@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { TruckIcon } from "lucide-react"
+import { KeyRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Car,
@@ -140,7 +140,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     { href: "/tickets", icon: AlertCircle, label: "Tickets" },
     { href: "/cars", icon: Car, label: "Cars" },
     { href: "/maintenance", icon: Wrench, label: "Service" },
-    { href: "/pr", icon: TruckIcon, label: "P&R" },
+    { href: "/pr", icon: KeyRound, label: "P&R" }, // Changed icon from TruckIcon to KeyRound (car key icon)
   ]
 
   const managementNavigation = [

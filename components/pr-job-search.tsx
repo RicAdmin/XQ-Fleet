@@ -5,7 +5,7 @@ import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Search, User, Phone, FileText, Calendar, Clock, Eye } from "lucide-react"
+import { Search, User, Phone, FileText, Calendar, Clock, Eye, ArrowLeft } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -128,6 +128,13 @@ export function PRJobSearch({ onJobSelect, onViewConfirmation }: PRJobSearchProp
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Button variant="outline" onClick={() => (window.location.href = "/dashboard")} className="h-10">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Return to Dashboard
+        </Button>
+      </div>
+
       <Card className="p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-4">Search Job</h2>
 

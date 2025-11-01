@@ -536,24 +536,6 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
                     <p className="text-xs text-orange-600 mt-1">(RM 50/day + RM 5/hour)</p>
                   </div>
                 </div>
-
-                <div className="mt-3">
-                  <Label htmlFor="unplannedPayment" className="text-xs text-orange-700">
-                    Amount Collected <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="unplannedPayment"
-                    type="number"
-                    step="0.01"
-                    value={unplannedExtraPayment}
-                    onChange={(e) => setUnplannedExtraPayment(e.target.value)}
-                    placeholder="Enter collected amount"
-                    className="h-11 mt-1"
-                  />
-                  <p className="text-xs text-orange-600 mt-1">
-                    Must match extra charge: RM {unplannedExtra.extraCharge}
-                  </p>
-                </div>
               </div>
             </div>
           )}
