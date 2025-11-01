@@ -53,10 +53,10 @@ export default function PRPage() {
   }
 
   const handleViewConfirmation = (job: any, type: "pickup" | "return") => {
-    if (
-      (type === "pickup" && job.pickupStatus === "Confirmed") ||
-      (type === "return" && job.returnStatus === "Confirmed")
-    ) {
+    console.log("[v0] View confirmation clicked:", { job, type })
+
+    // Check if the job has the confirmed status for the requested type
+    if ((type === "pickup" && job.pickedUp) || (type === "return" && job.returned)) {
       setSelectedJob(job)
       setViewingConfirmation(true)
       setConfirmationType(type)
@@ -68,11 +68,14 @@ export default function PRPage() {
         panelImages: [],
         mileage: "50000",
         fuelLevel: "0.75",
-        depositCollected: job.depositAmount || "0",
+        depositCollected: job.depositAmount?.toString() || "0",
         extraHourDate: job.actualEndDate || null,
         extraHourTime: job.actualEndTime || "",
       })
       setShowConfirmation(true)
+      console.log("[v0] Showing confirmation page")
+    } else {
+      console.log("[v0] Confirmation not available for this job")
     }
   }
 
