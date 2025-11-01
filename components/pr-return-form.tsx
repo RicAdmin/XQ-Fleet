@@ -6,10 +6,41 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { Upload, X, ArrowLeft, ZoomIn } from "lucide-react"
+import { Upload, X, ArrowLeft, ZoomIn, Calculator } from "lucide-react"
 import Image from "next/image"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { differenceInDays, differenceInHours } from "date-fns"
+import { differenceInDays, differenceInHours, format } from "date-fns"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { CalendarIcon } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+const availableHours = [
+  "7:00 AM",
+  "8:00 AM",
+  "9:00 AM",
+  "10:00 AM",
+  "11:00 AM",
+  "12:00 PM",
+  "1:00 PM",
+  "2:00 PM",
+  "3:00 PM",
+  "4:00 PM",
+  "5:00 PM",
+  "6:00 PM",
+  "7:00 PM",
+  "8:00 PM",
+  "9:00 PM",
+  "10:00 PM",
+]
+
+const getCurrentTimeFormatted = () => {
+  const now = new Date()
+  const hours = now.getHours()
+  const ampm = hours >= 12 ? "PM" : "AM"
+  const displayHours = hours % 12 || 12
+  return `${displayHours}:00 ${ampm}`
+}
 
 interface PRReturnFormProps {
   job: any
@@ -25,37 +56,27 @@ const renameFile = (file: File, newName: string): File => {
 const getCacheKey = (jobId: string) => `pr-return-${jobId}`
 
 export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
+  const [actualReturnDate, setActualReturnDate] = useState<Date>(new Date())
+  const [actualReturnTime, setActualReturnTime] = useState(getCurrentTimeFormatted())
   const [conditionImages, setConditionImages] = useState<string[]>([])
   const [panelImages, setPanelImages] = useState<string[]>([])
   const [mileage, setMileage] = useState("")
   const [fuelLevel, setFuelLevel] = useState("")
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [unplannedExtraPayment, setUnplannedExtraPayment] = useState("")
+  const [lowFuelChargeAmount, setLowFuelChargeAmount] = useState<string>("")
+  const [calculatedDeposit, setCalculatedDeposit] = useState<number | null>(null)
+  const [showDepositCalculation, setShowDepositCalculation] = useState(false)
+  const [rentalExtraCharge, setRentalExtraCharge] = useState("")
 
-  const calculateLowFuelCharge = () => {
-    if (!fuelLevel) return 0
-
-    const pickupFuelLevel = Number.parseFloat(job.pickupFuelLevel || "1")
-    const returnFuelLevel = Number.parseFloat(fuelLevel)
-
-    if (returnFuelLevel < pickupFuelLevel) {
-      const fuelDifference = pickupFuelLevel - returnFuelLevel
-      // Base charge: RM 15 minimum, RM 20 per 1/8 tank difference
-      const baseCharge = 15
-      const additionalCharge = fuelDifference * 20
-      return Math.max(baseCharge, additionalCharge)
-    }
-    return 0
-  }
-
-  // Calculate unplanned extra hours
   const calculateUnplannedExtra = () => {
-    const actualPickup = new Date(job.actualStartDate || job.startDate)
-    const plannedReturn = new Date(job.endDate)
-    const now = new Date()
+    if (!actualReturnDate || !actualReturnTime) return null
 
-    const daysDiff = differenceInDays(now, plannedReturn)
-    const hoursDiff = differenceInHours(now, plannedReturn) % 24
+    const plannedReturn = new Date(job.endDate)
+    const actualReturn = new Date(actualReturnDate)
+
+    const daysDiff = differenceInDays(actualReturn, plannedReturn)
+    const hoursDiff = differenceInHours(actualReturn, plannedReturn) % 24
 
     if (daysDiff > 0 || hoursDiff > 0) {
       const extraCharge = daysDiff * 50 + hoursDiff * 5
@@ -65,13 +86,82 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
   }
 
   const unplannedExtra = calculateUnplannedExtra()
-  const lowFuelCharge = calculateLowFuelCharge()
 
-  const collectedDeposit = Number.parseFloat(job.depositAmount || "0")
-  const unplannedExtraCharge = unplannedExtra?.extraCharge || 0
-  const actualReturningDeposit = collectedDeposit - unplannedExtraCharge - lowFuelCharge
+  const handleCalculateDeposit = () => {
+    if (!fuelLevel) {
+      alert("Please select fuel level first")
+      return
+    }
 
-  // Load cached data
+    const lowFuelCharge = lowFuelChargeAmount ? Number.parseFloat(lowFuelChargeAmount) : 0
+    const collectedDeposit = Number.parseFloat(job.depositAmount || "0")
+    const unplannedExtraCharge = unplannedExtra?.extraCharge || 0
+    const actualReturningDeposit = collectedDeposit - unplannedExtraCharge - lowFuelCharge
+
+    setCalculatedDeposit(actualReturningDeposit)
+    setShowDepositCalculation(true)
+  }
+
+  const handleSubmit = () => {
+    if (!actualReturnDate) {
+      alert("Actual Return Date is required")
+      return
+    }
+    if (!actualReturnTime) {
+      alert("Actual Return Time is required")
+      return
+    }
+    if (panelImages.length === 0) {
+      alert("Instrument Panel photos are required")
+      return
+    }
+    if (!mileage.trim()) {
+      alert("Mileage is required")
+      return
+    }
+    if (!fuelLevel) {
+      alert("Fuel Level is required")
+      return
+    }
+    if (!showDepositCalculation) {
+      alert("Please calculate the returning deposit first")
+      return
+    }
+
+    if (calculatedDeposit !== null && calculatedDeposit < 0) {
+      if (!rentalExtraCharge.trim()) {
+        alert("Rental Extra Charge collection is required when deposit is insufficient")
+        return
+      }
+      const chargeAmount = Number.parseFloat(rentalExtraCharge)
+      const requiredAmount = Math.abs(calculatedDeposit)
+      if (chargeAmount !== requiredAmount) {
+        alert(
+          `Rental Extra Charge collected (RM ${chargeAmount}) must match required amount (RM ${requiredAmount.toFixed(2)})`,
+        )
+        return
+      }
+    }
+
+    const lowFuelCharge = lowFuelChargeAmount ? Number.parseFloat(lowFuelChargeAmount) : 0
+
+    const data = {
+      actualReturnDate,
+      actualReturnTime,
+      conditionImages,
+      panelImages,
+      mileage,
+      fuelLevel,
+      unplannedExtra,
+      unplannedExtraPayment,
+      lowFuelChargeAmount: lowFuelCharge,
+      actualReturningDeposit: calculatedDeposit,
+      rentalExtraCharge: calculatedDeposit && calculatedDeposit < 0 ? rentalExtraCharge : null,
+    }
+
+    onComplete(data)
+  }
+
   useEffect(() => {
     const cacheKey = getCacheKey(job.jobId)
     const cached = localStorage.getItem(cacheKey)
@@ -79,11 +169,16 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
     if (cached) {
       try {
         const data = JSON.parse(cached)
+        if (data.actualReturnDate) setActualReturnDate(new Date(data.actualReturnDate))
+        else setActualReturnDate(new Date()) // Default to current date if no cache
+        setActualReturnTime(data.actualReturnTime || getCurrentTimeFormatted())
         setConditionImages(data.conditionImages || [])
         setPanelImages(data.panelImages || [])
         setMileage(data.mileage || "")
         setFuelLevel(data.fuelLevel || "")
         setUnplannedExtraPayment(data.unplannedExtraPayment || "")
+        setLowFuelChargeAmount(data.lowFuelChargeAmount || "")
+        setRentalExtraCharge(data.rentalExtraCharge || "")
         console.log("[v0] Loaded cached return data for job:", job.jobId)
       } catch (error) {
         console.error("[v0] Error loading cached return data:", error)
@@ -91,18 +186,32 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
     }
   }, [job.jobId])
 
-  // Save to cache
   useEffect(() => {
     const cacheKey = getCacheKey(job.jobId)
     const dataToCache = {
+      actualReturnDate: actualReturnDate?.toISOString(),
+      actualReturnTime,
       conditionImages,
       panelImages,
       mileage,
       fuelLevel,
       unplannedExtraPayment,
+      lowFuelChargeAmount,
+      rentalExtraCharge,
     }
     localStorage.setItem(cacheKey, JSON.stringify(dataToCache))
-  }, [job.jobId, conditionImages, panelImages, mileage, fuelLevel, unplannedExtraPayment])
+  }, [
+    job.jobId,
+    actualReturnDate,
+    actualReturnTime,
+    conditionImages,
+    panelImages,
+    mileage,
+    fuelLevel,
+    unplannedExtraPayment,
+    lowFuelChargeAmount,
+    rentalExtraCharge,
+  ])
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: "condition" | "panel") => {
     const files = e.target.files
@@ -133,46 +242,6 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
     if (type === "panel") setPanelImages(panelImages.filter((_, i) => i !== index))
   }
 
-  const handleSubmit = () => {
-    if (panelImages.length === 0) {
-      alert("Instrument Panel photos are required")
-      return
-    }
-    if (!mileage.trim()) {
-      alert("Mileage is required")
-      return
-    }
-    if (!fuelLevel) {
-      alert("Fuel Level is required")
-      return
-    }
-    if (unplannedExtra && unplannedExtra.extraCharge > 0) {
-      if (!unplannedExtraPayment.trim()) {
-        alert("Unplanned extra hour payment is required")
-        return
-      }
-      const paymentAmount = Number.parseFloat(unplannedExtraPayment)
-      if (paymentAmount !== unplannedExtra.extraCharge) {
-        alert(`Payment collected ($${paymentAmount}) must match the extra charge ($${unplannedExtra.extraCharge})`)
-        return
-      }
-    }
-
-    const data = {
-      conditionImages,
-      panelImages,
-      mileage,
-      fuelLevel,
-      unplannedExtra,
-      unplannedExtraPayment,
-      collectedDeposit,
-      lowFuelCharge,
-      actualReturningDeposit,
-    }
-
-    onComplete(data)
-  }
-
   return (
     <div className="space-y-4">
       <Button variant="ghost" onClick={onBack} className="mb-2">
@@ -189,7 +258,6 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
         </div>
 
         <div className="space-y-4">
-          {/* Car Agreement ID (Read-only) */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold">Car Agreement ID</Label>
             <div className="h-11 px-3 py-2 bg-muted rounded-md border flex items-center">
@@ -197,7 +265,6 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
             </div>
           </div>
 
-          {/* Actual Pickup Date/Time */}
           <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
             <Label className="text-sm font-semibold text-blue-900">Pickup Information</Label>
             <div className="mt-2 space-y-1 text-sm">
@@ -230,42 +297,224 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
             </div>
           </div>
 
-          <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-            <Label className="text-sm font-semibold text-green-900 mb-3">Deposit Return Calculation</Label>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-green-700">Collected Deposit:</span>
-                <span className="font-semibold">RM {collectedDeposit.toFixed(2)}</span>
+          <div className="space-y-3 p-4 bg-purple-50 rounded-lg border border-purple-200">
+            <div>
+              <Label className="text-sm font-semibold text-purple-900">
+                Actual Return Date & Time <span className="text-red-500">*</span>
+              </Label>
+              <p className="text-xs text-purple-700 mt-1">Select the actual date and time of vehicle return</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs text-purple-700">Return Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal h-11 bg-white",
+                        !actualReturnDate && "text-muted-foreground",
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+                      <span className="truncate">
+                        {actualReturnDate ? format(actualReturnDate, "PPP") : "Pick date"}
+                      </span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={actualReturnDate}
+                      onSelect={(date) => date && setActualReturnDate(date)}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
 
-              {unplannedExtraCharge > 0 && (
-                <div className="flex justify-between text-red-600">
-                  <span>Less: Unplanned Extra Hour</span>
-                  <span className="font-semibold">- RM {unplannedExtraCharge.toFixed(2)}</span>
-                </div>
-              )}
-
-              {lowFuelCharge > 0 && (
-                <div className="flex justify-between text-red-600">
-                  <span>Less: Low Fuel Charge</span>
-                  <span className="font-semibold">- RM {lowFuelCharge.toFixed(2)}</span>
-                </div>
-              )}
-
-              <div className="flex justify-between pt-2 border-t border-green-300">
-                <span className="text-green-900 font-bold">Actual Returning Deposit:</span>
-                <span className="font-bold text-lg text-green-900">RM {actualReturningDeposit.toFixed(2)}</span>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-purple-700">Return Time</Label>
+                <select
+                  value={actualReturnTime}
+                  onChange={(e) => setActualReturnTime(e.target.value)}
+                  className="flex h-11 w-full rounded-md border border-input bg-white px-3 py-2 text-sm"
+                >
+                  <option value="">Select time</option>
+                  {availableHours.map((time) => (
+                    <option key={time} value={time}>
+                      {time}
+                    </option>
+                  ))}
+                </select>
               </div>
-
-              {lowFuelCharge > 0 && (
-                <p className="text-xs text-orange-600 pt-1">
-                  ⚠️ Fuel level is lower than pickup. Low fuel charge applied.
-                </p>
-              )}
             </div>
           </div>
 
-          {/* Unplanned Extra Hour */}
+          <div className="space-y-2">
+            <Label htmlFor="mileage" className="text-sm font-semibold">
+              Mileage (km) <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="mileage"
+              type="number"
+              value={mileage}
+              onChange={(e) => setMileage(e.target.value)}
+              placeholder="Enter current mileage"
+              className="h-11"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="fuelLevel" className="text-sm font-semibold">
+              Fuel Level <span className="text-red-500">*</span>
+            </Label>
+            <select
+              id="fuelLevel"
+              value={fuelLevel}
+              onChange={(e) => {
+                setFuelLevel(e.target.value)
+                setShowDepositCalculation(false)
+                setCalculatedDeposit(null)
+              }}
+              className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              <option value="">Select level</option>
+              <option value="0">Empty (0)</option>
+              <option value="0.125">1/8</option>
+              <option value="0.25">1/4</option>
+              <option value="0.375">3/8</option>
+              <option value="0.5">1/2</option>
+              <option value="0.625">5/8</option>
+              <option value="0.75">3/4</option>
+              <option value="0.875">7/8</option>
+              <option value="1">Full (1)</option>
+            </select>
+
+            {fuelLevel && Number.parseFloat(fuelLevel) < Number.parseFloat(job.pickupFuelLevel || "1") && (
+              <div className="p-3 bg-orange-50 rounded-lg border border-orange-200 mt-2 space-y-3">
+                <div className="flex items-start space-x-2">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-orange-900">⚠️ Low Fuel Level Detected</p>
+                    <p className="text-xs text-orange-700 mt-1">
+                      Fuel level ({fuelLevel}) is lower than pickup level ({job.pickupFuelLevel || "1"}).
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="lowFuelCharge" className="text-xs text-orange-700">
+                    Low Fuel Surcharge (Optional)
+                  </Label>
+                  <select
+                    id="lowFuelCharge"
+                    value={lowFuelChargeAmount}
+                    onChange={(e) => {
+                      setLowFuelChargeAmount(e.target.value)
+                      setShowDepositCalculation(false)
+                      setCalculatedDeposit(null)
+                    }}
+                    className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm"
+                  >
+                    <option value="">No charge</option>
+                    <option value="10">RM 10</option>
+                    <option value="15">RM 15</option>
+                    <option value="20">RM 20</option>
+                    <option value="30">RM 30</option>
+                    <option value="50">RM 50</option>
+                  </select>
+                  {lowFuelChargeAmount && (
+                    <p className="text-xs text-orange-600 mt-1">
+                      ✓ Low fuel surcharge of RM {lowFuelChargeAmount} will be applied
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <Button
+            onClick={handleCalculateDeposit}
+            variant="outline"
+            className="w-full h-12 text-base font-semibold border-2 border-green-600 text-green-700 hover:bg-green-50 bg-transparent"
+          >
+            <Calculator className="h-5 w-5 mr-2" />
+            Calculate Returning Deposit
+          </Button>
+
+          {showDepositCalculation && (
+            <div className="p-4 bg-green-50 rounded-lg border border-green-200 space-y-3">
+              <Label className="text-sm font-semibold text-green-900">Deposit Return Calculation</Label>
+
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between py-2">
+                  <span className="text-green-700">Collected Deposit:</span>
+                  <span className="font-semibold">RM {Number.parseFloat(job.depositAmount || "0").toFixed(2)}</span>
+                </div>
+
+                {unplannedExtra && unplannedExtra.extraCharge > 0 && (
+                  <div className="border-t border-green-200 pt-2">
+                    <div className="flex justify-between text-red-600 mb-1">
+                      <span className="font-medium">Less: Extra Hours</span>
+                      <span className="font-semibold">- RM {unplannedExtra.extraCharge.toFixed(2)}</span>
+                    </div>
+                    <div className="text-xs text-red-500 pl-4 space-y-0.5">
+                      <div>
+                        • Extra {unplannedExtra.daysDiff} day(s) × RM 50 = RM{" "}
+                        {(unplannedExtra.daysDiff * 50).toFixed(2)}
+                      </div>
+                      <div>
+                        • Extra {unplannedExtra.hoursDiff} hour(s) × RM 5 = RM{" "}
+                        {(unplannedExtra.hoursDiff * 5).toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {lowFuelChargeAmount && Number.parseFloat(lowFuelChargeAmount) > 0 && (
+                  <div className="flex justify-between text-red-600 border-t border-green-200 pt-2">
+                    <span>Less: Low Fuel Surcharge</span>
+                    <span className="font-semibold">- RM {Number.parseFloat(lowFuelChargeAmount).toFixed(2)}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between pt-3 border-t-2 border-green-300">
+                  <span className="text-green-900 font-bold">Actual Returning Deposit will be:</span>
+                  <span
+                    className={cn(
+                      "font-bold text-lg",
+                      calculatedDeposit !== null && calculatedDeposit < 0 ? "text-red-600" : "text-green-900",
+                    )}
+                  >
+                    RM {calculatedDeposit?.toFixed(2)}
+                  </span>
+                </div>
+
+                {calculatedDeposit !== null && calculatedDeposit < 0 && (
+                  <div className="bg-red-50 border border-red-200 rounded p-3 mt-3">
+                    <p className="text-sm font-semibold text-red-900 mb-2">⚠️ Customer owes additional payment</p>
+                    <div className="space-y-2">
+                      <Label htmlFor="rentalExtraCharge" className="text-xs text-red-700">
+                        Rental Extra Charge Collected <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="rentalExtraCharge"
+                        type="number"
+                        step="0.01"
+                        value={rentalExtraCharge}
+                        onChange={(e) => setRentalExtraCharge(e.target.value)}
+                        placeholder="Enter collected amount"
+                        className="h-10"
+                      />
+                      <p className="text-xs text-red-600">Must collect: RM {Math.abs(calculatedDeposit).toFixed(2)}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {unplannedExtra && unplannedExtra.extraCharge > 0 && (
             <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
               <Label className="text-sm font-semibold text-orange-900">⚠️ Unplanned Extra Hour Detected</Label>
@@ -284,7 +533,7 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
                       <span className="text-orange-900 font-semibold">Total Extra Charge:</span>
                       <span className="font-bold text-lg text-orange-900">RM {unplannedExtra.extraCharge}</span>
                     </div>
-                    <p className="text-xs text-orange-600 pt-1">(RM 50/day + RM 5/hour)</p>
+                    <p className="text-xs text-orange-600 mt-1">(RM 50/day + RM 5/hour)</p>
                   </div>
                 </div>
 
@@ -309,7 +558,6 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
             </div>
           )}
 
-          {/* Car Condition Photos (Optional) */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold">Car Condition Photos (Optional)</Label>
             <p className="text-xs text-muted-foreground">Document any damages or issues</p>
@@ -360,7 +608,6 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
             )}
           </div>
 
-          {/* Instrument Panel Photos */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold">
               Instrument Panel Photos <span className="text-red-500">*</span>
@@ -409,50 +656,6 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
                   </div>
                 ))}
               </div>
-            )}
-          </div>
-
-          {/* Mileage */}
-          <div className="space-y-2">
-            <Label htmlFor="mileage" className="text-sm font-semibold">
-              Mileage (km) <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="mileage"
-              type="number"
-              value={mileage}
-              onChange={(e) => setMileage(e.target.value)}
-              placeholder="Enter current mileage"
-              className="h-11"
-            />
-          </div>
-
-          {/* Fuel Level */}
-          <div className="space-y-2">
-            <Label htmlFor="fuelLevel" className="text-sm font-semibold">
-              Fuel Level <span className="text-red-500">*</span>
-            </Label>
-            <select
-              id="fuelLevel"
-              value={fuelLevel}
-              onChange={(e) => setFuelLevel(e.target.value)}
-              className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            >
-              <option value="">Select level</option>
-              <option value="0">Empty (0)</option>
-              <option value="0.125">1/8</option>
-              <option value="0.25">1/4</option>
-              <option value="0.375">3/8</option>
-              <option value="0.5">1/2</option>
-              <option value="0.625">5/8</option>
-              <option value="0.75">3/4</option>
-              <option value="0.875">7/8</option>
-              <option value="1">Full (1)</option>
-            </select>
-            {fuelLevel && Number.parseFloat(fuelLevel) < Number.parseFloat(job.pickupFuelLevel || "1") && (
-              <p className="text-xs text-orange-600 font-semibold">
-                ⚠️ Fuel level is lower than pickup. Low fuel charge: RM {lowFuelCharge.toFixed(2)}
-              </p>
             )}
           </div>
 

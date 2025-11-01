@@ -63,7 +63,6 @@ export function PRConfirmation({
     const daysDiff = differenceInDays(newReturn, originalReturn)
     const hoursDiff = differenceInHours(newReturn, originalReturn) % 24
 
-    // Calculate fee: $50 per day + $5 per hour
     const extraCharge = daysDiff * 50 + hoursDiff * 5
 
     return { daysDiff, hoursDiff, extraCharge }
@@ -159,7 +158,9 @@ export function PRConfirmation({
                     <div className="pl-2 space-y-1 bg-white p-3 rounded border border-green-300">
                       <div className="flex justify-between text-xs">
                         <span className="text-green-600">Collected Deposit:</span>
-                        <span className="font-medium">RM {pickupData.collectedDeposit?.toFixed(2) || "0.00"}</span>
+                        <span className="font-medium">
+                          RM {(pickupData.collectedDeposit || job.depositAmount || 0).toFixed(2)}
+                        </span>
                       </div>
 
                       {pickupData.unplannedExtra && pickupData.unplannedExtra.extraCharge > 0 && (
@@ -169,7 +170,7 @@ export function PRConfirmation({
                         </div>
                       )}
 
-                      {pickupData.lowFuelCharge > 0 && (
+                      {pickupData.isLowFuelChargeApplicable && pickupData.lowFuelCharge > 0 && (
                         <div className="flex justify-between text-xs text-red-600">
                           <span>Less: Low Fuel Charge</span>
                           <span className="font-medium">- RM {pickupData.lowFuelCharge.toFixed(2)}</span>
@@ -272,7 +273,7 @@ export function PRConfirmation({
                     </div>
                     <div className="flex justify-between pt-2 border-t border-yellow-300">
                       <span className="text-yellow-900 font-semibold">Extra Fee:</span>
-                      <span className="font-bold text-lg text-yellow-900">${extraChargeInfo.extraCharge}</span>
+                      <span className="font-bold text-lg text-yellow-900">RM {extraChargeInfo.extraCharge}</span>
                     </div>
                   </div>
                 </div>
@@ -330,28 +331,29 @@ export function PRConfirmation({
             </div>
           </div>
 
-          {/* Deposit Collection Section */}
-          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h3 className="font-semibold text-sm text-blue-900 mb-3">Deposit Collection</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-blue-700">Deposit Amount:</span>
-                <span className="font-semibold">RM {job.depositAmount || "0.00"}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-blue-700">Collected Amount:</span>
-                <span className="font-semibold text-green-600">RM {pickupData.depositCollected}</span>
-              </div>
-              {Number.parseFloat(pickupData.depositCollected) === Number.parseFloat(job.depositAmount || "0") && (
-                <div className="pt-2 border-t border-blue-300">
-                  <p className="text-xs text-green-600 font-semibold flex items-center">
-                    <Check className="h-3 w-3 mr-1" />
-                    Deposit amount matched
-                  </p>
+          {confirmationType === "pickup" && (
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h3 className="font-semibold text-sm text-blue-900 mb-3">Deposit Collection</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-blue-700">Deposit Amount:</span>
+                  <span className="font-semibold">RM {job.depositAmount || "0.00"}</span>
                 </div>
-              )}
+                <div className="flex justify-between">
+                  <span className="text-blue-700">Collected Amount:</span>
+                  <span className="font-semibold text-green-600">RM {pickupData.depositCollected}</span>
+                </div>
+                {Number.parseFloat(pickupData.depositCollected) === Number.parseFloat(job.depositAmount || "0") && (
+                  <div className="pt-2 border-t border-blue-300">
+                    <p className="text-xs text-green-600 font-semibold flex items-center">
+                      <Check className="h-3 w-3 mr-1" />
+                      Deposit amount matched
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Vehicle Condition */}
           <div className="p-4 bg-muted/30 rounded-lg">
@@ -372,49 +374,77 @@ export function PRConfirmation({
             <h3 className="font-semibold text-sm mb-3">Photos Uploaded (Click to view)</h3>
 
             <div className="space-y-3">
-              <div>
-                <p className="text-xs text-muted-foreground mb-2">
-                  Agreement Photos ({pickupData.agreementImages?.length || 0})
-                </p>
-                <div className="grid grid-cols-4 gap-2">
-                  {(pickupData.agreementImages || []).map((img: string, index: number) => (
-                    <div key={index} className="relative group cursor-pointer" onClick={() => setPreviewImage(img)}>
-                      <Image
-                        src={img || "/placeholder.svg"}
-                        alt={`Agreement ${index + 1}`}
-                        width={80}
-                        height={80}
-                        className="rounded object-cover w-full h-16"
-                      />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center">
-                        <ZoomIn className="h-5 w-5 text-white" />
-                      </div>
+              {confirmationType === "pickup" && (
+                <>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Agreement Photos ({pickupData.agreementImages?.length || 0})
+                    </p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {(pickupData.agreementImages || []).map((img: string, index: number) => (
+                        <div key={index} className="relative group cursor-pointer" onClick={() => setPreviewImage(img)}>
+                          <Image
+                            src={img || "/placeholder.svg"}
+                            alt={`Agreement ${index + 1}`}
+                            width={80}
+                            height={80}
+                            className="rounded object-cover w-full h-16"
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center">
+                            <ZoomIn className="h-5 w-5 text-white" />
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
 
-              <div>
-                <p className="text-xs text-muted-foreground mb-2">
-                  Document Photos ({pickupData.documentImages?.length || 0})
-                </p>
-                <div className="grid grid-cols-4 gap-2">
-                  {(pickupData.documentImages || []).map((img: string, index: number) => (
-                    <div key={index} className="relative group cursor-pointer" onClick={() => setPreviewImage(img)}>
-                      <Image
-                        src={img || "/placeholder.svg"}
-                        alt={`Document ${index + 1}`}
-                        width={80}
-                        height={80}
-                        className="rounded object-cover w-full h-16"
-                      />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center">
-                        <ZoomIn className="h-5 w-5 text-white" />
-                      </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Document Photos ({pickupData.documentImages?.length || 0})
+                    </p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {(pickupData.documentImages || []).map((img: string, index: number) => (
+                        <div key={index} className="relative group cursor-pointer" onClick={() => setPreviewImage(img)}>
+                          <Image
+                            src={img || "/placeholder.svg"}
+                            alt={`Document ${index + 1}`}
+                            width={80}
+                            height={80}
+                            className="rounded object-cover w-full h-16"
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center">
+                            <ZoomIn className="h-5 w-5 text-white" />
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+                </>
+              )}
+
+              {confirmationType === "return" && pickupData.conditionImages && pickupData.conditionImages.length > 0 && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Condition Photos ({pickupData.conditionImages.length})
+                  </p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {pickupData.conditionImages.map((img: string, index: number) => (
+                      <div key={index} className="relative group cursor-pointer" onClick={() => setPreviewImage(img)}>
+                        <Image
+                          src={img || "/placeholder.svg"}
+                          alt={`Condition ${index + 1}`}
+                          width={80}
+                          height={80}
+                          className="rounded object-cover w-full h-16"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center">
+                          <ZoomIn className="h-5 w-5 text-white" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div>
                 <p className="text-xs text-muted-foreground mb-2">
@@ -446,7 +476,9 @@ export function PRConfirmation({
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-green-700">Collected Deposit:</span>
-                  <span className="font-semibold">RM {pickupData.collectedDeposit?.toFixed(2) || "0.00"}</span>
+                  <span className="font-semibold">
+                    RM {(pickupData.collectedDeposit || job.depositAmount || 0).toFixed(2)}
+                  </span>
                 </div>
 
                 {pickupData.unplannedExtra && pickupData.unplannedExtra.extraCharge > 0 && (
@@ -456,7 +488,7 @@ export function PRConfirmation({
                   </div>
                 )}
 
-                {pickupData.lowFuelCharge > 0 && (
+                {pickupData.isLowFuelChargeApplicable && pickupData.lowFuelCharge > 0 && (
                   <div className="flex justify-between text-red-600">
                     <span>Less: Low Fuel Charge</span>
                     <span className="font-semibold">- RM {pickupData.lowFuelCharge.toFixed(2)}</span>
@@ -514,9 +546,9 @@ export function PRConfirmation({
                   </div>
                   <div className="flex justify-between pt-2 border-t border-yellow-300">
                     <span className="text-yellow-900 font-semibold">Extra Fee:</span>
-                    <span className="font-bold text-lg text-yellow-900">${extraChargeInfo.extraCharge}</span>
+                    <span className="font-bold text-lg text-yellow-900">RM {extraChargeInfo.extraCharge}</span>
                   </div>
-                  <p className="text-xs text-yellow-700 pt-1">($50/day + $5/hour)</p>
+                  <p className="text-xs text-yellow-700 pt-1">(RM 50/day + RM 5/hour)</p>
                 </div>
               </div>
             </div>
