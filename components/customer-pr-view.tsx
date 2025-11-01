@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -212,128 +212,129 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-4 sm:p-6 pb-20">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <div className="text-center pt-8 pb-4">
-          <div className="inline-flex items-center justify-center w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-blue-600 to-purple-600 rounded-3xl mb-4 shadow-2xl">
-            <span className="text-4xl sm:text-5xl font-bold text-white">XQ</span>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-4 pb-20">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="text-center pt-6 pb-2">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl mb-3 shadow-lg">
+            <span className="text-3xl font-bold text-white">XQ</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3 leading-tight">Your Rental Journey</h1>
-          <p className="text-lg text-gray-600">Thank you for choosing XQ Rent System</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Rental Journey</h1>
+          <p className="text-gray-600">Thank you for choosing XQ Rent System</p>
         </div>
 
-        <Card className="shadow-xl border-0 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6">
-            <div className="flex items-center gap-3 text-white mb-2">
-              <Car className="h-7 w-7" />
-              <h2 className="text-2xl font-bold">Rental Details</h2>
-            </div>
-          </div>
-          <CardContent className="p-6 space-y-5">
-            <div className="space-y-4">
-              <div className="bg-gray-50 p-4 rounded-xl">
-                <p className="text-sm text-gray-500 mb-1">Job ID</p>
-                <p className="text-xl font-bold text-gray-900">{jobData.jobID}</p>
+        {/* Job Information */}
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Car className="h-5 w-5 text-primary" />
+              Rental Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Job ID</p>
+                <p className="font-semibold">{jobData.jobID}</p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-xl">
-                <p className="text-sm text-gray-500 mb-1">Customer</p>
-                <p className="text-xl font-bold text-gray-900">{jobData.customerName}</p>
+              <div>
+                <p className="text-sm text-muted-foreground">Customer</p>
+                <p className="font-semibold">{jobData.customerName}</p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-xl">
-                <p className="text-sm text-gray-500 mb-1">Vehicle</p>
-                <p className="text-xl font-bold text-gray-900">{jobData.carModel}</p>
-                <p className="text-lg text-gray-600 mt-1">{jobData.carPlate}</p>
+              <div>
+                <p className="text-sm text-muted-foreground">Vehicle</p>
+                <p className="font-semibold">{jobData.carModel}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Plate Number</p>
+                <p className="font-semibold">{jobData.carPlate}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
+        {/* Pickup Information */}
         {jobData.pickedUp && (
-          <Card className="shadow-xl border-0 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6">
-              <div className="flex items-center justify-between flex-wrap gap-3">
-                <div className="flex items-center gap-3 text-white">
-                  <CheckCircle2 className="h-7 w-7" />
-                  <div>
-                    <h2 className="text-2xl font-bold">Pickup Confirmed</h2>
-                    <p className="text-blue-100 text-sm mt-1">By {jobData.pickupConfirmedBy}</p>
-                  </div>
-                </div>
+          <Card className="glass-card border-l-4 border-l-blue-500">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-blue-600" />
+                  Pickup Confirmed
+                </CardTitle>
                 {customerPickupConfirmed && (
-                  <Badge className="bg-green-500 text-white text-base px-4 py-2 border-0">✓ You Confirmed</Badge>
+                  <Badge variant="secondary" className="bg-green-100 text-green-700">
+                    ✓ You Confirmed
+                  </Badge>
                 )}
               </div>
-            </div>
-            <CardContent className="p-6 space-y-6">
-              <div className="space-y-5">
-                <div className="bg-blue-50 p-5 rounded-xl">
-                  <div className="flex items-start gap-3 mb-3">
-                    <Calendar className="h-6 w-6 text-blue-600 mt-1 flex-shrink-0" />
+              <CardDescription>Processed by {jobData.pickupConfirmedBy}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div className="flex items-start gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground mt-1" />
                     <div className="flex-1">
-                      <p className="text-sm text-gray-600 mb-2">Scheduled Pickup</p>
-                      <p className="text-lg font-semibold text-gray-900">{jobData.scheduledPickupDate}</p>
-                      <p className="text-xl font-bold text-blue-600 mt-1">{jobData.scheduledPickupTime}</p>
+                      <p className="text-sm text-muted-foreground">Scheduled Pickup</p>
+                      <p className="font-medium text-sm">
+                        {jobData.scheduledPickupDate} at {jobData.scheduledPickupTime}
+                      </p>
                       {pickupTimeDiff && (
-                        <div className="mt-4 pt-4 border-t border-blue-200">
-                          <p className="text-sm text-gray-600 mb-2">Actual Pickup</p>
-                          <p className="text-lg font-semibold text-gray-900">{jobData.actualPickupDate}</p>
-                          <p className="text-xl font-bold text-gray-900 mt-1">{jobData.actualPickupTime}</p>
-                          <div className="flex items-center gap-2 mt-3 bg-orange-100 p-3 rounded-lg">
-                            <Clock className="h-5 w-5 text-orange-600 flex-shrink-0" />
-                            <p className="text-base text-orange-700 font-semibold">
+                        <>
+                          <p className="text-sm text-muted-foreground mt-1">Actual Pickup</p>
+                          <p className="font-semibold">
+                            {jobData.actualPickupDate} at {jobData.actualPickupTime}
+                          </p>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Clock className="h-3 w-3 text-orange-600" />
+                            <p className="text-xs text-orange-600 font-medium">
                               {pickupTimeDiff.isLate ? "+" : "-"}
                               {pickupTimeDiff.hours}h {pickupTimeDiff.minutes}m{" "}
                               {pickupTimeDiff.isLate ? "late" : "early"}
                             </p>
                           </div>
-                        </div>
+                        </>
                       )}
                     </div>
                   </div>
-                </div>
-
-                <div className="bg-gray-50 p-5 rounded-xl">
-                  <div className="flex items-start gap-3">
-                    <MapPin className="h-6 w-6 text-gray-600 mt-1 flex-shrink-0" />
+                  <div className="flex items-start gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground mt-1" />
                     <div>
-                      <p className="text-sm text-gray-600 mb-2">Pickup Location</p>
-                      <p className="text-lg font-bold text-gray-900">{jobData.pickupLocation}</p>
+                      <p className="text-sm text-muted-foreground">Location</p>
+                      <p className="font-semibold">{jobData.pickupLocation}</p>
                     </div>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gray-50 p-5 rounded-xl">
-                    <div className="flex items-start gap-2 mb-2">
-                      <Gauge className="h-5 w-5 text-gray-600 mt-1 flex-shrink-0" />
-                      <p className="text-sm text-gray-600">Mileage</p>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-2">
+                    <Gauge className="h-4 w-4 text-muted-foreground mt-1" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Mileage</p>
+                      <p className="font-semibold">{jobData.pickupMileage.toLocaleString()} km</p>
                     </div>
-                    <p className="text-xl font-bold text-gray-900">{jobData.pickupMileage.toLocaleString()}</p>
-                    <p className="text-sm text-gray-500 mt-1">km</p>
                   </div>
-                  <div className="bg-gray-50 p-5 rounded-xl">
-                    <div className="flex items-start gap-2 mb-2">
-                      <Fuel className="h-5 w-5 text-gray-600 mt-1 flex-shrink-0" />
-                      <p className="text-sm text-gray-600">Fuel</p>
+                  <div className="flex items-start gap-2">
+                    <Fuel className="h-4 w-4 text-muted-foreground mt-1" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Fuel Level</p>
+                      <p className="font-semibold">{jobData.pickupFuelLevel}</p>
                     </div>
-                    <p className="text-xl font-bold text-gray-900">{jobData.pickupFuelLevel}</p>
                   </div>
                 </div>
+              </div>
 
-                <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-xl text-white">
-                  <p className="text-blue-100 text-base mb-2">Deposit Collected</p>
-                  <p className="text-4xl font-bold">RM {jobData.depositCollected}</p>
+              <div className="pt-3 border-t">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Deposit Collected</span>
+                  <span className="text-lg font-bold text-blue-600">RM {jobData.depositCollected}</span>
                 </div>
               </div>
 
               {customerPickupConfirmed && pickupConfirmedAt && (
-                <div className="bg-green-50 p-5 rounded-xl border-2 border-green-200">
-                  <div className="flex items-center gap-3 text-green-700">
-                    <CheckCircle2 className="h-6 w-6 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold text-base">You confirmed pickup</p>
-                      <p className="text-sm text-green-600 mt-1">{pickupConfirmedAt}</p>
-                    </div>
+                <div className="pt-3 border-t bg-green-50 -mx-6 -mb-6 px-6 py-3 rounded-b-lg">
+                  <div className="flex items-center gap-2 text-sm text-green-700">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>You confirmed pickup on {pickupConfirmedAt}</span>
                   </div>
                 </div>
               )}
@@ -341,9 +342,10 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
               {!customerPickupConfirmed && (
                 <Button
                   onClick={() => setShowPickupDialog(true)}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white h-16 text-lg font-semibold rounded-xl shadow-lg"
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  size="lg"
                 >
-                  <CheckCircle2 className="mr-3 h-6 w-6" />
+                  <CheckCircle2 className="mr-2 h-5 w-5" />
                   Done Pickup
                 </Button>
               )}
@@ -351,115 +353,109 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
           </Card>
         )}
 
+        {/* Return Information */}
         {jobData.returned && (
-          <Card className="shadow-xl border-0 overflow-hidden">
-            <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-6">
-              <div className="flex items-center justify-between flex-wrap gap-3">
-                <div className="flex items-center gap-3 text-white">
-                  <CheckCircle2 className="h-7 w-7" />
-                  <div>
-                    <h2 className="text-2xl font-bold">Return Confirmed</h2>
-                    <p className="text-purple-100 text-sm mt-1">By {jobData.returnConfirmedBy}</p>
-                  </div>
-                </div>
+          <Card className="glass-card border-l-4 border-l-purple-500">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-purple-600" />
+                  Return Confirmed
+                </CardTitle>
                 {customerReturnConfirmed && (
-                  <Badge className="bg-green-500 text-white text-base px-4 py-2 border-0">✓ You Confirmed</Badge>
+                  <Badge variant="secondary" className="bg-green-100 text-green-700">
+                    ✓ You Confirmed
+                  </Badge>
                 )}
               </div>
-            </div>
-            <CardContent className="p-6 space-y-6">
-              <div className="space-y-5">
-                <div className="bg-purple-50 p-5 rounded-xl">
-                  <div className="flex items-start gap-3 mb-3">
-                    <Calendar className="h-6 w-6 text-purple-600 mt-1 flex-shrink-0" />
+              <CardDescription>Processed by {jobData.returnConfirmedBy}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div className="flex items-start gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground mt-1" />
                     <div className="flex-1">
-                      <p className="text-sm text-gray-600 mb-2">Scheduled Return</p>
-                      <p className="text-lg font-semibold text-gray-900">{jobData.scheduledReturnDate}</p>
-                      <p className="text-xl font-bold text-purple-600 mt-1">{jobData.scheduledReturnTime}</p>
+                      <p className="text-sm text-muted-foreground">Scheduled Return</p>
+                      <p className="font-medium text-sm">
+                        {jobData.scheduledReturnDate} at {jobData.scheduledReturnTime}
+                      </p>
                       {returnTimeDiff && (
-                        <div className="mt-4 pt-4 border-t border-purple-200">
-                          <p className="text-sm text-gray-600 mb-2">Actual Return</p>
-                          <p className="text-lg font-semibold text-gray-900">{jobData.actualReturnDate}</p>
-                          <p className="text-xl font-bold text-gray-900 mt-1">{jobData.actualReturnTime}</p>
-                          <div className="flex items-center gap-2 mt-3 bg-orange-100 p-3 rounded-lg">
-                            <Clock className="h-5 w-5 text-orange-600 flex-shrink-0" />
-                            <p className="text-base text-orange-700 font-semibold">
+                        <>
+                          <p className="text-sm text-muted-foreground mt-1">Actual Return</p>
+                          <p className="font-semibold">
+                            {jobData.actualReturnDate} at {jobData.actualReturnTime}
+                          </p>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Clock className="h-3 w-3 text-orange-600" />
+                            <p className="text-xs text-orange-600 font-medium">
                               {returnTimeDiff.isLate ? "+" : "-"}
                               {returnTimeDiff.hours}h {returnTimeDiff.minutes}m{" "}
                               {returnTimeDiff.isLate ? "late" : "early"}
                             </p>
                           </div>
-                        </div>
+                        </>
                       )}
                     </div>
                   </div>
-                </div>
-
-                <div className="bg-gray-50 p-5 rounded-xl">
-                  <div className="flex items-start gap-3">
-                    <MapPin className="h-6 w-6 text-gray-600 mt-1 flex-shrink-0" />
+                  <div className="flex items-start gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground mt-1" />
                     <div>
-                      <p className="text-sm text-gray-600 mb-2">Return Location</p>
-                      <p className="text-lg font-bold text-gray-900">{jobData.returnLocation}</p>
+                      <p className="text-sm text-muted-foreground">Location</p>
+                      <p className="font-semibold">{jobData.returnLocation}</p>
                     </div>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gray-50 p-5 rounded-xl">
-                    <div className="flex items-start gap-2 mb-2">
-                      <Gauge className="h-5 w-5 text-gray-600 mt-1 flex-shrink-0" />
-                      <p className="text-sm text-gray-600">Mileage</p>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-2">
+                    <Gauge className="h-4 w-4 text-muted-foreground mt-1" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Mileage</p>
+                      <p className="font-semibold">{jobData.returnMileage.toLocaleString()} km</p>
+                      <p className="text-xs text-muted-foreground">
+                        ({(jobData.returnMileage - jobData.pickupMileage).toLocaleString()} km driven)
+                      </p>
                     </div>
-                    <p className="text-xl font-bold text-gray-900">{jobData.returnMileage.toLocaleString()}</p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      +{(jobData.returnMileage - jobData.pickupMileage).toLocaleString()} km
-                    </p>
                   </div>
-                  <div className="bg-gray-50 p-5 rounded-xl">
-                    <div className="flex items-start gap-2 mb-2">
-                      <Fuel className="h-5 w-5 text-gray-600 mt-1 flex-shrink-0" />
-                      <p className="text-sm text-gray-600">Fuel</p>
-                    </div>
-                    <p className="text-xl font-bold text-gray-900">{jobData.returnFuelLevel}</p>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-xl border-2 border-purple-200">
-                  <p className="text-lg font-bold text-purple-900 mb-4">Deposit Return</p>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-base text-gray-700">Deposit Collected</span>
-                      <span className="text-xl font-bold text-gray-900">RM {jobData.depositCollected}</span>
-                    </div>
-                    {jobData.extraHourCharge > 0 && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-base text-gray-700">Extra Hour Charge</span>
-                        <span className="text-xl font-bold text-orange-600">- RM {jobData.extraHourCharge}</span>
-                      </div>
-                    )}
-                    {jobData.lowFuelCharge > 0 && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-base text-gray-700">Low Fuel Surcharge</span>
-                        <span className="text-xl font-bold text-orange-600">- RM {jobData.lowFuelCharge}</span>
-                      </div>
-                    )}
-                    <div className="pt-4 border-t-2 border-purple-300 flex justify-between items-center">
-                      <span className="text-lg font-bold text-purple-900">Returning Deposit</span>
-                      <span className="text-3xl font-bold text-purple-600">RM {jobData.depositReturned}</span>
+                  <div className="flex items-start gap-2">
+                    <Fuel className="h-4 w-4 text-muted-foreground mt-1" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Fuel Level</p>
+                      <p className="font-semibold">{jobData.returnFuelLevel}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
+              <div className="pt-3 border-t space-y-2 bg-purple-50 -mx-6 px-6 py-4 rounded-lg">
+                <p className="font-semibold text-purple-900 mb-2">Deposit Return Calculation</p>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Deposit Collected</span>
+                  <span className="font-semibold">RM {jobData.depositCollected}</span>
+                </div>
+                {jobData.extraHourCharge > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Less: Extra Hour Charge</span>
+                    <span className="font-semibold text-orange-600">- RM {jobData.extraHourCharge}</span>
+                  </div>
+                )}
+                {jobData.lowFuelCharge > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Less: Low Fuel Surcharge</span>
+                    <span className="font-semibold text-orange-600">- RM {jobData.lowFuelCharge}</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center pt-2 border-t border-purple-200">
+                  <span className="font-bold text-purple-900">Returning Deposit</span>
+                  <span className="text-xl font-bold text-purple-600">RM {jobData.depositReturned}</span>
+                </div>
+              </div>
+
               {customerReturnConfirmed && returnConfirmedAt && (
-                <div className="bg-green-50 p-5 rounded-xl border-2 border-green-200">
-                  <div className="flex items-center gap-3 text-green-700">
-                    <CheckCircle2 className="h-6 w-6 flex-shrink-0" />
-                    <div>
-                      <p className="font-semibold text-base">You confirmed return</p>
-                      <p className="text-sm text-green-600 mt-1">{returnConfirmedAt}</p>
-                    </div>
+                <div className="pt-3 border-t bg-green-50 -mx-6 -mb-6 px-6 py-3 rounded-b-lg">
+                  <div className="flex items-center gap-2 text-sm text-green-700">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>You confirmed return on {returnConfirmedAt}</span>
                   </div>
                 </div>
               )}
@@ -467,9 +463,10 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
               {!customerReturnConfirmed && (
                 <Button
                   onClick={() => setShowReturnDialog(true)}
-                  className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white h-16 text-lg font-semibold rounded-xl shadow-lg"
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  size="lg"
                 >
-                  <CheckCircle2 className="mr-3 h-6 w-6" />
+                  <CheckCircle2 className="mr-2 h-5 w-5" />
                   Done Return
                 </Button>
               )}
@@ -477,34 +474,30 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
           </Card>
         )}
 
-        <Card className="shadow-xl border-0 overflow-hidden">
-          <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6">
-            <div className="flex items-center gap-3 text-white">
-              <Gift className="h-7 w-7" />
-              <div>
-                <h2 className="text-2xl font-bold">Your Langkawi Rewards</h2>
-                <p className="text-amber-100 text-sm mt-1">Exclusive discounts for you!</p>
-              </div>
-            </div>
-          </div>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 gap-4">
+        {/* Rewards Section */}
+        <Card className="glass-card bg-gradient-to-br from-amber-50 to-orange-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Gift className="h-5 w-5 text-amber-600" />
+              Your Langkawi Rewards
+            </CardTitle>
+            <CardDescription>Thank you for participating! Enjoy these exclusive discounts</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {rewards.map((reward, index) => (
-                <Card
-                  key={index}
-                  className="bg-gradient-to-br from-white to-amber-50 border-2 border-amber-200 hover:border-amber-400 transition-all cursor-pointer shadow-md hover:shadow-lg"
-                >
-                  <CardContent className="p-5">
-                    <div className="flex items-center gap-4">
-                      <div className="text-5xl flex-shrink-0">{reward.icon}</div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-3 mb-2">
-                          <h3 className="font-bold text-lg text-gray-900 leading-tight">{reward.title}</h3>
-                          <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-base px-3 py-1 border-0 shrink-0">
+                <Card key={index} className="bg-white/80 hover:bg-white transition-colors cursor-pointer">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="text-3xl">{reward.icon}</div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <h3 className="font-semibold text-sm">{reward.title}</h3>
+                          <Badge variant="secondary" className="bg-amber-100 text-amber-700 shrink-0">
                             {reward.discount}
                           </Badge>
                         </div>
-                        <p className="text-sm text-gray-600 leading-relaxed">{reward.description}</p>
+                        <p className="text-xs text-muted-foreground">{reward.description}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -514,10 +507,10 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
           </CardContent>
         </Card>
 
-        <div className="text-center py-8 space-y-3">
-          <p className="text-xl font-semibold text-gray-700">Have a wonderful trip in Langkawi! 🌴</p>
-          <p className="text-base text-gray-600">For assistance, contact us at</p>
-          <p className="text-lg font-bold text-blue-600">+60 12-345 6789</p>
+        {/* Footer */}
+        <div className="text-center py-6 text-sm text-muted-foreground">
+          <p>Have a wonderful trip in Langkawi! 🌴</p>
+          <p className="mt-1">For assistance, contact us at +60 12-345 6789</p>
         </div>
       </div>
 
