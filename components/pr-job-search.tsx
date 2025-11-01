@@ -58,6 +58,30 @@ const mockJobs = [
     returnedOn: null,
     isConfirmed: false,
   },
+  {
+    id: "3",
+    jobId: "JOB-2025-003",
+    customerName: "Michael Chen",
+    customerMobile: "+60187654321",
+    carName: "Ford Explorer",
+    startDate: "2025-01-08",
+    startTime: "9:00 AM",
+    endDate: "2025-01-11",
+    endTime: "6:00 PM",
+    actualStartDate: "2025-01-08",
+    actualStartTime: "9:15 AM",
+    actualEndDate: "2025-01-11",
+    actualEndTime: "5:45 PM",
+    status: "Completed",
+    depositAmount: 150,
+    pickedUp: true,
+    pickedUpBy: "Sarah Lee",
+    pickedUpOn: "2025-01-08 09:15 AM",
+    returned: true,
+    returnedBy: "Ahmad bin Ali",
+    returnedOn: "2025-01-11 05:45 PM",
+    isConfirmed: true,
+  },
 ]
 
 interface PRJobSearchProps {
@@ -274,30 +298,50 @@ export function PRJobSearch({ onJobSelect, onViewConfirmation }: PRJobSearchProp
                       )}
                     </div>
 
-                    {job.isConfirmed && onViewConfirmation && (
-                      <div className="flex gap-2 mt-3">
-                        {job.pickedUp && (
-                          <Button
-                            onClick={() => onViewConfirmation(job, "pickup")}
-                            variant="outline"
-                            className="flex-1 h-10"
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Cfm Pickup
-                          </Button>
-                        )}
-                        {job.returned && (
-                          <Button
-                            onClick={() => onViewConfirmation(job, "return")}
-                            variant="outline"
-                            className="flex-1 h-10"
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Cfm Return
-                          </Button>
-                        )}
-                      </div>
-                    )}
+                    <div className="flex gap-2 mt-3">
+                      {/* Process Pickup button - show when pickup not done yet */}
+                      {!job.pickedUp && (
+                        <Button onClick={() => onJobSelect(job)} className="flex-1 h-10 bg-blue-600 hover:bg-blue-700">
+                          <FileText className="h-4 w-4 mr-2" />
+                          Process Pickup
+                        </Button>
+                      )}
+
+                      {/* Process Return button - show when pickup done but return not done yet */}
+                      {job.pickedUp && !job.returned && (
+                        <Button
+                          onClick={() => onJobSelect(job)}
+                          className="flex-1 h-10 bg-purple-600 hover:bg-purple-700"
+                        >
+                          <Clock className="h-4 w-4 mr-2" />
+                          Process Return
+                        </Button>
+                      )}
+
+                      {/* View Cfm Pickup button - show when pickup is confirmed */}
+                      {job.pickedUp && onViewConfirmation && (
+                        <Button
+                          onClick={() => onViewConfirmation(job, "pickup")}
+                          variant="outline"
+                          className="flex-1 h-10"
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Cfm Pickup
+                        </Button>
+                      )}
+
+                      {/* View Cfm Return button - show when return is confirmed */}
+                      {job.returned && onViewConfirmation && (
+                        <Button
+                          onClick={() => onViewConfirmation(job, "return")}
+                          variant="outline"
+                          className="flex-1 h-10"
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Cfm Return
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Card>
