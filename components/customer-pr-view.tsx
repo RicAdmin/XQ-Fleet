@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle2, MapPin, Car, Calendar, Fuel, Gauge, Gift } from "lucide-react"
+import { CheckCircle2, MapPin, Car, Calendar, Fuel, Gauge, Gift, Clock } from "lucide-react"
+import { differenceInHours, differenceInMinutes } from "date-fns"
 
 interface CustomerPRViewProps {
   jobID: string
@@ -15,6 +16,8 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
   const [loading, setLoading] = useState(true)
   const [customerPickupConfirmed, setCustomerPickupConfirmed] = useState(false)
   const [customerReturnConfirmed, setCustomerReturnConfirmed] = useState(false)
+  const [pickupConfirmedAt, setPickupConfirmedAt] = useState<string | null>(null)
+  const [returnConfirmedAt, setReturnConfirmedAt] = useState<string | null>(null)
 
   useEffect(() => {
     // Fetch job data based on jobID
@@ -40,6 +43,7 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
       pickupFuelLevel: "Full (1)",
       depositCollected: 500,
       customerScannedPickup: false,
+      customerPickupConfirmedAt: null,
 
       // Return Information
       returned: true,
@@ -55,6 +59,7 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
       lowFuelCharge: 0,
       depositReturned: 490,
       customerScannedReturn: false,
+      customerReturnConfirmedAt: null,
     }
 
     // Simulate API call
@@ -62,20 +67,62 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
       setJobData(mockJob)
       setCustomerPickupConfirmed(mockJob.customerScannedPickup)
       setCustomerReturnConfirmed(mockJob.customerScannedReturn)
+      setPickupConfirmedAt(mockJob.customerPickupConfirmedAt)
+      setReturnConfirmedAt(mockJob.customerReturnConfirmedAt)
       setLoading(false)
     }, 500)
   }, [jobID])
 
   const handlePickupConfirmation = () => {
+    const timestamp = new Date().toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
     setCustomerPickupConfirmed(true)
+    setPickupConfirmedAt(timestamp)
     // TODO: Send confirmation to backend
-    console.log("[v0] Customer confirmed pickup for job:", jobID)
+    console.log("[v0] Customer confirmed pickup for job:", jobID, "at", timestamp)
   }
 
   const handleReturnConfirmation = () => {
+    const timestamp = new Date().toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
     setCustomerReturnConfirmed(true)
+    setReturnConfirmedAt(timestamp)
     // TODO: Send confirmation to backend
-    console.log("[v0] Customer confirmed return for job:", jobID)
+    console.log("[v0] Customer confirmed return for job:", jobID, "at", timestamp)
+  }
+
+  const calculateTimeDifference = (
+    scheduledDate: string,
+    scheduledTime: string,
+    actualDate: string,
+    actualTime: string,
+  ) => {
+    try {
+      const scheduled = new Date(`${scheduledDate} ${scheduledTime}`)
+      const actual = new Date(`${actualDate} ${actualTime}`)
+      const hoursDiff = differenceInHours(actual, scheduled)
+      const minutesDiff = differenceInMinutes(actual, scheduled) % 60
+
+      if (hoursDiff === 0 && minutesDiff === 0) return null
+
+      return {
+        hours: Math.abs(hoursDiff),
+        minutes: Math.abs(minutesDiff),
+        isLate: actual > scheduled,
+      }
+    } catch {
+      return null
+    }
   }
 
   if (loading) {
@@ -96,6 +143,20 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
       </div>
     )
   }
+
+  const pickupTimeDiff = calculateTimeDifference(
+    jobData.scheduledPickupDate,
+    jobData.scheduledPickupTime,
+    jobData.actualPickupDate,
+    jobData.actualPickupTime,
+  )
+
+  const returnTimeDiff = calculateTimeDifference(
+    jobData.scheduledReturnDate,
+    jobData.scheduledReturnTime,
+    jobData.actualReturnDate,
+    jobData.actualReturnTime,
+  )
 
   const rewards = [
     {
@@ -139,8 +200,10 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-4 pb-20">
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="text-center pt-6 pb-4">
+        <div className="text-center pt-6 pb-2">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl mb-3 shadow-lg">
+            <span className="text-3xl font-bold text-white">XQ</span>
+          </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Rental Journey</h1>
           <p className="text-gray-600">Thank you for choosing XQ Rent System</p>
         </div>
@@ -197,11 +260,27 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground mt-1" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Pickup Date & Time</p>
-                      <p className="font-semibold">
-                        {jobData.actualPickupDate} at {jobData.actualPickupTime}
+                    <div className="flex-1">
+                      <p className="text-sm text-muted-foreground">Scheduled Pickup</p>
+                      <p className="font-medium text-sm">
+                        {jobData.scheduledPickupDate} at {jobData.scheduledPickupTime}
                       </p>
+                      {pickupTimeDiff && (
+                        <>
+                          <p className="text-sm text-muted-foreground mt-1">Actual Pickup</p>
+                          <p className="font-semibold">
+                            {jobData.actualPickupDate} at {jobData.actualPickupTime}
+                          </p>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Clock className="h-3 w-3 text-orange-600" />
+                            <p className="text-xs text-orange-600 font-medium">
+                              {pickupTimeDiff.isLate ? "+" : "-"}
+                              {pickupTimeDiff.hours}h {pickupTimeDiff.minutes}m{" "}
+                              {pickupTimeDiff.isLate ? "late" : "early"}
+                            </p>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
@@ -237,6 +316,15 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
                 </div>
               </div>
 
+              {customerPickupConfirmed && pickupConfirmedAt && (
+                <div className="pt-3 border-t bg-green-50 -mx-6 -mb-6 px-6 py-3 rounded-b-lg">
+                  <div className="flex items-center gap-2 text-sm text-green-700">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>You confirmed pickup on {pickupConfirmedAt}</span>
+                  </div>
+                </div>
+              )}
+
               {!customerPickupConfirmed && (
                 <Button onClick={handlePickupConfirmation} className="w-full bg-blue-600 hover:bg-blue-700" size="lg">
                   <CheckCircle2 className="mr-2 h-5 w-5" />
@@ -269,11 +357,27 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground mt-1" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Return Date & Time</p>
-                      <p className="font-semibold">
-                        {jobData.actualReturnDate} at {jobData.actualReturnTime}
+                    <div className="flex-1">
+                      <p className="text-sm text-muted-foreground">Scheduled Return</p>
+                      <p className="font-medium text-sm">
+                        {jobData.scheduledReturnDate} at {jobData.scheduledReturnTime}
                       </p>
+                      {returnTimeDiff && (
+                        <>
+                          <p className="text-sm text-muted-foreground mt-1">Actual Return</p>
+                          <p className="font-semibold">
+                            {jobData.actualReturnDate} at {jobData.actualReturnTime}
+                          </p>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Clock className="h-3 w-3 text-orange-600" />
+                            <p className="text-xs text-orange-600 font-medium">
+                              {returnTimeDiff.isLate ? "+" : "-"}
+                              {returnTimeDiff.hours}h {returnTimeDiff.minutes}m{" "}
+                              {returnTimeDiff.isLate ? "late" : "early"}
+                            </p>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
@@ -305,7 +409,8 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
                 </div>
               </div>
 
-              <div className="pt-3 border-t space-y-2">
+              <div className="pt-3 border-t space-y-2 bg-purple-50 -mx-6 px-6 py-4 rounded-lg">
+                <p className="font-semibold text-purple-900 mb-2">Deposit Return Calculation</p>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Deposit Collected</span>
                   <span className="font-semibold">RM {jobData.depositCollected}</span>
@@ -322,11 +427,20 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
                     <span className="font-semibold text-orange-600">- RM {jobData.lowFuelCharge}</span>
                   </div>
                 )}
-                <div className="flex justify-between items-center pt-2 border-t">
-                  <span className="font-semibold">Deposit Returned</span>
-                  <span className="text-lg font-bold text-purple-600">RM {jobData.depositReturned}</span>
+                <div className="flex justify-between items-center pt-2 border-t border-purple-200">
+                  <span className="font-bold text-purple-900">Returning Deposit</span>
+                  <span className="text-xl font-bold text-purple-600">RM {jobData.depositReturned}</span>
                 </div>
               </div>
+
+              {customerReturnConfirmed && returnConfirmedAt && (
+                <div className="pt-3 border-t bg-green-50 -mx-6 -mb-6 px-6 py-3 rounded-b-lg">
+                  <div className="flex items-center gap-2 text-sm text-green-700">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>You confirmed return on {returnConfirmedAt}</span>
+                  </div>
+                </div>
+              )}
 
               {!customerReturnConfirmed && (
                 <Button

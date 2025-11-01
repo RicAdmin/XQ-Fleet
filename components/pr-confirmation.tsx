@@ -43,7 +43,7 @@ export function PRConfirmation({
   }
 
   const handleFinalConfirm = () => {
-    const qrUrl = `${window.location.origin}/pr/customer?jobId=${job.jobId}&mobile=${encodeURIComponent(job.customerMobile)}`
+    const qrUrl = `https://xqrentsys.vercel.app/customer?jobID=${job.jobId}`
     setQrCodeUrl(qrUrl)
     setIsConfirmed(true)
     setShowConfirmDialog(false)
@@ -90,13 +90,7 @@ export function PRConfirmation({
             <h3 className="font-semibold text-center mb-4 text-gray-900">Customer P&R QR Code</h3>
             <div className="flex justify-center mb-4">
               <div className="p-4 bg-white rounded-lg shadow-lg">
-                <QRCode
-                  value={
-                    qrCodeUrl ||
-                    `${typeof window !== "undefined" ? window.location.origin : ""}/pr/customer?jobId=${job.jobId}&mobile=${encodeURIComponent(job.customerMobile)}`
-                  }
-                  size={220}
-                />
+                <QRCode value={qrCodeUrl || `https://xqrentsys.vercel.app/customer?jobID=${job.jobId}`} size={220} />
               </div>
             </div>
             <div className="text-center space-y-2">
