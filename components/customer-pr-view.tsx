@@ -4,6 +4,16 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { CheckCircle2, MapPin, Car, Calendar, Fuel, Gauge, Gift, Clock } from "lucide-react"
 import { differenceInHours, differenceInMinutes } from "date-fns"
 
@@ -18,6 +28,8 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
   const [customerReturnConfirmed, setCustomerReturnConfirmed] = useState(false)
   const [pickupConfirmedAt, setPickupConfirmedAt] = useState<string | null>(null)
   const [returnConfirmedAt, setReturnConfirmedAt] = useState<string | null>(null)
+  const [showPickupDialog, setShowPickupDialog] = useState(false)
+  const [showReturnDialog, setShowReturnDialog] = useState(false)
 
   useEffect(() => {
     // Fetch job data based on jobID
@@ -83,6 +95,7 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
     })
     setCustomerPickupConfirmed(true)
     setPickupConfirmedAt(timestamp)
+    setShowPickupDialog(false)
     // TODO: Send confirmation to backend
     console.log("[v0] Customer confirmed pickup for job:", jobID, "at", timestamp)
   }
@@ -97,6 +110,7 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
     })
     setCustomerReturnConfirmed(true)
     setReturnConfirmedAt(timestamp)
+    setShowReturnDialog(false)
     // TODO: Send confirmation to backend
     console.log("[v0] Customer confirmed return for job:", jobID, "at", timestamp)
   }
@@ -326,7 +340,11 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
               )}
 
               {!customerPickupConfirmed && (
-                <Button onClick={handlePickupConfirmation} className="w-full bg-blue-600 hover:bg-blue-700" size="lg">
+                <Button
+                  onClick={() => setShowPickupDialog(true)}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  size="lg"
+                >
                   <CheckCircle2 className="mr-2 h-5 w-5" />
                   Done Pickup
                 </Button>
@@ -444,7 +462,7 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
 
               {!customerReturnConfirmed && (
                 <Button
-                  onClick={handleReturnConfirmation}
+                  onClick={() => setShowReturnDialog(true)}
                   className="w-full bg-purple-600 hover:bg-purple-700"
                   size="lg"
                 >
@@ -495,6 +513,44 @@ export default function CustomerPRView({ jobID }: CustomerPRViewProps) {
           <p className="mt-1">For assistance, contact us at +60 12-345 6789</p>
         </div>
       </div>
+
+      {/* Confirmation dialog for pickup */}
+      <AlertDialog open={showPickupDialog} onOpenChange={setShowPickupDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Pickup Completion</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to confirm that you have completed the pickup process? This action will be recorded
+              with a timestamp.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>No</AlertDialogCancel>
+            <AlertDialogAction onClick={handlePickupConfirmation} className="bg-blue-600 hover:bg-blue-700">
+              Yes, Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirmation dialog for return */}
+      <AlertDialog open={showReturnDialog} onOpenChange={setShowReturnDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Return Completion</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to confirm that you have completed the return process? This action will be recorded
+              with a timestamp.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>No</AlertDialogCancel>
+            <AlertDialogAction onClick={handleReturnConfirmation} className="bg-purple-600 hover:bg-purple-700">
+              Yes, Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
