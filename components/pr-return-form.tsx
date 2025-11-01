@@ -515,31 +515,6 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
             </div>
           )}
 
-          {unplannedExtra && unplannedExtra.extraCharge > 0 && (
-            <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
-              <Label className="text-sm font-semibold text-orange-900">⚠️ Unplanned Extra Hour Detected</Label>
-              <div className="mt-3 space-y-2 text-sm">
-                <div className="p-3 bg-white rounded border border-orange-300">
-                  <div className="space-y-1">
-                    <div className="flex justify-between">
-                      <span className="text-orange-700">Extra Days:</span>
-                      <span className="font-bold">{unplannedExtra.daysDiff} days</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-orange-700">Extra Hours:</span>
-                      <span className="font-bold">{unplannedExtra.hoursDiff} hours</span>
-                    </div>
-                    <div className="flex justify-between pt-2 border-t border-orange-300">
-                      <span className="text-orange-900 font-semibold">Total Extra Charge:</span>
-                      <span className="font-bold text-lg text-orange-900">RM {unplannedExtra.extraCharge}</span>
-                    </div>
-                    <p className="text-xs text-orange-600 mt-1">(RM 50/day + RM 5/hour)</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
           <div className="space-y-2">
             <Label className="text-sm font-semibold">Car Condition Photos (Optional)</Label>
             <p className="text-xs text-muted-foreground">Document any damages or issues</p>
