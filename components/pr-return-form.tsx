@@ -32,6 +32,22 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [unplannedExtraPayment, setUnplannedExtraPayment] = useState("")
 
+  const calculateLowFuelCharge = () => {
+    if (!fuelLevel) return 0
+
+    const pickupFuelLevel = Number.parseFloat(job.pickupFuelLevel || "1")
+    const returnFuelLevel = Number.parseFloat(fuelLevel)
+
+    if (returnFuelLevel < pickupFuelLevel) {
+      const fuelDifference = pickupFuelLevel - returnFuelLevel
+      // Base charge: RM 15 minimum, RM 20 per 1/8 tank difference
+      const baseCharge = 15
+      const additionalCharge = fuelDifference * 20
+      return Math.max(baseCharge, additionalCharge)
+    }
+    return 0
+  }
+
   // Calculate unplanned extra hours
   const calculateUnplannedExtra = () => {
     const actualPickup = new Date(job.actualStartDate || job.startDate)
@@ -49,6 +65,11 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
   }
 
   const unplannedExtra = calculateUnplannedExtra()
+  const lowFuelCharge = calculateLowFuelCharge()
+
+  const collectedDeposit = Number.parseFloat(job.depositAmount || "0")
+  const unplannedExtraCharge = unplannedExtra?.extraCharge || 0
+  const actualReturningDeposit = collectedDeposit - unplannedExtraCharge - lowFuelCharge
 
   // Load cached data
   useEffect(() => {
@@ -144,6 +165,9 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
       fuelLevel,
       unplannedExtra,
       unplannedExtraPayment,
+      collectedDeposit,
+      lowFuelCharge,
+      actualReturningDeposit,
     }
 
     onComplete(data)
@@ -199,6 +223,45 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
                   | {job.endTime}
                 </span>
               </div>
+              <div className="flex justify-between pt-2 border-t border-blue-300">
+                <span className="text-blue-700">Pickup Fuel Level:</span>
+                <span className="font-medium">{job.pickupFuelLevel || "1"} (Full)</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+            <Label className="text-sm font-semibold text-green-900 mb-3">Deposit Return Calculation</Label>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-green-700">Collected Deposit:</span>
+                <span className="font-semibold">RM {collectedDeposit.toFixed(2)}</span>
+              </div>
+
+              {unplannedExtraCharge > 0 && (
+                <div className="flex justify-between text-red-600">
+                  <span>Less: Unplanned Extra Hour</span>
+                  <span className="font-semibold">- RM {unplannedExtraCharge.toFixed(2)}</span>
+                </div>
+              )}
+
+              {lowFuelCharge > 0 && (
+                <div className="flex justify-between text-red-600">
+                  <span>Less: Low Fuel Charge</span>
+                  <span className="font-semibold">- RM {lowFuelCharge.toFixed(2)}</span>
+                </div>
+              )}
+
+              <div className="flex justify-between pt-2 border-t border-green-300">
+                <span className="text-green-900 font-bold">Actual Returning Deposit:</span>
+                <span className="font-bold text-lg text-green-900">RM {actualReturningDeposit.toFixed(2)}</span>
+              </div>
+
+              {lowFuelCharge > 0 && (
+                <p className="text-xs text-orange-600 pt-1">
+                  ⚠️ Fuel level is lower than pickup. Low fuel charge applied.
+                </p>
+              )}
             </div>
           </div>
 
@@ -219,9 +282,9 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
                     </div>
                     <div className="flex justify-between pt-2 border-t border-orange-300">
                       <span className="text-orange-900 font-semibold">Total Extra Charge:</span>
-                      <span className="font-bold text-lg text-orange-900">${unplannedExtra.extraCharge}</span>
+                      <span className="font-bold text-lg text-orange-900">RM {unplannedExtra.extraCharge}</span>
                     </div>
-                    <p className="text-xs text-orange-600 pt-1">($50/day + $5/hour)</p>
+                    <p className="text-xs text-orange-600 pt-1">(RM 50/day + RM 5/hour)</p>
                   </div>
                 </div>
 
@@ -238,7 +301,9 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
                     placeholder="Enter collected amount"
                     className="h-11 mt-1"
                   />
-                  <p className="text-xs text-orange-600 mt-1">Must match extra charge: ${unplannedExtra.extraCharge}</p>
+                  <p className="text-xs text-orange-600 mt-1">
+                    Must match extra charge: RM {unplannedExtra.extraCharge}
+                  </p>
                 </div>
               </div>
             </div>
@@ -384,6 +449,11 @@ export function PRReturnForm({ job, onComplete, onBack }: PRReturnFormProps) {
               <option value="0.875">7/8</option>
               <option value="1">Full (1)</option>
             </select>
+            {fuelLevel && Number.parseFloat(fuelLevel) < Number.parseFloat(job.pickupFuelLevel || "1") && (
+              <p className="text-xs text-orange-600 font-semibold">
+                ⚠️ Fuel level is lower than pickup. Low fuel charge: RM {lowFuelCharge.toFixed(2)}
+              </p>
+            )}
           </div>
 
           <Button onClick={handleSubmit} className="w-full h-12 text-base font-semibold mt-6">

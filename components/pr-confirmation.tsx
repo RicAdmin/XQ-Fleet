@@ -153,59 +153,38 @@ export function PRConfirmation({
                   </div>
                 )}
 
-                <div className="pt-2 border-t border-green-300 space-y-2">
-                  <div>
-                    <p className="text-green-700 font-semibold mb-1">Pickup Date | Time</p>
-                    <div className="pl-2 space-y-1">
-                      <p className="text-xs">
-                        <span className="text-green-600">Ordered:</span>{" "}
-                        {new Date(job.startDate).toLocaleDateString("en-US", {
-                          month: "long",
-                          day: "numeric",
-                          year: "numeric",
-                        })}{" "}
-                        | {job.startTime}
-                      </p>
-                      {job.actualStartDate && (
-                        <p className="text-xs">
-                          <span className="text-green-600">Actual:</span>{" "}
-                          {new Date(job.actualStartDate).toLocaleDateString("en-US", {
-                            month: "long",
-                            day: "numeric",
-                            year: "numeric",
-                          })}{" "}
-                          | {job.actualStartTime}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                {confirmationType === "return" && (
+                  <div className="pt-2 border-t border-green-300 space-y-2">
+                    <p className="text-green-700 font-semibold">Deposit Return:</p>
+                    <div className="pl-2 space-y-1 bg-white p-3 rounded border border-green-300">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-green-600">Collected Deposit:</span>
+                        <span className="font-medium">RM {pickupData.collectedDeposit?.toFixed(2) || "0.00"}</span>
+                      </div>
 
-                  <div>
-                    <p className="text-green-700 font-semibold mb-1">Return Date | Time</p>
-                    <div className="pl-2 space-y-1">
-                      <p className="text-xs">
-                        <span className="text-green-600">Ordered:</span>{" "}
-                        {new Date(job.endDate).toLocaleDateString("en-US", {
-                          month: "long",
-                          day: "numeric",
-                          year: "numeric",
-                        })}{" "}
-                        | {job.endTime}
-                      </p>
-                      {job.actualEndDate && (
-                        <p className="text-xs">
-                          <span className="text-green-600">Actual:</span>{" "}
-                          {new Date(job.actualEndDate).toLocaleDateString("en-US", {
-                            month: "long",
-                            day: "numeric",
-                            year: "numeric",
-                          })}{" "}
-                          | {job.actualEndTime}
-                        </p>
+                      {pickupData.unplannedExtra && pickupData.unplannedExtra.extraCharge > 0 && (
+                        <div className="flex justify-between text-xs text-red-600">
+                          <span>Less: Unplanned Extra Hour</span>
+                          <span className="font-medium">- RM {pickupData.unplannedExtra.extraCharge.toFixed(2)}</span>
+                        </div>
                       )}
+
+                      {pickupData.lowFuelCharge > 0 && (
+                        <div className="flex justify-between text-xs text-red-600">
+                          <span>Less: Low Fuel Charge</span>
+                          <span className="font-medium">- RM {pickupData.lowFuelCharge.toFixed(2)}</span>
+                        </div>
+                      )}
+
+                      <div className="flex justify-between pt-2 border-t border-green-400">
+                        <span className="text-green-900 font-bold text-sm">Returning Deposit:</span>
+                        <span className="font-bold text-green-900">
+                          RM {pickupData.actualReturningDeposit?.toFixed(2) || "0.00"}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {confirmationType === "return" &&
                   pickupData.unplannedExtra &&
@@ -221,10 +200,12 @@ export function PRConfirmation({
                           hours
                         </p>
                         <p className="text-xs">
-                          <span className="text-green-600">Extra Charge:</span> ${pickupData.unplannedExtra.extraCharge}
+                          <span className="text-green-600">Extra Charge:</span> RM{" "}
+                          {pickupData.unplannedExtra.extraCharge}
                         </p>
                         <p className="text-xs">
-                          <span className="text-green-600">Payment Collected:</span> ${pickupData.unplannedExtraPayment}
+                          <span className="text-green-600">Payment Collected:</span> RM{" "}
+                          {pickupData.unplannedExtraPayment}
                         </p>
                       </div>
                     </div>
@@ -393,10 +374,10 @@ export function PRConfirmation({
             <div className="space-y-3">
               <div>
                 <p className="text-xs text-muted-foreground mb-2">
-                  Agreement Photos ({pickupData.agreementImages.length})
+                  Agreement Photos ({pickupData.agreementImages?.length || 0})
                 </p>
                 <div className="grid grid-cols-4 gap-2">
-                  {pickupData.agreementImages.map((img: string, index: number) => (
+                  {(pickupData.agreementImages || []).map((img: string, index: number) => (
                     <div key={index} className="relative group cursor-pointer" onClick={() => setPreviewImage(img)}>
                       <Image
                         src={img || "/placeholder.svg"}
@@ -415,10 +396,10 @@ export function PRConfirmation({
 
               <div>
                 <p className="text-xs text-muted-foreground mb-2">
-                  Document Photos ({pickupData.documentImages.length})
+                  Document Photos ({pickupData.documentImages?.length || 0})
                 </p>
                 <div className="grid grid-cols-4 gap-2">
-                  {pickupData.documentImages.map((img: string, index: number) => (
+                  {(pickupData.documentImages || []).map((img: string, index: number) => (
                     <div key={index} className="relative group cursor-pointer" onClick={() => setPreviewImage(img)}>
                       <Image
                         src={img || "/placeholder.svg"}
@@ -436,9 +417,11 @@ export function PRConfirmation({
               </div>
 
               <div>
-                <p className="text-xs text-muted-foreground mb-2">Panel Photos ({pickupData.panelImages.length})</p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Panel Photos ({pickupData.panelImages?.length || 0})
+                </p>
                 <div className="grid grid-cols-4 gap-2">
-                  {pickupData.panelImages.map((img: string, index: number) => (
+                  {(pickupData.panelImages || []).map((img: string, index: number) => (
                     <div key={index} className="relative group cursor-pointer" onClick={() => setPreviewImage(img)}>
                       <Image
                         src={img || "/placeholder.svg"}
@@ -456,6 +439,41 @@ export function PRConfirmation({
               </div>
             </div>
           </div>
+
+          {confirmationType === "return" && (
+            <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+              <h3 className="font-semibold text-sm text-green-900 mb-3">Deposit Return Calculation</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-green-700">Collected Deposit:</span>
+                  <span className="font-semibold">RM {pickupData.collectedDeposit?.toFixed(2) || "0.00"}</span>
+                </div>
+
+                {pickupData.unplannedExtra && pickupData.unplannedExtra.extraCharge > 0 && (
+                  <div className="flex justify-between text-red-600">
+                    <span>Less: Unplanned Extra Hour</span>
+                    <span className="font-semibold">- RM {pickupData.unplannedExtra.extraCharge.toFixed(2)}</span>
+                  </div>
+                )}
+
+                {pickupData.lowFuelCharge > 0 && (
+                  <div className="flex justify-between text-red-600">
+                    <span>Less: Low Fuel Charge</span>
+                    <span className="font-semibold">- RM {pickupData.lowFuelCharge.toFixed(2)}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between pt-2 border-t border-green-300">
+                  <span className="text-green-900 font-bold">Returning Deposit:</span>
+                  <span className="font-bold text-lg text-green-900">
+                    RM {pickupData.actualReturningDeposit?.toFixed(2) || "0.00"}
+                  </span>
+                </div>
+
+                <p className="text-xs text-green-600 pt-1">Customer will receive this amount after deductions</p>
+              </div>
+            </div>
+          )}
 
           {extraChargeInfo && (
             <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
