@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -63,7 +62,7 @@ const mockJobs = [
 
 interface PRJobSearchProps {
   onJobSelect: (job: any) => void
-  onViewConfirmation?: (job: any) => void
+  onViewConfirmation?: (job: any, type: "pickup" | "return") => void
 }
 
 export function PRJobSearch({ onJobSelect, onViewConfirmation }: PRJobSearchProps) {
@@ -274,14 +273,32 @@ export function PRJobSearch({ onJobSelect, onViewConfirmation }: PRJobSearchProp
                         </Badge>
                       )}
                     </div>
-                  </div>
 
-                  {job.isConfirmed && onViewConfirmation && (
-                    <Button onClick={() => onViewConfirmation(job)} variant="outline" className="w-full mt-3 h-10">
-                      <Eye className="h-4 w-4 mr-2" />
-                      View Confirmation
-                    </Button>
-                  )}
+                    {job.isConfirmed && onViewConfirmation && (
+                      <div className="flex gap-2 mt-3">
+                        {job.pickedUp && (
+                          <Button
+                            onClick={() => onViewConfirmation(job, "pickup")}
+                            variant="outline"
+                            className="flex-1 h-10"
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            View Cfm Pickup
+                          </Button>
+                        )}
+                        {job.returned && (
+                          <Button
+                            onClick={() => onViewConfirmation(job, "return")}
+                            variant="outline"
+                            className="flex-1 h-10"
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            View Cfm Return
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </Card>
             ))

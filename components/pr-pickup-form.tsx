@@ -60,6 +60,7 @@ export function PRPickupForm({ job, onComplete, onBack }: PRPickupFormProps) {
   const [extraHourDate, setExtraHourDate] = useState<Date>()
   const [extraHourTime, setExtraHourTime] = useState("")
   const [previewImage, setPreviewImage] = useState<string | null>(null)
+  const [depositCollected, setDepositCollected] = useState("")
 
   useEffect(() => {
     const cacheKey = getCacheKey(job.jobId)
@@ -76,6 +77,7 @@ export function PRPickupForm({ job, onComplete, onBack }: PRPickupFormProps) {
         setFuelLevel(data.fuelLevel || "")
         if (data.extraHourDate) setExtraHourDate(new Date(data.extraHourDate))
         setExtraHourTime(data.extraHourTime || "")
+        setDepositCollected(data.depositCollected || "")
         console.log("[v0] Loaded cached data for job:", job.jobId)
       } catch (error) {
         console.error("[v0] Error loading cached data:", error)
@@ -94,6 +96,7 @@ export function PRPickupForm({ job, onComplete, onBack }: PRPickupFormProps) {
       fuelLevel,
       extraHourDate: extraHourDate?.toISOString(),
       extraHourTime,
+      depositCollected,
     }
     localStorage.setItem(cacheKey, JSON.stringify(dataToCache))
   }, [
@@ -106,6 +109,7 @@ export function PRPickupForm({ job, onComplete, onBack }: PRPickupFormProps) {
     fuelLevel,
     extraHourDate,
     extraHourTime,
+    depositCollected,
   ])
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: "agreement" | "document" | "panel") => {
@@ -165,6 +169,16 @@ export function PRPickupForm({ job, onComplete, onBack }: PRPickupFormProps) {
       alert("Fuel Level is required")
       return
     }
+    if (!depositCollected.trim()) {
+      alert("Deposit Collection is required")
+      return
+    }
+    const depositAmount = Number.parseFloat(job.depositAmount || "0")
+    const collectedAmount = Number.parseFloat(depositCollected)
+    if (collectedAmount !== depositAmount) {
+      alert(`Deposit collected (RM ${collectedAmount}) must match the deposit amount (RM ${depositAmount})`)
+      return
+    }
 
     const data = {
       carAgreementId,
@@ -175,6 +189,7 @@ export function PRPickupForm({ job, onComplete, onBack }: PRPickupFormProps) {
       fuelLevel,
       extraHourDate,
       extraHourTime,
+      depositCollected,
     }
 
     onComplete(data)
@@ -208,6 +223,38 @@ export function PRPickupForm({ job, onComplete, onBack }: PRPickupFormProps) {
               placeholder="Enter agreement ID"
               className="h-11"
             />
+          </div>
+
+          {/* Deposit Collection */}
+          <div className="space-y-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <Label className="text-sm font-semibold text-blue-900">Deposit Collection</Label>
+
+            <div className="space-y-2">
+              <div>
+                <Label className="text-xs text-blue-700">Deposit Amount to be Collect</Label>
+                <div className="h-11 px-3 py-2 bg-white rounded-md border border-blue-300 flex items-center">
+                  <span className="font-semibold text-gray-900">RM {job.depositAmount || "0.00"}</span>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="depositCollected" className="text-xs text-blue-700">
+                  Deposit Collected <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="depositCollected"
+                  type="number"
+                  step="0.01"
+                  value={depositCollected}
+                  onChange={(e) => setDepositCollected(e.target.value)}
+                  placeholder="Enter collected amount"
+                  className="h-11"
+                />
+                <p className="text-xs text-blue-600 mt-1">
+                  Must match deposit amount: RM {job.depositAmount || "0.00"}
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Car Agreement Photos */}

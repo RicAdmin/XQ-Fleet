@@ -21,10 +21,19 @@ interface PRConfirmationProps {
   pickupData: any
   onConfirm: () => void
   onBack: () => void
+  confirmationType?: "pickup" | "return"
+  isViewOnly?: boolean
 }
 
-export function PRConfirmation({ job, pickupData, onConfirm, onBack }: PRConfirmationProps) {
-  const [isConfirmed, setIsConfirmed] = useState(false)
+export function PRConfirmation({
+  job,
+  pickupData,
+  onConfirm,
+  onBack,
+  confirmationType = "pickup",
+  isViewOnly = false,
+}: PRConfirmationProps) {
+  const [isConfirmed, setIsConfirmed] = useState(isViewOnly)
   const [qrCodeUrl, setQrCodeUrl] = useState("")
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [previewImage, setPreviewImage] = useState<string | null>(null)
@@ -62,7 +71,7 @@ export function PRConfirmation({ job, pickupData, onConfirm, onBack }: PRConfirm
 
   const extraChargeInfo = calculateExtraCharge()
 
-  if (isConfirmed) {
+  if (isConfirmed || isViewOnly) {
     return (
       <div className="space-y-4">
         <Card className="p-6">
@@ -70,27 +79,49 @@ export function PRConfirmation({ job, pickupData, onConfirm, onBack }: PRConfirm
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Check className="h-8 w-8 text-green-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Pickup Confirmed!</h2>
-            <p className="text-sm text-muted-foreground">Job {job.jobId} has been marked as picked up</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              {confirmationType === "pickup" ? "Pickup" : "Return"} Confirmed!
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Job {job.jobId} has been marked as {confirmationType === "pickup" ? "picked up" : "returned"}
+            </p>
           </div>
 
           <div className="bg-white p-6 rounded-lg border-2 border-green-500 mb-6">
             <h3 className="font-semibold text-center mb-4 text-gray-900">Customer P&R QR Code</h3>
             <div className="flex justify-center mb-4">
               <div className="p-4 bg-white rounded-lg shadow-lg">
-                <QRCode value={qrCodeUrl} size={220} />
+                <QRCode
+                  value={
+                    qrCodeUrl ||
+                    `${typeof window !== "undefined" ? window.location.origin : ""}/pr/customer?jobId=${job.jobId}&mobile=${encodeURIComponent(job.customerMobile)}`
+                  }
+                  size={220}
+                />
               </div>
             </div>
             <div className="text-center space-y-2">
               <p className="text-sm font-medium text-gray-900">Scan this QR code to access P&R details</p>
               <p className="text-xs text-muted-foreground">Job ID: {job.jobId}</p>
               <p className="text-xs text-muted-foreground">Mobile: {job.customerMobile}</p>
+              <div className="pt-2 border-t mt-3">
+                <p className="text-xs text-muted-foreground">
+                  Customer Scan Status:{" "}
+                  {job.customerScanned ? (
+                    <span className="text-green-600 font-semibold">✓ Scanned on {job.customerScannedAt}</span>
+                  ) : (
+                    <span className="text-orange-600 font-semibold">✗ Not Yet Scanned</span>
+                  )}
+                </p>
+              </div>
             </div>
           </div>
 
           <div className="space-y-3 mb-6">
             <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-              <h3 className="font-semibold text-sm text-green-900 mb-3">Confirmed Pickup Information</h3>
+              <h3 className="font-semibold text-sm text-green-900 mb-3">
+                Confirmed {confirmationType === "pickup" ? "Pickup" : "Return"} Information
+              </h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-green-700">Customer:</span>
@@ -112,23 +143,98 @@ export function PRConfirmation({ job, pickupData, onConfirm, onBack }: PRConfirm
                   <span className="text-green-700">Fuel Level:</span>
                   <span className="font-medium">{pickupData.fuelLevel}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-green-700">Pickup Date:</span>
-                  <span className="font-medium">{new Date().toLocaleDateString()}</span>
+
+                <div className="pt-2 border-t border-green-300 space-y-2">
+                  <div>
+                    <p className="text-green-700 font-semibold mb-1">Pickup Date | Time</p>
+                    <div className="pl-2 space-y-1">
+                      <p className="text-xs">
+                        <span className="text-green-600">Ordered:</span>{" "}
+                        {new Date(job.startDate).toLocaleDateString("en-US", {
+                          month: "long",
+                          day: "numeric",
+                          year: "numeric",
+                        })}{" "}
+                        | {job.startTime}
+                      </p>
+                      {job.actualStartDate && (
+                        <p className="text-xs">
+                          <span className="text-green-600">Actual:</span>{" "}
+                          {new Date(job.actualStartDate).toLocaleDateString("en-US", {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          })}{" "}
+                          | {job.actualStartTime}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-green-700 font-semibold mb-1">Return Date | Time</p>
+                    <div className="pl-2 space-y-1">
+                      <p className="text-xs">
+                        <span className="text-green-600">Ordered:</span>{" "}
+                        {new Date(job.endDate).toLocaleDateString("en-US", {
+                          month: "long",
+                          day: "numeric",
+                          year: "numeric",
+                        })}{" "}
+                        | {job.endTime}
+                      </p>
+                      {job.actualEndDate && (
+                        <p className="text-xs">
+                          <span className="text-green-600">Actual:</span>{" "}
+                          {new Date(job.actualEndDate).toLocaleDateString("en-US", {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          })}{" "}
+                          | {job.actualEndTime}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-green-700">Pickup Time:</span>
-                  <span className="font-medium">{new Date().toLocaleTimeString()}</span>
+
+                <div className="pt-2 border-t border-green-300">
+                  <div className="flex justify-between">
+                    <span className="text-green-700">Confirmed By:</span>
+                    <span className="font-medium">
+                      {confirmationType === "pickup" ? job.pickedUpBy : job.returnedBy}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-green-700">Confirmed On:</span>
+                    <span className="font-medium">
+                      {confirmationType === "pickup" ? job.pickedUpOn : job.returnedOn}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {extraChargeInfo && (
+            {extraChargeInfo && extraChargeInfo.extraCharge > 0 && (
               <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                <h3 className="font-semibold text-sm text-yellow-900 mb-3">Extended Return Information</h3>
+                <h3 className="font-semibold text-sm text-yellow-900 mb-3">
+                  <span className="inline-block w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
+                  Extra Hour Fee Applied
+                </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-yellow-700">New Return Date:</span>
+                    <span className="text-yellow-700">Original Return:</span>
+                    <span className="font-medium">
+                      {new Date(job.endDate).toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })}{" "}
+                      | {job.endTime}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-yellow-700">New Return:</span>
                     <span className="font-medium">
                       {pickupData.extraHourDate
                         ? new Date(pickupData.extraHourDate).toLocaleDateString("en-US", {
@@ -136,24 +242,31 @@ export function PRConfirmation({ job, pickupData, onConfirm, onBack }: PRConfirm
                             day: "numeric",
                             year: "numeric",
                           })
-                        : "N/A"}
+                        : "N/A"}{" "}
+                      | {pickupData.extraHourTime}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-yellow-700">New Return Time:</span>
-                    <span className="font-medium">{pickupData.extraHourTime}</span>
-                  </div>
-                  <div className="flex justify-between pt-2 border-t border-yellow-300">
-                    <span className="text-yellow-900 font-semibold">Extra Fee:</span>
-                    <span className="font-bold text-yellow-900">${extraChargeInfo.extraCharge}</span>
+                  <div className="pt-2 border-t border-yellow-300 space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-yellow-900 font-semibold">Extra Days:</span>
+                      <span className="font-bold">{extraChargeInfo.daysDiff} days</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-yellow-900 font-semibold">Extra Hours:</span>
+                      <span className="font-bold">{extraChargeInfo.hoursDiff} hours</span>
+                    </div>
+                    <div className="flex justify-between pt-2 border-t border-yellow-300">
+                      <span className="text-yellow-900 font-semibold">Extra Fee:</span>
+                      <span className="font-bold text-lg text-yellow-900">${extraChargeInfo.extraCharge}</span>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
           </div>
 
-          <Button onClick={onConfirm} className="w-full h-12 bg-green-600 hover:bg-green-700">
-            Done
+          <Button onClick={onBack} className="w-full h-12 bg-green-600 hover:bg-green-700">
+            Back to Search
           </Button>
         </Card>
       </div>
@@ -164,7 +277,7 @@ export function PRConfirmation({ job, pickupData, onConfirm, onBack }: PRConfirm
     <div className="space-y-4">
       <Button variant="ghost" onClick={onBack} className="mb-2">
         <ArrowLeft className="h-4 w-4 mr-2" />
-        Back to Edit
+        Back to Search
       </Button>
 
       <Card className="p-6">
@@ -197,6 +310,29 @@ export function PRConfirmation({ job, pickupData, onConfirm, onBack }: PRConfirm
                 <span className="text-muted-foreground">Agreement ID:</span>
                 <span className="font-mono font-semibold">{pickupData.carAgreementId}</span>
               </div>
+            </div>
+          </div>
+
+          {/* Deposit Collection Section */}
+          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h3 className="font-semibold text-sm text-blue-900 mb-3">Deposit Collection</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-blue-700">Deposit Amount:</span>
+                <span className="font-semibold">RM {job.depositAmount || "0.00"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-blue-700">Collected Amount:</span>
+                <span className="font-semibold text-green-600">RM {pickupData.depositCollected}</span>
+              </div>
+              {Number.parseFloat(pickupData.depositCollected) === Number.parseFloat(job.depositAmount || "0") && (
+                <div className="pt-2 border-t border-blue-300">
+                  <p className="text-xs text-green-600 font-semibold flex items-center">
+                    <Check className="h-3 w-3 mr-1" />
+                    Deposit amount matched
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 

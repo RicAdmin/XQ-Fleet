@@ -16,6 +16,7 @@ export default function PRPage() {
   const [pickupData, setPickupData] = useState<any>(null)
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [viewingConfirmation, setViewingConfirmation] = useState(false)
+  const [confirmationType, setConfirmationType] = useState<"pickup" | "return">("pickup")
 
   // Check if user is staff (Operation or Super Admin)
   const isStaff = currentUser?.role === "Operation" || currentUser?.role === "Super Admin"
@@ -32,7 +33,11 @@ export default function PRPage() {
 
   const handleBack = () => {
     if (showConfirmation) {
+      // Go back to search page, not the form
       setShowConfirmation(false)
+      setSelectedJob(null)
+      setPickupData(null)
+      setViewingConfirmation(false)
     } else if (selectedJob) {
       setSelectedJob(null)
     }
@@ -47,21 +52,28 @@ export default function PRPage() {
     setShowConfirmation(false)
   }
 
-  const handleViewConfirmation = (job: any) => {
-    setSelectedJob(job)
-    setViewingConfirmation(true)
-    // Load the pickup data from the job (in real app, this would come from backend)
-    setPickupData({
-      carAgreementId: "AGR-2025-001",
-      agreementImages: [],
-      documentImages: [],
-      panelImages: [],
-      mileage: "50000",
-      fuelLevel: "0.75",
-      extraHourDate: null,
-      extraHourTime: "",
-    })
-    setShowConfirmation(true)
+  const handleViewConfirmation = (job: any, type: "pickup" | "return") => {
+    if (
+      (type === "pickup" && job.pickupStatus === "Confirmed") ||
+      (type === "return" && job.returnStatus === "Confirmed")
+    ) {
+      setSelectedJob(job)
+      setViewingConfirmation(true)
+      setConfirmationType(type)
+      // Load the pickup data from the job (in real app, this would come from backend)
+      setPickupData({
+        carAgreementId: "AGR-2025-001",
+        agreementImages: [],
+        documentImages: [],
+        panelImages: [],
+        mileage: "50000",
+        fuelLevel: "0.75",
+        depositCollected: job.depositAmount || "0",
+        extraHourDate: job.actualEndDate || null,
+        extraHourTime: job.actualEndTime || "",
+      })
+      setShowConfirmation(true)
+    }
   }
 
   if (!isStaff) {
@@ -107,6 +119,8 @@ export default function PRPage() {
             pickupData={pickupData}
             onConfirm={handleConfirmPickup}
             onBack={handleBack}
+            confirmationType={confirmationType}
+            isViewOnly={viewingConfirmation}
           />
         ) : selectedJob ? (
           <PRPickupForm job={selectedJob} onComplete={handlePickupComplete} onBack={handleBack} />
