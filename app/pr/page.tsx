@@ -4,6 +4,7 @@ import { useState } from "react"
 import { PRQRLogin } from "@/components/pr-qr-login"
 import { PRJobSearch } from "@/components/pr-job-search"
 import { PRPickupForm } from "@/components/pr-pickup-form"
+import { PRReturnForm } from "@/components/pr-return-form"
 import { PRConfirmation } from "@/components/pr-confirmation"
 import { useUser } from "@/lib/user-context"
 import { Card } from "@/components/ui/card"
@@ -16,13 +17,14 @@ export default function PRPage() {
   const [pickupData, setPickupData] = useState<any>(null)
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [viewingConfirmation, setViewingConfirmation] = useState(false)
-  const [confirmationType, setConfirmationType] = useState<"pickup" | "return">("pickup")
+  const [processType, setProcessType] = useState<"pickup" | "return">("pickup")
 
   // Check if user is staff (Operation or Super Admin)
   const isStaff = currentUser?.role === "Operation" || currentUser?.role === "Super Admin"
 
-  const handleJobSelect = (job: any) => {
+  const handleJobSelect = (job: any, type: "pickup" | "return" = "pickup") => {
     setSelectedJob(job)
+    setProcessType(type)
     setViewingConfirmation(false)
   }
 
@@ -59,7 +61,7 @@ export default function PRPage() {
     if ((type === "pickup" && job.pickedUp) || (type === "return" && job.returned)) {
       setSelectedJob(job)
       setViewingConfirmation(true)
-      setConfirmationType(type)
+      setProcessType(type)
       // Load the pickup data from the job (in real app, this would come from backend)
       setPickupData({
         carAgreementId: "AGR-2025-001",
@@ -122,11 +124,15 @@ export default function PRPage() {
             pickupData={pickupData}
             onConfirm={handleConfirmPickup}
             onBack={handleBack}
-            confirmationType={confirmationType}
+            confirmationType={processType}
             isViewOnly={viewingConfirmation}
           />
         ) : selectedJob ? (
-          <PRPickupForm job={selectedJob} onComplete={handlePickupComplete} onBack={handleBack} />
+          processType === "pickup" ? (
+            <PRPickupForm job={selectedJob} onComplete={handlePickupComplete} onBack={handleBack} />
+          ) : (
+            <PRReturnForm job={selectedJob} onComplete={handlePickupComplete} onBack={handleBack} />
+          )
         ) : (
           <PRJobSearch onJobSelect={handleJobSelect} onViewConfirmation={handleViewConfirmation} />
         )}

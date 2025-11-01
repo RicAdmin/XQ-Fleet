@@ -85,7 +85,7 @@ const mockJobs = [
 ]
 
 interface PRJobSearchProps {
-  onJobSelect: (job: any) => void
+  onJobSelect: (job: any, type?: "pickup" | "return") => void
   onViewConfirmation?: (job: any, type: "pickup" | "return") => void
 }
 
@@ -301,7 +301,10 @@ export function PRJobSearch({ onJobSelect, onViewConfirmation }: PRJobSearchProp
                     <div className="flex gap-2 mt-3">
                       {/* Process Pickup button - show when pickup not done yet */}
                       {!job.pickedUp && (
-                        <Button onClick={() => onJobSelect(job)} className="flex-1 h-10 bg-blue-600 hover:bg-blue-700">
+                        <Button
+                          onClick={() => onJobSelect(job, "pickup")}
+                          className="flex-1 h-10 bg-blue-600 hover:bg-blue-700"
+                        >
                           <FileText className="h-4 w-4 mr-2" />
                           Process Pickup
                         </Button>
@@ -310,7 +313,7 @@ export function PRJobSearch({ onJobSelect, onViewConfirmation }: PRJobSearchProp
                       {/* Process Return button - show when pickup done but return not done yet */}
                       {job.pickedUp && !job.returned && (
                         <Button
-                          onClick={() => onJobSelect(job)}
+                          onClick={() => onJobSelect(job, "return")}
                           className="flex-1 h-10 bg-purple-600 hover:bg-purple-700"
                         >
                           <Clock className="h-4 w-4 mr-2" />

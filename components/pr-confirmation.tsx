@@ -48,10 +48,10 @@ export function PRConfirmation({
     setIsConfirmed(true)
     setShowConfirmDialog(false)
 
-    const cacheKey = `pr-pickup-${job.jobId}`
+    const cacheKey = confirmationType === "pickup" ? `pr-pickup-${job.jobId}` : `pr-return-${job.jobId}`
     localStorage.removeItem(cacheKey)
     console.log("[v0] Cleared cache for job:", job.jobId)
-    console.log("[v0] Pickup confirmed for job:", job.jobId)
+    console.log(`[v0] ${confirmationType} confirmed for job:`, job.jobId)
   }
 
   const calculateExtraCharge = () => {
@@ -144,6 +144,15 @@ export function PRConfirmation({
                   <span className="font-medium">{pickupData.fuelLevel}</span>
                 </div>
 
+                {confirmationType === "pickup" && pickupData.depositCollected && (
+                  <div className="pt-2 border-t border-green-300">
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Deposit Collected:</span>
+                      <span className="font-semibold text-green-900">RM {pickupData.depositCollected}</span>
+                    </div>
+                  </div>
+                )}
+
                 <div className="pt-2 border-t border-green-300 space-y-2">
                   <div>
                     <p className="text-green-700 font-semibold mb-1">Pickup Date | Time</p>
@@ -198,9 +207,34 @@ export function PRConfirmation({
                   </div>
                 </div>
 
+                {confirmationType === "return" &&
+                  pickupData.unplannedExtra &&
+                  pickupData.unplannedExtra.extraCharge > 0 && (
+                    <div className="pt-2 border-t border-green-300">
+                      <p className="text-green-700 font-semibold mb-1">Unplanned Extra Hour:</p>
+                      <div className="pl-2 space-y-1">
+                        <p className="text-xs">
+                          <span className="text-green-600">Extra Days:</span> {pickupData.unplannedExtra.daysDiff} days
+                        </p>
+                        <p className="text-xs">
+                          <span className="text-green-600">Extra Hours:</span> {pickupData.unplannedExtra.hoursDiff}{" "}
+                          hours
+                        </p>
+                        <p className="text-xs">
+                          <span className="text-green-600">Extra Charge:</span> ${pickupData.unplannedExtra.extraCharge}
+                        </p>
+                        <p className="text-xs">
+                          <span className="text-green-600">Payment Collected:</span> ${pickupData.unplannedExtraPayment}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                 <div className="pt-2 border-t border-green-300">
                   <div className="flex justify-between">
-                    <span className="text-green-700">Confirmed By:</span>
+                    <span className="text-green-700">
+                      {confirmationType === "pickup" ? "Pickup" : "Return"} Confirmed By:
+                    </span>
                     <span className="font-medium">
                       {confirmationType === "pickup" ? job.pickedUpBy : job.returnedBy}
                     </span>
@@ -285,7 +319,9 @@ export function PRConfirmation({
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Check className="h-8 w-8 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Pickup Confirmation</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            {confirmationType === "pickup" ? "Pickup" : "Return"} Confirmation
+          </h2>
           <p className="text-sm text-muted-foreground">Review details before confirming</p>
         </div>
 
@@ -475,7 +511,7 @@ export function PRConfirmation({
           </Button>
           <Button onClick={handleConfirmClick} className="h-12 bg-green-600 hover:bg-green-700">
             <Check className="h-5 w-5 mr-2" />
-            Cfm. Pickup
+            {confirmationType === "pickup" ? "Cfm. Pickup" : "Cfm. Return"}
           </Button>
         </div>
       </Card>
@@ -483,9 +519,10 @@ export function PRConfirmation({
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm Pickup?</DialogTitle>
+            <DialogTitle>Confirm {confirmationType === "pickup" ? "Pickup" : "Return"}?</DialogTitle>
             <DialogDescription>
-              Are you sure you want to mark this job as picked up? This action cannot be undone.
+              Are you sure you want to mark this job as {confirmationType === "pickup" ? "picked up" : "returned"}? This
+              action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
@@ -493,7 +530,7 @@ export function PRConfirmation({
               No, Cancel
             </Button>
             <Button onClick={handleFinalConfirm} className="bg-green-600 hover:bg-green-700">
-              Yes, Confirm Pickup
+              Yes, Confirm {confirmationType === "pickup" ? "Pickup" : "Return"}
             </Button>
           </DialogFooter>
         </DialogContent>
