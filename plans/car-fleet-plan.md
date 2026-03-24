@@ -7,9 +7,9 @@
 | Stage | Title | Status |
 |---|---|---|
 | 1 | Foundation — Auth, Roles & Schema | ✅ Done |
-| 2 | Car Inventory | 🔄 In progress |
-| 3 | Customer Records | 🔲 Not started |
-| 4 | Rental Lifecycle | 🔲 Not started |
+| 2 | Car Inventory | ✅ Done |
+| 3 | Customer Records | ✅ Done |
+| 4 | Rental Lifecycle | 🔄 In progress |
 | 5 | Internal Dashboard | 🔲 Not started |
 | 6 | Reporting | 🔲 Not started |
 | 7 | Document Generation | 🔲 Not started |
@@ -99,7 +99,7 @@ Owner-only CRUD for the car fleet. An owner can add, edit, and retire cars. Each
 
 ## Stage 3: Customer Records
 
-**Status**: 🔲 Not started
+**Status**: ✅ Done
 **User stories**: 13, 14, 15, 16
 
 ### What to build
@@ -119,7 +119,7 @@ Staff-accessible CRUD for customer records. A staff member can create a new cust
 
 ## Stage 4: Rental Lifecycle
 
-**Status**: 🔲 Not started
+**Status**: 🔄 In progress
 **User stories**: 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29
 
 ### What to build

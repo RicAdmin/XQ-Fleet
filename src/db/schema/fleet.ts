@@ -60,6 +60,10 @@ export const paymentStatusEnum = pgEnum('payment_status', [
   'partial',
   'paid',
 ])
+
+export type RentalType = (typeof rentalTypeEnum.enumValues)[number]
+export type RentalStatus = (typeof rentalStatusEnum.enumValues)[number]
+export type PaymentStatus = (typeof paymentStatusEnum.enumValues)[number]
 export const paymentProviderEnum = pgEnum('payment_provider', ['manual', 'ipay88'])
 export const paymentAttemptStatusEnum = pgEnum('payment_attempt_status', [
   'pending',

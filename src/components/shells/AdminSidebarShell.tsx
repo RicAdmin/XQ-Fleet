@@ -19,7 +19,13 @@ import { authClient } from '#/lib/auth-client'
 import type { AppRole } from '#/lib/auth-model'
 import { getRoleLabel } from '#/lib/auth-model'
 
-type NavLinkTo = '/admin' | '/admin/cars' | '/admin/customers' | '/app/customers'
+type NavLinkTo =
+  | '/admin'
+  | '/admin/cars'
+  | '/admin/customers'
+  | '/admin/rentals'
+  | '/app/customers'
+  | '/app/rentals'
 
 type NavSectionItem =
   | {
@@ -63,7 +69,7 @@ const NAV_SECTIONS: NavSection[] = [
         icon: <Car size={16} />,
         exact: false,
       },
-      { type: 'placeholder', label: 'Rentals', icon: <CalendarCheck size={16} /> },
+      { type: 'link', label: 'Rentals', icon: <CalendarCheck size={16} />, to: '/admin/rentals', staffTo: '/app/rentals', exact: false },
       {
         type: 'link',
         label: 'Customers',

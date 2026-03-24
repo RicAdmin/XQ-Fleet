@@ -27,6 +27,10 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AdminCarsCarIdRouteImport } from './routes/admin/cars/$carId'
 import { Route as AppCustomersCustomerIdRouteImport } from './routes/app/customers/$customerId'
 import { Route as AdminCustomersCustomerIdRouteImport } from './routes/admin/customers/$customerId'
+import { Route as AppRentalsIndexRouteImport } from './routes/app/rentals/index'
+import { Route as AdminRentalsIndexRouteImport } from './routes/admin/rentals/index'
+import { Route as AppRentalsRentalIdRouteImport } from './routes/app/rentals/$rentalId'
+import { Route as AdminRentalsRentalIdRouteImport } from './routes/admin/rentals/$rentalId'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -118,6 +122,26 @@ const AdminCustomersCustomerIdRoute = AdminCustomersCustomerIdRouteImport.update
   path: '/customers/$customerId',
   getParentRoute: () => AdminRoute,
 } as any)
+const AppRentalsIndexRoute = AppRentalsIndexRouteImport.update({
+  id: '/rentals/',
+  path: '/rentals/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AdminRentalsIndexRoute = AdminRentalsIndexRouteImport.update({
+  id: '/rentals/',
+  path: '/rentals/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AppRentalsRentalIdRoute = AppRentalsRentalIdRouteImport.update({
+  id: '/rentals/$rentalId',
+  path: '/rentals/$rentalId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AdminRentalsRentalIdRoute = AdminRentalsRentalIdRouteImport.update({
+  id: '/rentals/$rentalId',
+  path: '/rentals/$rentalId',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -138,6 +162,10 @@ export interface FileRoutesByFullPath {
   '/admin/cars/': typeof AdminCarsIndexRoute
   '/admin/customers/': typeof AdminCustomersIndexRoute
   '/app/customers/': typeof AppCustomersIndexRoute
+  '/admin/rentals/': typeof AdminRentalsIndexRoute
+  '/app/rentals/': typeof AppRentalsIndexRoute
+  '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
+  '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -157,6 +185,10 @@ export interface FileRoutesByTo {
   '/admin/cars': typeof AdminCarsIndexRoute
   '/admin/customers': typeof AdminCustomersIndexRoute
   '/app/customers': typeof AppCustomersIndexRoute
+  '/admin/rentals': typeof AdminRentalsIndexRoute
+  '/app/rentals': typeof AppRentalsIndexRoute
+  '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
+  '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -178,6 +210,10 @@ export interface FileRoutesById {
   '/admin/cars/': typeof AdminCarsIndexRoute
   '/admin/customers/': typeof AdminCustomersIndexRoute
   '/app/customers/': typeof AppCustomersIndexRoute
+  '/admin/rentals/': typeof AdminRentalsIndexRoute
+  '/app/rentals/': typeof AppRentalsIndexRoute
+  '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
+  '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -200,6 +236,10 @@ export interface FileRouteTypes {
     | '/admin/cars/'
     | '/admin/customers/'
     | '/app/customers/'
+    | '/admin/rentals/'
+    | '/app/rentals/'
+    | '/admin/rentals/$rentalId'
+    | '/app/rentals/$rentalId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -219,6 +259,10 @@ export interface FileRouteTypes {
     | '/admin/cars'
     | '/admin/customers'
     | '/app/customers'
+    | '/admin/rentals'
+    | '/app/rentals'
+    | '/admin/rentals/$rentalId'
+    | '/app/rentals/$rentalId'
   id:
     | '__root__'
     | '/'
@@ -239,6 +283,10 @@ export interface FileRouteTypes {
     | '/admin/cars/'
     | '/admin/customers/'
     | '/app/customers/'
+    | '/admin/rentals/'
+    | '/app/rentals/'
+    | '/admin/rentals/$rentalId'
+    | '/app/rentals/$rentalId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -382,6 +430,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCustomersCustomerIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/admin/rentals/': {
+      id: '/rentals/'
+      path: '/rentals/'
+      fullPath: '/admin/rentals/'
+      preLoaderRoute: typeof AdminRentalsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/app/rentals/': {
+      id: '/rentals/'
+      path: '/rentals/'
+      fullPath: '/app/rentals/'
+      preLoaderRoute: typeof AppRentalsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/admin/rentals/$rentalId': {
+      id: '/rentals/$rentalId'
+      path: '/rentals/$rentalId'
+      fullPath: '/admin/rentals/$rentalId'
+      preLoaderRoute: typeof AdminRentalsRentalIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/app/rentals/$rentalId': {
+      id: '/rentals/$rentalId'
+      path: '/rentals/$rentalId'
+      fullPath: '/app/rentals/$rentalId'
+      preLoaderRoute: typeof AppRentalsRentalIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -391,6 +467,8 @@ interface AdminRouteChildren {
   AdminCarsIndexRoute: typeof AdminCarsIndexRoute
   AdminCustomersIndexRoute: typeof AdminCustomersIndexRoute
   AdminCustomersCustomerIdRoute: typeof AdminCustomersCustomerIdRoute
+  AdminRentalsIndexRoute: typeof AdminRentalsIndexRoute
+  AdminRentalsRentalIdRoute: typeof AdminRentalsRentalIdRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -399,6 +477,8 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCarsIndexRoute: AdminCarsIndexRoute,
   AdminCustomersIndexRoute: AdminCustomersIndexRoute,
   AdminCustomersCustomerIdRoute: AdminCustomersCustomerIdRoute,
+  AdminRentalsIndexRoute: AdminRentalsIndexRoute,
+  AdminRentalsRentalIdRoute: AdminRentalsRentalIdRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -407,12 +487,16 @@ interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppCustomersIndexRoute: typeof AppCustomersIndexRoute
   AppCustomersCustomerIdRoute: typeof AppCustomersCustomerIdRoute
+  AppRentalsIndexRoute: typeof AppRentalsIndexRoute
+  AppRentalsRentalIdRoute: typeof AppRentalsRentalIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppCustomersIndexRoute: AppCustomersIndexRoute,
   AppCustomersCustomerIdRoute: AppCustomersCustomerIdRoute,
+  AppRentalsIndexRoute: AppRentalsIndexRoute,
+  AppRentalsRentalIdRoute: AppRentalsRentalIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
