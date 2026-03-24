@@ -1,0 +1,35 @@
+const STATUS_LABELS: Record<string, string> = {
+  available: 'Available',
+  reserved: 'Reserved',
+  'payment-pending': 'Pmt. Pending',
+  rented: 'Rented',
+  maintenance: 'Maintenance',
+  damaged: 'Damaged',
+  retired: 'Retired',
+  pending: 'Pending',
+  active: 'Active',
+  closed: 'Closed',
+  cancelled: 'Cancelled',
+  unpaid: 'Unpaid',
+  partial: 'Partial',
+  paid: 'Paid',
+}
+
+type StatusBadgeProps = {
+  status: string
+  size?: 'sm' | 'md'
+  className?: string
+}
+
+export function StatusBadge({ status, size = 'md', className = '' }: StatusBadgeProps) {
+  const cls = [
+    'status-badge',
+    `status-badge--${status}`,
+    size === 'sm' ? 'status-badge--sm' : '',
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  return <span className={cls}>{STATUS_LABELS[status] ?? status}</span>
+}
