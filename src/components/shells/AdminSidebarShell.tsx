@@ -19,10 +19,19 @@ import { authClient } from '#/lib/auth-client'
 import type { AppRole } from '#/lib/auth-model'
 import { getRoleLabel } from '#/lib/auth-model'
 
-type NavLinkTo = '/admin' | '/admin/cars'
+type NavLinkTo = '/admin' | '/admin/cars' | '/admin/customers' | '/app/customers'
 
 type NavSectionItem =
-  | { type: 'link'; label: string; icon: ReactNode; to: NavLinkTo; exact: boolean; ownerOnly?: boolean }
+  | {
+      type: 'link'
+      label: string
+      icon: ReactNode
+      to: NavLinkTo
+      /** Alternate path shown to staff (non-owner) instead of `to` */
+      staffTo?: NavLinkTo
+      exact: boolean
+      ownerOnly?: boolean
+    }
   | { type: 'placeholder'; label: string; icon: ReactNode }
 
 type NavSection = {
@@ -55,6 +64,14 @@ const NAV_SECTIONS: NavSection[] = [
         exact: false,
       },
       { type: 'placeholder', label: 'Rentals', icon: <CalendarCheck size={16} /> },
+      {
+        type: 'link',
+        label: 'Customers',
+        to: '/admin/customers',
+        staffTo: '/app/customers',
+        icon: <Users size={16} />,
+        exact: false,
+      },
       { type: 'placeholder', label: 'Analytics', icon: <BarChart3 size={16} /> },
     ],
   },
@@ -136,10 +153,11 @@ export default function AdminSidebarShell({
           {section.items.map((item) => {
                 if (item.type === 'link') {
                   if (item.ownerOnly && !isOwner) return null
+                  const resolvedTo = (item.staffTo && !isOwner ? item.staffTo : item.to) as NavLinkTo
                   return (
                     <Link
                       key={item.label}
-                      to={item.to}
+                      to={resolvedTo}
                       activeOptions={{ exact: item.exact }}
                       className="sidebar-nav-item"
                       activeProps={{ className: 'is-active' }}
