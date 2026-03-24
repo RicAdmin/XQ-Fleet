@@ -1,9 +1,17 @@
 import { useState, useMemo } from 'react'
 
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { ArrowUpDown, ChevronUp, ChevronDown, Plus, Pencil, CarFront, X } from 'lucide-react'
+import { ArrowUpDown, ChevronUp, ChevronDown, Plus, Pencil, CarFront } from 'lucide-react'
 
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
+import { Button } from '#/components/ui/button'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+} from '#/components/ui/sheet'
 import { StatusBadge } from '#/components/ui/StatusBadge'
 import type { CarCategory, CarColor, CarStatus } from '#/db/schema'
 import {
@@ -451,26 +459,32 @@ function CarsPage() {
                   </td>
                   <td className="px-3 py-[0.42rem]">
                     {isOwner && car.status !== 'retired' && car.status !== 'rented' && car.status !== 'reserved' && car.status !== 'payment-pending' ? (
-                      <select
-                        className="status-badge cursor-pointer border-0 bg-transparent p-0 text-inherit"
-                        style={{ appearance: 'none' }}
-                        value={car.status}
-                        disabled={statusChangingId === car.id}
-                        onChange={(e) =>
-                          handleStatusChange(
-                            car.id,
-                            e.target.value as 'maintenance' | 'damaged' | 'available',
-                          )
-                        }
-                        aria-label={`Change status of ${car.plateNumber}`}
-                        title="Click to change status"
-                      >
-                        {MANUAL_STATUS_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
+                      <span className="relative inline-flex items-center">
+                        <select
+                          className={`status-badge status-badge--${car.status} cursor-pointer appearance-none border-0 pr-[1.1rem] transition-shadow hover:ring-1 hover:ring-current/30 disabled:cursor-not-allowed disabled:opacity-60`}
+                          value={car.status}
+                          disabled={statusChangingId === car.id}
+                          onChange={(e) =>
+                            handleStatusChange(
+                              car.id,
+                              e.target.value as 'maintenance' | 'damaged' | 'available',
+                            )
+                          }
+                          aria-label={`Change status of ${car.plateNumber}`}
+                          title="Click to change status"
+                        >
+                          {MANUAL_STATUS_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                        <ChevronDown
+                          size={9}
+                          className="pointer-events-none absolute right-[0.3rem] opacity-60"
+                          strokeWidth={2.5}
+                        />
+                      </span>
                     ) : (
                       <StatusBadge status={car.status} />
                     )}
@@ -506,154 +520,151 @@ function CarsPage() {
         )}
       </article>
 
-      {/* ── Add / Edit form overlay ── */}
-      {isOwner && formOpen && (
-        <div className="form-overlay" role="dialog" aria-modal="true">
-          <div className="form-panel island-shell">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <p className="island-kicker mb-0.5">{editingCar ? 'Edit vehicle' : 'New vehicle'}</p>
-                <h3 className="text-lg font-semibold text-[var(--sea-ink)]">
-                  {editingCar ? `${editingCar.make} ${editingCar.model}` : 'Add to fleet'}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={closeForm}
-                className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-[rgba(23,58,64,0.08)]"
-                aria-label="Close"
-              >
-                <X size={16} />
-              </button>
+      {/* ── Add / Edit Sheet ── */}
+      {isOwner && (
+        <Sheet open={formOpen} onOpenChange={(open) => { if (!open) closeForm() }}>
+          <SheetContent
+            side="right"
+            className="flex flex-col gap-0 p-0 sm:max-w-[28rem]"
+          >
+            <SheetHeader className="border-b border-[var(--line)] px-5 pt-5 pb-4">
+              <p className="island-kicker mb-1">
+                {editingCar ? 'Edit vehicle' : 'New vehicle'}
+              </p>
+              <SheetTitle className="text-lg font-semibold text-[var(--sea-ink)]">
+                {editingCar ? `${editingCar.make} ${editingCar.model}` : 'Add to fleet'}
+              </SheetTitle>
+            </SheetHeader>
+
+            <div className="flex-1 overflow-y-auto px-5 py-4">
+              <form id="car-form" className="space-y-3" onSubmit={handleFormSubmit}>
+                <div>
+                  <label className="field-label" htmlFor="cf-plate">Plate number</label>
+                  <input
+                    id="cf-plate"
+                    type="text"
+                    className="field-input uppercase"
+                    value={formData.plateNumber}
+                    onChange={(e) => setField('plateNumber', e.target.value.toUpperCase())}
+                    placeholder="e.g. ABC 1234"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="field-label" htmlFor="cf-make">Make</label>
+                    <input
+                      id="cf-make"
+                      type="text"
+                      className="field-input"
+                      value={formData.make}
+                      onChange={(e) => setField('make', e.target.value)}
+                      placeholder="e.g. Perodua"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="field-label" htmlFor="cf-model">Model</label>
+                    <input
+                      id="cf-model"
+                      type="text"
+                      className="field-input"
+                      value={formData.model}
+                      onChange={(e) => setField('model', e.target.value)}
+                      placeholder="e.g. Myvi"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="field-label" htmlFor="cf-year">Year</label>
+                    <input
+                      id="cf-year"
+                      type="number"
+                      className="field-input"
+                      value={formData.year}
+                      onChange={(e) => setField('year', e.target.value)}
+                      min={1960}
+                      max={currentYear() + 1}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="field-label" htmlFor="cf-color">Color</label>
+                    <select
+                      id="cf-color"
+                      className="field-input"
+                      value={formData.color}
+                      onChange={(e) => setField('color', e.target.value as CarColor)}
+                      required
+                    >
+                      {COLOR_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="field-label" htmlFor="cf-category">Category</label>
+                    <select
+                      id="cf-category"
+                      className="field-input"
+                      value={formData.category}
+                      onChange={(e) => setField('category', e.target.value as CarCategory)}
+                      required
+                    >
+                      {CATEGORY_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="field-label" htmlFor="cf-rate">Daily rate (RM)</label>
+                    <input
+                      id="cf-rate"
+                      type="number"
+                      className="field-input"
+                      value={formData.dailyRateRM}
+                      onChange={(e) => setField('dailyRateRM', e.target.value)}
+                      min={0}
+                      step={0.01}
+                      placeholder="0.00"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="field-label" htmlFor="cf-notes">Notes (optional)</label>
+                  <textarea
+                    id="cf-notes"
+                    className="field-input"
+                    rows={3}
+                    value={formData.notes}
+                    onChange={(e) => setField('notes', e.target.value)}
+                    placeholder="Any additional notes about this vehicle…"
+                  />
+                </div>
+
+                {formError && <p className="form-error">{formError}</p>}
+              </form>
             </div>
 
-            <form className="space-y-3" onSubmit={handleFormSubmit}>
-              <div>
-                <label className="field-label" htmlFor="cf-plate">Plate number</label>
-                <input
-                  id="cf-plate"
-                  type="text"
-                  className="field-input uppercase"
-                  value={formData.plateNumber}
-                  onChange={(e) => setField('plateNumber', e.target.value.toUpperCase())}
-                  placeholder="e.g. ABC 1234"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="field-label" htmlFor="cf-make">Make</label>
-                  <input
-                    id="cf-make"
-                    type="text"
-                    className="field-input"
-                    value={formData.make}
-                    onChange={(e) => setField('make', e.target.value)}
-                    placeholder="e.g. Perodua"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="field-label" htmlFor="cf-model">Model</label>
-                  <input
-                    id="cf-model"
-                    type="text"
-                    className="field-input"
-                    value={formData.model}
-                    onChange={(e) => setField('model', e.target.value)}
-                    placeholder="e.g. Myvi"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="field-label" htmlFor="cf-year">Year</label>
-                  <input
-                    id="cf-year"
-                    type="number"
-                    className="field-input"
-                    value={formData.year}
-                    onChange={(e) => setField('year', e.target.value)}
-                    min={1960}
-                    max={currentYear() + 1}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="field-label" htmlFor="cf-color">Color</label>
-                  <select
-                    id="cf-color"
-                    className="field-input"
-                    value={formData.color}
-                    onChange={(e) => setField('color', e.target.value as CarColor)}
-                    required
-                  >
-                    {COLOR_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="field-label" htmlFor="cf-category">Category</label>
-                  <select
-                    id="cf-category"
-                    className="field-input"
-                    value={formData.category}
-                    onChange={(e) => setField('category', e.target.value as CarCategory)}
-                    required
-                  >
-                    {CATEGORY_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="field-label" htmlFor="cf-rate">Daily rate (RM)</label>
-                  <input
-                    id="cf-rate"
-                    type="number"
-                    className="field-input"
-                    value={formData.dailyRateRM}
-                    onChange={(e) => setField('dailyRateRM', e.target.value)}
-                    min={0}
-                    step={0.01}
-                    placeholder="0.00"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="field-label" htmlFor="cf-notes">Notes (optional)</label>
-                <textarea
-                  id="cf-notes"
-                  className="field-input"
-                  rows={3}
-                  value={formData.notes}
-                  onChange={(e) => setField('notes', e.target.value)}
-                  placeholder="Any additional notes about this vehicle…"
-                />
-              </div>
-
-              {formError && <p className="form-error">{formError}</p>}
-
-              <div className="flex gap-3 pt-2">
-                <button type="submit" className="button-primary" disabled={isSubmitting}>
-                  {isSubmitting ? 'Saving…' : editingCar ? 'Save changes' : 'Add vehicle'}
-                </button>
-                <button type="button" className="button-secondary" onClick={closeForm}>
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+            <SheetFooter className="flex-row gap-2 border-t border-[var(--line)] px-5 py-4">
+              <Button type="submit" form="car-form" disabled={isSubmitting}>
+                {isSubmitting ? 'Saving…' : editingCar ? 'Save changes' : 'Add vehicle'}
+              </Button>
+              <Button variant="outline" type="button" onClick={closeForm}>
+                Cancel
+              </Button>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
       )}
 
       {/* ── Confirm retire overlay ── */}
