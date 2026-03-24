@@ -6,10 +6,10 @@ import {
   getHomePathForRole,
   getLoginPathForSurface,
 } from '#/lib/auth-model'
-import { getCurrentSession, getOwnerSetupState } from '#/lib/auth-functions'
+import { getRequestSession, getOwnerSetupState } from '#/lib/auth-functions'
 
 export async function redirectAuthenticatedUser() {
-  const session = await getCurrentSession()
+  const session = await getRequestSession()
 
   if (session) {
     throw redirect({ to: getHomePathForRole(session.user.role) })
@@ -19,7 +19,7 @@ export async function redirectAuthenticatedUser() {
 }
 
 export async function requireInternalAccess() {
-  const session = await getCurrentSession()
+  const session = await getRequestSession()
 
   if (!session) {
     throw redirect({ to: '/internal/login' })
@@ -33,7 +33,7 @@ export async function requireInternalAccess() {
 }
 
 export async function requireSurfaceAccess(surface: ProtectedSurface) {
-  const session = await getCurrentSession()
+  const session = await getRequestSession()
 
   if (!session) {
     throw redirect({ to: getLoginPathForSurface(surface) })
@@ -47,7 +47,7 @@ export async function requireSurfaceAccess(surface: ProtectedSurface) {
 }
 
 export async function loadInternalLoginState() {
-  const session = await getCurrentSession()
+  const session = await getRequestSession()
 
   if (session) {
     throw redirect({ to: getHomePathForRole(session.user.role) })

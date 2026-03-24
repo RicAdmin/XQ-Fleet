@@ -81,18 +81,20 @@ function invitationUrl(token: string) {
   return `${baseUrl}/internal/invite/${token}`
 }
 
-export async function getRequestSession(): Promise<AuthSession | null> {
-  const { auth } = await import('#/lib/auth')
-  const { getRequestHeaders } = await import('@tanstack/react-start/server')
-  const headers = getRequestHeaders()
-  const session = await auth.api.getSession({ headers })
+export const getRequestSession = createServerFn({ method: 'GET' }).handler(
+  async (): Promise<AuthSession | null> => {
+    const { auth } = await import('#/lib/auth')
+    const { getRequestHeaders } = await import('@tanstack/react-start/server')
+    const headers = getRequestHeaders()
+    const session = await auth.api.getSession({ headers })
 
-  if (!session || !isAppRole(session.user.role)) {
-    return null
-  }
+    if (!session || !isAppRole(session.user.role)) {
+      return null
+    }
 
-  return session
-}
+    return session
+  },
+)
 
 export async function requireRole(allowedRoles: AppRole[]) {
   const session = await getRequestSession()
@@ -107,10 +109,6 @@ export async function requireRole(allowedRoles: AppRole[]) {
 
   return session
 }
-
-export const getCurrentSession = createServerFn({ method: 'GET' }).handler(
-  async () => getRequestSession(),
-)
 
 export const getOwnerSetupState = createServerFn({ method: 'GET' }).handler(
   async () => {
