@@ -1,7 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto'
 
 import { createServerFn } from '@tanstack/react-start'
-import { getRequestHeaders } from '@tanstack/react-start/server'
 import { and, desc, eq, gt, isNull } from 'drizzle-orm'
 import type { AuthSession } from '#/lib/auth'
 import type { AppRole } from '#/lib/auth-model'
@@ -84,6 +83,7 @@ function invitationUrl(token: string) {
 
 export async function getRequestSession(): Promise<AuthSession | null> {
   const { auth } = await import('#/lib/auth')
+  const { getRequestHeaders } = await import('@tanstack/react-start/server')
   const headers = getRequestHeaders()
   const session = await auth.api.getSession({ headers })
 
@@ -133,6 +133,7 @@ export const createInitialOwner = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const { db } = await import('#/db')
     const { auth } = await import('#/lib/auth')
+    const { getRequestHeaders } = await import('@tanstack/react-start/server')
     const owners = await db
       .select({ id: users.id })
       .from(users)
@@ -306,6 +307,7 @@ export const acceptStaffInvitation = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const { db } = await import('#/db')
     const { auth } = await import('#/lib/auth')
+    const { getRequestHeaders } = await import('@tanstack/react-start/server')
     const tokenHash = hashInvitationToken(data.token)
 
     const invites = await db
