@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 
 import { Link } from '@tanstack/react-router'
-import { AlertTriangle, CalendarCheck, Car, TrendingUp } from 'lucide-react'
+import { AlertTriangle, CalendarCheck, Car, TrendingUp, Wrench } from 'lucide-react'
 
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
 import {
@@ -173,7 +173,7 @@ type AdminDashboardProps = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function AdminDashboard({ session, data, ownerStats, directory }: AdminDashboardProps) {
-  const { fleetCounts, dueToday, overdue } = data
+  const { fleetCounts, dueToday, overdue, maintenanceAlerts } = data
 
   // Staff management state
   const [email, setEmail] = useState('')
@@ -241,8 +241,8 @@ export default function AdminDashboard({ session, data, ownerStats, directory }:
         </div>
       </section>
 
-      {/* ── Due today + Overdue ── */}
-      <section className="mb-6 grid gap-4 lg:grid-cols-2">
+      {/* ── Due today + Overdue + Maintenance ── */}
+      <section className="mb-6 grid gap-4 lg:grid-cols-3">
         {/* Due today */}
         <article className="workspace-panel island-shell p-5">
           <div className="mb-4 flex items-center gap-2">
@@ -283,6 +283,40 @@ export default function AdminDashboard({ session, data, ownerStats, directory }:
               {overdue.map((r) => (
                 <RentalAlertRow key={r.id} {...r} daysOverdue={r.daysOverdue} />
               ))}
+            </div>
+          )}
+        </article>
+
+        {/* Maintenance alerts */}
+        <article className="workspace-panel island-shell p-5">
+          <div className="mb-4 flex items-center gap-2">
+            <Wrench size={16} className="text-amber-600" />
+            <p className="island-kicker">Maintenance</p>
+            {maintenanceAlerts.length > 0 && (
+              <span className="ml-auto inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                {maintenanceAlerts.length}
+              </span>
+            )}
+          </div>
+          {maintenanceAlerts.length === 0 ? (
+            <p className="text-sm text-[var(--sea-ink-soft)]">No maintenance alerts.</p>
+          ) : (
+            <div className="space-y-2">
+              {maintenanceAlerts.slice(0, 5).map((a, i) => (
+                <Link
+                  key={i}
+                  to="/app/maintenance"
+                  className={`hub-alert hub-alert--${a.severity} text-xs`}
+                >
+                  <Wrench size={12} />
+                  <span className="flex-1 truncate">{a.message}</span>
+                </Link>
+              ))}
+              {maintenanceAlerts.length > 5 && (
+                <Link to="/app/maintenance" className="text-xs font-medium text-[var(--lagoon-deep)] hover:underline">
+                  +{maintenanceAlerts.length - 5} more →
+                </Link>
+              )}
             </div>
           )}
         </article>

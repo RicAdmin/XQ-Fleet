@@ -72,6 +72,22 @@ export const paymentAttemptStatusEnum = pgEnum('payment_attempt_status', [
   'voided',
 ])
 
+export const maintenanceEventTypeEnum = pgEnum('maintenance_event_type', [
+  'scheduled',
+  'unscheduled',
+  'damage',
+  'road-tax',
+  'insurance',
+])
+
+export const maintenanceEventStatusEnum = pgEnum('maintenance_event_status', [
+  'open',
+  'completed',
+])
+
+export type MaintenanceEventType = (typeof maintenanceEventTypeEnum.enumValues)[number]
+export type MaintenanceEventStatus = (typeof maintenanceEventStatusEnum.enumValues)[number]
+
 export const cars = pgTable(
   'cars',
   {
@@ -84,6 +100,7 @@ export const cars = pgTable(
     category: carCategoryEnum('category').notNull().default('other'),
     status: carStatusEnum('status').notNull().default('available'),
     dailyRateSen: integer('daily_rate_sen').notNull().default(0),
+    currentMileage: integer('current_mileage'),
     notes: text('notes'),
     createdAt: timestamp('created_at', {
       mode: 'date',
@@ -247,3 +264,49 @@ export const payments = pgTable(
   },
   (table) => [index('payments_rental_id_idx').on(table.rentalId)],
 )
+
+export const maintenanceEvents = pgTable(
+  'maintenance_events',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    carId: uuid('car_id')
+      .notNull()
+      .references(() => cars.id, { onDelete: 'cascade' }),
+    type: maintenanceEventTypeEnum('type').notNull(),
+    description: text('description').notNull(),
+    mileageAtService: integer('mileage_at_service'),
+    costSen: integer('cost_sen').notNull().default(0),
+    workshopVendor: text('workshop_vendor'),
+    status: maintenanceEventStatusEnum('status').notNull().default('open'),
+    openedAt: timestamp('opened_at', { mode: 'date', withTimezone: true }).notNull().defaultNow(),
+    completedAt: timestamp('completed_at', { mode: 'date', withTimezone: true }),
+    nextDueMileage: integer('next_due_mileage'),
+    nextDueDate: timestamp('next_due_date', { mode: 'date', withTimezone: true }),
+    createdByUserId: text('created_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('maintenance_events_car_id_idx').on(table.carId),
+    index('maintenance_events_status_idx').on(table.status),
+  ],
+)
+
+export const carServiceConfig = pgTable('car_service_config', {
+  carId: uuid('car_id')
+    .primaryKey()
+    .references(() => cars.id, { onDelete: 'cascade' }),
+  serviceIntervalKm: integer('service_interval_km'),
+  serviceIntervalDays: integer('service_interval_days'),
+  alertBeforeKm: integer('alert_before_km').notNull().default(500),
+  alertBeforeDays: integer('alert_before_days').notNull().default(7),
+  roadTaxExpiryDate: timestamp('road_tax_expiry_date', { mode: 'date', withTimezone: true }),
+  roadTaxRenewalCostSen: integer('road_tax_renewal_cost_sen').notNull().default(0),
+  roadTaxPolicyRef: text('road_tax_policy_ref'),
+  insuranceExpiryDate: timestamp('insurance_expiry_date', { mode: 'date', withTimezone: true }),
+  insuranceRenewalCostSen: integer('insurance_renewal_cost_sen').notNull().default(0),
+  insurancePolicyRef: text('insurance_policy_ref'),
+  updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true }).notNull().defaultNow(),
+})

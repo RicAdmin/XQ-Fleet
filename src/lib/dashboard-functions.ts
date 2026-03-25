@@ -3,6 +3,8 @@ import { and, eq, gte, lt, sql } from 'drizzle-orm'
 
 import { cars, customers, rentals } from '#/db/schema'
 import { requireRole } from '#/lib/auth-functions'
+import type { MaintenanceAlertRow } from '#/lib/maintenance-functions'
+import { getMaintenanceDashboardAlerts } from '#/lib/maintenance-functions'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -32,6 +34,7 @@ export type DashboardData = {
   fleetCounts: FleetCounts
   dueToday: RentalAlertRow[]
   overdue: OverdueRow[]
+  maintenanceAlerts: MaintenanceAlertRow[]
 }
 
 export type OwnerStats = {
@@ -79,37 +82,42 @@ export const getDashboardData = createServerFn({ method: 'GET' }).handler(
       }
     }
 
-    // Active rentals due back today
-    const dueToday = await db
-      .select({
-        id: rentals.id,
-        carPlateNumber: cars.plateNumber,
-        carMake: cars.make,
-        carModel: cars.model,
-        customerFullName: customers.fullName,
-        endDate: rentals.endDate,
-      })
-      .from(rentals)
-      .leftJoin(cars, eq(rentals.carId, cars.id))
-      .leftJoin(customers, eq(rentals.customerId, customers.id))
-      .where(and(eq(rentals.status, 'active'), gte(rentals.endDate, todayStart), lt(rentals.endDate, tomorrowStart)))
-      .orderBy(rentals.endDate)
+    const [dueToday, overdueRaw, maintenanceAlerts] = await Promise.all([
+      // Active rentals due back today
+      db
+        .select({
+          id: rentals.id,
+          carPlateNumber: cars.plateNumber,
+          carMake: cars.make,
+          carModel: cars.model,
+          customerFullName: customers.fullName,
+          endDate: rentals.endDate,
+        })
+        .from(rentals)
+        .leftJoin(cars, eq(rentals.carId, cars.id))
+        .leftJoin(customers, eq(rentals.customerId, customers.id))
+        .where(and(eq(rentals.status, 'active'), gte(rentals.endDate, todayStart), lt(rentals.endDate, tomorrowStart)))
+        .orderBy(rentals.endDate),
 
-    // Active rentals past their end date (overdue), most overdue first
-    const overdueRaw = await db
-      .select({
-        id: rentals.id,
-        carPlateNumber: cars.plateNumber,
-        carMake: cars.make,
-        carModel: cars.model,
-        customerFullName: customers.fullName,
-        endDate: rentals.endDate,
-      })
-      .from(rentals)
-      .leftJoin(cars, eq(rentals.carId, cars.id))
-      .leftJoin(customers, eq(rentals.customerId, customers.id))
-      .where(and(eq(rentals.status, 'active'), lt(rentals.endDate, todayStart)))
-      .orderBy(rentals.endDate) // ascending = most overdue (earliest) first
+      // Active rentals past their end date (overdue), most overdue first
+      db
+        .select({
+          id: rentals.id,
+          carPlateNumber: cars.plateNumber,
+          carMake: cars.make,
+          carModel: cars.model,
+          customerFullName: customers.fullName,
+          endDate: rentals.endDate,
+        })
+        .from(rentals)
+        .leftJoin(cars, eq(rentals.carId, cars.id))
+        .leftJoin(customers, eq(rentals.customerId, customers.id))
+        .where(and(eq(rentals.status, 'active'), lt(rentals.endDate, todayStart)))
+        .orderBy(rentals.endDate),
+
+      // Maintenance alerts (lazy computed)
+      getMaintenanceDashboardAlerts(),
+    ])
 
     const overdue: OverdueRow[] = overdueRaw.map((r) => ({
       ...r,
@@ -119,7 +127,7 @@ export const getDashboardData = createServerFn({ method: 'GET' }).handler(
       ),
     }))
 
-    return { fleetCounts, dueToday, overdue }
+    return { fleetCounts, dueToday, overdue, maintenanceAlerts }
   },
 )
 

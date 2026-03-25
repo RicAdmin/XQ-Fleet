@@ -17,6 +17,8 @@ import {
   getRevenueReport,
   getUtilizationReport,
 } from '#/lib/report-functions'
+import type { MaintenanceReport } from '#/lib/maintenance-functions'
+import { getMaintenanceReport } from '#/lib/maintenance-functions'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -751,15 +753,173 @@ function HistoryTab({ allCars }: { allCars: CarSelectRow[] }) {
   )
 }
 
+// ─── Maintenance tab ──────────────────────────────────────────────────────────
+
+function MaintenanceTab() {
+  const [from, setFrom] = useState(thisMonthRange()[0])
+  const [to, setTo] = useState(thisMonthRange()[1])
+  const [data, setData] = useState<MaintenanceReport | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function loadReport() {
+    setLoading(true)
+    setError(null)
+    try {
+      const result = await getMaintenanceReport({ data: { from, to } })
+      setData(result)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load report.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function downloadCsv() {
+    if (!data) return
+    const rows = data.rows.map((r) => ({
+      Date: r.openedAt.toLocaleDateString('en-MY'),
+      'Completed Date': r.completedAt ? r.completedAt.toLocaleDateString('en-MY') : '',
+      Vehicle: r.carPlateNumber ?? '',
+      Make: r.carMake ?? '',
+      Model: r.carModel ?? '',
+      Type: r.type,
+      Description: r.description,
+      'Cost (RM)': (r.costSen / 100).toFixed(2),
+      Workshop: r.workshopVendor ?? '',
+      Status: r.status,
+    }))
+    const headers = Object.keys(rows[0] ?? {})
+    const csv = [
+      headers.join(','),
+      ...rows.map((r) =>
+        headers.map((h) => {
+          const val = String(r[h as keyof typeof r] ?? '')
+          return val.includes(',') ? `"${val}"` : val
+        }).join(','),
+      ),
+    ].join('\n')
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `maintenance-${from}-to-${to}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  return (
+    <div>
+      <div className="workspace-panel island-shell mb-6 p-5">
+        <p className="island-kicker mb-4">Date range</p>
+        <div className="flex flex-wrap items-end gap-4">
+          <div>
+            <label className="field-label" htmlFor="maint-from">From</label>
+            <input
+              id="maint-from"
+              type="date"
+              className="field-input"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="field-label" htmlFor="maint-to">To</label>
+            <input
+              id="maint-to"
+              type="date"
+              className="field-input"
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+            />
+          </div>
+          <button
+            type="button"
+            className="button-primary inline-flex items-center gap-2"
+            onClick={loadReport}
+            disabled={loading}
+          >
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            {loading ? 'Loading…' : 'Run report'}
+          </button>
+        </div>
+        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+      </div>
+
+      {data && (
+        <div className="workspace-panel island-shell p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <p className="island-kicker mb-0.5">Results</p>
+              <h3 className="text-xl font-semibold text-[var(--sea-ink)]">
+                {data.rows.length} event{data.rows.length !== 1 ? 's' : ''} · Total: {formatMYR(data.totalCostSen)}
+              </h3>
+            </div>
+            <div className="flex gap-2 print:hidden">
+              <button
+                type="button"
+                className="button-secondary inline-flex items-center gap-1.5 text-sm"
+                onClick={downloadCsv}
+              >
+                <Download size={13} />
+                CSV
+              </button>
+              <button
+                type="button"
+                className="button-secondary inline-flex items-center gap-1.5 text-sm"
+                onClick={() => window.print()}
+              >
+                <Printer size={13} />
+                Print
+              </button>
+            </div>
+          </div>
+
+          {data.rows.length === 0 ? (
+            <p className="text-sm text-[var(--sea-ink-soft)]">No maintenance events in this period.</p>
+          ) : (
+            <div className="maint-event-table">
+              <div className="maint-event-table-header">
+                <span>Date</span>
+                <span>Vehicle</span>
+                <span>Type</span>
+                <span>Description</span>
+                <span>Cost</span>
+                <span>Status</span>
+              </div>
+              {data.rows.map((r) => (
+                <div key={r.id} className="maint-event-row">
+                  <span className="text-xs tabular-nums text-[var(--sea-ink-soft)]">
+                    {new Date(r.openedAt).toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </span>
+                  <span className="font-mono text-xs font-semibold text-[var(--lagoon-deep)]">
+                    {r.carPlateNumber ?? '—'} <span className="font-normal text-[var(--sea-ink-soft)]">{r.carMake} {r.carModel}</span>
+                  </span>
+                  <span className="text-xs">{r.type}</span>
+                  <span className="text-sm">{r.description}</span>
+                  <span className="text-xs tabular-nums">{r.costSen > 0 ? formatMYR(r.costSen) : '—'}</span>
+                  <span className={`maint-status-badge maint-status-badge--${r.status}`}>
+                    {r.status === 'open' ? 'Open' : 'Done'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Tab types ────────────────────────────────────────────────────────────────
 
-type ReportTab = 'revenue' | 'utilization' | 'overdue' | 'history'
+type ReportTab = 'revenue' | 'utilization' | 'overdue' | 'history' | 'maintenance'
 
 const TABS: { key: ReportTab; label: string }[] = [
   { key: 'revenue', label: 'Revenue' },
   { key: 'utilization', label: 'Utilization' },
   { key: 'overdue', label: 'Overdue' },
   { key: 'history', label: 'Rental History' },
+  { key: 'maintenance', label: 'Maintenance' },
 ]
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -803,6 +963,7 @@ export default function AdminReports({ session, initialRevenue, allCars }: Admin
       {activeTab === 'utilization' && <UtilizationTab />}
       {activeTab === 'overdue' && <OverdueTab />}
       {activeTab === 'history' && <HistoryTab allCars={allCars} />}
+      {activeTab === 'maintenance' && <MaintenanceTab />}
     </AdminSidebarShell>
   )
 }

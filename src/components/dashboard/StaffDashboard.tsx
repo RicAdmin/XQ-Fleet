@@ -1,4 +1,4 @@
-import { AlertTriangle, CalendarCheck, Car, ChevronRight, LogOut, Users } from 'lucide-react'
+import { AlertTriangle, CalendarCheck, Car, ChevronRight, LogOut, Wrench, Users } from 'lucide-react'
 
 import { Link } from '@tanstack/react-router'
 
@@ -56,9 +56,12 @@ type StaffDashboardProps = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function StaffDashboard({ user, data }: StaffDashboardProps) {
-  const { fleetCounts, dueToday, overdue } = data
+  const { fleetCounts, dueToday, overdue, maintenanceAlerts } = data
 
   const totalActive = fleetCounts.rented + fleetCounts.reserved
+  const redAlerts = maintenanceAlerts.filter((a) => a.severity === 'red')
+  const amberAlerts = maintenanceAlerts.filter((a) => a.severity === 'amber')
+  const hasUrgent = overdue.length > 0 || dueToday.length > 0 || redAlerts.length > 0 || amberAlerts.length > 0
 
   async function handleSignOut() {
     await authClient.signOut()
@@ -84,14 +87,14 @@ export default function StaffDashboard({ user, data }: StaffDashboardProps) {
         <div className="hub-greeting">
           <p className="hub-greeting-text">{greeting(user.name)}</p>
           <p className="hub-greeting-sub">
-            {overdue.length > 0 || dueToday.length > 0
+            {hasUrgent
               ? "Here's what needs your attention today."
               : "You're all caught up — nothing urgent today."}
           </p>
         </div>
 
         {/* Priority inbox */}
-        {(overdue.length > 0 || dueToday.length > 0) && (
+        {(overdue.length > 0 || dueToday.length > 0 || maintenanceAlerts.length > 0) && (
           <section className="hub-section">
             <p className="hub-section-title">Priority inbox</p>
             <div className="hub-alerts">
@@ -119,6 +122,24 @@ export default function StaffDashboard({ user, data }: StaffDashboardProps) {
                   <ChevronRight size={13} className="hub-alert-arrow" />
                 </Link>
               )}
+              {redAlerts.length > 0 && (
+                <Link to="/app/maintenance" className="hub-alert hub-alert--red">
+                  <Wrench size={14} />
+                  <span>
+                    {redAlerts.length} maintenance issue{redAlerts.length !== 1 ? 's' : ''} urgent
+                  </span>
+                  <ChevronRight size={13} className="hub-alert-arrow" />
+                </Link>
+              )}
+              {amberAlerts.length > 0 && (
+                <Link to="/app/maintenance" className="hub-alert hub-alert--amber">
+                  <Wrench size={14} />
+                  <span>
+                    {amberAlerts.length} maintenance alert{amberAlerts.length !== 1 ? 's' : ''}
+                  </span>
+                  <ChevronRight size={13} className="hub-alert-arrow" />
+                </Link>
+              )}
             </div>
           </section>
         )}
@@ -127,6 +148,10 @@ export default function StaffDashboard({ user, data }: StaffDashboardProps) {
         <section className="hub-section">
           <p className="hub-section-title">Quick actions</p>
           <div className="hub-quick-actions">
+            <Link to="/app/maintenance" className="hub-action-btn hub-action-btn--secondary">
+              <Wrench size={20} />
+              <span>Maintenance</span>
+            </Link>
             <Link to="/app/rentals" className="hub-action-btn hub-action-btn--primary">
               <CalendarCheck size={20} />
               <span>Rentals</span>
@@ -222,7 +247,7 @@ export default function StaffDashboard({ user, data }: StaffDashboardProps) {
         )}
 
         {/* All clear */}
-        {dueToday.length === 0 && overdue.length === 0 && (
+        {dueToday.length === 0 && overdue.length === 0 && maintenanceAlerts.length === 0 && (
           <section className="hub-section">
             <div className="hub-empty-state">
               <CalendarCheck size={22} />

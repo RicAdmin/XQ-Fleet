@@ -2864,3 +2864,135 @@ select.field-input {
   text-align: center;
   margin: 1rem 0 0;
 }
+
+/* ─── Maintenance Hub ──────────────────────────────────────────────────────── */
+
+.maint-hub {
+  padding: 1.5rem;
+  max-width: 64rem;
+  margin: 0 auto;
+}
+
+.maint-hub-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ─── Maintenance event table ─────────────────────────────────────────────── */
+
+.maint-event-table {
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  font-size: 0.82rem;
+}
+
+.maint-event-table-header {
+  display: grid;
+  grid-template-columns: 6rem 6rem 8rem 1fr 5.5rem 4.5rem 4rem;
+  gap: 0.5rem;
+  padding: 0.55rem 0.75rem;
+  background: var(--surface-alt, rgba(23,58,64,0.04));
+  border-bottom: 1px solid var(--line);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sea-ink-soft);
+}
+
+.maint-event-row {
+  display: grid;
+  grid-template-columns: 6rem 6rem 8rem 1fr 5.5rem 4.5rem 4rem;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid var(--line);
+  transition: background 0.12s ease;
+}
+
+.maint-event-row:last-child {
+  border-bottom: none;
+}
+
+.maint-event-row:hover {
+  background: rgba(23, 58, 64, 0.03);
+}
+
+/* 6-col variant for hub (no action column) */
+.maint-event-table-header.six-col,
+.maint-event-row.six-col {
+  grid-template-columns: 6rem 7rem 8rem 1fr 5.5rem 4.5rem;
+}
+
+/* ─── Maintenance status badges ───────────────────────────────────────────── */
+
+.maint-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.maint-status-badge--open {
+  background: rgba(232, 160, 48, 0.15);
+  color: #7a5010;
+  border: 1px solid rgba(232, 160, 48, 0.35);
+}
+
+.maint-status-badge--completed {
+  background: rgba(58, 171, 106, 0.12);
+  color: #185a30;
+  border: 1px solid rgba(58, 171, 106, 0.25);
+}
+
+/* ─── Service config cards ────────────────────────────────────────────────── */
+
+.maint-config-card {
+  padding: 0.75rem 1rem;
+  border-radius: 0.6rem;
+  background: rgba(23, 58, 64, 0.03);
+  border: 1px solid var(--line);
+}
+
+.maint-config-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sea-ink-soft);
+  margin-bottom: 0.25rem;
+}
+
+.maint-config-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--sea-ink);
+}
+
+.maint-config-ref {
+  font-size: 0.72rem;
+  color: var(--sea-ink-soft);
+  margin-top: 0.15rem;
+}
+
+/* ─── Type badge (inline event type chip) ────────────────────────────────── */
+
+.maint-type-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(23, 58, 64, 0.07);
+  color: var(--sea-ink);
+}

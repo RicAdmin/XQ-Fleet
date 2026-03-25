@@ -13,6 +13,7 @@ import {
   Menu,
   Settings,
   Users,
+  Wrench,
 } from 'lucide-react'
 
 import { authClient } from '#/lib/auth-client'
@@ -27,6 +28,7 @@ type NavLinkTo =
   | '/admin/reports'
   | '/app/customers'
   | '/app/rentals'
+  | '/app/maintenance'
 
 type NavSectionItem =
   | {
@@ -78,6 +80,15 @@ const NAV_SECTIONS: NavSection[] = [
         staffTo: '/app/customers',
         icon: <Users size={16} />,
         exact: false,
+      },
+      {
+        type: 'link',
+        label: 'Maintenance',
+        to: '/admin/cars',
+        staffTo: '/app/maintenance',
+        icon: <Wrench size={16} />,
+        exact: false,
+        ownerOnly: false,
       },
       { type: 'link', label: 'Reports', icon: <BarChart3 size={16} />, to: '/admin/reports', exact: false, ownerOnly: true },
     ],

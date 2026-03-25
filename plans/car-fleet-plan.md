@@ -14,7 +14,7 @@
 | 6 | Reporting | ✅ Done |
 | 7 | Document Generation | ✅ Done |
 | 8 | Customer Portal — Browse & Car Photos | ✅ Done |
-| 9 | Customer Portal — Accounts & Booking | 🔄 In progress |
+| 9 | Customer Portal — Accounts & Booking | ✅ Done |
 | 10 | Online Payments — iPay88 | 🔲 Not started |
 | 11 | Maintenance Lifecycle | 🔲 Not started |
 
