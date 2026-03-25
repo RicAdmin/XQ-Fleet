@@ -109,3 +109,42 @@ Dynamic imports ensure Vite treats these modules as server-only and never includ
 **Decision:** Rental agreements can be generated as soon as the rental is active (vehicle handed over). Invoices are only available once the rental is closed (vehicle returned).
 
 **Reason:** The agreement is a contract that exists from handover. The invoice finalises billing details (actual return date, final amounts) which are only confirmed on close.
+
+---
+
+## Stage 8 — Customer Portal: Browse & Car Photos
+
+### R2 upload flow: presigned PUT URL via server function
+**Decision:** Upload flow uses `generatePresignedUrl` (server function) → browser PUTs file directly to R2 → `saveCarPhoto` (server function) writes the DB row.
+
+**Reason:** Avoids routing large binary payloads through the TanStack Start server. R2 presigned PUT URLs are single-use and expire after 15 minutes, keeping uploads secure without streaming through our server.
+
+### First uploaded photo auto-set as cover
+**Decision:** In `saveCarPhoto`, if no other photos exist for the car, `isCover` is set to `true` automatically.
+
+**Reason:** Ensures every car with at least one photo always has a designated cover photo for the landing page grid, without requiring a separate user action.
+
+### `notInArray` guard for date availability filter
+**Decision:** In `filterPublicCars`, the `notInArray(cars.id, conflictingIds)` condition is only appended when `conflictingIds.length > 0`.
+
+**Reason:** An empty `NOT IN ()` is invalid SQL in PostgreSQL and would throw a runtime error. The guard skips the condition entirely when there are no conflicts, returning all available cars.
+
+### `deleteCarPhoto` best-effort R2 deletion
+**Decision:** R2 object deletion errors are caught and logged but do not bubble up; the DB row is deleted regardless.
+
+**Reason:** The DB row is the source of truth for what the app displays. A stale R2 object that is unreachable from the app is acceptable. Failing the entire operation because R2 is temporarily unreachable would degrade the admin UX unnecessarily.
+
+### routeTree.gen.ts: `/cars/$carId` registered as root-level child
+**Decision:** `CarsCarIdRoute` uses `getParentRoute: () => rootRouteImport` (not `AdminRoute` or `AppRoute`).
+
+**Reason:** The public car detail page is a top-level public route, not nested under the admin or customer app. It must be accessible without any auth guard.
+
+### Landing page hero uses `PublicPageShell` with `className=""`
+**Decision:** The `className` prop on `PublicPageShell` is set to `""` on the index route so the `<main>` renders with no padding or max-width. Individual sections (hero, browse) manage their own layout.
+
+**Reason:** The hero section needs to be full-bleed (edge-to-edge). Overriding the default `page-wrap px-4 pb-12 pt-10` class via the `className` prop avoids adding wrapper divs or negative margins.
+
+### Amber (#b07a1a / #e8b84a dark) for price display
+**Decision:** Daily rate figures use a warm amber colour distinct from the teal brand palette.
+
+**Reason:** Price is a key decision-making signal. A contrasting warm accent draws the eye to the rate without competing with the teal/green brand colours used for interactive elements.

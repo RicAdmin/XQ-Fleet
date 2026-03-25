@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
-import { and, desc, eq, ne, or } from 'drizzle-orm'
+import { and, desc, eq, ne, or, sql } from 'drizzle-orm'
 
-import { cars, rentals } from '#/db/schema'
+import { carPhotos, cars, rentals } from '#/db/schema'
 import type { CarCategory, CarColor } from '#/db/schema'
 import { requireRole } from '#/lib/auth-functions'
 
@@ -221,4 +221,161 @@ export const retireCar = createServerFn({ method: 'POST' })
 
     if (!result[0]) throw new Error('Vehicle not found.')
     return result[0]
+  })
+
+// ─── Car Photo Server Functions ───────────────────────────────────────────────
+
+export type CarPhotoRow = {
+  id: string
+  carId: string
+  url: string
+  sortOrder: number
+  isCover: boolean
+  createdAt: Date
+}
+
+type GetCarPhotosInput = { carId: string }
+
+export const getCarPhotos = createServerFn({ method: 'GET' })
+  .inputValidator((input: GetCarPhotosInput) => input)
+  .handler(async ({ data }): Promise<CarPhotoRow[]> => {
+    await requireRole(['owner', 'staff'])
+    const { db } = await import('#/db')
+    return db
+      .select()
+      .from(carPhotos)
+      .where(eq(carPhotos.carId, data.carId))
+      .orderBy(carPhotos.sortOrder)
+  })
+
+type GeneratePresignedUrlInput = {
+  carId: string
+  fileName: string
+  contentType: string
+}
+
+export const generatePresignedUrl = createServerFn({ method: 'POST' })
+  .inputValidator((input: GeneratePresignedUrlInput) => input)
+  .handler(async ({ data }) => {
+    await requireRole(['owner'])
+    const { db } = await import('#/db')
+    const [car] = await db.select({ id: cars.id }).from(cars).where(eq(cars.id, data.carId)).limit(1)
+    if (!car) throw new Error('Vehicle not found.')
+
+    const { getPresignedPutUrl, getPublicUrl } = await import('#/integrations/cloudflare-r2')
+    const key = `cars/${data.carId}/${Date.now()}-${data.fileName.replace(/[^a-zA-Z0-9._-]/g, '_')}`
+    const presignedUrl = await getPresignedPutUrl(key, data.contentType)
+    return { presignedUrl, key, publicUrl: getPublicUrl(key) }
+  })
+
+type SaveCarPhotoInput = {
+  carId: string
+  url: string
+  key: string
+}
+
+export const saveCarPhoto = createServerFn({ method: 'POST' })
+  .inputValidator((input: SaveCarPhotoInput) => input)
+  .handler(async ({ data }): Promise<CarPhotoRow> => {
+    await requireRole(['owner'])
+    const { db } = await import('#/db')
+
+    const [maxRow] = await db
+      .select({ max: sql<number>`COALESCE(MAX(${carPhotos.sortOrder}), -1)` })
+      .from(carPhotos)
+      .where(eq(carPhotos.carId, data.carId))
+
+    const nextOrder = (maxRow?.max ?? -1) + 1
+
+    // First photo automatically becomes cover
+    const [existingCount] = await db
+      .select({ count: sql<number>`COUNT(*)::int` })
+      .from(carPhotos)
+      .where(eq(carPhotos.carId, data.carId))
+    const isFirst = (existingCount?.count ?? 0) === 0
+
+    const [result] = await db
+      .insert(carPhotos)
+      .values({ carId: data.carId, url: data.url, sortOrder: nextOrder, isCover: isFirst })
+      .returning()
+
+    if (!result) throw new Error('Failed to save photo.')
+    return result
+  })
+
+type ReorderPhotosInput = {
+  carId: string
+  photoIds: string[]
+}
+
+export const reorderPhotos = createServerFn({ method: 'POST' })
+  .inputValidator((input: ReorderPhotosInput) => input)
+  .handler(async ({ data }) => {
+    await requireRole(['owner'])
+    const { db } = await import('#/db')
+    await Promise.all(
+      data.photoIds.map((photoId, index) =>
+        db
+          .update(carPhotos)
+          .set({ sortOrder: index })
+          .where(and(eq(carPhotos.id, photoId), eq(carPhotos.carId, data.carId))),
+      ),
+    )
+    return { success: true }
+  })
+
+type SetCoverPhotoInput = {
+  carId: string
+  photoId: string
+}
+
+export const setCoverPhoto = createServerFn({ method: 'POST' })
+  .inputValidator((input: SetCoverPhotoInput) => input)
+  .handler(async ({ data }): Promise<CarPhotoRow> => {
+    await requireRole(['owner'])
+    const { db } = await import('#/db')
+    await db.update(carPhotos).set({ isCover: false }).where(eq(carPhotos.carId, data.carId))
+    const [result] = await db
+      .update(carPhotos)
+      .set({ isCover: true })
+      .where(and(eq(carPhotos.id, data.photoId), eq(carPhotos.carId, data.carId)))
+      .returning()
+    if (!result) throw new Error('Photo not found.')
+    return result
+  })
+
+type DeleteCarPhotoInput = {
+  carId: string
+  photoId: string
+}
+
+export const deleteCarPhoto = createServerFn({ method: 'POST' })
+  .inputValidator((input: DeleteCarPhotoInput) => input)
+  .handler(async ({ data }) => {
+    await requireRole(['owner'])
+    const { db } = await import('#/db')
+
+    const [photo] = await db
+      .select({ url: carPhotos.url })
+      .from(carPhotos)
+      .where(and(eq(carPhotos.id, data.photoId), eq(carPhotos.carId, data.carId)))
+      .limit(1)
+
+    if (!photo) throw new Error('Photo not found.')
+
+    await db
+      .delete(carPhotos)
+      .where(and(eq(carPhotos.id, data.photoId), eq(carPhotos.carId, data.carId)))
+
+    // Best-effort R2 deletion (URL contains the key after R2_PUBLIC_URL/)
+    try {
+      const { deleteR2Object } = await import('#/integrations/cloudflare-r2')
+      const publicBase = process.env.R2_PUBLIC_URL ?? ''
+      const key = photo.url.startsWith(publicBase) ? photo.url.slice(publicBase.length + 1) : null
+      if (key) await deleteR2Object(key)
+    } catch {
+      // Non-fatal: DB row is already deleted
+    }
+
+    return { success: true }
   })

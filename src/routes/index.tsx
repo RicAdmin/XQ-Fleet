@@ -1,61 +1,238 @@
+import { useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { ArrowRight, Building2, KeyRound, ShieldCheck } from 'lucide-react'
+import { Car, ChevronDown, MapPin, SlidersHorizontal } from 'lucide-react'
 
 import PublicPageShell from '#/components/shells/PublicPageShell'
+import { filterPublicCars, getPublicCars, type PublicCarRow } from '#/lib/portal-functions'
 
-export const Route = createFileRoute('/')({ component: App })
+export const Route = createFileRoute('/')({
+  beforeLoad: async () => {
+    const cars = await getPublicCars()
+    return { cars }
+  },
+  component: LandingPage,
+})
 
-function App() {
+const CATEGORIES = [
+  { value: 'all', label: 'All vehicles', emoji: '🚗' },
+  { value: 'economy', label: 'Economy', emoji: '🚙' },
+  { value: 'mpv', label: 'MPV', emoji: '🚐' },
+  { value: 'suv', label: 'SUV', emoji: '🛻' },
+  { value: 'other', label: 'Other', emoji: '🚕' },
+] as const
+
+function formatMYR(sen: number) {
+  return `RM ${Math.round(sen / 100).toLocaleString()}`
+}
+
+function estimateDays(start: string, end: string) {
+  if (!start || !end) return null
+  const ms = new Date(end).getTime() - new Date(start).getTime()
+  return ms > 0 ? Math.ceil(ms / 86_400_000) : null
+}
+
+function LandingPage() {
+  const { cars: initialCars } = Route.useRouteContext() as { cars: PublicCarRow[] }
+
+  const [cars, setCars] = useState<PublicCarRow[]>(initialCars)
+  const [category, setCategory] = useState('all')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [filtering, setFiltering] = useState(false)
+  const [filtered, setFiltered] = useState(false)
+
+  const today = new Date().toISOString().slice(0, 10)
+  const estimatedDays = estimateDays(startDate, endDate)
+
+  async function search() {
+    setFiltering(true)
+    try {
+      const results = await filterPublicCars({
+        data: {
+          category: category === 'all' ? undefined : category,
+          startDate: startDate || undefined,
+          endDate: endDate || undefined,
+        },
+      })
+      setCars(results)
+      setFiltered(true)
+    } finally {
+      setFiltering(false)
+    }
+  }
+
+  function reset() {
+    setCategory('all')
+    setStartDate('')
+    setEndDate('')
+    setCars(initialCars)
+    setFiltered(false)
+  }
+
   return (
-    <PublicPageShell>
-      <section className="hero-grid rise-in">
-        <div className="hero-copy island-shell rounded-[2rem] px-6 py-10 sm:px-10 sm:py-12">
-          <p className="island-kicker mb-3">Stage 1 foundation</p>
-          <h1 className="display-title mb-5 text-4xl font-bold tracking-tight text-[var(--sea-ink)] sm:text-6xl">
-            Log in fast. Route people to the right workspace. Keep access under control.
-          </h1>
-          <p className="mb-8 max-w-2xl text-base leading-8 text-[var(--sea-ink-soft)] sm:text-lg">
-            XQ Car Fleet is now set up to separate owner, staff, and customer access with a cleaner public entry, an internal login, and protected proof pages for each role.
+    <PublicPageShell className="">
+      {/* ── Hero ─────────────────────────────────────────── */}
+      <section className="portal-hero">
+        <div className="portal-hero-inner page-wrap px-4">
+          <p className="portal-hero-kicker">
+            <MapPin size={11} strokeWidth={2.5} />
+            Langkawi Island, Malaysia
           </p>
-          <div className="flex flex-wrap gap-3">
-            <Link to="/login" className="button-primary">
-              Customer portal
-              <ArrowRight size={16} />
-            </Link>
-            <Link to="/internal/login" className="button-secondary">
-              Staff and owner login
-            </Link>
-          </div>
+          <h1 className="portal-hero-title">
+            Your keys to<br />
+            <em>the island.</em>
+          </h1>
+          <p className="portal-hero-sub">
+            Well-maintained cars ready for pickup. Browse our fleet and find the perfect ride.
+          </p>
+          <a href="#browse" className="portal-hero-cta">
+            Explore vehicles
+            <ChevronDown size={16} strokeWidth={2.5} />
+          </a>
         </div>
+        <div className="portal-hero-arc" aria-hidden="true" />
+      </section>
 
-        <div className="grid gap-4">
-          {[
-            {
-              icon: KeyRound,
-              title: 'Customer access',
-              description: 'Simple sign-up and sign-in for customer accounts with their own protected account route.',
-            },
-            {
-              icon: Building2,
-              title: 'Internal access',
-              description: 'Owners and staff use a separate internal login so operational access stays distinct from the public portal.',
-            },
-            {
-              icon: ShieldCheck,
-              title: 'Role-aware routing',
-              description: 'Protected routes redirect by role so people land in the right area instead of guessing where to go.',
-            },
-          ].map(({ icon: Icon, title, description }) => (
-            <article key={title} className="feature-card rounded-[1.7rem] p-5">
-              <div className="mb-4 inline-flex rounded-2xl border border-[var(--line)] bg-white/70 p-3 text-[var(--lagoon-deep)]">
-                <Icon size={20} />
+      {/* ── Browse ───────────────────────────────────────── */}
+      <section id="browse" className="page-wrap px-4 py-10">
+        <div className="portal-layout">
+
+          {/* Sidebar */}
+          <aside className="portal-sidebar">
+            <div className="portal-filter-card">
+              <div className="portal-filter-title">
+                <SlidersHorizontal size={14} strokeWidth={2.5} />
+                Search
               </div>
-              <h2 className="mb-2 text-lg font-semibold text-[var(--sea-ink)]">{title}</h2>
-              <p className="m-0 text-sm leading-7 text-[var(--sea-ink-soft)]">{description}</p>
-            </article>
-          ))}
+
+              <div className="portal-filter-section">
+                <p className="portal-filter-label">Category</p>
+                <div className="portal-cat-grid">
+                  {CATEGORIES.map(({ value, label, emoji }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setCategory(value)}
+                      className={`portal-cat-btn${category === value ? ' is-active' : ''}`}
+                    >
+                      <span className="portal-cat-emoji">{emoji}</span>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="portal-filter-section">
+                <p className="portal-filter-label">Pickup date</p>
+                <input
+                  type="date"
+                  value={startDate}
+                  min={today}
+                  onChange={(e) => {
+                    setStartDate(e.target.value)
+                    if (endDate && e.target.value > endDate) setEndDate('')
+                  }}
+                  className="portal-date-input"
+                />
+              </div>
+
+              <div className="portal-filter-section">
+                <p className="portal-filter-label">Return date</p>
+                <input
+                  type="date"
+                  value={endDate}
+                  min={startDate || today}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="portal-date-input"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={search}
+                disabled={filtering}
+                className="button-primary w-full justify-center"
+              >
+                {filtering ? 'Searching…' : 'Find available cars'}
+              </button>
+
+              {filtered && (
+                <button type="button" onClick={reset} className="portal-clear-btn">
+                  Clear search
+                </button>
+              )}
+            </div>
+          </aside>
+
+          {/* Results */}
+          <main>
+            <div className="portal-results-bar">
+              <span className="portal-results-count">
+                <strong>{cars.length}</strong>{' '}
+                {cars.length === 1 ? 'vehicle' : 'vehicles'}
+                {filtered && startDate && endDate
+                  ? ' available for your dates'
+                  : ' in fleet'}
+              </span>
+              {estimatedDays && (
+                <span className="portal-results-days">
+                  {estimatedDays}-day rental
+                </span>
+              )}
+            </div>
+
+            {cars.length === 0 ? (
+              <div className="portal-empty">
+                <p className="portal-empty-icon">🔍</p>
+                <p className="portal-empty-title">No vehicles found</p>
+                <p className="portal-empty-sub">Try different dates or remove category filters.</p>
+                <button type="button" onClick={reset} className="button-secondary">
+                  Clear search
+                </button>
+              </div>
+            ) : (
+              <div className="portal-grid">
+                {cars.map((car) => (
+                  <CarCard key={car.id} car={car} days={estimatedDays} />
+                ))}
+              </div>
+            )}
+          </main>
         </div>
       </section>
     </PublicPageShell>
+  )
+}
+
+function CarCard({ car, days }: { car: PublicCarRow; days: number | null }) {
+  return (
+    <Link to="/cars/$carId" params={{ carId: car.id }} className="portal-car-card">
+      <div className="portal-car-photo">
+        {car.coverPhotoUrl
+          ? <img src={car.coverPhotoUrl} alt={`${car.make} ${car.model}`} className="portal-car-img" />
+          : (
+            <div className="portal-car-no-photo">
+              <Car size={28} />
+            </div>
+          )}
+        <span className="portal-car-badge">{car.category}</span>
+      </div>
+      <div className="portal-car-body">
+        <p className="portal-car-year">{car.year}</p>
+        <h3 className="portal-car-name">{car.make} {car.model}</h3>
+        <div className="portal-car-pricing">
+          <span className="portal-car-rate">
+            {formatMYR(car.dailyRateSen)}
+            <span className="portal-car-unit">/day</span>
+          </span>
+          {days && (
+            <span className="portal-car-est">
+              est. {formatMYR(car.dailyRateSen * days)}
+            </span>
+          )}
+        </div>
+        <p className="portal-car-link">View details →</p>
+      </div>
+    </Link>
   )
 }

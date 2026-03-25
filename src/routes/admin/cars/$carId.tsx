@@ -4,15 +4,17 @@ import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 import { ArrowLeft, Pencil, X } from 'lucide-react'
 
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
+import { CarPhotoManager } from '#/components/cars/CarPhotoManager'
 import { StatusBadge } from '#/components/ui/StatusBadge'
 import type { CarCategory, CarColor, CarStatus } from '#/db/schema'
-import { getCarById, updateCar } from '#/lib/car-functions'
+import { getCarById, getCarPhotos, updateCar } from '#/lib/car-functions'
 
 export const Route = createFileRoute('/admin/cars/$carId')({
   beforeLoad: async ({ params }) => {
     const car = await getCarById({ data: { carId: params.carId } })
     if (!car) throw notFound()
-    return { car }
+    const photos = await getCarPhotos({ data: { carId: params.carId } })
+    return { car, photos }
   },
   component: CarDetailPage,
 })
@@ -99,9 +101,10 @@ function carToForm(car: CarRow): CarFormData {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 function CarDetailPage() {
-  const { session, car: initialCar } = Route.useRouteContext() as unknown as {
+  const { session, car: initialCar, photos: initialPhotos } = Route.useRouteContext() as unknown as {
     session: { user: { name: string; email: string; role: string } }
     car: CarRow
+    photos: import('#/lib/car-functions').CarPhotoRow[]
   }
 
   const isOwner = session.user.role === 'owner'
@@ -244,6 +247,13 @@ function CarDetailPage() {
           </div>
         </article>
       </div>
+
+      {/* Photos */}
+      {isOwner && (
+        <section className="workspace-panel island-shell mt-4 p-5">
+          <CarPhotoManager carId={car.id} initialPhotos={initialPhotos} />
+        </section>
+      )}
 
       {/* ── Edit form overlay ── */}
       {isOwner && editOpen && (
