@@ -16,22 +16,24 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as InternalLoginRouteImport } from './routes/internal/login'
-import { Route as AdminCarsIndexRouteImport } from './routes/admin/cars/index'
-import { Route as AppCustomersIndexRouteImport } from './routes/app/customers/index'
-import { Route as AdminCustomersIndexRouteImport } from './routes/admin/customers/index'
-import { Route as InternalInviteTokenRouteImport } from './routes/internal/invite/$token'
-import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as AdminCarsCarIdRouteImport } from './routes/admin/cars/$carId'
-import { Route as AppCustomersCustomerIdRouteImport } from './routes/app/customers/$customerId'
-import { Route as AdminCustomersCustomerIdRouteImport } from './routes/admin/customers/$customerId'
 import { Route as AppRentalsIndexRouteImport } from './routes/app/rentals/index'
-import { Route as AdminRentalsIndexRouteImport } from './routes/admin/rentals/index'
-import { Route as AppRentalsRentalIdRouteImport } from './routes/app/rentals/$rentalId'
-import { Route as AdminRentalsRentalIdRouteImport } from './routes/admin/rentals/$rentalId'
+import { Route as AppCustomersIndexRouteImport } from './routes/app/customers/index'
 import { Route as AdminReportsIndexRouteImport } from './routes/admin/reports/index'
+import { Route as AdminRentalsIndexRouteImport } from './routes/admin/rentals/index'
+import { Route as AdminCustomersIndexRouteImport } from './routes/admin/customers/index'
+import { Route as AdminCarsIndexRouteImport } from './routes/admin/cars/index'
+import { Route as InternalInviteTokenRouteImport } from './routes/internal/invite/$token'
+import { Route as AppRentalsRentalIdRouteImport } from './routes/app/rentals/$rentalId'
+import { Route as AppCustomersCustomerIdRouteImport } from './routes/app/customers/$customerId'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiDocumentsAgreementRentalIdRouteImport } from './routes/api/documents/agreement/$rentalId'
+import { Route as ApiDocumentsInvoiceRentalIdRouteImport } from './routes/api/documents/invoice/$rentalId'
+import { Route as AdminRentalsRentalIdRouteImport } from './routes/admin/rentals/$rentalId'
+import { Route as AdminCustomersCustomerIdRouteImport } from './routes/admin/customers/$customerId'
+import { Route as AdminCarsCarIdRouteImport } from './routes/admin/cars/$carId'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -68,34 +70,49 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const InternalLoginRoute = InternalLoginRouteImport.update({
   id: '/internal/login',
   path: '/internal/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminCarsIndexRoute = AdminCarsIndexRouteImport.update({
-  id: '/cars/',
-  path: '/cars/',
-  getParentRoute: () => AdminRoute,
+const AppRentalsIndexRoute = AppRentalsIndexRouteImport.update({
+  id: '/rentals/',
+  path: '/rentals/',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppCustomersIndexRoute = AppCustomersIndexRouteImport.update({
   id: '/customers/',
   path: '/customers/',
   getParentRoute: () => AppRoute,
 } as any)
+const AdminReportsIndexRoute = AdminReportsIndexRouteImport.update({
+  id: '/reports/',
+  path: '/reports/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRentalsIndexRoute = AdminRentalsIndexRouteImport.update({
+  id: '/rentals/',
+  path: '/rentals/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCustomersIndexRoute = AdminCustomersIndexRouteImport.update({
   id: '/customers/',
   path: '/customers/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCarsIndexRoute = AdminCarsIndexRouteImport.update({
+  id: '/cars/',
+  path: '/cars/',
   getParentRoute: () => AdminRoute,
 } as any)
 const InternalInviteTokenRoute = InternalInviteTokenRouteImport.update({
@@ -103,49 +120,45 @@ const InternalInviteTokenRoute = InternalInviteTokenRouteImport.update({
   path: '/internal/invite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
-  id: '/api/auth/$',
-  path: '/api/auth/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminCarsCarIdRoute = AdminCarsCarIdRouteImport.update({
-  id: '/cars/$carId',
-  path: '/cars/$carId',
-  getParentRoute: () => AdminRoute,
+const AppRentalsRentalIdRoute = AppRentalsRentalIdRouteImport.update({
+  id: '/rentals/$rentalId',
+  path: '/rentals/$rentalId',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppCustomersCustomerIdRoute = AppCustomersCustomerIdRouteImport.update({
   id: '/customers/$customerId',
   path: '/customers/$customerId',
   getParentRoute: () => AppRoute,
 } as any)
-const AdminCustomersCustomerIdRoute = AdminCustomersCustomerIdRouteImport.update({
-  id: '/customers/$customerId',
-  path: '/customers/$customerId',
-  getParentRoute: () => AdminRoute,
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AppRentalsIndexRoute = AppRentalsIndexRouteImport.update({
-  id: '/rentals/',
-  path: '/rentals/',
-  getParentRoute: () => AppRoute,
+const ApiDocumentsAgreementRentalIdRoute = ApiDocumentsAgreementRentalIdRouteImport.update({
+  id: '/api/documents/agreement/$rentalId',
+  path: '/api/documents/agreement/$rentalId',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRentalsIndexRoute = AdminRentalsIndexRouteImport.update({
-  id: '/rentals/',
-  path: '/rentals/',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AppRentalsRentalIdRoute = AppRentalsRentalIdRouteImport.update({
-  id: '/rentals/$rentalId',
-  path: '/rentals/$rentalId',
-  getParentRoute: () => AppRoute,
+const ApiDocumentsInvoiceRentalIdRoute = ApiDocumentsInvoiceRentalIdRouteImport.update({
+  id: '/api/documents/invoice/$rentalId',
+  path: '/api/documents/invoice/$rentalId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRentalsRentalIdRoute = AdminRentalsRentalIdRouteImport.update({
   id: '/rentals/$rentalId',
   path: '/rentals/$rentalId',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminReportsIndexRoute = AdminReportsIndexRouteImport.update({
-  id: '/reports/',
-  path: '/reports/',
+const AdminCustomersCustomerIdRoute =
+  AdminCustomersCustomerIdRouteImport.update({
+    id: '/customers/$customerId',
+    path: '/customers/$customerId',
+    getParentRoute: () => AdminRoute,
+  } as any)
+const AdminCarsCarIdRoute = AdminCarsCarIdRouteImport.update({
+  id: '/cars/$carId',
+  path: '/cars/$carId',
   getParentRoute: () => AdminRoute,
 } as any)
 
@@ -162,41 +175,44 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
   '/admin/cars/$carId': typeof AdminCarsCarIdRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
-  '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
+  '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/documents/agreement/$rentalId': typeof ApiDocumentsAgreementRentalIdRoute
+  '/api/documents/invoice/$rentalId': typeof ApiDocumentsInvoiceRentalIdRoute
+  '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
+  '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
   '/internal/invite/$token': typeof InternalInviteTokenRoute
   '/admin/cars/': typeof AdminCarsIndexRoute
   '/admin/customers/': typeof AdminCustomersIndexRoute
-  '/app/customers/': typeof AppCustomersIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
-  '/app/rentals/': typeof AppRentalsIndexRoute
-  '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
-  '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
   '/admin/reports/': typeof AdminReportsIndexRoute
+  '/app/customers/': typeof AppCustomersIndexRoute
+  '/app/rentals/': typeof AppRentalsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
-  '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/internal/login': typeof InternalLoginRoute
   '/admin': typeof AdminIndexRoute
-  '/app/': typeof AppIndexRoute
+  '/app': typeof AppIndexRoute
   '/admin/cars/$carId': typeof AdminCarsCarIdRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
-  '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
+  '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/documents/agreement/$rentalId': typeof ApiDocumentsAgreementRentalIdRoute
+  '/api/documents/invoice/$rentalId': typeof ApiDocumentsInvoiceRentalIdRoute
+  '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
+  '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
   '/internal/invite/$token': typeof InternalInviteTokenRoute
   '/admin/cars': typeof AdminCarsIndexRoute
   '/admin/customers': typeof AdminCustomersIndexRoute
-  '/app/customers': typeof AppCustomersIndexRoute
   '/admin/rentals': typeof AdminRentalsIndexRoute
-  '/app/rentals': typeof AppRentalsIndexRoute
-  '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
-  '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
   '/admin/reports': typeof AdminReportsIndexRoute
+  '/app/customers': typeof AppCustomersIndexRoute
+  '/app/rentals': typeof AppRentalsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -212,17 +228,19 @@ export interface FileRoutesById {
   '/app/': typeof AppIndexRoute
   '/admin/cars/$carId': typeof AdminCarsCarIdRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
-  '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
+  '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/documents/agreement/$rentalId': typeof ApiDocumentsAgreementRentalIdRoute
+  '/api/documents/invoice/$rentalId': typeof ApiDocumentsInvoiceRentalIdRoute
+  '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
+  '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
   '/internal/invite/$token': typeof InternalInviteTokenRoute
   '/admin/cars/': typeof AdminCarsIndexRoute
   '/admin/customers/': typeof AdminCustomersIndexRoute
-  '/app/customers/': typeof AppCustomersIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
-  '/app/rentals/': typeof AppRentalsIndexRoute
-  '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
-  '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
   '/admin/reports/': typeof AdminReportsIndexRoute
+  '/app/customers/': typeof AppCustomersIndexRoute
+  '/app/rentals/': typeof AppRentalsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -239,41 +257,44 @@ export interface FileRouteTypes {
     | '/app/'
     | '/admin/cars/$carId'
     | '/admin/customers/$customerId'
-    | '/app/customers/$customerId'
+    | '/admin/rentals/$rentalId'
     | '/api/auth/$'
+    | '/api/documents/agreement/$rentalId'
+    | '/api/documents/invoice/$rentalId'
+    | '/app/customers/$customerId'
+    | '/app/rentals/$rentalId'
     | '/internal/invite/$token'
     | '/admin/cars/'
     | '/admin/customers/'
-    | '/app/customers/'
     | '/admin/rentals/'
-    | '/app/rentals/'
-    | '/admin/rentals/$rentalId'
-    | '/app/rentals/$rentalId'
     | '/admin/reports/'
+    | '/app/customers/'
+    | '/app/rentals/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/account'
-    | '/app'
     | '/login'
     | '/register'
     | '/internal/login'
     | '/admin'
-    | '/app/'
+    | '/app'
     | '/admin/cars/$carId'
     | '/admin/customers/$customerId'
-    | '/app/customers/$customerId'
+    | '/admin/rentals/$rentalId'
     | '/api/auth/$'
+    | '/api/documents/agreement/$rentalId'
+    | '/api/documents/invoice/$rentalId'
+    | '/app/customers/$customerId'
+    | '/app/rentals/$rentalId'
     | '/internal/invite/$token'
     | '/admin/cars'
     | '/admin/customers'
-    | '/app/customers'
     | '/admin/rentals'
-    | '/app/rentals'
-    | '/admin/rentals/$rentalId'
-    | '/app/rentals/$rentalId'
     | '/admin/reports'
+    | '/app/customers'
+    | '/app/rentals'
   id:
     | '__root__'
     | '/'
@@ -288,17 +309,19 @@ export interface FileRouteTypes {
     | '/app/'
     | '/admin/cars/$carId'
     | '/admin/customers/$customerId'
-    | '/app/customers/$customerId'
+    | '/admin/rentals/$rentalId'
     | '/api/auth/$'
-    | '/internal/invoke/$token'
+    | '/api/documents/agreement/$rentalId'
+    | '/api/documents/invoice/$rentalId'
+    | '/app/customers/$customerId'
+    | '/app/rentals/$rentalId'
+    | '/internal/invite/$token'
     | '/admin/cars/'
     | '/admin/customers/'
-    | '/app/customers/'
     | '/admin/rentals/'
-    | '/app/rentals/'
-    | '/admin/rentals/$rentalId'
-    | '/app/rentals/$rentalId'
     | '/admin/reports/'
+    | '/app/customers/'
+    | '/app/rentals/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -311,6 +334,8 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   InternalLoginRoute: typeof InternalLoginRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiDocumentsAgreementRentalIdRoute: typeof ApiDocumentsAgreementRentalIdRoute
+  ApiDocumentsInvoiceRentalIdRoute: typeof ApiDocumentsInvoiceRentalIdRoute
   InternalInviteTokenRoute: typeof InternalInviteTokenRoute
 }
 
@@ -365,19 +390,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/': {
-      id: '/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/app/': {
       id: '/app/'
       path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/internal/login': {
       id: '/internal/login'
@@ -386,11 +411,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InternalLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/cars/': {
-      id: '/admin/cars/'
-      path: '/cars'
-      fullPath: '/admin/cars/'
-      preLoaderRoute: typeof AdminCarsIndexRouteImport
+    '/app/rentals/': {
+      id: '/app/rentals/'
+      path: '/rentals'
+      fullPath: '/app/rentals/'
+      preLoaderRoute: typeof AppRentalsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/customers/': {
+      id: '/app/customers/'
+      path: '/customers'
+      fullPath: '/app/customers/'
+      preLoaderRoute: typeof AppCustomersIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/admin/reports/': {
+      id: '/admin/reports/'
+      path: '/reports'
+      fullPath: '/admin/reports/'
+      preLoaderRoute: typeof AdminReportsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/rentals/': {
+      id: '/admin/rentals/'
+      path: '/rentals'
+      fullPath: '/admin/rentals/'
+      preLoaderRoute: typeof AdminRentalsIndexRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/customers/': {
@@ -400,12 +446,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCustomersIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/app/customers/': {
-      id: '/app/customers/'
-      path: '/customers'
-      fullPath: '/app/customers/'
-      preLoaderRoute: typeof AppCustomersIndexRouteImport
-      parentRoute: typeof AppRoute
+    '/admin/cars/': {
+      id: '/admin/cars/'
+      path: '/cars'
+      fullPath: '/admin/cars/'
+      preLoaderRoute: typeof AdminCarsIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/internal/invite/$token': {
       id: '/internal/invite/$token'
@@ -414,6 +460,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InternalInviteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/rentals/$rentalId': {
+      id: '/app/rentals/$rentalId'
+      path: '/rentals/$rentalId'
+      fullPath: '/app/rentals/$rentalId'
+      preLoaderRoute: typeof AppRentalsRentalIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/customers/$customerId': {
+      id: '/app/customers/$customerId'
+      path: '/customers/$customerId'
+      fullPath: '/app/customers/$customerId'
+      preLoaderRoute: typeof AppCustomersCustomerIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -421,11 +481,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/cars/$carId': {
-      id: '/admin/cars/$carId'
-      path: '/cars/$carId'
-      fullPath: '/admin/cars/$carId'
-      preLoaderRoute: typeof AdminCarsCarIdRouteImport
+    '/api/documents/agreement/$rentalId': {
+      id: '/api/documents/agreement/$rentalId'
+      path: '/api/documents/agreement/$rentalId'
+      fullPath: '/api/documents/agreement/$rentalId'
+      preLoaderRoute: typeof ApiDocumentsAgreementRentalIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/documents/invoice/$rentalId': {
+      id: '/api/documents/invoice/$rentalId'
+      path: '/api/documents/invoice/$rentalId'
+      fullPath: '/api/documents/invoice/$rentalId'
+      preLoaderRoute: typeof ApiDocumentsInvoiceRentalIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/rentals/$rentalId': {
+      id: '/admin/rentals/$rentalId'
+      path: '/rentals/$rentalId'
+      fullPath: '/admin/rentals/$rentalId'
+      preLoaderRoute: typeof AdminRentalsRentalIdRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/customers/$customerId': {
@@ -435,46 +509,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCustomersCustomerIdRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/app/customers/$customerId': {
-      id: '/app/customers/$customerId'
-      path: '/customers/$customerId'
-      fullPath: '/app/customers/$customerId'
-      preLoaderRoute: typeof AppCustomersCustomerIdRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/admin/rentals/': {
-      id: '/rentals/'
-      path: '/rentals/'
-      fullPath: '/admin/rentals/'
-      preLoaderRoute: typeof AdminRentalsIndexRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/app/rentals/': {
-      id: '/rentals/'
-      path: '/rentals/'
-      fullPath: '/app/rentals/'
-      preLoaderRoute: typeof AppRentalsIndexRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/admin/rentals/$rentalId': {
-      id: '/rentals/$rentalId'
-      path: '/rentals/$rentalId'
-      fullPath: '/admin/rentals/$rentalId'
-      preLoaderRoute: typeof AdminRentalsRentalIdRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/app/rentals/$rentalId': {
-      id: '/rentals/$rentalId'
-      path: '/rentals/$rentalId'
-      fullPath: '/app/rentals/$rentalId'
-      preLoaderRoute: typeof AppRentalsRentalIdRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/admin/reports/': {
-      id: '/reports/'
-      path: '/reports/'
-      fullPath: '/admin/reports/'
-      preLoaderRoute: typeof AdminReportsIndexRouteImport
+    '/admin/cars/$carId': {
+      id: '/admin/cars/$carId'
+      path: '/cars/$carId'
+      fullPath: '/admin/cars/$carId'
+      preLoaderRoute: typeof AdminCarsCarIdRouteImport
       parentRoute: typeof AdminRoute
     }
   }
@@ -483,22 +522,22 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AdminCarsCarIdRoute: typeof AdminCarsCarIdRoute
+  AdminCustomersCustomerIdRoute: typeof AdminCustomersCustomerIdRoute
+  AdminRentalsRentalIdRoute: typeof AdminRentalsRentalIdRoute
   AdminCarsIndexRoute: typeof AdminCarsIndexRoute
   AdminCustomersIndexRoute: typeof AdminCustomersIndexRoute
-  AdminCustomersCustomerIdRoute: typeof AdminCustomersCustomerIdRoute
   AdminRentalsIndexRoute: typeof AdminRentalsIndexRoute
-  AdminRentalsRentalIdRoute: typeof AdminRentalsRentalIdRoute
   AdminReportsIndexRoute: typeof AdminReportsIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   AdminCarsCarIdRoute: AdminCarsCarIdRoute,
+  AdminCustomersCustomerIdRoute: AdminCustomersCustomerIdRoute,
+  AdminRentalsRentalIdRoute: AdminRentalsRentalIdRoute,
   AdminCarsIndexRoute: AdminCarsIndexRoute,
   AdminCustomersIndexRoute: AdminCustomersIndexRoute,
-  AdminCustomersCustomerIdRoute: AdminCustomersCustomerIdRoute,
   AdminRentalsIndexRoute: AdminRentalsIndexRoute,
-  AdminRentalsRentalIdRoute: AdminRentalsRentalIdRoute,
   AdminReportsIndexRoute: AdminReportsIndexRoute,
 }
 
@@ -506,18 +545,18 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
-  AppCustomersIndexRoute: typeof AppCustomersIndexRoute
   AppCustomersCustomerIdRoute: typeof AppCustomersCustomerIdRoute
-  AppRentalsIndexRoute: typeof AppRentalsIndexRoute
   AppRentalsRentalIdRoute: typeof AppRentalsRentalIdRoute
+  AppCustomersIndexRoute: typeof AppCustomersIndexRoute
+  AppRentalsIndexRoute: typeof AppRentalsIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppIndexRoute: AppIndexRoute,
-  AppCustomersIndexRoute: AppCustomersIndexRoute,
   AppCustomersCustomerIdRoute: AppCustomersCustomerIdRoute,
-  AppRentalsIndexRoute: AppRentalsIndexRoute,
   AppRentalsRentalIdRoute: AppRentalsRentalIdRoute,
+  AppCustomersIndexRoute: AppCustomersIndexRoute,
+  AppRentalsIndexRoute: AppRentalsIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -532,313 +571,8 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   InternalLoginRoute: InternalLoginRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
-  InternalInviteTokenRoute: InternalInviteTokenRoute,
-}
-export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
-
-
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppRoute = AppRouteImport.update({
-  id: '/app',
-  path: '/app',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AccountRoute = AccountRouteImport.update({
-  id: '/account',
-  path: '/account',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminRoute,
-} as any)
-const InternalLoginRoute = InternalLoginRouteImport.update({
-  id: '/internal/login',
-  path: '/internal/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminCarsIndexRoute = AdminCarsIndexRouteImport.update({
-  id: '/cars/',
-  path: '/cars/',
-  getParentRoute: () => AdminRoute,
-} as any)
-const InternalInviteTokenRoute = InternalInviteTokenRouteImport.update({
-  id: '/internal/invite/$token',
-  path: '/internal/invite/$token',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
-  id: '/api/auth/$',
-  path: '/api/auth/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminCarsCarIdRoute = AdminCarsCarIdRouteImport.update({
-  id: '/cars/$carId',
-  path: '/cars/$carId',
-  getParentRoute: () => AdminRoute,
-} as any)
-
-export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/account': typeof AccountRoute
-  '/admin': typeof AdminRouteWithChildren
-  '/app': typeof AppRoute
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
-  '/internal/login': typeof InternalLoginRoute
-  '/admin/': typeof AdminIndexRoute
-  '/admin/cars/$carId': typeof AdminCarsCarIdRoute
-  '/api/auth/$': typeof ApiAuthSplatRoute
-  '/internal/invite/$token': typeof InternalInviteTokenRoute
-  '/admin/cars/': typeof AdminCarsIndexRoute
-}
-export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/account': typeof AccountRoute
-  '/app': typeof AppRoute
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
-  '/internal/login': typeof InternalLoginRoute
-  '/admin': typeof AdminIndexRoute
-  '/admin/cars/$carId': typeof AdminCarsCarIdRoute
-  '/api/auth/$': typeof ApiAuthSplatRoute
-  '/internal/invite/$token': typeof InternalInviteTokenRoute
-  '/admin/cars': typeof AdminCarsIndexRoute
-}
-export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/account': typeof AccountRoute
-  '/admin': typeof AdminRouteWithChildren
-  '/app': typeof AppRoute
-  '/login': typeof LoginRoute
-  '/register': typeof RegisterRoute
-  '/internal/login': typeof InternalLoginRoute
-  '/admin/': typeof AdminIndexRoute
-  '/admin/cars/$carId': typeof AdminCarsCarIdRoute
-  '/api/auth/$': typeof ApiAuthSplatRoute
-  '/internal/invite/$token': typeof InternalInviteTokenRoute
-  '/admin/cars/': typeof AdminCarsIndexRoute
-}
-export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/about'
-    | '/account'
-    | '/admin'
-    | '/app'
-    | '/login'
-    | '/register'
-    | '/internal/login'
-    | '/admin/'
-    | '/admin/cars/$carId'
-    | '/api/auth/$'
-    | '/internal/invite/$token'
-    | '/admin/cars/'
-  fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/about'
-    | '/account'
-    | '/app'
-    | '/login'
-    | '/register'
-    | '/internal/login'
-    | '/admin'
-    | '/admin/cars/$carId'
-    | '/api/auth/$'
-    | '/internal/invite/$token'
-    | '/admin/cars'
-  id:
-    | '__root__'
-    | '/'
-    | '/about'
-    | '/account'
-    | '/admin'
-    | '/app'
-    | '/login'
-    | '/register'
-    | '/internal/login'
-    | '/admin/'
-    | '/admin/cars/$carId'
-    | '/api/auth/$'
-    | '/internal/invite/$token'
-    | '/admin/cars/'
-  fileRoutesById: FileRoutesById
-}
-export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
-  AccountRoute: typeof AccountRoute
-  AdminRoute: typeof AdminRouteWithChildren
-  AppRoute: typeof AppRoute
-  LoginRoute: typeof LoginRoute
-  RegisterRoute: typeof RegisterRoute
-  InternalLoginRoute: typeof InternalLoginRoute
-  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
-  InternalInviteTokenRoute: typeof InternalInviteTokenRoute
-}
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app': {
-      id: '/app'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof AppRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/account': {
-      id: '/account'
-      path: '/account'
-      fullPath: '/account'
-      preLoaderRoute: typeof AccountRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/': {
-      id: '/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/internal/login': {
-      id: '/internal/login'
-      path: '/internal/login'
-      fullPath: '/internal/login'
-      preLoaderRoute: typeof InternalLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/cars/': {
-      id: '/admin/cars/'
-      path: '/cars'
-      fullPath: '/admin/cars/'
-      preLoaderRoute: typeof AdminCarsIndexRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/internal/invite/$token': {
-      id: '/internal/invite/$token'
-      path: '/internal/invite/$token'
-      fullPath: '/internal/invite/$token'
-      preLoaderRoute: typeof InternalInviteTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/$': {
-      id: '/api/auth/$'
-      path: '/api/auth/$'
-      fullPath: '/api/auth/$'
-      preLoaderRoute: typeof ApiAuthSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/cars/$carId': {
-      id: '/admin/cars/$carId'
-      path: '/cars/$carId'
-      fullPath: '/admin/cars/$carId'
-      preLoaderRoute: typeof AdminCarsCarIdRouteImport
-      parentRoute: typeof AdminRoute
-    }
-  }
-}
-
-interface AdminRouteChildren {
-  AdminIndexRoute: typeof AdminIndexRoute
-  AdminCarsCarIdRoute: typeof AdminCarsCarIdRoute
-  AdminCarsIndexRoute: typeof AdminCarsIndexRoute
-}
-
-const AdminRouteChildren: AdminRouteChildren = {
-  AdminIndexRoute: AdminIndexRoute,
-  AdminCarsCarIdRoute: AdminCarsCarIdRoute,
-  AdminCarsIndexRoute: AdminCarsIndexRoute,
-}
-
-const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
-
-const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
-  AccountRoute: AccountRoute,
-  AdminRoute: AdminRouteWithChildren,
-  AppRoute: AppRoute,
-  LoginRoute: LoginRoute,
-  RegisterRoute: RegisterRoute,
-  InternalLoginRoute: InternalLoginRoute,
-  ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiDocumentsAgreementRentalIdRoute: ApiDocumentsAgreementRentalIdRoute,
+  ApiDocumentsInvoiceRentalIdRoute: ApiDocumentsInvoiceRentalIdRoute,
   InternalInviteTokenRoute: InternalInviteTokenRoute,
 }
 export const routeTree = rootRouteImport

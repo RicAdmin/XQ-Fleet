@@ -75,3 +75,37 @@ Dynamic imports ensure Vite treats these modules as server-only and never includ
 **Decision:** Dashboard data is not polled. It refreshes on navigation (TanStack `beforeLoad`).
 
 **Reason:** The fleet is small; real-time push or polling adds complexity (WebSockets / intervals) with little benefit for the target use case. Navigation-based refresh is sufficient and simpler.
+
+---
+
+## Stage 7 — Document Generation
+
+### PDF library: `@react-pdf/renderer`
+**Decision:** Use `@react-pdf/renderer` for server-side PDF generation.
+
+**Reason:** Runs in Node.js server context (no headless browser needed), outputs proper vector PDFs, and uses a React-like component model that matches the project's stack. Alternatives (Puppeteer, jsPDF) require either a browser runtime or low-level canvas APIs.
+
+### PDF delivery: inline preview + download via query param
+**Decision:** Both routes (`/api/documents/agreement/$rentalId`, `/api/documents/invoice/$rentalId`) serve the same endpoint. `?download=1` switches `Content-Disposition` from `inline` to `attachment`.
+
+**Reason:** Staff often want to preview the document first. A single endpoint avoids duplication. Browser handles rendering (PDF.js in Chromium/Firefox) when inline.
+
+### API routes are top-level `/api/documents/...`, not under `/admin/`
+**Decision:** Document routes are at `/api/documents/agreement/$rentalId` and `/api/documents/invoice/$rentalId`, outside the admin route group.
+
+**Reason:** These are raw API endpoints returning binary data — they don't render any React UI, so nesting under the `/admin` layout route would cause a layout mismatch. Access is controlled by a session check inside the handler (both owner and staff roles allowed).
+
+### Auth in API route handlers: direct `auth.api.getSession`
+**Decision:** In API route `server.handlers`, authenticate using `auth.api.getSession({ headers: request.headers })` directly rather than `requireRole` (which uses `createServerFn` + `getRequestHeaders`).
+
+**Reason:** `requireRole` relies on `createServerFn`'s server context; `request` is the raw `Request` object available in the handler. Using `request.headers` directly is simpler and avoids mixing server-function context with handler context.
+
+### Data fetched inline in API routes (not via `getRentalById`)
+**Decision:** Each document API route issues its own Drizzle query joining `rentals + cars + customers`, including `customers.address`.
+
+**Reason:** `getRentalById` (in `rental-functions.ts`) omits `customers.address` as it isn't needed for the app UI. Rather than modifying the shared function, the document routes fetch only what they need with a targeted query.
+
+### Agreement available for `active` + `closed`; invoice only for `closed`
+**Decision:** Rental agreements can be generated as soon as the rental is active (vehicle handed over). Invoices are only available once the rental is closed (vehicle returned).
+
+**Reason:** The agreement is a contract that exists from handover. The invoice finalises billing details (actual return date, final amounts) which are only confirmed on close.

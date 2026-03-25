@@ -353,6 +353,49 @@ export default function RentalDetail({
         </section>
       )}
 
+      {/* Documents */}
+      {(rental.status === 'active' || rental.status === 'closed') && (
+        <section className="workspace-panel island-shell mb-4 p-5">
+          <p className="island-kicker mb-3">Documents</p>
+          <div className="flex flex-wrap gap-3">
+            <div className="flex items-center gap-2">
+              <a
+                href={`/api/documents/agreement/${rental.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="button-secondary text-sm"
+              >
+                View agreement
+              </a>
+              <a
+                href={`/api/documents/agreement/${rental.id}?download=1`}
+                className="button-secondary text-sm"
+              >
+                ↓ Download
+              </a>
+            </div>
+            {rental.status === 'closed' && (
+              <div className="flex items-center gap-2">
+                <a
+                  href={`/api/documents/invoice/${rental.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="button-secondary text-sm"
+                >
+                  View invoice
+                </a>
+                <a
+                  href={`/api/documents/invoice/${rental.id}?download=1`}
+                  className="button-secondary text-sm"
+                >
+                  ↓ Download
+                </a>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* Cancelled notice */}
       {rental.status === 'cancelled' && (
         <section className="workspace-panel island-shell mb-4 p-4">
