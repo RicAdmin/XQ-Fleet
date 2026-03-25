@@ -193,7 +193,7 @@ function LandingPage() {
             ) : (
               <div className="portal-grid">
                 {cars.map((car) => (
-                  <CarCard key={car.id} car={car} days={estimatedDays} />
+                  <CarCard key={car.id} car={car} days={estimatedDays} startDate={startDate} endDate={endDate} />
                 ))}
               </div>
             )}
@@ -204,35 +204,49 @@ function LandingPage() {
   )
 }
 
-function CarCard({ car, days }: { car: PublicCarRow; days: number | null }) {
+function CarCard({ car, days, startDate, endDate }: { car: PublicCarRow; days: number | null; startDate: string; endDate: string }) {
   return (
-    <Link to="/cars/$carId" params={{ carId: car.id }} className="portal-car-card">
-      <div className="portal-car-photo">
-        {car.coverPhotoUrl
-          ? <img src={car.coverPhotoUrl} alt={`${car.make} ${car.model}`} className="portal-car-img" />
-          : (
-            <div className="portal-car-no-photo">
-              <Car size={28} />
-            </div>
-          )}
-        <span className="portal-car-badge">{car.category}</span>
-      </div>
-      <div className="portal-car-body">
-        <p className="portal-car-year">{car.year}</p>
-        <h3 className="portal-car-name">{car.make} {car.model}</h3>
-        <div className="portal-car-pricing">
-          <span className="portal-car-rate">
-            {formatMYR(car.dailyRateSen)}
-            <span className="portal-car-unit">/day</span>
-          </span>
-          {days && (
-            <span className="portal-car-est">
-              est. {formatMYR(car.dailyRateSen * days)}
-            </span>
-          )}
+    <div className="portal-car-card">
+      <Link to="/cars/$carId" params={{ carId: car.id }} className="portal-car-card-inner">
+        <div className="portal-car-photo">
+          {car.coverPhotoUrl
+            ? <img src={car.coverPhotoUrl} alt={`${car.make} ${car.model}`} className="portal-car-img" />
+            : (
+              <div className="portal-car-no-photo">
+                <Car size={28} />
+              </div>
+            )}
+          <span className="portal-car-badge">{car.category}</span>
         </div>
-        <p className="portal-car-link">View details →</p>
+        <div className="portal-car-body">
+          <p className="portal-car-year">{car.year}</p>
+          <h3 className="portal-car-name">{car.make} {car.model}</h3>
+          <div className="portal-car-pricing">
+            <span className="portal-car-rate">
+              {formatMYR(car.dailyRateSen)}
+              <span className="portal-car-unit">/day</span>
+            </span>
+            {days && (
+              <span className="portal-car-est">
+                est. {formatMYR(car.dailyRateSen * days)}
+              </span>
+            )}
+          </div>
+        </div>
+      </Link>
+      <div className="portal-car-actions">
+        <Link
+          to="/book/$carId"
+          params={{ carId: car.id }}
+          search={{ startDate: startDate || undefined, endDate: endDate || undefined }}
+          className="button-primary portal-car-book-btn"
+        >
+          Book
+        </Link>
+        <Link to="/cars/$carId" params={{ carId: car.id }} className="portal-car-detail-link">
+          Details →
+        </Link>
       </div>
-    </Link>
+    </div>
   )
 }

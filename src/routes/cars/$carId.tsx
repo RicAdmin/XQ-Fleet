@@ -91,23 +91,22 @@ function CarDetailPage() {
               </div>
             )}
 
-            {/* Booking stub */}
+            {/* Booking card */}
             <div className="car-detail-book-card">
               <div className="car-detail-book-header">
                 <Calendar size={16} />
                 <span>Reserve this vehicle</span>
               </div>
-              <p className="car-detail-book-sub">
-                To make a booking, please contact us directly. Our team will confirm availability and set everything up.
+              <p className="car-detail-book-rate">
+                {formatMYR(car.dailyRateSen)} <span>/ day</span>
               </p>
-              <a
-                href="https://wa.me/601234567890"
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to="/book/$carId"
+                params={{ carId: car.id }}
                 className="button-primary w-full justify-center"
               >
-                WhatsApp us to book
-              </a>
+                Book this car
+              </Link>
               <Link to="/" className="button-secondary w-full justify-center">
                 Back to fleet
               </Link>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import { Link, createFileRoute } from '@tanstack/react-router'
+import { z } from 'zod'
 
 import AuthFrame from '#/components/auth/AuthFrame'
 import PublicPageShell from '#/components/shells/PublicPageShell'
@@ -9,6 +10,7 @@ import { isAppRole } from '#/lib/auth-model'
 import { redirectAuthenticatedUser } from '#/lib/route-guards'
 
 export const Route = createFileRoute('/login')({
+  validateSearch: z.object({ returnTo: z.string().optional() }),
   beforeLoad: async () => {
     await redirectAuthenticatedUser()
   },
@@ -17,6 +19,7 @@ export const Route = createFileRoute('/login')({
 
 function CustomerLoginPage() {
   const navigate = Route.useNavigate()
+  const { returnTo } = Route.useSearch()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -53,7 +56,7 @@ function CustomerLoginPage() {
                 return
               }
 
-              await navigate({ to: '/account' })
+              await navigate({ to: (returnTo as never) ?? '/account' })
             } catch (submissionError) {
               setError(
                 submissionError instanceof Error

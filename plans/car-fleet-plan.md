@@ -9,12 +9,12 @@
 | 1 | Foundation — Auth, Roles & Schema | ✅ Done |
 | 2 | Car Inventory | ✅ Done |
 | 3 | Customer Records | ✅ Done |
-| 4 | Rental Lifecycle | 🔄 In progress |
-| 5 | Internal Dashboard | 🔲 Not started |
-| 6 | Reporting | 🔲 Not started |
-| 7 | Document Generation | 🔲 Not started |
-| 8 | Customer Portal — Browse & Car Photos | 🔲 Not started |
-| 9 | Customer Portal — Accounts & Booking | 🔲 Not started |
+| 4 | Rental Lifecycle | ✅ Done |
+| 5 | Internal Dashboard | ✅ Done |
+| 6 | Reporting | ✅ Done |
+| 7 | Document Generation | ✅ Done |
+| 8 | Customer Portal — Browse & Car Photos | ✅ Done |
+| 9 | Customer Portal — Accounts & Booking | 🔄 In progress |
 | 10 | Online Payments — iPay88 | 🔲 Not started |
 | 11 | Maintenance Lifecycle | 🔲 Not started |
 
