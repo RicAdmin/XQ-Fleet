@@ -24,6 +24,7 @@ type NavLinkTo =
   | '/admin/cars'
   | '/admin/customers'
   | '/admin/rentals'
+  | '/admin/reports'
   | '/app/customers'
   | '/app/rentals'
 
@@ -78,7 +79,7 @@ const NAV_SECTIONS: NavSection[] = [
         icon: <Users size={16} />,
         exact: false,
       },
-      { type: 'placeholder', label: 'Analytics', icon: <BarChart3 size={16} /> },
+      { type: 'link', label: 'Reports', icon: <BarChart3 size={16} />, to: '/admin/reports', exact: false, ownerOnly: true },
     ],
   },
   {

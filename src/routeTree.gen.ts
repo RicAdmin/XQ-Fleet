@@ -31,6 +31,7 @@ import { Route as AppRentalsIndexRouteImport } from './routes/app/rentals/index'
 import { Route as AdminRentalsIndexRouteImport } from './routes/admin/rentals/index'
 import { Route as AppRentalsRentalIdRouteImport } from './routes/app/rentals/$rentalId'
 import { Route as AdminRentalsRentalIdRouteImport } from './routes/admin/rentals/$rentalId'
+import { Route as AdminReportsIndexRouteImport } from './routes/admin/reports/index'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -142,6 +143,11 @@ const AdminRentalsRentalIdRoute = AdminRentalsRentalIdRouteImport.update({
   path: '/rentals/$rentalId',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminReportsIndexRoute = AdminReportsIndexRouteImport.update({
+  id: '/reports/',
+  path: '/reports/',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -166,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/app/rentals/': typeof AppRentalsIndexRoute
   '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
   '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
+  '/admin/reports/': typeof AdminReportsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -189,6 +196,7 @@ export interface FileRoutesByTo {
   '/app/rentals': typeof AppRentalsIndexRoute
   '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
   '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
+  '/admin/reports': typeof AdminReportsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -214,6 +222,7 @@ export interface FileRoutesById {
   '/app/rentals/': typeof AppRentalsIndexRoute
   '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
   '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
+  '/admin/reports/': typeof AdminReportsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -240,6 +249,7 @@ export interface FileRouteTypes {
     | '/app/rentals/'
     | '/admin/rentals/$rentalId'
     | '/app/rentals/$rentalId'
+    | '/admin/reports/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -263,6 +273,7 @@ export interface FileRouteTypes {
     | '/app/rentals'
     | '/admin/rentals/$rentalId'
     | '/app/rentals/$rentalId'
+    | '/admin/reports'
   id:
     | '__root__'
     | '/'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/app/rentals/'
     | '/admin/rentals/$rentalId'
     | '/app/rentals/$rentalId'
+    | '/admin/reports/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -458,6 +470,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRentalsRentalIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/admin/reports/': {
+      id: '/reports/'
+      path: '/reports/'
+      fullPath: '/admin/reports/'
+      preLoaderRoute: typeof AdminReportsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
@@ -469,6 +488,7 @@ interface AdminRouteChildren {
   AdminCustomersCustomerIdRoute: typeof AdminCustomersCustomerIdRoute
   AdminRentalsIndexRoute: typeof AdminRentalsIndexRoute
   AdminRentalsRentalIdRoute: typeof AdminRentalsRentalIdRoute
+  AdminReportsIndexRoute: typeof AdminReportsIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -479,6 +499,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCustomersCustomerIdRoute: AdminCustomersCustomerIdRoute,
   AdminRentalsIndexRoute: AdminRentalsIndexRoute,
   AdminRentalsRentalIdRoute: AdminRentalsRentalIdRoute,
+  AdminReportsIndexRoute: AdminReportsIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
