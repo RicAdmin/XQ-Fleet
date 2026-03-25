@@ -1007,6 +1007,12 @@ a {
   color: var(--kicker);
 }
 
+.hub-section-sub {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--sea-ink-soft);
+}
+
 .hub-see-all {
   display: inline-flex;
   align-items: center;
