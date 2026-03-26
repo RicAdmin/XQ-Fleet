@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { Car, ChevronDown, MapPin, SlidersHorizontal } from 'lucide-react'
+import { Calendar, Car, MapPin } from 'lucide-react'
 
-import PublicPageShell from '#/components/shells/PublicPageShell'
+import Footer from '#/components/Footer'
+import ThemeToggle from '#/components/ThemeToggle'
 import { filterPublicCars, getPublicCars, type PublicCarRow } from '#/lib/portal-functions'
 
 export const Route = createFileRoute('/')({
@@ -14,7 +15,7 @@ export const Route = createFileRoute('/')({
 })
 
 const CATEGORIES = [
-  { value: 'all', label: 'All vehicles', emoji: '🚗' },
+  { value: 'all', label: 'All', emoji: '🚗' },
   { value: 'economy', label: 'Economy', emoji: '🚙' },
   { value: 'mpv', label: 'MPV', emoji: '🚐' },
   { value: 'suv', label: 'SUV', emoji: '🛻' },
@@ -70,60 +71,60 @@ function LandingPage() {
   }
 
   return (
-    <PublicPageShell className="">
-      {/* ── Hero ─────────────────────────────────────────── */}
-      <section className="portal-hero">
-        <div className="portal-hero-inner page-wrap px-4">
-          <p className="portal-hero-kicker">
+    <div className="landing-root">
+      {/* ── Full-viewport hero ──────────────────────────── */}
+      <section className="landing-hero">
+
+        {/* Floating nav */}
+        <nav className="landing-nav">
+          <div className="landing-nav-inner page-wrap px-4">
+            <Link to="/" className="landing-brand">XQ Car Fleet</Link>
+            <div className="landing-nav-links">
+              <Link to="/about" className="landing-nav-link">About</Link>
+              <Link to="/login" className="landing-nav-link">Customer login</Link>
+              <Link to="/internal/login" className="landing-nav-link">Staff</Link>
+              <ThemeToggle />
+            </div>
+          </div>
+        </nav>
+
+        {/* Hero text */}
+        <div className="landing-hero-body page-wrap px-4">
+          <p className="landing-kicker">
             <MapPin size={11} strokeWidth={2.5} />
             Langkawi Island, Malaysia
           </p>
-          <h1 className="portal-hero-title">
-            Your keys to<br />
-            <em>the island.</em>
+          <h1 className="landing-title">
+            Your keys<br />to the <em>island.</em>
           </h1>
-          <p className="portal-hero-sub">
-            Well-maintained cars ready for pickup. Browse our fleet and find the perfect ride.
+          <p className="landing-subtitle">
+            Well-maintained cars, ready for pickup. Browse our fleet and find the perfect ride for your Langkawi escape.
           </p>
-          <a href="#browse" className="portal-hero-cta">
-            Explore vehicles
-            <ChevronDown size={16} strokeWidth={2.5} />
-          </a>
         </div>
-        <div className="portal-hero-arc" aria-hidden="true" />
-      </section>
 
-      {/* ── Browse ───────────────────────────────────────── */}
-      <section id="browse" className="page-wrap px-4 py-10">
-        <div className="portal-layout">
+        {/* Search card — sits at the base of the hero, overlapping the arc */}
+        <div className="landing-search-wrap page-wrap px-4">
+          <div className="landing-search-card">
+            <div className="landing-cat-pills">
+              {CATEGORIES.map(({ value, label, emoji }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setCategory(value)}
+                  className={`landing-cat-pill${category === value ? ' is-active' : ''}`}
+                >
+                  <span aria-hidden="true">{emoji}</span>
+                  {label}
+                </button>
+              ))}
+            </div>
 
-          {/* Sidebar */}
-          <aside className="portal-sidebar">
-            <div className="portal-filter-card">
-              <div className="portal-filter-title">
-                <SlidersHorizontal size={14} strokeWidth={2.5} />
-                Search
-              </div>
-
-              <div className="portal-filter-section">
-                <p className="portal-filter-label">Category</p>
-                <div className="portal-cat-grid">
-                  {CATEGORIES.map(({ value, label, emoji }) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setCategory(value)}
-                      className={`portal-cat-btn${category === value ? ' is-active' : ''}`}
-                    >
-                      <span className="portal-cat-emoji">{emoji}</span>
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="portal-filter-section">
-                <p className="portal-filter-label">Pickup date</p>
+            <div className="landing-date-row">
+              <div className="landing-date-field">
+                <label className="landing-date-label">
+                  <Calendar size={12} strokeWidth={2.5} aria-hidden="true" />
+                  Pickup date
+                </label>
                 <input
                   type="date"
                   value={startDate}
@@ -132,18 +133,23 @@ function LandingPage() {
                     setStartDate(e.target.value)
                     if (endDate && e.target.value > endDate) setEndDate('')
                   }}
-                  className="portal-date-input"
+                  className="landing-date-input"
                 />
               </div>
 
-              <div className="portal-filter-section">
-                <p className="portal-filter-label">Return date</p>
+              <div className="landing-date-sep" aria-hidden="true">→</div>
+
+              <div className="landing-date-field">
+                <label className="landing-date-label">
+                  <Calendar size={12} strokeWidth={2.5} aria-hidden="true" />
+                  Return date
+                </label>
                 <input
                   type="date"
                   value={endDate}
                   min={startDate || today}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="portal-date-input"
+                  className="landing-date-input"
                 />
               </div>
 
@@ -151,99 +157,106 @@ function LandingPage() {
                 type="button"
                 onClick={search}
                 disabled={filtering}
-                className="button-primary w-full justify-center"
+                className="landing-search-btn"
               >
                 {filtering ? 'Searching…' : 'Find available cars'}
               </button>
-
-              {filtered && (
-                <button type="button" onClick={reset} className="portal-clear-btn">
-                  Clear search
-                </button>
-              )}
             </div>
-          </aside>
-
-          {/* Results */}
-          <main>
-            <div className="portal-results-bar">
-              <span className="portal-results-count">
-                <strong>{cars.length}</strong>{' '}
-                {cars.length === 1 ? 'vehicle' : 'vehicles'}
-                {filtered && startDate && endDate
-                  ? ' available for your dates'
-                  : ' in fleet'}
-              </span>
-              {estimatedDays && (
-                <span className="portal-results-days">
-                  {estimatedDays}-day rental
-                </span>
-              )}
-            </div>
-
-            {cars.length === 0 ? (
-              <div className="portal-empty">
-                <p className="portal-empty-icon">🔍</p>
-                <p className="portal-empty-title">No vehicles found</p>
-                <p className="portal-empty-sub">Try different dates or remove category filters.</p>
-                <button type="button" onClick={reset} className="button-secondary">
-                  Clear search
-                </button>
-              </div>
-            ) : (
-              <div className="portal-grid">
-                {cars.map((car) => (
-                  <CarCard key={car.id} car={car} days={estimatedDays} startDate={startDate} endDate={endDate} />
-                ))}
-              </div>
-            )}
-          </main>
+          </div>
         </div>
+
+        <div className="portal-hero-arc" aria-hidden="true" />
       </section>
-    </PublicPageShell>
-  )
-}
 
-function CarCard({ car, days, startDate, endDate }: { car: PublicCarRow; days: number | null; startDate: string; endDate: string }) {
-  return (
-    <div className="portal-car-card">
-      <Link to="/cars/$carId" params={{ carId: car.id }} className="portal-car-card-inner">
-        <div className="portal-car-photo">
-          {car.coverPhotoUrl
-            ? <img src={car.coverPhotoUrl} alt={`${car.make} ${car.model}`} className="portal-car-img" />
-            : (
-              <div className="portal-car-no-photo">
-                <Car size={28} />
-              </div>
+      {/* ── Fleet browse ────────────────────────────────── */}
+      <section id="browse" className="landing-browse page-wrap px-4">
+        <div className="landing-results-bar">
+          <span className="portal-results-count">
+            <strong>{cars.length}</strong>{' '}
+            {cars.length === 1 ? 'vehicle' : 'vehicles'}
+            {filtered && startDate && endDate ? ' available for your dates' : ' in fleet'}
+          </span>
+          <div className="landing-results-end">
+            {estimatedDays && (
+              <span className="portal-results-days">{estimatedDays}-day rental</span>
             )}
-          <span className="portal-car-badge">{car.category}</span>
-        </div>
-        <div className="portal-car-body">
-          <p className="portal-car-year">{car.year}</p>
-          <h3 className="portal-car-name">{car.make} {car.model}</h3>
-          <div className="portal-car-pricing">
-            <span className="portal-car-rate">
-              {formatMYR(car.dailyRateSen)}
-              <span className="portal-car-unit">/day</span>
-            </span>
-            {days && (
-              <span className="portal-car-est">
-                est. {formatMYR(car.dailyRateSen * days)}
-              </span>
+            {filtered && (
+              <button type="button" onClick={reset} className="landing-clear-btn">
+                Clear
+              </button>
             )}
           </div>
         </div>
+
+        {cars.length === 0 ? (
+          <div className="portal-empty">
+            <p className="portal-empty-icon">🔍</p>
+            <p className="portal-empty-title">No vehicles found</p>
+            <p className="portal-empty-sub">Try different dates or remove category filters.</p>
+            <button type="button" onClick={reset} className="button-secondary">
+              Clear search
+            </button>
+          </div>
+        ) : (
+          <div className="landing-grid">
+            {cars.map((car) => (
+              <CarCard key={car.id} car={car} days={estimatedDays} startDate={startDate} endDate={endDate} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <Footer />
+    </div>
+  )
+}
+
+function CarCard({
+  car,
+  days,
+  startDate,
+  endDate,
+}: {
+  car: PublicCarRow
+  days: number | null
+  startDate: string
+  endDate: string
+}) {
+  return (
+    <div className="landing-car-card">
+      <Link to="/cars/$carId" params={{ carId: car.id }} className="landing-car-photo-link">
+        <div className="landing-car-photo">
+          {car.coverPhotoUrl ? (
+            <img src={car.coverPhotoUrl} alt={`${car.make} ${car.model}`} className="landing-car-img" />
+          ) : (
+            <div className="landing-car-no-photo">
+              <Car size={32} />
+            </div>
+          )}
+          <span className="landing-car-cat">{car.category}</span>
+        </div>
+        <div className="landing-car-body">
+          <p className="landing-car-year">{car.year}</p>
+          <h3 className="landing-car-name">
+            {car.make} {car.model}
+          </h3>
+          <div className="landing-car-price">
+            <span className="landing-car-rate">{formatMYR(car.dailyRateSen)}</span>
+            <span className="landing-car-unit">/day</span>
+            {days && <span className="landing-car-est">· est. {formatMYR(car.dailyRateSen * days)}</span>}
+          </div>
+        </div>
       </Link>
-      <div className="portal-car-actions">
+      <div className="landing-car-actions">
         <Link
           to="/book/$carId"
           params={{ carId: car.id }}
           search={{ startDate: startDate || undefined, endDate: endDate || undefined }}
-          className="button-primary portal-car-book-btn"
+          className="button-primary landing-book-btn"
         >
-          Book
+          Book now
         </Link>
-        <Link to="/cars/$carId" params={{ carId: car.id }} className="portal-car-detail-link">
+        <Link to="/cars/$carId" params={{ carId: car.id }} className="landing-details-link">
           Details →
         </Link>
       </div>
