@@ -52,7 +52,7 @@ Durable decisions that apply across all stages:
 
 ## Stage 1: Foundation — Auth, Roles & Schema
 
-**Status**: 🔲 Not started
+**Status**: ✅ Done
 **User stories**: 44, 45, 46, 47, 48, 54, 55
 
 ### What to build
@@ -119,7 +119,7 @@ Staff-accessible CRUD for customer records. A staff member can create a new cust
 
 ## Stage 4: Rental Lifecycle
 
-**Status**: 🔄 In progress
+**Status**: ✅ Done
 **User stories**: 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29
 
 ### What to build
@@ -145,7 +145,7 @@ At handover, staff confirm the rental by recording start mileage and a condition
 
 ## Stage 5: Internal Dashboard
 
-**Status**: 🔲 Not started
+**Status**: ✅ Done
 **User stories**: 1, 2, 3, 4, 5, 41, 42
 
 ### What to build
@@ -165,7 +165,7 @@ The primary screen for both staff (mobile) and owner (desktop). Shows a live fle
 
 ## Stage 6: Reporting
 
-**Status**: 🔲 Not started
+**Status**: ✅ Done
 **User stories**: 34, 35, 36, 37, 38, 39, 40, 43
 
 ### What to build
@@ -190,7 +190,7 @@ Owner-only reports accessible from `/admin/reports`. Four report types:
 
 ## Stage 7: Document Generation
 
-**Status**: 🔲 Not started
+**Status**: ✅ Done
 **User stories**: 30, 31, 32, 33
 
 ### What to build
@@ -215,7 +215,7 @@ Both are rendered server-side as HTML and served as print-optimised pages (CSS `
 
 ## Stage 8: Customer Portal — Browse & Car Photos
 
-**Status**: 🔲 Not started
+**Status**: ✅ Done
 **User stories**: 49, 50, 51, 52, 53, 62, 63, 64
 
 ### What to build
@@ -240,7 +240,7 @@ In the owner admin panel, owners can upload multiple photos per car, designate a
 
 ## Stage 9: Customer Portal — Accounts & Booking
 
-**Status**: 🔲 Not started
+**Status**: ✅ Done
 **User stories**: 54, 55, 56, 57 (redirect only), 58, 59, 60, 61
 
 ### What to build
@@ -290,7 +290,7 @@ Owner can configure per-booking whether full payment or deposit only is charged 
 
 ## Stage 11: Maintenance Lifecycle
 
-**Status**: 🔲 Not started
+**Status**: ✅ Done
 **User stories**: (new — no PRD user stories yet; to be added to PRD)
 
 ### What to build
