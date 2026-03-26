@@ -1,9 +1,10 @@
 import { createServerFn } from '@tanstack/react-start'
 import { and, desc, eq, gt, inArray, lt } from 'drizzle-orm'
 
-import { cars, customers, rentals } from '#/db/schema'
+import { cars, customers, payments, rentals } from '#/db/schema'
 import type { CarCategory, RentalStatus } from '#/db/schema'
 import { getRequestSession } from '#/lib/auth-functions'
+import { HOLD_MINUTES } from '#/lib/payment-functions'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -100,6 +101,10 @@ export const createPortalBooking = createServerFn({ method: 'POST' })
 
     const { db } = await import('#/db')
 
+    // Expire any stale holds before checking availability
+    const { expirePaymentHolds } = await import('#/lib/payment-functions')
+    await expirePaymentHolds()
+
     // Check overlap (excluding already-cancelled)
     const overlap = await db
       .select({ id: rentals.id })
@@ -160,7 +165,15 @@ export const createPortalBooking = createServerFn({ method: 'POST' })
       customerId = newCustomer.id
     }
 
-    // Create rental (car stays 'available'; Stage 10 handles payment-pending)
+    // Load payment settings to determine deposit amount
+    const { getPaymentSettings } = await import('#/lib/settings-functions')
+    const paymentConfig = await getPaymentSettings()
+    const depositAmountSen =
+      paymentConfig.paymentMode === 'deposit' ? paymentConfig.depositAmountSen : 0
+
+    const holdExpiry = new Date(Date.now() + HOLD_MINUTES * 60 * 1000)
+
+    // Create rental
     const [rental] = await db
       .insert(rentals)
       .values({
@@ -173,11 +186,33 @@ export const createPortalBooking = createServerFn({ method: 'POST' })
         endDate,
         dailyRateSen: car.dailyRateSen,
         totalAmountSen,
-        depositAmountSen: 0,
+        depositAmountSen,
         paidAmountSen: 0,
+        paymentHoldExpiresAt: holdExpiry,
         createdByUserId: session.user.id,
       })
       .returning({ id: rentals.id })
+
+    // Set car to payment-pending
+    await db
+      .update(cars)
+      .set({ status: 'payment-pending', updatedAt: new Date() })
+      .where(eq(cars.id, data.carId))
+
+    // Create pending payment record
+    if (paymentConfig.enabled) {
+      const chargeSen =
+        paymentConfig.paymentMode === 'deposit' && paymentConfig.depositAmountSen > 0
+          ? paymentConfig.depositAmountSen
+          : totalAmountSen
+      await db.insert(payments).values({
+        rentalId: rental.id,
+        provider: 'ipay88',
+        amountSen: chargeSen,
+        currency: 'MYR',
+        status: 'pending',
+      })
+    }
 
     return { rentalId: rental.id }
   })

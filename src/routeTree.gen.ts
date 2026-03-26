@@ -19,12 +19,14 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
+import { Route as PayRentalIdRouteImport } from './routes/pay/$rentalId'
 import { Route as InternalLoginRouteImport } from './routes/internal/login'
 import { Route as CarsCarIdRouteImport } from './routes/cars/$carId'
 import { Route as BookCarIdRouteImport } from './routes/book/$carId'
 import { Route as AppRentalsIndexRouteImport } from './routes/app/rentals/index'
 import { Route as AppMaintenanceIndexRouteImport } from './routes/app/maintenance/index'
 import { Route as AppCustomersIndexRouteImport } from './routes/app/customers/index'
+import { Route as AdminSettingsIndexRouteImport } from './routes/admin/settings/index'
 import { Route as AdminReportsIndexRouteImport } from './routes/admin/reports/index'
 import { Route as AdminRentalsIndexRouteImport } from './routes/admin/rentals/index'
 import { Route as AdminCustomersIndexRouteImport } from './routes/admin/customers/index'
@@ -33,6 +35,7 @@ import { Route as AccountBookingsIndexRouteImport } from './routes/account/booki
 import { Route as InternalInviteTokenRouteImport } from './routes/internal/invite/$token'
 import { Route as AppRentalsRentalIdRouteImport } from './routes/app/rentals/$rentalId'
 import { Route as AppCustomersCustomerIdRouteImport } from './routes/app/customers/$customerId'
+import { Route as ApiWebhooksIpay88RouteImport } from './routes/api/webhooks/ipay88'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AdminRentalsRentalIdRouteImport } from './routes/admin/rentals/$rentalId'
 import { Route as AdminCustomersCustomerIdRouteImport } from './routes/admin/customers/$customerId'
@@ -91,6 +94,11 @@ const AccountIndexRoute = AccountIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AccountRoute,
 } as any)
+const PayRentalIdRoute = PayRentalIdRouteImport.update({
+  id: '/pay/$rentalId',
+  path: '/pay/$rentalId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InternalLoginRoute = InternalLoginRouteImport.update({
   id: '/internal/login',
   path: '/internal/login',
@@ -120,6 +128,11 @@ const AppCustomersIndexRoute = AppCustomersIndexRouteImport.update({
   id: '/customers/',
   path: '/customers/',
   getParentRoute: () => AppRoute,
+} as any)
+const AdminSettingsIndexRoute = AdminSettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminReportsIndexRoute = AdminReportsIndexRouteImport.update({
   id: '/reports/',
@@ -160,6 +173,11 @@ const AppCustomersCustomerIdRoute = AppCustomersCustomerIdRouteImport.update({
   id: '/customers/$customerId',
   path: '/customers/$customerId',
   getParentRoute: () => AppRoute,
+} as any)
+const ApiWebhooksIpay88Route = ApiWebhooksIpay88RouteImport.update({
+  id: '/api/webhooks/ipay88',
+  path: '/api/webhooks/ipay88',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -211,6 +229,7 @@ export interface FileRoutesByFullPath {
   '/book/$carId': typeof BookCarIdRoute
   '/cars/$carId': typeof CarsCarIdRoute
   '/internal/login': typeof InternalLoginRoute
+  '/pay/$rentalId': typeof PayRentalIdRoute
   '/account/': typeof AccountIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
@@ -219,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/webhooks/ipay88': typeof ApiWebhooksIpay88Route
   '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
   '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
   '/internal/invite/$token': typeof InternalInviteTokenRoute
@@ -227,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/admin/customers/': typeof AdminCustomersIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
   '/admin/reports/': typeof AdminReportsIndexRoute
+  '/admin/settings/': typeof AdminSettingsIndexRoute
   '/app/customers/': typeof AppCustomersIndexRoute
   '/app/maintenance/': typeof AppMaintenanceIndexRoute
   '/app/rentals/': typeof AppRentalsIndexRoute
@@ -241,6 +262,7 @@ export interface FileRoutesByTo {
   '/book/$carId': typeof BookCarIdRoute
   '/cars/$carId': typeof CarsCarIdRoute
   '/internal/login': typeof InternalLoginRoute
+  '/pay/$rentalId': typeof PayRentalIdRoute
   '/account': typeof AccountIndexRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
@@ -249,6 +271,7 @@ export interface FileRoutesByTo {
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/webhooks/ipay88': typeof ApiWebhooksIpay88Route
   '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
   '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
   '/internal/invite/$token': typeof InternalInviteTokenRoute
@@ -257,6 +280,7 @@ export interface FileRoutesByTo {
   '/admin/customers': typeof AdminCustomersIndexRoute
   '/admin/rentals': typeof AdminRentalsIndexRoute
   '/admin/reports': typeof AdminReportsIndexRoute
+  '/admin/settings': typeof AdminSettingsIndexRoute
   '/app/customers': typeof AppCustomersIndexRoute
   '/app/maintenance': typeof AppMaintenanceIndexRoute
   '/app/rentals': typeof AppRentalsIndexRoute
@@ -275,6 +299,7 @@ export interface FileRoutesById {
   '/book/$carId': typeof BookCarIdRoute
   '/cars/$carId': typeof CarsCarIdRoute
   '/internal/login': typeof InternalLoginRoute
+  '/pay/$rentalId': typeof PayRentalIdRoute
   '/account/': typeof AccountIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
@@ -283,6 +308,7 @@ export interface FileRoutesById {
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/webhooks/ipay88': typeof ApiWebhooksIpay88Route
   '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
   '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
   '/internal/invite/$token': typeof InternalInviteTokenRoute
@@ -291,6 +317,7 @@ export interface FileRoutesById {
   '/admin/customers/': typeof AdminCustomersIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
   '/admin/reports/': typeof AdminReportsIndexRoute
+  '/admin/settings/': typeof AdminSettingsIndexRoute
   '/app/customers/': typeof AppCustomersIndexRoute
   '/app/maintenance/': typeof AppMaintenanceIndexRoute
   '/app/rentals/': typeof AppRentalsIndexRoute
@@ -310,6 +337,7 @@ export interface FileRouteTypes {
     | '/book/$carId'
     | '/cars/$carId'
     | '/internal/login'
+    | '/pay/$rentalId'
     | '/account/'
     | '/admin/'
     | '/app/'
@@ -318,6 +346,7 @@ export interface FileRouteTypes {
     | '/admin/customers/$customerId'
     | '/admin/rentals/$rentalId'
     | '/api/auth/$'
+    | '/api/webhooks/ipay88'
     | '/app/customers/$customerId'
     | '/app/rentals/$rentalId'
     | '/internal/invite/$token'
@@ -326,6 +355,7 @@ export interface FileRouteTypes {
     | '/admin/customers/'
     | '/admin/rentals/'
     | '/admin/reports/'
+    | '/admin/settings/'
     | '/app/customers/'
     | '/app/maintenance/'
     | '/app/rentals/'
@@ -340,6 +370,7 @@ export interface FileRouteTypes {
     | '/book/$carId'
     | '/cars/$carId'
     | '/internal/login'
+    | '/pay/$rentalId'
     | '/account'
     | '/admin'
     | '/app'
@@ -348,6 +379,7 @@ export interface FileRouteTypes {
     | '/admin/customers/$customerId'
     | '/admin/rentals/$rentalId'
     | '/api/auth/$'
+    | '/api/webhooks/ipay88'
     | '/app/customers/$customerId'
     | '/app/rentals/$rentalId'
     | '/internal/invite/$token'
@@ -356,6 +388,7 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/rentals'
     | '/admin/reports'
+    | '/admin/settings'
     | '/app/customers'
     | '/app/maintenance'
     | '/app/rentals'
@@ -373,6 +406,7 @@ export interface FileRouteTypes {
     | '/book/$carId'
     | '/cars/$carId'
     | '/internal/login'
+    | '/pay/$rentalId'
     | '/account/'
     | '/admin/'
     | '/app/'
@@ -381,6 +415,7 @@ export interface FileRouteTypes {
     | '/admin/customers/$customerId'
     | '/admin/rentals/$rentalId'
     | '/api/auth/$'
+    | '/api/webhooks/ipay88'
     | '/app/customers/$customerId'
     | '/app/rentals/$rentalId'
     | '/internal/invite/$token'
@@ -389,6 +424,7 @@ export interface FileRouteTypes {
     | '/admin/customers/'
     | '/admin/rentals/'
     | '/admin/reports/'
+    | '/admin/settings/'
     | '/app/customers/'
     | '/app/maintenance/'
     | '/app/rentals/'
@@ -407,7 +443,9 @@ export interface RootRouteChildren {
   BookCarIdRoute: typeof BookCarIdRoute
   CarsCarIdRoute: typeof CarsCarIdRoute
   InternalLoginRoute: typeof InternalLoginRoute
+  PayRentalIdRoute: typeof PayRentalIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiWebhooksIpay88Route: typeof ApiWebhooksIpay88Route
   InternalInviteTokenRoute: typeof InternalInviteTokenRoute
   ApiDocumentsAgreementRentalIdRoute: typeof ApiDocumentsAgreementRentalIdRoute
   ApiDocumentsInvoiceRentalIdRoute: typeof ApiDocumentsInvoiceRentalIdRoute
@@ -485,6 +523,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountIndexRouteImport
       parentRoute: typeof AccountRoute
     }
+    '/pay/$rentalId': {
+      id: '/pay/$rentalId'
+      path: '/pay/$rentalId'
+      fullPath: '/pay/$rentalId'
+      preLoaderRoute: typeof PayRentalIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/internal/login': {
       id: '/internal/login'
       path: '/internal/login'
@@ -526,6 +571,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/customers/'
       preLoaderRoute: typeof AppCustomersIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/admin/settings/': {
+      id: '/admin/settings/'
+      path: '/settings'
+      fullPath: '/admin/settings/'
+      preLoaderRoute: typeof AdminSettingsIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/reports/': {
       id: '/admin/reports/'
@@ -582,6 +634,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/customers/$customerId'
       preLoaderRoute: typeof AppCustomersCustomerIdRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/api/webhooks/ipay88': {
+      id: '/api/webhooks/ipay88'
+      path: '/api/webhooks/ipay88'
+      fullPath: '/api/webhooks/ipay88'
+      preLoaderRoute: typeof ApiWebhooksIpay88RouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -659,6 +718,7 @@ interface AdminRouteChildren {
   AdminCustomersIndexRoute: typeof AdminCustomersIndexRoute
   AdminRentalsIndexRoute: typeof AdminRentalsIndexRoute
   AdminReportsIndexRoute: typeof AdminReportsIndexRoute
+  AdminSettingsIndexRoute: typeof AdminSettingsIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -670,6 +730,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCustomersIndexRoute: AdminCustomersIndexRoute,
   AdminRentalsIndexRoute: AdminRentalsIndexRoute,
   AdminReportsIndexRoute: AdminReportsIndexRoute,
+  AdminSettingsIndexRoute: AdminSettingsIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -705,7 +766,9 @@ const rootRouteChildren: RootRouteChildren = {
   BookCarIdRoute: BookCarIdRoute,
   CarsCarIdRoute: CarsCarIdRoute,
   InternalLoginRoute: InternalLoginRoute,
+  PayRentalIdRoute: PayRentalIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiWebhooksIpay88Route: ApiWebhooksIpay88Route,
   InternalInviteTokenRoute: InternalInviteTokenRoute,
   ApiDocumentsAgreementRentalIdRoute: ApiDocumentsAgreementRentalIdRoute,
   ApiDocumentsInvoiceRentalIdRoute: ApiDocumentsInvoiceRentalIdRoute,

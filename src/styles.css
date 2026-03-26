@@ -2996,3 +2996,246 @@ select.field-input {
   background: rgba(23, 58, 64, 0.07);
   color: var(--sea-ink);
 }
+
+/* ─── Payment redirect page ──────────────────────────────────────────────── */
+
+.payment-redirect-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sea-glass);
+}
+
+.payment-redirect-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+.payment-redirect-spinner {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 3px solid rgba(23, 58, 64, 0.15);
+  border-top-color: var(--sea-ink);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.payment-redirect-text {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--sea-ink);
+}
+
+.payment-redirect-sub {
+  font-size: 0.85rem;
+  color: var(--sea-ink-soft);
+}
+
+/* ─── Payment result banners ─────────────────────────────────────────────── */
+
+.booking-failed-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.9rem 1.1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-md);
+  color: #991b1b;
+}
+
+.booking-failed-icon {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  color: #dc2626;
+}
+
+.booking-failed-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.booking-failed-sub {
+  font-size: 0.82rem;
+  margin-top: 0.2rem;
+  opacity: 0.85;
+}
+
+/* ─── Admin settings page ────────────────────────────────────────────────── */
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 600px;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.settings-section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--sea-ink);
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--sea-border);
+}
+
+.settings-info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  background: rgba(23, 58, 64, 0.05);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  color: var(--sea-ink-soft);
+}
+
+.settings-info-banner code {
+  font-family: monospace;
+  background: rgba(23, 58, 64, 0.1);
+  padding: 0.05rem 0.3rem;
+  border-radius: 0.2rem;
+}
+
+.settings-field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.settings-field-label-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.settings-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--sea-ink);
+}
+
+.settings-label-hint {
+  font-size: 0.78rem;
+  color: var(--sea-ink-soft);
+}
+
+.settings-toggle {
+  position: relative;
+  width: 2.5rem;
+  height: 1.4rem;
+  border-radius: 9999px;
+  background: var(--sea-border);
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.settings-toggle--on {
+  background: var(--sea-ink);
+}
+
+.settings-toggle-thumb {
+  position: absolute;
+  top: 0.2rem;
+  left: 0.2rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.2s;
+}
+
+.settings-toggle--on .settings-toggle-thumb {
+  transform: translateX(1.1rem);
+}
+
+.settings-field-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.settings-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.settings-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--sea-ink);
+  cursor: pointer;
+}
+
+.settings-radio {
+  accent-color: var(--sea-ink);
+}
+
+.settings-input-prefix-group {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--sea-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  max-width: 180px;
+}
+
+.settings-input-prefix {
+  padding: 0.5rem 0.75rem;
+  background: var(--sea-glass);
+  font-size: 0.875rem;
+  color: var(--sea-ink-soft);
+  border-right: 1px solid var(--sea-border);
+}
+
+.settings-input {
+  border: none;
+  outline: none;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--sea-ink);
+  background: white;
+  width: 120px;
+}
+
+.settings-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.settings-error {
+  font-size: 0.85rem;
+  color: #dc2626;
+  padding: 0.5rem 0.75rem;
+  background: #fef2f2;
+  border-radius: var(--radius-sm);
+}
+
+.settings-saved {
+  font-size: 0.85rem;
+  color: #15803d;
+  padding: 0.5rem 0.75rem;
+  background: #f0fdf4;
+  border-radius: var(--radius-sm);
+}

@@ -1,11 +1,14 @@
-import { Link, createFileRoute, redirect } from '@tanstack/react-router'
-import { ArrowLeft, Car, CheckCircle } from 'lucide-react'
+import { Link, createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
+import { ArrowLeft, Car, CheckCircle, XCircle } from 'lucide-react'
 import { z } from 'zod'
 
 import { getBookingDetail } from '#/lib/portal-booking-functions'
 
 export const Route = createFileRoute('/account/bookings/$rentalId')({
-  validateSearch: z.object({ confirmed: z.boolean().optional() }),
+  validateSearch: z.object({
+    confirmed: z.boolean().optional(),
+    payment: z.enum(['response', 'error']).optional(),
+  }),
   loader: async ({ params }) => {
     const booking = await getBookingDetail({ data: { rentalId: params.rentalId } })
     if (!booking) throw redirect({ to: '/account/bookings' })
@@ -29,11 +32,16 @@ function formatDate(date: Date) {
 
 function BookingDetailPage() {
   const { booking } = Route.useLoaderData()
-  const { confirmed } = Route.useSearch()
+  const { confirmed, payment } = Route.useSearch()
+  const navigate = useNavigate()
 
   const days = Math.ceil(
     (new Date(booking.endDate).getTime() - new Date(booking.startDate).getTime()) / 86_400_000,
   )
+
+  function handlePayNow() {
+    navigate({ to: '/pay/$rentalId', params: { rentalId: booking.id } })
+  }
 
   return (
     <div className="hub-layout">
@@ -51,9 +59,32 @@ function BookingDetailPage() {
           <div className="booking-confirmed-banner">
             <CheckCircle size={20} className="booking-confirmed-icon" />
             <div>
-              <p className="booking-confirmed-title">Booking confirmed!</p>
+              <p className="booking-confirmed-title">Booking submitted!</p>
               <p className="booking-confirmed-sub">
-                Your booking is submitted. We'll be in touch to arrange payment.
+                Complete payment below to confirm your booking.
+              </p>
+            </div>
+          </div>
+        ) : null}
+
+        {/* Payment result banner */}
+        {payment === 'response' && booking.customerStatus === 'Confirmed' ? (
+          <div className="booking-confirmed-banner">
+            <CheckCircle size={20} className="booking-confirmed-icon" />
+            <div>
+              <p className="booking-confirmed-title">Payment received!</p>
+              <p className="booking-confirmed-sub">Your booking is confirmed.</p>
+            </div>
+          </div>
+        ) : null}
+
+        {payment === 'error' || (payment === 'response' && booking.customerStatus === 'Pending Payment') ? (
+          <div className="booking-failed-banner">
+            <XCircle size={20} className="booking-failed-icon" />
+            <div>
+              <p className="booking-failed-title">Payment unsuccessful</p>
+              <p className="booking-failed-sub">
+                Your payment could not be processed. Please try again.
               </p>
             </div>
           </div>
@@ -68,7 +99,7 @@ function BookingDetailPage() {
             </span>
           </div>
           {booking.customerStatus === 'Pending Payment' ? (
-            <button type="button" className="button-primary" disabled>
+            <button type="button" className="button-primary" onClick={handlePayNow}>
               Pay now
             </button>
           ) : null}

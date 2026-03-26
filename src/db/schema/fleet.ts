@@ -72,6 +72,18 @@ export const paymentAttemptStatusEnum = pgEnum('payment_attempt_status', [
   'voided',
 ])
 
+export const paymentModeEnum = pgEnum('payment_mode', ['full', 'deposit'])
+export type PaymentMode = (typeof paymentModeEnum.enumValues)[number]
+
+export const paymentSettings = pgTable('payment_settings', {
+  id: integer('id').primaryKey().default(1),
+  paymentMode: paymentModeEnum('payment_mode').notNull().default('full'),
+  depositAmountSen: integer('deposit_amount_sen').notNull().default(0),
+  sandboxMode: boolean('sandbox_mode').notNull().default(true),
+  enabled: boolean('enabled').notNull().default(false),
+  updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true }).notNull().defaultNow(),
+})
+
 export const maintenanceEventTypeEnum = pgEnum('maintenance_event_type', [
   'scheduled',
   'unscheduled',

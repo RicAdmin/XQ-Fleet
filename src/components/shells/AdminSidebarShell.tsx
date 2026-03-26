@@ -26,6 +26,7 @@ type NavLinkTo =
   | '/admin/customers'
   | '/admin/rentals'
   | '/admin/reports'
+  | '/admin/settings'
   | '/app/customers'
   | '/app/rentals'
   | '/app/maintenance'
@@ -99,7 +100,16 @@ const NAV_SECTIONS: NavSection[] = [
   },
   {
     label: 'System',
-    items: [{ type: 'placeholder', label: 'Settings', icon: <Settings size={16} /> }],
+    items: [
+      {
+        type: 'link',
+        label: 'Settings',
+        icon: <Settings size={16} />,
+        to: '/admin/settings',
+        exact: false,
+        ownerOnly: true,
+      },
+    ],
   },
 ]
 

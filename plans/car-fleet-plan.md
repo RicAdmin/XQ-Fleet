@@ -16,7 +16,7 @@
 | 8 | Customer Portal — Browse & Car Photos | ✅ Done |
 | 9 | Customer Portal — Accounts & Booking | ✅ Done |
 | 10 | Online Payments — iPay88 | 🔲 Not started |
-| 11 | Maintenance Lifecycle | 🔲 Not started |
+| 11 | Maintenance Lifecycle | ✅ Done |
 
 > Status legend: 🔲 Not started · 🔄 In progress · ✅ Done
 
@@ -263,7 +263,7 @@ Customer registration and login on the portal. Once logged in, a customer can co
 
 ## Stage 10: Online Payments — iPay88
 
-**Status**: 🔲 Not started
+**Status**: ✅ Done
 **User stories**: 65, 66, 67, 68, 69, 70
 
 ### What to build
