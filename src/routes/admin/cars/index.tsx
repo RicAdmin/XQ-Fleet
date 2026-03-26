@@ -1,8 +1,10 @@
 import { useState, useMemo } from 'react'
 
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { ArrowUpDown, ChevronUp, ChevronDown, Plus, Pencil, CarFront } from 'lucide-react'
+import { ChevronDown, Plus, Pencil, CarFront } from 'lucide-react'
 
+import { DataTable, useSortState, type Column } from '#/components/ui/DataTable'
+import { PageHeader } from '#/components/ui/PageHeader'
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
 import { Button } from '#/components/ui/button'
 import {
@@ -179,15 +181,6 @@ function sortCars(cars: CarRow[], key: SortKey, dir: 'asc' | 'desc'): CarRow[] {
 const ROW_BTN =
   'inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] text-[var(--sea-ink)] shadow-[0_1px_3px_rgba(30,90,72,0.08)] hover:-translate-y-px transition-transform cursor-pointer disabled:cursor-not-allowed disabled:opacity-50'
 
-// ─── Sort icon (lifted outside component to prevent remount on render) ─────────
-
-function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: 'asc' | 'desc' }) {
-  if (sortKey !== col) return <ArrowUpDown size={11} className="inline opacity-40 ml-1" />
-  return sortDir === 'asc'
-    ? <ChevronUp size={11} className="inline ml-1" />
-    : <ChevronDown size={11} className="inline ml-1" />
-}
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 function CarsPage() {
@@ -200,8 +193,7 @@ function CarsPage() {
 
   const [cars, setCars] = useState<CarRow[]>(initialCars)
   const [activeTab, setActiveTab] = useState<CarStatus | 'all'>('all')
-  const [sortKey, setSortKey] = useState<SortKey>('plateNumber')
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
+  const { sortKey, sortDir, handleSort } = useSortState<SortKey>('plateNumber')
 
   // Form panel
   const [formOpen, setFormOpen] = useState(false)
@@ -233,17 +225,6 @@ function CarsPage() {
     const filtered = activeTab === 'all' ? cars : cars.filter((c) => c.status === activeTab)
     return sortCars(filtered, sortKey, sortDir)
   }, [cars, activeTab, sortKey, sortDir])
-
-  // ── Sort handler ──────────────────────────────────────────────────────────
-
-  function handleSort(key: SortKey) {
-    if (sortKey === key) {
-      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
-    } else {
-      setSortKey(key)
-      setSortDir('asc')
-    }
-  }
 
   // ── Form handlers ─────────────────────────────────────────────────────────
 
@@ -350,25 +331,148 @@ function CarsPage() {
     }
   }
 
+  // ── Columns ───────────────────────────────────────────────────────────────
+
+  const columns: Column<CarRow>[] = [
+    {
+      key: 'plateNumber',
+      header: 'Plate',
+      sortable: true,
+      render: (car) => (
+        <Link to="/admin/cars/$carId" params={{ carId: car.id }} className="plate-link">
+          {car.plateNumber}
+        </Link>
+      ),
+    },
+    {
+      key: 'make',
+      header: 'Vehicle',
+      sortable: true,
+      render: (car) => (
+        <>
+          <span className="font-medium">{car.make}</span>{' '}
+          <span className="vehicle-model">{car.model}</span>
+        </>
+      ),
+    },
+    {
+      key: 'year',
+      header: 'Year',
+      sortable: true,
+      cellClassName: 'text-[var(--sea-ink-soft)]',
+      render: (car) => car.year,
+    },
+    {
+      key: 'color',
+      header: 'Color',
+      render: (car) => (
+        <span className="inline-flex items-center gap-1.5">
+          <span className="size-2.5 shrink-0 rounded-full border border-black/10" style={{ background: COLOR_SWATCH[car.color] }} />
+          <span className="text-[var(--sea-ink-soft)]">{COLOR_LABEL[car.color]}</span>
+        </span>
+      ),
+    },
+    {
+      key: 'category',
+      header: 'Category',
+      sortable: true,
+      render: (car) => (
+        <span className={`category-pill category-pill--${car.category}`}>
+          {CATEGORY_LABEL[car.category]}
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      sortable: true,
+      render: (car) =>
+        isOwner &&
+        car.status !== 'retired' &&
+        car.status !== 'rented' &&
+        car.status !== 'reserved' &&
+        car.status !== 'payment-pending' ? (
+          <span className="relative inline-flex items-center">
+            <select
+              className={`status-badge status-badge--${car.status} cursor-pointer appearance-none border-0 pr-[1.1rem] transition-shadow hover:ring-1 hover:ring-current/30 disabled:cursor-not-allowed disabled:opacity-60`}
+              value={car.status}
+              disabled={statusChangingId === car.id}
+              onChange={(e) =>
+                handleStatusChange(car.id, e.target.value as 'maintenance' | 'damaged' | 'available')
+              }
+              aria-label={`Change status of ${car.plateNumber}`}
+              title="Click to change status"
+            >
+              {MANUAL_STATUS_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown size={9} className="pointer-events-none absolute right-[0.3rem] opacity-60" strokeWidth={2.5} />
+          </span>
+        ) : (
+          <StatusBadge status={car.status} />
+        ),
+    },
+    {
+      key: 'dailyRateSen',
+      header: 'Daily Rate',
+      sortable: true,
+      render: (car) => formatMYR(car.dailyRateSen),
+    },
+    ...(isOwner
+      ? [
+          {
+            key: 'actions',
+            header: 'Actions',
+            headerClassName: 'text-right',
+            cellClassName: 'text-right whitespace-nowrap',
+            render: (car: CarRow) => (
+              <>
+                <button
+                  type="button"
+                  className={`${ROW_BTN} mr-1.5`}
+                  onClick={() => openEdit(car)}
+                  disabled={car.status === 'retired'}
+                  title={car.status === 'retired' ? 'Retired vehicles cannot be edited' : 'Edit vehicle'}
+                >
+                  <Pencil size={11} />
+                  Edit
+                </button>
+                {car.status !== 'retired' && (
+                  <button
+                    type="button"
+                    className={`${ROW_BTN} opacity-60 hover:opacity-100`}
+                    onClick={() => setConfirmingRetire(car)}
+                  >
+                    Retire
+                  </button>
+                )}
+              </>
+            ),
+          } satisfies Column<CarRow>,
+        ]
+      : []),
+  ]
+
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
     <AdminSidebarShell user={session.user} pageTitle="Fleet">
       {/* Page header */}
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-semibold text-[var(--sea-ink)]">Vehicle Inventory</h2>
-          <p className="mt-1 text-sm text-[var(--sea-ink-soft)]">
-            {cars.length} vehicle{cars.length !== 1 ? 's' : ''} total
-          </p>
-        </div>
-        {isOwner && (
-          <button type="button" className="button-primary flex items-center gap-2" onClick={openAdd}>
-            <Plus size={15} />
-            Add vehicle
-          </button>
-        )}
-      </div>
+      <PageHeader
+        title="Vehicle Inventory"
+        description={`${cars.length} vehicle${cars.length !== 1 ? 's' : ''} total`}
+        actions={
+          isOwner && (
+            <button type="button" className="button-primary flex items-center gap-2" onClick={openAdd}>
+              <Plus size={15} />
+              Add vehicle
+            </button>
+          )
+        }
+      />
 
       {/* Status tabs */}
       <div className="status-tabs mb-4">
@@ -393,131 +497,22 @@ function CarsPage() {
 
       {/* Table */}
       <article className="workspace-panel island-shell overflow-x-auto p-0">
-        {filteredSortedCars.length === 0 ? (
-          <div className="hub-empty-state m-6">
-            <CarFront size={28} className="text-[var(--sea-ink-soft)]" />
-            <p className="text-sm text-[var(--sea-ink-soft)]">
-              {activeTab === 'all' ? 'No vehicles yet.' : `No ${activeTab} vehicles.`}
-            </p>
-          </div>
-        ) : (
-          <table className="cars-table">
-            <thead>
-              <tr>
-                <th className="sortable px-3 py-2" onClick={() => handleSort('plateNumber')}>
-                  <span className="sort-indicator">Plate <SortIcon col="plateNumber" sortKey={sortKey} sortDir={sortDir} /></span>
-                </th>
-                <th className="sortable px-3 py-2" onClick={() => handleSort('make')}>
-                  <span className="sort-indicator">Vehicle <SortIcon col="make" sortKey={sortKey} sortDir={sortDir} /></span>
-                </th>
-                <th className="sortable px-3 py-2" onClick={() => handleSort('year')}>
-                  <span className="sort-indicator">Year <SortIcon col="year" sortKey={sortKey} sortDir={sortDir} /></span>
-                </th>
-                <th className="px-3 py-2">Color</th>
-                <th className="sortable px-3 py-2" onClick={() => handleSort('category')}>
-                  <span className="sort-indicator">Category <SortIcon col="category" sortKey={sortKey} sortDir={sortDir} /></span>
-                </th>
-                <th className="sortable px-3 py-2" onClick={() => handleSort('status')}>
-                  <span className="sort-indicator">Status <SortIcon col="status" sortKey={sortKey} sortDir={sortDir} /></span>
-                </th>
-                <th className="sortable px-3 py-2" onClick={() => handleSort('dailyRateSen')}>
-                  <span className="sort-indicator">Daily Rate <SortIcon col="dailyRateSen" sortKey={sortKey} sortDir={sortDir} /></span>
-                </th>
-                {isOwner && <th className="px-3 py-2 text-right">Actions</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredSortedCars.map((car) => (
-                <tr key={car.id}>
-                  <td className="px-3 py-[0.42rem]">
-                    <Link
-                      to="/admin/cars/$carId"
-                      params={{ carId: car.id }}
-                      className="plate-link"
-                    >
-                      {car.plateNumber}
-                    </Link>
-                  </td>
-                  <td className="px-3 py-[0.42rem]">
-                    <span className="font-medium">{car.make}</span>{' '}
-                    <span className="vehicle-model">{car.model}</span>
-                  </td>
-                  <td className="px-3 py-[0.42rem] text-[var(--sea-ink-soft)]">{car.year}</td>
-                  <td className="px-3 py-[0.42rem]">
-                    <span className="inline-flex items-center gap-1.5">
-                      <span
-                        className="size-2.5 shrink-0 rounded-full border border-black/10"
-                        style={{ background: COLOR_SWATCH[car.color] }}
-                      />
-                      <span className="text-[var(--sea-ink-soft)]">{COLOR_LABEL[car.color]}</span>
-                    </span>
-                  </td>
-                  <td className="px-3 py-[0.42rem]">
-                    <span className={`category-pill category-pill--${car.category}`}>
-                      {CATEGORY_LABEL[car.category]}
-                    </span>
-                  </td>
-                  <td className="px-3 py-[0.42rem]">
-                    {isOwner && car.status !== 'retired' && car.status !== 'rented' && car.status !== 'reserved' && car.status !== 'payment-pending' ? (
-                      <span className="relative inline-flex items-center">
-                        <select
-                          className={`status-badge status-badge--${car.status} cursor-pointer appearance-none border-0 pr-[1.1rem] transition-shadow hover:ring-1 hover:ring-current/30 disabled:cursor-not-allowed disabled:opacity-60`}
-                          value={car.status}
-                          disabled={statusChangingId === car.id}
-                          onChange={(e) =>
-                            handleStatusChange(
-                              car.id,
-                              e.target.value as 'maintenance' | 'damaged' | 'available',
-                            )
-                          }
-                          aria-label={`Change status of ${car.plateNumber}`}
-                          title="Click to change status"
-                        >
-                          {MANUAL_STATUS_OPTIONS.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </option>
-                          ))}
-                        </select>
-                        <ChevronDown
-                          size={9}
-                          className="pointer-events-none absolute right-[0.3rem] opacity-60"
-                          strokeWidth={2.5}
-                        />
-                      </span>
-                    ) : (
-                      <StatusBadge status={car.status} />
-                    )}
-                  </td>
-                  <td className="px-3 py-[0.42rem]">{formatMYR(car.dailyRateSen)}</td>
-                  {isOwner && (
-                    <td className="px-3 py-[0.42rem] text-right whitespace-nowrap">
-                      <button
-                        type="button"
-                        className={`${ROW_BTN} mr-1.5`}
-                        onClick={() => openEdit(car)}
-                        disabled={car.status === 'retired'}
-                        title={car.status === 'retired' ? 'Retired vehicles cannot be edited' : 'Edit vehicle'}
-                      >
-                        <Pencil size={11} />
-                        Edit
-                      </button>
-                      {car.status !== 'retired' && (
-                        <button
-                          type="button"
-                          className={`${ROW_BTN} opacity-60 hover:opacity-100`}
-                          onClick={() => setConfirmingRetire(car)}
-                        >
-                          Retire
-                        </button>
-                      )}
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        <DataTable
+          columns={columns}
+          data={filteredSortedCars}
+          getKey={(c) => c.id}
+          sortKey={sortKey}
+          sortDir={sortDir}
+          onSort={handleSort as (key: string) => void}
+          emptyState={
+            <div className="hub-empty-state m-6">
+              <CarFront size={28} className="text-[var(--sea-ink-soft)]" />
+              <p className="text-sm text-[var(--sea-ink-soft)]">
+                {activeTab === 'all' ? 'No vehicles yet.' : `No ${activeTab} vehicles.`}
+              </p>
+            </div>
+          }
+        />
       </article>
 
       {/* ── Add / Edit Sheet ── */}

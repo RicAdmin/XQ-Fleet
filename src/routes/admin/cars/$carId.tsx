@@ -580,7 +580,7 @@ function CarDetailPage() {
               <button
                 type="button"
                 onClick={() => setEditOpen(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-[rgba(23,58,64,0.08)]"
+                className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-[rgba(26,25,22,0.06)]"
                 aria-label="Close"
               >
                 <X size={16} />

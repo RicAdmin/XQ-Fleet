@@ -2,11 +2,11 @@ import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/render
 
 // ─── Brand colours ────────────────────────────────────────────────────────────
 
-const TEAL = '#328f97'
-const INK = '#173a40'
-const INK_SOFT = '#5a7a80'
-const LINE = '#d4e4e6'
-const SURFACE = '#f3faf5'
+const AMBER = '#a06208'
+const INK = '#1a1916'
+const INK_SOFT = '#6b6760'
+const LINE = '#e8e7e4'
+const SURFACE = '#faf9f7'
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
 
@@ -29,11 +29,11 @@ const s = StyleSheet.create({
     marginBottom: 28,
     paddingBottom: 18,
     borderBottomWidth: 2,
-    borderBottomColor: TEAL,
+    borderBottomColor: AMBER,
   },
   logo: { width: 48, height: 48, objectFit: 'contain' },
   companyBlock: { alignItems: 'flex-end' },
-  docTitle: { fontSize: 20, fontFamily: 'Helvetica-Bold', color: TEAL, marginBottom: 2 },
+  docTitle: { fontSize: 20, fontFamily: 'Helvetica-Bold', color: AMBER, marginBottom: 2 },
   docMeta: { fontSize: 8, color: INK_SOFT },
 
   // Section
@@ -41,7 +41,7 @@ const s = StyleSheet.create({
   sectionTitle: {
     fontSize: 7.5,
     fontFamily: 'Helvetica-Bold',
-    color: TEAL,
+    color: AMBER,
     letterSpacing: 1,
     textTransform: 'uppercase',
     marginBottom: 8,
@@ -76,7 +76,7 @@ const s = StyleSheet.create({
   summaryValue: { fontFamily: 'Helvetica-Bold', color: INK },
   summaryTotal: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 6, paddingTop: 6, borderTopWidth: 0.5, borderTopColor: LINE },
   summaryTotalLabel: { fontFamily: 'Helvetica-Bold', fontSize: 10 },
-  summaryTotalValue: { fontFamily: 'Helvetica-Bold', fontSize: 11, color: TEAL },
+  summaryTotalValue: { fontFamily: 'Helvetica-Bold', fontSize: 11, color: AMBER },
 
   // Signature block
   sigSection: { flexDirection: 'row', gap: 40, marginTop: 32 },
@@ -435,9 +435,9 @@ export function InvoiceDocument({ data }: { data: DocumentData }) {
                 <Text style={s.summaryValue}>− {fmt(Math.max(0, data.paidAmountSen - data.depositAmountSen))}</Text>
               </View>
             )}
-            <View style={[s.summaryTotal, { borderTopColor: TEAL, borderTopWidth: 1 }]}>
+            <View style={[s.summaryTotal, { borderTopColor: AMBER, borderTopWidth: 1 }]}>
               <Text style={s.summaryTotalLabel}>Balance due</Text>
-              <Text style={[s.summaryTotalValue, { color: balance > 0 ? '#c44444' : TEAL }]}>
+              <Text style={[s.summaryTotalValue, { color: balance > 0 ? '#c44444' : AMBER }]}>
                 {fmt(Math.max(0, balance))}
               </Text>
             </View>

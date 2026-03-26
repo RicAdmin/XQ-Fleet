@@ -1,8 +1,10 @@
 import { useState, useMemo } from 'react'
 
 import { Link } from '@tanstack/react-router'
-import { ArrowUpDown, ChevronDown, ChevronUp, Eye, Plus, Trash2, X } from 'lucide-react'
+import { Eye, Plus, Trash2, X } from 'lucide-react'
 
+import { DataTable, useSortState, type Column } from '#/components/ui/DataTable'
+import { PageHeader } from '#/components/ui/PageHeader'
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
 import {
   Combobox,
@@ -123,15 +125,6 @@ function sortRentals(rows: RentalListRow[], key: SortKey, dir: 'asc' | 'desc'): 
 const ROW_BTN =
   'inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] text-[var(--sea-ink)] shadow-[0_1px_3px_rgba(30,90,72,0.08)] hover:-translate-y-px transition-transform cursor-pointer disabled:cursor-not-allowed disabled:opacity-50'
 
-// ─── Sort icon ────────────────────────────────────────────────────────────────
-
-function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: 'asc' | 'desc' }) {
-  if (sortKey !== col) return <ArrowUpDown size={11} className="ml-1 inline opacity-40" />
-  return sortDir === 'asc'
-    ? <ChevronUp size={11} className="ml-1 inline" />
-    : <ChevronDown size={11} className="ml-1 inline" />
-}
-
 // ─── Form state ───────────────────────────────────────────────────────────────
 
 type RentalFormData = {
@@ -182,8 +175,7 @@ export default function RentalsList({
   const [rentalsList, setRentalsList] = useState<RentalListRow[]>(initialRentals)
   const [activeTab, setActiveTab] = useState<RentalStatus | 'all'>('all')
   const [search, setSearch] = useState('')
-  const [sortKey, setSortKey] = useState<SortKey>('startDate')
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const { sortKey, sortDir, handleSort } = useSortState<SortKey>('startDate', 'desc')
 
   // Form
   const [formOpen, setFormOpen] = useState(false)
@@ -328,30 +320,112 @@ export default function RentalsList({
     }
   }
 
-  // ── Sort handler ──────────────────────────────────────────────────────────
+  // ── Columns ───────────────────────────────────────────────────────────────
 
-  function handleSort(key: SortKey) {
-    if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
-    else { setSortKey(key); setSortDir('asc') }
-  }
+  const columns: Column<RentalListRow>[] = [
+    {
+      key: 'carPlateNumber',
+      header: 'Car',
+      sortable: true,
+      render: (r) => (
+        <>
+          <Link to={`${basePath}/$rentalId` as never} params={{ rentalId: r.id } as never} className="plate-link">
+            {r.carPlateNumber ?? '—'}
+          </Link>
+          <span className="ml-1.5 text-xs text-[var(--sea-ink-soft)]">{r.carMake} {r.carModel}</span>
+        </>
+      ),
+    },
+    {
+      key: 'customerFullName',
+      header: 'Customer',
+      sortable: true,
+      cellClassName: 'text-sm text-[var(--sea-ink)]',
+      render: (r) => r.customerFullName ?? '—',
+    },
+    {
+      key: 'type',
+      header: 'Type',
+      render: (r) => (
+        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${r.type === 'walk-in' ? 'border-blue-200 bg-blue-50 text-blue-700' : 'border-purple-200 bg-purple-50 text-purple-700'}`}>
+          {r.type === 'walk-in' ? 'Walk-in' : 'Booking'}
+        </span>
+      ),
+    },
+    {
+      key: 'startDate',
+      header: 'Dates',
+      sortable: true,
+      cellClassName: 'text-xs text-[var(--sea-ink-soft)]',
+      render: (r) => (
+        <>
+          {formatDateShort(r.startDate)}
+          <span className="mx-1 opacity-40">→</span>
+          {formatDateShort(r.endDate)}
+        </>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      sortable: true,
+      render: (r) => <RentalStatusBadge status={r.status} />,
+    },
+    {
+      key: 'paymentStatus',
+      header: 'Payment',
+      render: (r) => <PaymentBadge status={r.paymentStatus} />,
+    },
+    {
+      key: 'totalAmountSen',
+      header: 'Total',
+      sortable: true,
+      cellClassName: 'font-mono text-sm',
+      render: (r) => formatMYR(r.totalAmountSen),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      headerClassName: 'text-right',
+      cellClassName: 'text-right whitespace-nowrap',
+      render: (r) => (
+        <>
+          <Link to={`${basePath}/$rentalId` as never} params={{ rentalId: r.id } as never} className={`${ROW_BTN} mr-1.5`}>
+            <Eye size={11} />
+            View
+          </Link>
+          {r.status === 'pending' && (
+            <button type="button" className={`${ROW_BTN} mr-1.5 opacity-70 hover:opacity-100`} onClick={() => { setConfirmingCancel(r); setCancelError(null) }}>
+              <X size={11} />
+              Cancel
+            </button>
+          )}
+          {canDelete && (r.status === 'closed' || r.status === 'cancelled') && (
+            <button type="button" className={`${ROW_BTN} opacity-50 hover:opacity-100`} onClick={() => { setConfirmingDelete(r); setDeleteError(null) }}>
+              <Trash2 size={11} />
+              Delete
+            </button>
+          )}
+        </>
+      ),
+    },
+  ]
 
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
     <AdminSidebarShell user={session.user} pageTitle="Rentals">
       {/* Page header */}
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-semibold text-[var(--sea-ink)]">Rentals</h2>
-          <p className="mt-1 text-sm text-[var(--sea-ink-soft)]">
-            {rentalsList.length} rental{rentalsList.length !== 1 ? 's' : ''} total
-          </p>
-        </div>
-        <button type="button" className="button-primary flex items-center gap-2" onClick={openAdd}>
-          <Plus size={15} />
-          New rental
-        </button>
-      </div>
+      <PageHeader
+        title="Rentals"
+        description={`${rentalsList.length} rental${rentalsList.length !== 1 ? 's' : ''} total`}
+        actions={
+          <button type="button" className="button-primary flex items-center gap-2" onClick={openAdd}>
+            <Plus size={15} />
+            New rental
+          </button>
+        }
+      />
 
       {/* Status tabs */}
       <div className="status-tabs mb-4">
@@ -390,108 +464,21 @@ export default function RentalsList({
 
       {/* Table */}
       <article className="workspace-panel island-shell overflow-x-auto p-0">
-        {filteredSorted.length === 0 ? (
-          <div className="hub-empty-state m-6">
-            <p className="text-sm text-[var(--sea-ink-soft)]">
-              {search || activeTab !== 'all' ? 'No rentals match your filter.' : 'No rentals yet.'}
-            </p>
-          </div>
-        ) : (
-          <table className="cars-table">
-            <thead>
-              <tr>
-                <th className="sortable px-3 py-2" onClick={() => handleSort('carPlateNumber')}>
-                  <span className="sort-indicator">Car <SortIcon col="carPlateNumber" sortKey={sortKey} sortDir={sortDir} /></span>
-                </th>
-                <th className="sortable px-3 py-2" onClick={() => handleSort('customerFullName')}>
-                  <span className="sort-indicator">Customer <SortIcon col="customerFullName" sortKey={sortKey} sortDir={sortDir} /></span>
-                </th>
-                <th className="px-3 py-2">Type</th>
-                <th className="sortable px-3 py-2" onClick={() => handleSort('startDate')}>
-                  <span className="sort-indicator">Dates <SortIcon col="startDate" sortKey={sortKey} sortDir={sortDir} /></span>
-                </th>
-                <th className="sortable px-3 py-2" onClick={() => handleSort('status')}>
-                  <span className="sort-indicator">Status <SortIcon col="status" sortKey={sortKey} sortDir={sortDir} /></span>
-                </th>
-                <th className="px-3 py-2">Payment</th>
-                <th className="sortable px-3 py-2" onClick={() => handleSort('totalAmountSen')}>
-                  <span className="sort-indicator">Total <SortIcon col="totalAmountSen" sortKey={sortKey} sortDir={sortDir} /></span>
-                </th>
-                <th className="px-3 py-2 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredSorted.map((r) => (
-                <tr key={r.id}>
-                  <td className="px-3 py-[0.42rem]">
-                    <Link
-                      to={`${basePath}/$rentalId` as never}
-                      params={{ rentalId: r.id } as never}
-                      className="plate-link"
-                    >
-                      {r.carPlateNumber ?? '—'}
-                    </Link>
-                    <span className="ml-1.5 text-xs text-[var(--sea-ink-soft)]">
-                      {r.carMake} {r.carModel}
-                    </span>
-                  </td>
-                  <td className="px-3 py-[0.42rem] text-sm text-[var(--sea-ink)]">
-                    {r.customerFullName ?? '—'}
-                  </td>
-                  <td className="px-3 py-[0.42rem]">
-                    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${r.type === 'walk-in' ? 'border-blue-200 bg-blue-50 text-blue-700' : 'border-purple-200 bg-purple-50 text-purple-700'}`}>
-                      {r.type === 'walk-in' ? 'Walk-in' : 'Booking'}
-                    </span>
-                  </td>
-                  <td className="px-3 py-[0.42rem] text-xs text-[var(--sea-ink-soft)]">
-                    {formatDateShort(r.startDate)}
-                    <span className="mx-1 opacity-40">→</span>
-                    {formatDateShort(r.endDate)}
-                  </td>
-                  <td className="px-3 py-[0.42rem]">
-                    <RentalStatusBadge status={r.status} />
-                  </td>
-                  <td className="px-3 py-[0.42rem]">
-                    <PaymentBadge status={r.paymentStatus} />
-                  </td>
-                  <td className="px-3 py-[0.42rem] font-mono text-sm">
-                    {formatMYR(r.totalAmountSen)}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-[0.42rem] text-right">
-                    <Link
-                      to={`${basePath}/$rentalId` as never}
-                      params={{ rentalId: r.id } as never}
-                      className={`${ROW_BTN} mr-1.5`}
-                    >
-                      <Eye size={11} />
-                      View
-                    </Link>
-                    {r.status === 'pending' && (
-                      <button
-                        type="button"
-                        className={`${ROW_BTN} mr-1.5 opacity-70 hover:opacity-100`}
-                        onClick={() => { setConfirmingCancel(r); setCancelError(null) }}
-                      >
-                        <X size={11} />
-                        Cancel
-                      </button>
-                    )}
-                    {canDelete && (r.status === 'closed' || r.status === 'cancelled') && (
-                      <button
-                        type="button"
-                        className={`${ROW_BTN} opacity-50 hover:opacity-100`}
-                        onClick={() => { setConfirmingDelete(r); setDeleteError(null) }}
-                      >
-                        <Trash2 size={11} />
-                        Delete
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        <DataTable
+          columns={columns}
+          data={filteredSorted}
+          getKey={(r) => r.id}
+          sortKey={sortKey}
+          sortDir={sortDir}
+          onSort={handleSort as (key: string) => void}
+          emptyState={
+            <div className="hub-empty-state m-6">
+              <p className="text-sm text-[var(--sea-ink-soft)]">
+                {search || activeTab !== 'all' ? 'No rentals match your filter.' : 'No rentals yet.'}
+              </p>
+            </div>
+          }
+        />
       </article>
 
       {/* ── New Rental Sheet ── */}

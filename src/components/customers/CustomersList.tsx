@@ -1,8 +1,10 @@
 import { useState, useMemo } from 'react'
 
 import { Link } from '@tanstack/react-router'
-import { ArrowUpDown, ChevronDown, ChevronUp, Pencil, Plus, Search, Trash2, Users } from 'lucide-react'
+import { Pencil, Plus, Search, Trash2, Users } from 'lucide-react'
 
+import { DataTable, useSortState, type Column } from '#/components/ui/DataTable'
+import { PageHeader } from '#/components/ui/PageHeader'
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
 import { Button } from '#/components/ui/button'
 import {
@@ -78,23 +80,6 @@ function formatDate(d: Date) {
 const ROW_BTN =
   'inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] text-[var(--sea-ink)] shadow-[0_1px_3px_rgba(30,90,72,0.08)] hover:-translate-y-px transition-transform cursor-pointer disabled:cursor-not-allowed disabled:opacity-50'
 
-// ─── Sort icon ────────────────────────────────────────────────────────────────
-
-function SortIcon({
-  col,
-  sortKey,
-  sortDir,
-}: {
-  col: SortKey
-  sortKey: SortKey
-  sortDir: 'asc' | 'desc'
-}) {
-  if (sortKey !== col) return <ArrowUpDown size={11} className="ml-1 inline opacity-40" />
-  return sortDir === 'asc'
-    ? <ChevronUp size={11} className="ml-1 inline" />
-    : <ChevronDown size={11} className="ml-1 inline" />
-}
-
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 type CustomersListProps = {
@@ -114,8 +99,7 @@ export default function CustomersList({
 }: CustomersListProps) {
   const [customers, setCustomers] = useState<CustomerRow[]>(initialCustomers)
   const [search, setSearch] = useState('')
-  const [sortKey, setSortKey] = useState<SortKey>('createdAt')
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const { sortKey, sortDir, handleSort } = useSortState<SortKey>('createdAt', 'desc')
 
   // Form
   const [formOpen, setFormOpen] = useState(false)
@@ -143,17 +127,6 @@ export default function CustomersList({
       : customers
     return sortCustomers(filtered, sortKey, sortDir)
   }, [customers, search, sortKey, sortDir])
-
-  // ── Sort handler ──────────────────────────────────────────────────────────
-
-  function handleSort(key: SortKey) {
-    if (sortKey === key) {
-      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
-    } else {
-      setSortKey(key)
-      setSortDir('asc')
-    }
-  }
 
   // ── Form handlers ─────────────────────────────────────────────────────────
 
@@ -237,23 +210,91 @@ export default function CustomersList({
     }
   }
 
+  // ── Columns ───────────────────────────────────────────────────────────────
+
+  const columns: Column<CustomerRow>[] = [
+    {
+      key: 'fullName',
+      header: 'Name',
+      sortable: true,
+      render: (c) => (
+        <Link to={`${basePath}/$customerId` as never} params={{ customerId: c.id } as never} className="plate-link">
+          {c.fullName ?? '—'}
+        </Link>
+      ),
+    },
+    {
+      key: 'icOrPassport',
+      header: 'IC / Passport',
+      sortable: true,
+      cellClassName: 'font-mono text-xs text-[var(--sea-ink-soft)]',
+      render: (c) => c.icOrPassport ?? '—',
+    },
+    {
+      key: 'phone',
+      header: 'Phone',
+      sortable: true,
+      cellClassName: 'text-[var(--sea-ink-soft)]',
+      render: (c) => c.phone ?? '—',
+    },
+    {
+      key: 'email',
+      header: 'Email',
+      sortable: true,
+      cellClassName: 'text-[var(--sea-ink-soft)]',
+      render: (c) => c.email ?? <span className="opacity-40">—</span>,
+    },
+    {
+      key: 'createdAt',
+      header: 'Joined',
+      sortable: true,
+      cellClassName: 'text-[var(--sea-ink-soft)]',
+      render: (c) => formatDate(c.createdAt),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      headerClassName: 'text-right',
+      cellClassName: 'text-right whitespace-nowrap',
+      render: (c) => (
+        <>
+          <button type="button" className={`${ROW_BTN} mr-1.5`} onClick={() => openEdit(c)}>
+            <Pencil size={11} />
+            Edit
+          </button>
+          {canDelete && (
+            <button
+              type="button"
+              className={`${ROW_BTN} opacity-60 hover:opacity-100`}
+              onClick={() => {
+                setConfirmingDelete(c)
+                setDeleteError(null)
+              }}
+            >
+              <Trash2 size={11} />
+              Delete
+            </button>
+          )}
+        </>
+      ),
+    },
+  ]
+
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
     <AdminSidebarShell user={session.user} pageTitle="Customers">
       {/* Page header */}
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-semibold text-[var(--sea-ink)]">Customers</h2>
-          <p className="mt-1 text-sm text-[var(--sea-ink-soft)]">
-            {customers.length} customer{customers.length !== 1 ? 's' : ''} total
-          </p>
-        </div>
-        <button type="button" className="button-primary flex items-center gap-2" onClick={openAdd}>
-          <Plus size={15} />
-          Add customer
-        </button>
-      </div>
+      <PageHeader
+        title="Customers"
+        description={`${customers.length} customer${customers.length !== 1 ? 's' : ''} total`}
+        actions={
+          <button type="button" className="button-primary flex items-center gap-2" onClick={openAdd}>
+            <Plus size={15} />
+            Add customer
+          </button>
+        }
+      />
 
       {/* Search bar */}
       <div className="mb-4 flex items-center gap-2">
@@ -279,112 +320,22 @@ export default function CustomersList({
 
       {/* Table */}
       <article className="workspace-panel island-shell overflow-x-auto p-0">
-        {filteredSorted.length === 0 ? (
-          <div className="hub-empty-state m-6">
-            <Users size={28} className="text-[var(--sea-ink-soft)]" />
-            <p className="text-sm text-[var(--sea-ink-soft)]">
-              {search ? 'No customers match your search.' : 'No customers yet.'}
-            </p>
-          </div>
-        ) : (
-          <table className="cars-table">
-            <thead>
-              <tr>
-                <th
-                  className="sortable px-3 py-2"
-                  onClick={() => handleSort('fullName')}
-                >
-                  <span className="sort-indicator">
-                    Name <SortIcon col="fullName" sortKey={sortKey} sortDir={sortDir} />
-                  </span>
-                </th>
-                <th
-                  className="sortable px-3 py-2"
-                  onClick={() => handleSort('icOrPassport')}
-                >
-                  <span className="sort-indicator">
-                    IC / Passport <SortIcon col="icOrPassport" sortKey={sortKey} sortDir={sortDir} />
-                  </span>
-                </th>
-                <th
-                  className="sortable px-3 py-2"
-                  onClick={() => handleSort('phone')}
-                >
-                  <span className="sort-indicator">
-                    Phone <SortIcon col="phone" sortKey={sortKey} sortDir={sortDir} />
-                  </span>
-                </th>
-                <th
-                  className="sortable px-3 py-2"
-                  onClick={() => handleSort('email')}
-                >
-                  <span className="sort-indicator">
-                    Email <SortIcon col="email" sortKey={sortKey} sortDir={sortDir} />
-                  </span>
-                </th>
-                <th
-                  className="sortable px-3 py-2"
-                  onClick={() => handleSort('createdAt')}
-                >
-                  <span className="sort-indicator">
-                    Joined <SortIcon col="createdAt" sortKey={sortKey} sortDir={sortDir} />
-                  </span>
-                </th>
-                <th className="px-3 py-2 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredSorted.map((c) => (
-                <tr key={c.id}>
-                  <td className="px-3 py-[0.42rem]">
-                    <Link
-                      to={`${basePath}/$customerId` as never}
-                      params={{ customerId: c.id } as never}
-                      className="plate-link"
-                    >
-                      {c.fullName ?? '—'}
-                    </Link>
-                  </td>
-                  <td className="px-3 py-[0.42rem] font-mono text-xs text-[var(--sea-ink-soft)]">
-                    {c.icOrPassport ?? '—'}
-                  </td>
-                  <td className="px-3 py-[0.42rem] text-[var(--sea-ink-soft)]">
-                    {c.phone ?? '—'}
-                  </td>
-                  <td className="px-3 py-[0.42rem] text-[var(--sea-ink-soft)]">
-                    {c.email ?? <span className="opacity-40">—</span>}
-                  </td>
-                  <td className="px-3 py-[0.42rem] text-[var(--sea-ink-soft)]">
-                    {formatDate(c.createdAt)}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-[0.42rem] text-right">
-                    <button
-                      type="button"
-                      className={`${ROW_BTN} mr-1.5`}
-                      onClick={() => openEdit(c)}
-                    >
-                      <Pencil size={11} />
-                      Edit
-                    </button>
-                    {canDelete && (
-                      <button
-                        type="button"
-                        className={`${ROW_BTN} opacity-60 hover:opacity-100`}
-                        onClick={() => {
-                          setConfirmingDelete(c)
-                          setDeleteError(null)
-                        }}
-                      >
-                        <Trash2 size={11} />
-                        Delete
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        <DataTable
+          columns={columns}
+          data={filteredSorted}
+          getKey={(c) => c.id}
+          sortKey={sortKey}
+          sortDir={sortDir}
+          onSort={handleSort as (key: string) => void}
+          emptyState={
+            <div className="hub-empty-state m-6">
+              <Users size={28} className="text-[var(--sea-ink-soft)]" />
+              <p className="text-sm text-[var(--sea-ink-soft)]">
+                {search ? 'No customers match your search.' : 'No customers yet.'}
+              </p>
+            </div>
+          }
+        />
       </article>
 
       {/* ── Add / Edit Sheet ── */}
