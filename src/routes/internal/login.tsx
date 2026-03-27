@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 
 import AuthFrame from '#/components/auth/AuthFrame'
-import PublicPageShell from '#/components/shells/PublicPageShell'
+import AuthPageShell from '#/components/shells/AuthPageShell'
 import { authClient } from '#/lib/auth-client'
 import { createInitialOwner } from '#/lib/auth-functions'
 import { isAppRole } from '#/lib/auth-model'
@@ -29,7 +29,7 @@ function InternalLoginPage() {
   const title = hasOwner ? 'Internal sign in' : 'Create the first owner account'
 
   return (
-    <PublicPageShell className="page-wrap px-4 pb-12 pt-8">
+    <AuthPageShell>
       <AuthFrame
         badge="Internal workspace"
         title={title}
@@ -144,6 +144,6 @@ function InternalLoginPage() {
           </button>
         </form>
       </AuthFrame>
-    </PublicPageShell>
+    </AuthPageShell>
   )
 }

@@ -4,7 +4,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 
 import AuthFrame from '#/components/auth/AuthFrame'
-import PublicPageShell from '#/components/shells/PublicPageShell'
+import AuthPageShell from '#/components/shells/AuthPageShell'
 import { authClient } from '#/lib/auth-client'
 import { redirectAuthenticatedUser } from '#/lib/route-guards'
 
@@ -26,7 +26,7 @@ function CustomerRegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   return (
-    <PublicPageShell className="page-wrap px-4 pb-12 pt-8">
+    <AuthPageShell>
       <AuthFrame
         badge="Portal onboarding"
         title="Create a customer account"
@@ -108,6 +108,6 @@ function CustomerRegisterPage() {
           </button>
         </form>
       </AuthFrame>
-    </PublicPageShell>
+    </AuthPageShell>
   )
 }

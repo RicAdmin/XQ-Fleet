@@ -4,7 +4,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 
 import AuthFrame from '#/components/auth/AuthFrame'
-import PublicPageShell from '#/components/shells/PublicPageShell'
+import AuthPageShell from '#/components/shells/AuthPageShell'
 import { authClient } from '#/lib/auth-client'
 import { isAppRole } from '#/lib/auth-model'
 import { redirectAuthenticatedUser } from '#/lib/route-guards'
@@ -26,7 +26,7 @@ function CustomerLoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   return (
-    <PublicPageShell className="page-wrap px-4 pb-12 pt-8">
+    <AuthPageShell>
       <AuthFrame
         badge="Customer access"
         title="Sign in"
@@ -102,6 +102,6 @@ function CustomerLoginPage() {
           </button>
         </form>
       </AuthFrame>
-    </PublicPageShell>
+    </AuthPageShell>
   )
 }

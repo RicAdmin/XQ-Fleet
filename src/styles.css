@@ -3724,3 +3724,58 @@ select.field-input {
     padding: 1rem 1rem 1.2rem;
   }
 }
+
+
+/* ═══════════════════════════════════════════════
+   AUTH PAGE SHELL — minimal brand nav
+   ═══════════════════════════════════════════════ */
+
+.auth-page-root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-page-nav {
+  border-bottom: 1px solid var(--line);
+  padding: 1rem 0;
+  background: var(--bg-base);
+}
+
+.auth-page-nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.auth-page-brand {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--sea-ink);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  transition: opacity 150ms ease;
+}
+
+.auth-page-brand:hover {
+  opacity: 0.7;
+}
+
+.auth-page-back {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--sea-ink-soft);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+.auth-page-back:hover {
+  color: var(--sea-ink);
+}
+
+.auth-page-main {
+  flex: 1;
+  padding-top: 3rem;
+  padding-bottom: 4rem;
+}
