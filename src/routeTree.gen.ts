@@ -29,6 +29,7 @@ import { Route as AppCustomersIndexRouteImport } from './routes/app/customers/in
 import { Route as AdminSettingsIndexRouteImport } from './routes/admin/settings/index'
 import { Route as AdminReportsIndexRouteImport } from './routes/admin/reports/index'
 import { Route as AdminRentalsIndexRouteImport } from './routes/admin/rentals/index'
+import { Route as AdminMaintenanceIndexRouteImport } from './routes/admin/maintenance/index'
 import { Route as AdminCustomersIndexRouteImport } from './routes/admin/customers/index'
 import { Route as AdminCarsIndexRouteImport } from './routes/admin/cars/index'
 import { Route as AccountBookingsIndexRouteImport } from './routes/account/bookings/index'
@@ -144,6 +145,11 @@ const AdminRentalsIndexRoute = AdminRentalsIndexRouteImport.update({
   path: '/rentals/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminMaintenanceIndexRoute = AdminMaintenanceIndexRouteImport.update({
+  id: '/maintenance/',
+  path: '/maintenance/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCustomersIndexRoute = AdminCustomersIndexRouteImport.update({
   id: '/customers/',
   path: '/customers/',
@@ -245,6 +251,7 @@ export interface FileRoutesByFullPath {
   '/account/bookings/': typeof AccountBookingsIndexRoute
   '/admin/cars/': typeof AdminCarsIndexRoute
   '/admin/customers/': typeof AdminCustomersIndexRoute
+  '/admin/maintenance/': typeof AdminMaintenanceIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
   '/admin/reports/': typeof AdminReportsIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
@@ -278,6 +285,7 @@ export interface FileRoutesByTo {
   '/account/bookings': typeof AccountBookingsIndexRoute
   '/admin/cars': typeof AdminCarsIndexRoute
   '/admin/customers': typeof AdminCustomersIndexRoute
+  '/admin/maintenance': typeof AdminMaintenanceIndexRoute
   '/admin/rentals': typeof AdminRentalsIndexRoute
   '/admin/reports': typeof AdminReportsIndexRoute
   '/admin/settings': typeof AdminSettingsIndexRoute
@@ -315,6 +323,7 @@ export interface FileRoutesById {
   '/account/bookings/': typeof AccountBookingsIndexRoute
   '/admin/cars/': typeof AdminCarsIndexRoute
   '/admin/customers/': typeof AdminCustomersIndexRoute
+  '/admin/maintenance/': typeof AdminMaintenanceIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
   '/admin/reports/': typeof AdminReportsIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
@@ -353,6 +362,7 @@ export interface FileRouteTypes {
     | '/account/bookings/'
     | '/admin/cars/'
     | '/admin/customers/'
+    | '/admin/maintenance/'
     | '/admin/rentals/'
     | '/admin/reports/'
     | '/admin/settings/'
@@ -386,6 +396,7 @@ export interface FileRouteTypes {
     | '/account/bookings'
     | '/admin/cars'
     | '/admin/customers'
+    | '/admin/maintenance'
     | '/admin/rentals'
     | '/admin/reports'
     | '/admin/settings'
@@ -422,6 +433,7 @@ export interface FileRouteTypes {
     | '/account/bookings/'
     | '/admin/cars/'
     | '/admin/customers/'
+    | '/admin/maintenance/'
     | '/admin/rentals/'
     | '/admin/reports/'
     | '/admin/settings/'
@@ -593,6 +605,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRentalsIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/maintenance/': {
+      id: '/admin/maintenance/'
+      path: '/maintenance'
+      fullPath: '/admin/maintenance/'
+      preLoaderRoute: typeof AdminMaintenanceIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/customers/': {
       id: '/admin/customers/'
       path: '/customers'
@@ -716,6 +735,7 @@ interface AdminRouteChildren {
   AdminRentalsRentalIdRoute: typeof AdminRentalsRentalIdRoute
   AdminCarsIndexRoute: typeof AdminCarsIndexRoute
   AdminCustomersIndexRoute: typeof AdminCustomersIndexRoute
+  AdminMaintenanceIndexRoute: typeof AdminMaintenanceIndexRoute
   AdminRentalsIndexRoute: typeof AdminRentalsIndexRoute
   AdminReportsIndexRoute: typeof AdminReportsIndexRoute
   AdminSettingsIndexRoute: typeof AdminSettingsIndexRoute
@@ -728,6 +748,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminRentalsRentalIdRoute: AdminRentalsRentalIdRoute,
   AdminCarsIndexRoute: AdminCarsIndexRoute,
   AdminCustomersIndexRoute: AdminCustomersIndexRoute,
+  AdminMaintenanceIndexRoute: AdminMaintenanceIndexRoute,
   AdminRentalsIndexRoute: AdminRentalsIndexRoute,
   AdminReportsIndexRoute: AdminReportsIndexRoute,
   AdminSettingsIndexRoute: AdminSettingsIndexRoute,

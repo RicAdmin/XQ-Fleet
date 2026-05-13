@@ -13,7 +13,7 @@
 }
 
 :root {
-  /* ── Warm Slate palette ── */
+  /* ── Warm Slate palette (legacy names — kept for backward compat) ── */
   --sea-ink: #1a1916;
   --sea-ink-soft: #6b6760;
   --lagoon: #c4780a;
@@ -23,6 +23,7 @@
   --foam: #faf9f7;
   --surface: rgba(255, 255, 255, 0.92);
   --surface-strong: #ffffff;
+  --surface-muted: rgba(244, 243, 240, 0.6);
   --line: rgba(26, 25, 22, 0.1);
   --inset-glint: rgba(255, 255, 255, 0.9);
   --kicker: #6b6760;
@@ -33,15 +34,79 @@
   --link-bg-hover: rgba(244, 243, 240, 0.9);
   --hero-a: rgba(196, 120, 10, 0.08);
   --hero-b: rgba(26, 25, 22, 0.04);
-  /* ── Semantic tokens ── */
-  --amber: #c4780a;
+  /* ── Carbon & Ember design system tokens ── */
+  /* Brand accent — ember (replaces split --lagoon / --amber usage) */
+  --ember: #c4780a;
+  --ember-deep: #a06208;
+  --ember-wash: rgba(196, 120, 10, 0.08);
+  --ember-border: rgba(196, 120, 10, 0.22);
+  /* Semantic: warning (shares hue with ember; always paired with icon/text) */
+  --warning: #c4780a;
+  --warning-wash: rgba(196, 120, 10, 0.08);
+  --warning-border: rgba(196, 120, 10, 0.22);
+  /* Semantic: success */
+  --success: #276749;
+  --success-wash: rgba(39, 103, 73, 0.08);
+  --success-border: rgba(39, 103, 73, 0.22);
+  /* Semantic: error */
+  --error: #c0392b;
+  --error-wash: rgba(192, 57, 43, 0.08);
+  --error-border: rgba(192, 57, 43, 0.22);
+  /* Semantic: info */
+  --info: #0284c7;
+  --info-wash: rgba(2, 132, 199, 0.08);
+  --info-border: rgba(2, 132, 199, 0.22);
+  /* Previously undefined — was used in booking confirmed banner */
+  --teal-brand: #0891b2;
+  /* Status badge tokens — fleet & rental */
+  --status-available-bg: rgba(39, 103, 73, 0.10);
+  --status-available-text: #276749;
+  --status-reserved-bg: rgba(37, 99, 235, 0.10);
+  --status-reserved-text: #1d4ed8;
+  --status-payment-pending-bg: rgba(120, 80, 200, 0.10);
+  --status-payment-pending-text: #5b3ea8;
+  --status-rented-bg: rgba(26, 25, 22, 0.08);
+  --status-rented-text: var(--sea-ink);
+  --status-maintenance-bg: rgba(196, 120, 10, 0.10);
+  --status-maintenance-text: #7a5010;
+  --status-damaged-bg: rgba(220, 60, 60, 0.10);
+  --status-damaged-text: #c02020;
+  --status-retired-bg: rgba(100, 100, 100, 0.10);
+  --status-retired-text: #666666;
+  /* Fleet status dot colors */
+  --dot-available: #3aab6a;
+  --dot-rented: var(--lagoon);
+  --dot-reserved: #7c5cbf;
+  --dot-maintenance: #e8a030;
+  --dot-damaged: #dd4444;
+  --dot-retired: #9aaa9a;
+  /* Legacy semantic aliases */
+  --amber: var(--ember);
   --amber-light: #d98a12;
-  --amber-bg: rgba(196, 120, 10, 0.08);
-  --amber-border: rgba(196, 120, 10, 0.22);
-  --green: #276749;
-  --green-bg: rgba(39, 103, 73, 0.08);
-  --red: #c0392b;
-  --red-bg: rgba(192, 57, 43, 0.08);
+  --amber-bg: var(--ember-wash);
+  --amber-border: var(--ember-border);
+  --amber-accent: var(--ember-deep);
+  --green: var(--success);
+  --green-bg: var(--success-wash);
+  --red: var(--error);
+  --red-bg: var(--error-wash);
+  /* Z-index scale */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 20;
+  --z-nav: 40;
+  --z-dropdown: 100;
+  --z-modal: 200;
+  --z-toast: 300;
+  --z-tooltip: 400;
+  /* Extended shadow scale */
+  --shadow-lg: 0 8px 28px rgba(26, 25, 22, 0.10), 0 2px 6px rgba(26, 25, 22, 0.06);
+  --shadow-xl: 0 20px 60px rgba(26, 25, 22, 0.14), 0 4px 12px rgba(26, 25, 22, 0.08);
+  /* Extended radius scale */
+  --radius-xs: 4px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
@@ -92,6 +157,7 @@
   --foam: #141311;
   --surface: rgba(28, 27, 25, 0.9);
   --surface-strong: rgba(24, 23, 21, 0.95);
+  --surface-muted: rgba(28, 27, 25, 0.6);
   --line: rgba(240, 237, 232, 0.1);
   --inset-glint: rgba(240, 237, 232, 0.08);
   --kicker: #a09b94;
@@ -102,6 +168,42 @@
   --link-bg-hover: rgba(36, 35, 32, 0.9);
   --hero-a: rgba(224, 146, 26, 0.12);
   --hero-b: rgba(26, 25, 22, 0.6);
+  /* Carbon & Ember dark overrides */
+  --ember: #e0921a;
+  --ember-deep: #d4880f;
+  --ember-wash: rgba(224, 146, 26, 0.12);
+  --ember-border: rgba(224, 146, 26, 0.25);
+  --warning: #e0921a;
+  --warning-wash: rgba(224, 146, 26, 0.12);
+  --warning-border: rgba(224, 146, 26, 0.25);
+  --success: #5ead89;
+  --success-wash: rgba(94, 173, 137, 0.12);
+  --success-border: rgba(94, 173, 137, 0.25);
+  --error: #e05555;
+  --error-wash: rgba(220, 85, 85, 0.12);
+  --error-border: rgba(220, 85, 85, 0.25);
+  /* Status badge tokens — dark mode with verified contrast */
+  --status-available-bg: rgba(94, 173, 137, 0.15);
+  --status-available-text: #7dd6b0;
+  --status-reserved-bg: rgba(96, 165, 250, 0.15);
+  --status-reserved-text: #93c5fd;
+  --status-payment-pending-bg: rgba(167, 139, 250, 0.15);
+  --status-payment-pending-text: #c4b5fd;
+  --status-rented-bg: rgba(240, 237, 232, 0.08);
+  --status-rented-text: var(--sea-ink);
+  --status-maintenance-bg: rgba(224, 146, 26, 0.15);
+  --status-maintenance-text: #fbbf24;
+  --status-damaged-bg: rgba(220, 85, 85, 0.15);
+  --status-damaged-text: #fca5a5;
+  --status-retired-bg: rgba(160, 160, 160, 0.12);
+  --status-retired-text: #a09b94;
+  /* Fleet status dot colors — dark */
+  --dot-available: #5ead89;
+  --dot-rented: var(--lagoon);
+  --dot-reserved: #a78bfa;
+  --dot-maintenance: #fbbf24;
+  --dot-damaged: #f87171;
+  --dot-retired: #6b6760;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -115,6 +217,7 @@
     --foam: #141311;
     --surface: rgba(28, 27, 25, 0.9);
     --surface-strong: rgba(24, 23, 21, 0.95);
+    --surface-muted: rgba(28, 27, 25, 0.6);
     --line: rgba(240, 237, 232, 0.1);
     --inset-glint: rgba(240, 237, 232, 0.08);
     --kicker: #a09b94;
@@ -125,6 +228,42 @@
     --link-bg-hover: rgba(36, 35, 32, 0.9);
     --hero-a: rgba(224, 146, 26, 0.12);
     --hero-b: rgba(26, 25, 22, 0.6);
+    /* Carbon & Ember dark overrides */
+    --ember: #e0921a;
+    --ember-deep: #d4880f;
+    --ember-wash: rgba(224, 146, 26, 0.12);
+    --ember-border: rgba(224, 146, 26, 0.25);
+    --warning: #e0921a;
+    --warning-wash: rgba(224, 146, 26, 0.12);
+    --warning-border: rgba(224, 146, 26, 0.25);
+    --success: #5ead89;
+    --success-wash: rgba(94, 173, 137, 0.12);
+    --success-border: rgba(94, 173, 137, 0.25);
+    --error: #e05555;
+    --error-wash: rgba(220, 85, 85, 0.12);
+    --error-border: rgba(220, 85, 85, 0.25);
+    /* Status badge tokens — dark mode */
+    --status-available-bg: rgba(94, 173, 137, 0.15);
+    --status-available-text: #7dd6b0;
+    --status-reserved-bg: rgba(96, 165, 250, 0.15);
+    --status-reserved-text: #93c5fd;
+    --status-payment-pending-bg: rgba(167, 139, 250, 0.15);
+    --status-payment-pending-text: #c4b5fd;
+    --status-rented-bg: rgba(240, 237, 232, 0.08);
+    --status-rented-text: var(--sea-ink);
+    --status-maintenance-bg: rgba(224, 146, 26, 0.15);
+    --status-maintenance-text: #fbbf24;
+    --status-damaged-bg: rgba(220, 85, 85, 0.15);
+    --status-damaged-text: #fca5a5;
+    --status-retired-bg: rgba(160, 160, 160, 0.12);
+    --status-retired-text: #a09b94;
+    /* Fleet status dot colors — dark */
+    --dot-available: #5ead89;
+    --dot-rented: var(--lagoon);
+    --dot-reserved: #a78bfa;
+    --dot-maintenance: #fbbf24;
+    --dot-damaged: #f87171;
+    --dot-retired: #6b6760;
   }
 }
 
@@ -183,6 +322,11 @@ a {
 
 a:hover {
   color: var(--lagoon-deep);
+}
+
+::selection {
+  background: var(--ember-wash);
+  color: var(--sea-ink);
 }
 
 code {
@@ -1061,15 +1205,15 @@ a {
 }
 
 .hub-alert--amber {
-  border-color: rgba(180, 120, 30, 0.22);
-  background: rgba(180, 120, 30, 0.06);
-  color: #7a5010;
+  border-color: var(--warning-border);
+  background: var(--warning-wash);
+  color: var(--status-maintenance-text);
 }
 
 .hub-alert--red {
-  border-color: rgba(183, 62, 47, 0.22);
-  background: rgba(183, 62, 47, 0.06);
-  color: #8f2f24;
+  border-color: var(--error-border);
+  background: var(--error-wash);
+  color: var(--status-damaged-text);
 }
 
 .hub-alert-arrow {
@@ -1343,21 +1487,21 @@ a {
   padding: 0.14rem 0.38rem;
 }
 
-.status-badge--available      { background: rgba(39, 103, 73, 0.1);   color: #276749; }
-.status-badge--reserved       { background: rgba(37, 99, 235, 0.1);   color: #1d4ed8; }
-.status-badge--payment-pending{ background: rgba(120, 80, 200, 0.1);  color: #5b3ea8; }
-.status-badge--rented         { background: rgba(26, 25, 22, 0.08);   color: var(--sea-ink); }
-.status-badge--maintenance    { background: rgba(196, 120, 10, 0.1);  color: #7a5010; }
-.status-badge--damaged        { background: rgba(220, 60, 60, 0.1);   color: #c02020; }
-.status-badge--retired        { background: rgba(100, 100, 100, 0.1); color: #666; }
+.status-badge--available      { background: var(--status-available-bg);       color: var(--status-available-text); }
+.status-badge--reserved       { background: var(--status-reserved-bg);        color: var(--status-reserved-text); }
+.status-badge--payment-pending{ background: var(--status-payment-pending-bg); color: var(--status-payment-pending-text); }
+.status-badge--rented         { background: var(--status-rented-bg);          color: var(--status-rented-text); }
+.status-badge--maintenance    { background: var(--status-maintenance-bg);     color: var(--status-maintenance-text); }
+.status-badge--damaged        { background: var(--status-damaged-bg);         color: var(--status-damaged-text); }
+.status-badge--retired        { background: var(--status-retired-bg);         color: var(--status-retired-text); }
 
-.status-badge--pending   { background: rgba(196, 120, 10, 0.1);  color: #7a5010; }
-.status-badge--active    { background: rgba(39, 103, 73, 0.1);   color: #276749; }
-.status-badge--closed    { background: rgba(100, 100, 100, 0.1); color: #666; }
-.status-badge--cancelled { background: rgba(220, 60, 60, 0.1);   color: #c02020; }
-.status-badge--unpaid    { background: rgba(220, 60, 60, 0.1);   color: #c02020; }
-.status-badge--partial   { background: rgba(196, 120, 10, 0.1);  color: #7a5010; }
-.status-badge--paid      { background: rgba(39, 103, 73, 0.1);   color: #276749; }
+.status-badge--pending   { background: var(--status-maintenance-bg); color: var(--status-maintenance-text); }
+.status-badge--active    { background: var(--status-available-bg);   color: var(--status-available-text); }
+.status-badge--closed    { background: var(--status-retired-bg);     color: var(--status-retired-text); }
+.status-badge--cancelled { background: var(--status-damaged-bg);     color: var(--status-damaged-text); }
+.status-badge--unpaid    { background: var(--status-damaged-bg);     color: var(--status-damaged-text); }
+.status-badge--partial   { background: var(--status-maintenance-bg); color: var(--status-maintenance-text); }
+.status-badge--paid      { background: var(--status-available-bg);   color: var(--status-available-text); }
 
 /* ============================================================
    CATEGORY PILL
@@ -1374,10 +1518,10 @@ a {
   white-space: nowrap;
 }
 
-.category-pill--economy { background: rgba(196, 120, 10, 0.08);  color: var(--lagoon-deep); }
-.category-pill--mpv     { background: rgba(100, 80, 200, 0.1);   color: #5b3ea8; }
-.category-pill--suv     { background: rgba(26, 25, 22, 0.08);    color: var(--sea-ink); }
-.category-pill--other   { background: rgba(100, 100, 100, 0.08); color: #666; }
+.category-pill--economy { background: var(--ember-wash);                   color: var(--ember-deep); }
+.category-pill--mpv     { background: var(--status-payment-pending-bg);   color: var(--status-payment-pending-text); }
+.category-pill--suv     { background: rgba(26, 25, 22, 0.08);              color: var(--sea-ink); }
+.category-pill--other   { background: var(--status-retired-bg);            color: var(--status-retired-text); }
 
 /* ============================================================
    STATUS TABS
@@ -2946,15 +3090,15 @@ select.field-input {
 }
 
 .maint-status-badge--open {
-  background: rgba(196, 120, 10, 0.1);
-  color: #7a5010;
-  border: 1px solid rgba(196, 120, 10, 0.25);
+  background: var(--status-maintenance-bg);
+  color: var(--status-maintenance-text);
+  border: 1px solid var(--warning-border);
 }
 
 .maint-status-badge--completed {
-  background: rgba(39, 103, 73, 0.1);
-  color: #185a30;
-  border: 1px solid rgba(58, 171, 106, 0.25);
+  background: var(--status-available-bg);
+  color: var(--status-available-text);
+  border: 1px solid var(--success-border);
 }
 
 /* ─── Service config cards ────────────────────────────────────────────────── */

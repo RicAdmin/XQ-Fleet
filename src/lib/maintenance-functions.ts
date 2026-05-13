@@ -547,6 +547,41 @@ export const getMaintenanceDashboardAlerts = createServerFn({ method: 'GET' }).h
   },
 )
 
+export const deleteMaintenanceEvent = createServerFn({ method: 'POST' })
+  .inputValidator((data: { eventId: string }) => data)
+  .handler(async ({ data }) => {
+    await requireRole(['owner'])
+    const { db } = await import('#/db')
+
+    const matchingEvents = await db
+      .select({ id: maintenanceEvents.id, carId: maintenanceEvents.carId, status: maintenanceEvents.status })
+      .from(maintenanceEvents)
+      .where(eq(maintenanceEvents.id, data.eventId))
+      .limit(1)
+    const event = matchingEvents.at(0)
+
+    if (!event) throw new Error('Maintenance event not found')
+
+    await db.delete(maintenanceEvents).where(eq(maintenanceEvents.id, data.eventId))
+
+    // If it was open, check if car still has other open events; if not, set available
+    if (event.status === 'open') {
+      const [{ openCount }] = await db
+        .select({ openCount: sql<number>`count(*)::int` })
+        .from(maintenanceEvents)
+        .where(and(eq(maintenanceEvents.carId, event.carId), eq(maintenanceEvents.status, 'open')))
+
+      if (Number(openCount) === 0) {
+        await db
+          .update(cars)
+          .set({ status: 'available', updatedAt: new Date() })
+          .where(eq(cars.id, event.carId))
+      }
+    }
+
+    return { ok: true }
+  })
+
 export const getMaintenanceReport = createServerFn({ method: 'GET' })
   .inputValidator((data: { from: string; to: string }) => data)
   .handler(async ({ data }): Promise<MaintenanceReport> => {

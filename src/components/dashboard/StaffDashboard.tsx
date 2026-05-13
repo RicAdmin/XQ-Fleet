@@ -18,27 +18,27 @@ function greeting(name: string): string {
 const STATUS_META: {
   key: keyof FleetCounts
   label: string
-  dot: string
-  bg: string
-  border: string
+  dotVar: string
+  bgVar: string
+  borderVar: string
 }[] = [
-  { key: 'available', label: 'Available', dot: '#3aab6a', bg: '#f0faf4', border: '#bbedd0' },
-  { key: 'rented', label: 'Rented', dot: 'var(--lagoon)', bg: '#f0f9fa', border: '#b3e4e8' },
-  { key: 'reserved', label: 'Reserved', dot: '#7c5cbf', bg: '#f5f3fc', border: '#cfc4ed' },
-  { key: 'maintenance', label: 'Maint.', dot: '#e8a030', bg: '#fdf7ed', border: '#f3d7a0' },
-  { key: 'damaged', label: 'Damaged', dot: '#d44', bg: '#fdf1f1', border: '#f5c5c5' },
-  { key: 'retired', label: 'Retired', dot: '#9aaa9a', bg: '#f5f5f4', border: '#d5d9d5' },
+  { key: 'available',   label: 'Available', dotVar: '--dot-available',   bgVar: '--status-available-bg',   borderVar: '--status-available-text' },
+  { key: 'rented',      label: 'Rented',    dotVar: '--dot-rented',      bgVar: '--status-rented-bg',      borderVar: '--status-rented-text' },
+  { key: 'reserved',    label: 'Reserved',  dotVar: '--dot-reserved',    bgVar: '--status-reserved-bg',    borderVar: '--status-reserved-text' },
+  { key: 'maintenance', label: 'Maint.',    dotVar: '--dot-maintenance', bgVar: '--status-maintenance-bg', borderVar: '--status-maintenance-text' },
+  { key: 'damaged',     label: 'Damaged',   dotVar: '--dot-damaged',     bgVar: '--status-damaged-bg',     borderVar: '--status-damaged-text' },
+  { key: 'retired',     label: 'Retired',   dotVar: '--dot-retired',     bgVar: '--status-retired-bg',     borderVar: '--status-retired-text' },
 ]
 
-function FleetTile({ label, count, dot, bg, border }: { label: string; count: number; dot: string; bg: string; border: string }) {
+function FleetTile({ label, count, dotVar, bgVar, borderVar }: { label: string; count: number; dotVar: string; bgVar: string; borderVar: string }) {
   return (
     <div
       className="flex flex-col items-center justify-center gap-1 rounded-2xl border px-3 py-3"
-      style={{ background: bg, borderColor: border }}
+      style={{ background: `var(${bgVar})`, borderColor: `var(${borderVar})` }}
     >
       <span
         className="mb-0.5 inline-block size-2.5 rounded-full"
-        style={{ background: dot }}
+        style={{ background: `var(${dotVar})` }}
       />
       <span className="text-xl font-bold leading-none text-[var(--sea-ink)]">{count}</span>
       <span className="text-[10px] font-semibold uppercase tracking-wide text-[var(--sea-ink-soft)]">{label}</span>
@@ -172,14 +172,14 @@ export default function StaffDashboard({ user, data }: StaffDashboardProps) {
             </span>
           </div>
           <div className="grid grid-cols-3 gap-2">
-            {STATUS_META.map(({ key, label, dot, bg, border }) => (
+            {STATUS_META.map(({ key, label, dotVar, bgVar, borderVar }) => (
               <FleetTile
                 key={key}
                 label={label}
                 count={fleetCounts[key]}
-                dot={dot}
-                bg={bg}
-                border={border}
+                dotVar={dotVar}
+                bgVar={bgVar}
+                borderVar={borderVar}
               />
             ))}
           </div>
@@ -234,7 +234,7 @@ export default function StaffDashboard({ user, data }: StaffDashboardProps) {
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-red-600">
+                    <span className="text-xs font-semibold" style={{ color: 'var(--status-damaged-text)' }}>
                       +{r.daysOverdue}d
                     </span>
                     <span className="text-xs">{r.customerFullName ?? '—'}</span>

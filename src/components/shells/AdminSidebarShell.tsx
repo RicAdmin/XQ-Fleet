@@ -24,6 +24,7 @@ type NavLinkTo =
   | '/admin'
   | '/admin/cars'
   | '/admin/customers'
+  | '/admin/maintenance'
   | '/admin/rentals'
   | '/admin/reports'
   | '/admin/settings'
@@ -85,7 +86,7 @@ const NAV_SECTIONS: NavSection[] = [
       {
         type: 'link',
         label: 'Maintenance',
-        to: '/admin/cars',
+        to: '/admin/maintenance',
         staffTo: '/app/maintenance',
         icon: <Wrench size={16} />,
         exact: false,
@@ -181,7 +182,7 @@ export default function AdminSidebarShell({
           {section.items.map((item) => {
                 if (item.type === 'link') {
                   if (item.ownerOnly && !isOwner) return null
-                  const resolvedTo = (item.staffTo && !isOwner ? item.staffTo : item.to) as NavLinkTo
+                  const resolvedTo = item.staffTo && !isOwner ? item.staffTo : item.to
                   return (
                     <Link
                       key={item.label}
