@@ -1,10 +1,14 @@
 import { useState } from 'react'
 
 import { Link, createFileRoute } from '@tanstack/react-router'
+import { ArrowRight } from 'lucide-react'
 import { z } from 'zod'
 
-import AuthFrame from '#/components/auth/AuthFrame'
+import CxqAuthLegalFooter from '#/components/auth/CxqAuthLegalFooter'
+import CxqAuthMarketingAside from '#/components/auth/CxqAuthMarketingAside'
+import CxqAuthSocialButtons from '#/components/auth/CxqAuthSocialButtons'
 import AuthPageShell from '#/components/shells/AuthPageShell'
+import { cxqAuthSignUpAside } from '#/lib/cxq-auth-marketing'
 import { authClient } from '#/lib/auth-client'
 import { redirectAuthenticatedUser } from '#/lib/route-guards'
 
@@ -22,92 +26,137 @@ function CustomerRegisterPage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isOAuthLoading, setIsOAuthLoading] = useState(false)
+
+  async function handleGoogleSignUp() {
+    setIsOAuthLoading(true)
+    await authClient.signIn.social({ provider: 'google', callbackURL: returnTo ?? '/account' })
+  }
 
   return (
     <AuthPageShell>
-      <AuthFrame
-        badge="Portal onboarding"
-        title="Create a customer account"
-        description="This keeps customer access separate from the internal workspace while still using the same secure auth system underneath."
-        asideTitle="Stage 1 scope"
-        asideBody="Registration is intentionally lightweight here so the customer surface can stay easy to use while the deeper booking flow arrives in later stages."
-        footer={
-          <p className="m-0 text-sm text-[var(--sea-ink-soft)]">
-            Already registered? <Link to="/login">Sign in instead.</Link>
-          </p>
-        }
-      >
-        <form
-          className="space-y-4"
-          onSubmit={async (event) => {
-            event.preventDefault()
-            setError(null)
-            setIsSubmitting(true)
+      <div className="cxq-auth-split">
+        <CxqAuthMarketingAside {...cxqAuthSignUpAside} />
 
-            try {
-              await authClient.signUp.email({ name, email, password })
-              await navigate({ to: (returnTo as never) ?? '/account' })
-            } catch (submissionError) {
-              setError(
-                submissionError instanceof Error
-                  ? submissionError.message
-                  : 'Unable to create your account right now.',
-              )
-            } finally {
-              setIsSubmitting(false)
-            }
-          }}
-        >
-          <div>
-            <label className="field-label" htmlFor="customer-name">
-              Full name
-            </label>
-            <input
-              id="customer-name"
-              autoComplete="name"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              className="field-input"
-              required
-            />
+        <div className="cxq-auth-right">
+          <span className="cxq-auth-badge">New account</span>
+          <h3>Create your account</h3>
+          <p className="cxq-auth-sub">
+            Already a member? <Link to="/login">Sign in</Link>
+          </p>
+
+          <CxqAuthSocialButtons
+            onGoogle={handleGoogleSignUp}
+            disabled={isOAuthLoading || isSubmitting}
+            googleLabel={isOAuthLoading ? 'Redirecting…' : 'Continue with Google'}
+          />
+
+          <div className="cxq-auth-divider">
+            <span>or with email</span>
           </div>
-          <div>
-            <label className="field-label" htmlFor="register-email">
-              Email
-            </label>
-            <input
-              id="register-email"
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className="field-input"
-              required
-            />
-          </div>
-          <div>
-            <label className="field-label" htmlFor="register-password">
-              Password
-            </label>
-            <input
-              id="register-password"
-              type="password"
-              autoComplete="new-password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className="field-input"
-              minLength={8}
-              required
-            />
-          </div>
-          {error ? <p className="form-error">{error}</p> : null}
-          <button type="submit" className="button-primary w-full justify-center" disabled={isSubmitting}>
-            {isSubmitting ? 'Creating account…' : 'Create customer account'}
-          </button>
-        </form>
-      </AuthFrame>
+
+          <form
+            onSubmit={async (event) => {
+              event.preventDefault()
+              setError(null)
+
+              if (!agreedToTerms) {
+                setError('Please agree to the terms to continue.')
+                return
+              }
+
+              setIsSubmitting(true)
+
+              try {
+                await authClient.signUp.email({ name, email, password })
+                await navigate({ to: (returnTo as never) ?? '/account' })
+              } catch (submissionError) {
+                setError(
+                  submissionError instanceof Error
+                    ? submissionError.message
+                    : 'Unable to create your account right now.',
+                )
+              } finally {
+                setIsSubmitting(false)
+              }
+            }}
+          >
+            <div className="cxq-auth-fields">
+              <div className="cxq-auth-field">
+                <label htmlFor="customer-name">Full name</label>
+                <input
+                  id="customer-name"
+                  type="text"
+                  autoComplete="name"
+                  placeholder="As shown on your driver's license"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="cxq-auth-field">
+                <label htmlFor="register-email">Email</label>
+                <input
+                  id="register-email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="cxq-auth-field">
+                <label htmlFor="register-password">Password</label>
+                <input
+                  id="register-password"
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="At least 8 characters"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  minLength={8}
+                  required
+                />
+              </div>
+
+              <label className="cxq-auth-check">
+                <input
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(event) => setAgreedToTerms(event.target.checked)}
+                />
+                I agree to the{' '}
+                <Link to="/about" className="cxq-auth-link">
+                  Rental Contract
+                </Link>{' '}
+                and{' '}
+                <Link to="/about" className="cxq-auth-link">
+                  Privacy Policy
+                </Link>
+              </label>
+            </div>
+
+            {error ? <p className="cxq-auth-error">{error}</p> : null}
+
+            <button
+              type="submit"
+              className="button-primary cxq-auth-submit cxq-auth-submit-with-icon"
+              disabled={isSubmitting || isOAuthLoading}
+            >
+              {isSubmitting ? 'Creating account…' : 'Create account'}
+              {!isSubmitting ? <ArrowRight size={14} strokeWidth={2.5} aria-hidden /> : null}
+            </button>
+
+            <CxqAuthLegalFooter />
+          </form>
+        </div>
+      </div>
     </AuthPageShell>
   )
 }

@@ -268,6 +268,70 @@ export const getCustomerBookings = createServerFn({ method: 'GET' }).handler(
   },
 )
 
+// ─── Portal customer profile (linked auth user) ───────────────────────────────
+
+export type PortalCustomerProfile = {
+  id: string
+  fullName: string | null
+  phone: string | null
+  email: string | null
+}
+
+export const getPortalCustomerProfile = createServerFn({ method: 'GET' }).handler(
+  async (): Promise<PortalCustomerProfile | null> => {
+    const session = await getRequestSession()
+    if (!session) throw new Error('You must be signed in.')
+
+    const { db } = await import('#/db')
+
+    const [row] = await db
+      .select({
+        id: customers.id,
+        fullName: customers.fullName,
+        phone: customers.phone,
+        email: customers.email,
+      })
+      .from(customers)
+      .where(eq(customers.authUserId, session.user.id))
+      .limit(1)
+
+    return row ?? null
+  },
+)
+
+type UpdatePortalCustomerProfileInput = {
+  fullName: string
+  phone: string
+}
+
+export const updatePortalCustomerProfile = createServerFn({ method: 'POST' })
+  .inputValidator((input: UpdatePortalCustomerProfileInput) => input)
+  .handler(async ({ data }): Promise<{ ok: true } | { ok: false; reason: 'no_customer' }> => {
+    const session = await getRequestSession()
+    if (!session) throw new Error('You must be signed in.')
+
+    const { db } = await import('#/db')
+
+    const [customer] = await db
+      .select({ id: customers.id })
+      .from(customers)
+      .where(eq(customers.authUserId, session.user.id))
+      .limit(1)
+
+    if (!customer) return { ok: false, reason: 'no_customer' }
+
+    await db
+      .update(customers)
+      .set({
+        fullName: data.fullName.trim() || null,
+        phone: data.phone.trim() || null,
+        updatedAt: new Date(),
+      })
+      .where(eq(customers.id, customer.id))
+
+    return { ok: true }
+  })
+
 // ─── Get booking detail ───────────────────────────────────────────────────────
 
 type GetBookingDetailInput = { rentalId: string }

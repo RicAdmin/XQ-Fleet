@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
@@ -21,8 +22,15 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as PayRentalIdRouteImport } from './routes/pay/$rentalId'
 import { Route as InternalLoginRouteImport } from './routes/internal/login'
+import { Route as GuidesPlanDriveRouteImport } from './routes/guides/plan-drive'
+import { Route as GuidesPickupReturnRouteImport } from './routes/guides/pickup-return'
+import { Route as GuidesPickCarRouteImport } from './routes/guides/pick-car'
+import { Route as GuidesKnowHowRouteImport } from './routes/guides/know-how'
 import { Route as CarsCarIdRouteImport } from './routes/cars/$carId'
 import { Route as BookCarIdRouteImport } from './routes/book/$carId'
+import { Route as AccountRentalsRouteImport } from './routes/account/rentals'
+import { Route as AccountProfileRouteImport } from './routes/account/profile'
+import { Route as AccountNotificationsRouteImport } from './routes/account/notifications'
 import { Route as AppRentalsIndexRouteImport } from './routes/app/rentals/index'
 import { Route as AppMaintenanceIndexRouteImport } from './routes/app/maintenance/index'
 import { Route as AppCustomersIndexRouteImport } from './routes/app/customers/index'
@@ -53,6 +61,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -105,6 +118,26 @@ const InternalLoginRoute = InternalLoginRouteImport.update({
   path: '/internal/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesPlanDriveRoute = GuidesPlanDriveRouteImport.update({
+  id: '/guides/plan-drive',
+  path: '/guides/plan-drive',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidesPickupReturnRoute = GuidesPickupReturnRouteImport.update({
+  id: '/guides/pickup-return',
+  path: '/guides/pickup-return',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidesPickCarRoute = GuidesPickCarRouteImport.update({
+  id: '/guides/pick-car',
+  path: '/guides/pick-car',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuidesKnowHowRoute = GuidesKnowHowRouteImport.update({
+  id: '/guides/know-how',
+  path: '/guides/know-how',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CarsCarIdRoute = CarsCarIdRouteImport.update({
   id: '/cars/$carId',
   path: '/cars/$carId',
@@ -114,6 +147,21 @@ const BookCarIdRoute = BookCarIdRouteImport.update({
   id: '/book/$carId',
   path: '/book/$carId',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRentalsRoute = AccountRentalsRouteImport.update({
+  id: '/rentals',
+  path: '/rentals',
+  getParentRoute: () => AccountRoute,
+} as any)
+const AccountProfileRoute = AccountProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AccountRoute,
+} as any)
+const AccountNotificationsRoute = AccountNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AccountRoute,
 } as any)
 const AppRentalsIndexRoute = AppRentalsIndexRouteImport.update({
   id: '/rentals/',
@@ -230,10 +278,18 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/account/notifications': typeof AccountNotificationsRoute
+  '/account/profile': typeof AccountProfileRoute
+  '/account/rentals': typeof AccountRentalsRoute
   '/book/$carId': typeof BookCarIdRoute
   '/cars/$carId': typeof CarsCarIdRoute
+  '/guides/know-how': typeof GuidesKnowHowRoute
+  '/guides/pick-car': typeof GuidesPickCarRoute
+  '/guides/pickup-return': typeof GuidesPickupReturnRoute
+  '/guides/plan-drive': typeof GuidesPlanDriveRoute
   '/internal/login': typeof InternalLoginRoute
   '/pay/$rentalId': typeof PayRentalIdRoute
   '/account/': typeof AccountIndexRoute
@@ -264,10 +320,18 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/account/notifications': typeof AccountNotificationsRoute
+  '/account/profile': typeof AccountProfileRoute
+  '/account/rentals': typeof AccountRentalsRoute
   '/book/$carId': typeof BookCarIdRoute
   '/cars/$carId': typeof CarsCarIdRoute
+  '/guides/know-how': typeof GuidesKnowHowRoute
+  '/guides/pick-car': typeof GuidesPickCarRoute
+  '/guides/pickup-return': typeof GuidesPickupReturnRoute
+  '/guides/plan-drive': typeof GuidesPlanDriveRoute
   '/internal/login': typeof InternalLoginRoute
   '/pay/$rentalId': typeof PayRentalIdRoute
   '/account': typeof AccountIndexRoute
@@ -302,10 +366,18 @@ export interface FileRoutesById {
   '/account': typeof AccountRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/account/notifications': typeof AccountNotificationsRoute
+  '/account/profile': typeof AccountProfileRoute
+  '/account/rentals': typeof AccountRentalsRoute
   '/book/$carId': typeof BookCarIdRoute
   '/cars/$carId': typeof CarsCarIdRoute
+  '/guides/know-how': typeof GuidesKnowHowRoute
+  '/guides/pick-car': typeof GuidesPickCarRoute
+  '/guides/pickup-return': typeof GuidesPickupReturnRoute
+  '/guides/plan-drive': typeof GuidesPlanDriveRoute
   '/internal/login': typeof InternalLoginRoute
   '/pay/$rentalId': typeof PayRentalIdRoute
   '/account/': typeof AccountIndexRoute
@@ -341,10 +413,18 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/app'
+    | '/forgot-password'
     | '/login'
     | '/register'
+    | '/account/notifications'
+    | '/account/profile'
+    | '/account/rentals'
     | '/book/$carId'
     | '/cars/$carId'
+    | '/guides/know-how'
+    | '/guides/pick-car'
+    | '/guides/pickup-return'
+    | '/guides/plan-drive'
     | '/internal/login'
     | '/pay/$rentalId'
     | '/account/'
@@ -375,10 +455,18 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/forgot-password'
     | '/login'
     | '/register'
+    | '/account/notifications'
+    | '/account/profile'
+    | '/account/rentals'
     | '/book/$carId'
     | '/cars/$carId'
+    | '/guides/know-how'
+    | '/guides/pick-car'
+    | '/guides/pickup-return'
+    | '/guides/plan-drive'
     | '/internal/login'
     | '/pay/$rentalId'
     | '/account'
@@ -412,10 +500,18 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/app'
+    | '/forgot-password'
     | '/login'
     | '/register'
+    | '/account/notifications'
+    | '/account/profile'
+    | '/account/rentals'
     | '/book/$carId'
     | '/cars/$carId'
+    | '/guides/know-how'
+    | '/guides/pick-car'
+    | '/guides/pickup-return'
+    | '/guides/plan-drive'
     | '/internal/login'
     | '/pay/$rentalId'
     | '/account/'
@@ -450,10 +546,15 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRouteWithChildren
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   BookCarIdRoute: typeof BookCarIdRoute
   CarsCarIdRoute: typeof CarsCarIdRoute
+  GuidesKnowHowRoute: typeof GuidesKnowHowRoute
+  GuidesPickCarRoute: typeof GuidesPickCarRoute
+  GuidesPickupReturnRoute: typeof GuidesPickupReturnRoute
+  GuidesPlanDriveRoute: typeof GuidesPlanDriveRoute
   InternalLoginRoute: typeof InternalLoginRoute
   PayRentalIdRoute: typeof PayRentalIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -477,6 +578,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -549,6 +657,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InternalLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/plan-drive': {
+      id: '/guides/plan-drive'
+      path: '/guides/plan-drive'
+      fullPath: '/guides/plan-drive'
+      preLoaderRoute: typeof GuidesPlanDriveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/pickup-return': {
+      id: '/guides/pickup-return'
+      path: '/guides/pickup-return'
+      fullPath: '/guides/pickup-return'
+      preLoaderRoute: typeof GuidesPickupReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/pick-car': {
+      id: '/guides/pick-car'
+      path: '/guides/pick-car'
+      fullPath: '/guides/pick-car'
+      preLoaderRoute: typeof GuidesPickCarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/know-how': {
+      id: '/guides/know-how'
+      path: '/guides/know-how'
+      fullPath: '/guides/know-how'
+      preLoaderRoute: typeof GuidesKnowHowRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cars/$carId': {
       id: '/cars/$carId'
       path: '/cars/$carId'
@@ -562,6 +698,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/book/$carId'
       preLoaderRoute: typeof BookCarIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/account/rentals': {
+      id: '/account/rentals'
+      path: '/rentals'
+      fullPath: '/account/rentals'
+      preLoaderRoute: typeof AccountRentalsRouteImport
+      parentRoute: typeof AccountRoute
+    }
+    '/account/profile': {
+      id: '/account/profile'
+      path: '/profile'
+      fullPath: '/account/profile'
+      preLoaderRoute: typeof AccountProfileRouteImport
+      parentRoute: typeof AccountRoute
+    }
+    '/account/notifications': {
+      id: '/account/notifications'
+      path: '/notifications'
+      fullPath: '/account/notifications'
+      preLoaderRoute: typeof AccountNotificationsRouteImport
+      parentRoute: typeof AccountRoute
     }
     '/app/rentals/': {
       id: '/app/rentals/'
@@ -714,12 +871,18 @@ declare module '@tanstack/react-router' {
 }
 
 interface AccountRouteChildren {
+  AccountNotificationsRoute: typeof AccountNotificationsRoute
+  AccountProfileRoute: typeof AccountProfileRoute
+  AccountRentalsRoute: typeof AccountRentalsRoute
   AccountIndexRoute: typeof AccountIndexRoute
   AccountBookingsRentalIdRoute: typeof AccountBookingsRentalIdRoute
   AccountBookingsIndexRoute: typeof AccountBookingsIndexRoute
 }
 
 const AccountRouteChildren: AccountRouteChildren = {
+  AccountNotificationsRoute: AccountNotificationsRoute,
+  AccountProfileRoute: AccountProfileRoute,
+  AccountRentalsRoute: AccountRentalsRoute,
   AccountIndexRoute: AccountIndexRoute,
   AccountBookingsRentalIdRoute: AccountBookingsRentalIdRoute,
   AccountBookingsIndexRoute: AccountBookingsIndexRoute,
@@ -782,10 +945,15 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRouteWithChildren,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   BookCarIdRoute: BookCarIdRoute,
   CarsCarIdRoute: CarsCarIdRoute,
+  GuidesKnowHowRoute: GuidesKnowHowRoute,
+  GuidesPickCarRoute: GuidesPickCarRoute,
+  GuidesPickupReturnRoute: GuidesPickupReturnRoute,
+  GuidesPlanDriveRoute: GuidesPlanDriveRoute,
   InternalLoginRoute: InternalLoginRoute,
   PayRentalIdRoute: PayRentalIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

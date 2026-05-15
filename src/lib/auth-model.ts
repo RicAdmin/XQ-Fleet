@@ -44,3 +44,10 @@ export function canAccessSurface(role: AppRole, surface: ProtectedSurface) {
       return role === 'customer'
   }
 }
+
+/** Session user from better-auth client may omit `role` in types until inferAdditionalFields is wired. */
+export function appRoleFromSessionUser(user: unknown): AppRole | null {
+  if (!user || typeof user !== 'object' || !('role' in user)) return null
+  const value = (user as { role: unknown }).role
+  return isAppRole(value) ? value : null
+}

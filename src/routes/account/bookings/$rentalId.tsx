@@ -11,7 +11,7 @@ export const Route = createFileRoute('/account/bookings/$rentalId')({
   }),
   loader: async ({ params }) => {
     const booking = await getBookingDetail({ data: { rentalId: params.rentalId } })
-    if (!booking) throw redirect({ to: '/account/bookings' })
+    if (!booking) throw redirect({ to: '/account/rentals' })
     return { booking }
   },
   component: BookingDetailPage,
@@ -47,9 +47,9 @@ function BookingDetailPage() {
     <div className="hub-layout">
       <div className="hub-content">
         <div className="hub-subpage-header">
-          <Link to="/account/bookings" className="hub-back-link">
+          <Link to="/account/rentals" className="hub-back-link">
             <ArrowLeft size={16} />
-            My bookings
+            My rentals
           </Link>
           <h1 className="hub-subpage-title">Booking detail</h1>
         </div>
