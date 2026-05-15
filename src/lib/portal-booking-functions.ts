@@ -428,20 +428,18 @@ export const createPortalBooking = createServerFn({ method: 'POST' })
         .where(and(eq(promos.title, normalized), gt(promos.usageLeft, 0)))
     }
 
-    // Create pending payment record
-    if (paymentConfig.enabled) {
-      const chargeSen =
-        paymentConfig.paymentMode === 'deposit' && paymentConfig.depositAmountSen > 0
-          ? paymentConfig.depositAmountSen
-          : totalAmountSen
-      await db.insert(payments).values({
-        rentalId: rental.id,
-        provider: 'ipay88',
-        amountSen: chargeSen,
-        currency: 'MYR',
-        status: 'pending',
-      })
-    }
+    // Always create a pending payment record so Pay Now can work even if settings change later
+    const chargeSen =
+      paymentConfig.paymentMode === 'deposit' && paymentConfig.depositAmountSen > 0
+        ? paymentConfig.depositAmountSen
+        : totalAmountSen
+    await db.insert(payments).values({
+      rentalId: rental.id,
+      provider: 'ipay88',
+      amountSen: chargeSen,
+      currency: 'MYR',
+      status: 'pending',
+    })
 
     return { rentalId: rental.id }
   })

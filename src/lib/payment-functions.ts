@@ -7,7 +7,7 @@ import type { PaymentSettingsRow } from '#/lib/settings-functions'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-export const IPAY88_GATEWAY_URL = 'https://payment.ipay88.com.my/ePayment/entry.asp'
+export const IPAY88_GATEWAY_URL = 'https://payment.ipay88.com.my/epayment/entry.asp'
 export const HOLD_MINUTES = 15
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -24,6 +24,7 @@ export type Ipay88FormParams = {
   UserContact: string
   Remark: string
   Lang: string
+  SignatureType: string
   Signature: string
   ResponseURL: string
   BackendURL: string
@@ -46,29 +47,30 @@ export function formatAmountRM(amountSen: number): string {
   return (amountSen / 100).toFixed(2)
 }
 
-/** Strips the decimal from the RM string for use in signature e.g. "50.00" → "5000" */
+/** Strips `.` and `,` from the RM string for use in signature e.g. "1,278.99" → "127899" */
 function signatureAmount(amountRM: string): string {
-  return amountRM.replace('.', '')
+  return amountRM.replace(/[.,]/g, '')
 }
 
-/** Computes SHA256 hex of the given string */
-function sha256hex(input: string): string {
-  return crypto.createHash('sha256').update(input, 'utf8').digest('hex')
+/** Computes HMAC-SHA512 hex (iPay88 OPSG standard) */
+function hmacSha512hex(key: string, input: string): string {
+  return crypto.createHmac('sha512', key).update(input, 'utf8').digest('hex')
 }
 
-/** Builds the iPay88 request signature */
+/** Builds the iPay88 request signature: Key+Code+RefNo+Amount+Currency+Xfield1 */
 export function buildRequestSignature(
   merchantKey: string,
   merchantCode: string,
   refNo: string,
   amountRM: string,
   currency: string,
+  xfield1 = '',
 ): string {
-  const raw = merchantKey + merchantCode + refNo + signatureAmount(amountRM) + currency
-  return sha256hex(raw)
+  const raw = merchantKey + merchantCode + refNo + signatureAmount(amountRM) + currency + xfield1
+  return hmacSha512hex(merchantKey, raw)
 }
 
-/** Verifies the iPay88 response/webhook signature */
+/** Verifies the iPay88 response/webhook signature: Key+Code+PaymentId+RefNo+Amount+Currency+Status */
 export function verifyResponseSignature(
   merchantKey: string,
   merchantCode: string,
@@ -80,8 +82,8 @@ export function verifyResponseSignature(
   receivedSignature: string,
 ): boolean {
   const raw =
-    merchantKey + merchantCode + paymentId + refNo + status + signatureAmount(amountRM) + currency
-  return sha256hex(raw) === receivedSignature
+    merchantKey + merchantCode + paymentId + refNo + signatureAmount(amountRM) + currency + status
+  return hmacSha512hex(merchantKey, raw) === receivedSignature
 }
 
 // ─── Expire stale payment holds (lazy, call before availability checks) ───────
@@ -144,14 +146,13 @@ export const initiatePayment = createServerFn({ method: 'POST' })
     const { rentals, cars, customers, payments } = await import('#/db/schema')
     const { and, eq } = await import('drizzle-orm')
 
-    // Load settings
+    // Load settings (for deposit mode — enabled flag does not gate the gateway itself)
     const { getPaymentSettings } = await import('#/lib/settings-functions')
     const settings = await getPaymentSettings()
-    if (!settings.enabled) throw new Error('Online payment is not currently available.')
 
     const merchantCode = process.env.IPAY88_MERCHANT_CODE
     const merchantKey = process.env.IPAY88_MERCHANT_KEY
-    if (!merchantCode || !merchantKey) throw new Error('Payment gateway not configured.')
+    if (!merchantCode || !merchantKey) throw new Error('Payment gateway credentials are not configured. Set IPAY88_MERCHANT_CODE and IPAY88_MERCHANT_KEY in your environment.')
 
     // Load rental + customer
     const [customer] = await db
@@ -238,11 +239,12 @@ export const initiatePayment = createServerFn({ method: 'POST' })
       Amount: amountRM,
       Currency: currency,
       ProdDesc: `Car rental - ${rental.carMake} ${rental.carModel}`,
-      UserName: rental.customerName,
+      UserName: rental.customerName ?? '',
       UserEmail: rental.customerEmail ?? '',
-      UserContact: rental.customerPhone,
+      UserContact: rental.customerPhone ?? '',
       Remark: `Rental ${data.rentalId}`,
       Lang: 'UTF-8',
+      SignatureType: 'HMACSHA512',
       Signature: signature,
       ResponseURL: `${baseUrl}/account/bookings/${data.rentalId}?payment=response`,
       BackendURL: `${baseUrl}/api/webhooks/ipay88`,
