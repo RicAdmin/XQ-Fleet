@@ -15,8 +15,11 @@ export const Route = createFileRoute('/api/webhooks/ipay88')({
           const currency = params.get('Currency') ?? 'MYR'
           const status = params.get('Status') ?? ''
           const transId = params.get('TransId') ?? ''
-          const errDesc = params.get('ErrDesc') ?? ''
+          const authCode = params.get('AuthCode') ?? ''
           const receivedSignature = params.get('Signature') ?? ''
+
+          // Capture full raw response for audit
+          const rawResponse = Object.fromEntries(params.entries())
 
           const configuredMerchantCode = process.env.IPAY88_MERCHANT_CODE ?? ''
           const merchantKey = process.env.IPAY88_MERCHANT_KEY ?? ''
@@ -84,6 +87,10 @@ export const Route = createFileRoute('/api/webhooks/ipay88')({
                 status: 'successful',
                 externalRef: transId,
                 paymentMethod: paymentId,
+                rawResponse,
+                ipay88TransId: transId || null,
+                ipay88AuthCode: authCode || null,
+                callbackSource: 'callback',
                 respondedAt,
                 updatedAt: new Date(),
               })
@@ -119,6 +126,10 @@ export const Route = createFileRoute('/api/webhooks/ipay88')({
               .set({
                 status: 'failed',
                 externalRef: transId || null,
+                rawResponse,
+                ipay88TransId: transId || null,
+                ipay88AuthCode: authCode || null,
+                callbackSource: 'callback',
                 respondedAt,
                 updatedAt: new Date(),
               })

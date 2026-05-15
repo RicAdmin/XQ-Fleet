@@ -1,12 +1,14 @@
 import { useState } from 'react'
 
-import { createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { ArrowRight } from 'lucide-react'
 
-import AuthFrame from '#/components/auth/AuthFrame'
+import CxqAuthMarketingAside from '#/components/auth/CxqAuthMarketingAside'
 import AuthPageShell from '#/components/shells/AuthPageShell'
+import { cxqAuthInternalAside } from '#/lib/cxq-auth-marketing'
 import { authClient } from '#/lib/auth-client'
 import { createInitialOwner } from '#/lib/auth-functions'
-import { isAppRole } from '#/lib/auth-model'
+import { appRoleFromSessionUser } from '#/lib/auth-model'
 import { loadInternalLoginState } from '#/lib/route-guards'
 
 export const Route = createFileRoute('/internal/login')({
@@ -26,26 +28,32 @@ function InternalLoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const title = hasOwner ? 'Internal sign in' : 'Create the first owner account'
+  const title = hasOwner ? 'Sign in' : 'Create the first owner account'
 
   return (
     <AuthPageShell>
-      <AuthFrame
-        badge="Internal workspace"
-        title={title}
-        description={
-          hasOwner
-            ? undefined
-            : 'Set up the owner account once, then continue into the admin workspace.'
-        }
-        variant="compact"
-      >
-        <form
-          className="space-y-4"
-          onSubmit={async (event) => {
-            event.preventDefault()
-            setError(null)
-            setIsSubmitting(true)
+      <div className="cxq-auth-split">
+        <CxqAuthMarketingAside {...cxqAuthInternalAside} />
+
+        <div className="cxq-auth-right">
+          <span className="cxq-auth-badge">Internal workspace</span>
+          <h3>{title}</h3>
+          <p className="cxq-auth-sub">
+            Renting as a customer? <Link to="/login">Customer sign in</Link>
+          </p>
+
+          {!hasOwner ? (
+            <p className="cxq-auth-internal-note">
+              This step only appears before the first owner account exists.
+            </p>
+          ) : null}
+
+          <form
+            className="cxq-auth-internal-form"
+            onSubmit={async (event) => {
+              event.preventDefault()
+              setError(null)
+              setIsSubmitting(true)
 
               try {
                 if (!hasOwner) {
@@ -55,95 +63,96 @@ function InternalLoginPage() {
                   await authClient.signIn.email({ email, password })
                   await navigate({ to: '/admin' })
                   return
+                }
+
+                await authClient.signIn.email({ email, password })
+                const { data: session } = await authClient.getSession()
+
+                const role = appRoleFromSessionUser(session?.user)
+
+                if (role === 'customer') {
+                  await authClient.signOut()
+                  setError('Customer accounts must use the customer login page.')
+                  return
+                }
+
+                if (!role) {
+                  setError('Unable to determine which internal workspace to open.')
+                  return
+                }
+
+                await navigate({ to: role === 'owner' ? '/admin' : '/app' })
+              } catch (submissionError) {
+                setError(
+                  submissionError instanceof Error
+                    ? submissionError.message
+                    : 'Unable to continue right now.',
+                )
+              } finally {
+                setIsSubmitting(false)
               }
+            }}
+          >
+            <div className="cxq-auth-fields">
+              {!hasOwner ? (
+                <div className="cxq-auth-field">
+                  <label htmlFor="owner-name">Owner name</label>
+                  <input
+                    id="owner-name"
+                    autoComplete="name"
+                    placeholder="Your full name"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    required
+                  />
+                </div>
+              ) : null}
 
-              await authClient.signIn.email({ email, password })
-              const { data: session } = await authClient.getSession()
+              <div className="cxq-auth-field">
+                <label htmlFor="internal-email">Email</label>
+                <input
+                  id="internal-email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@company.com"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  required
+                />
+              </div>
 
-              const role = session?.user && isAppRole(session.user.role) ? session.user.role : null
-
-              if (role === 'customer') {
-                await authClient.signOut()
-                setError('Customer accounts must use the customer login page.')
-                return
-              }
-
-              if (!role) {
-                setError('Unable to determine which internal workspace to open.')
-                return
-              }
-
-              await navigate({ to: role === 'owner' ? '/admin' : '/app' })
-            } catch (submissionError) {
-              setError(
-                submissionError instanceof Error
-                  ? submissionError.message
-                  : 'Unable to continue right now.',
-              )
-            } finally {
-              setIsSubmitting(false)
-            }
-          }}
-        >
-          {!hasOwner ? (
-            <p className="rounded-2xl border border-[var(--line)] bg-[rgba(255,255,255,0.38)] px-4 py-3 text-sm leading-7 text-[var(--sea-ink-soft)]">
-              This only appears before the first owner account exists.
-            </p>
-          ) : null}
-          {!hasOwner ? (
-            <div>
-              <label className="field-label" htmlFor="owner-name">
-                Owner name
-              </label>
-              <input
-                id="owner-name"
-                autoComplete="name"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                className="field-input"
-                required
-              />
+              <div className="cxq-auth-field">
+                <label htmlFor="internal-password">Password</label>
+                <input
+                  id="internal-password"
+                  type="password"
+                  autoComplete={hasOwner ? 'current-password' : 'new-password'}
+                  placeholder={hasOwner ? 'Your password' : 'Choose a strong password'}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  minLength={8}
+                  required
+                />
+              </div>
             </div>
-          ) : null}
-          <div>
-            <label className="field-label" htmlFor="internal-email">
-              Email
-            </label>
-            <input
-              id="internal-email"
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className="field-input"
-              required
-            />
-          </div>
-          <div>
-            <label className="field-label" htmlFor="internal-password">
-              Password
-            </label>
-            <input
-              id="internal-password"
-              type="password"
-              autoComplete={hasOwner ? 'current-password' : 'new-password'}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className="field-input"
-              minLength={8}
-              required
-            />
-          </div>
-          {error ? <p className="form-error">{error}</p> : null}
-          <button type="submit" className="button-primary w-full justify-center" disabled={isSubmitting}>
-            {isSubmitting
-              ? 'Working…'
-              : hasOwner
-                ? 'Continue'
-                : 'Create owner account'}
-          </button>
-        </form>
-      </AuthFrame>
+
+            {error ? <p className="cxq-auth-error">{error}</p> : null}
+
+            <button
+              type="submit"
+              className="button-primary cxq-auth-submit cxq-auth-submit-with-icon"
+              disabled={isSubmitting}
+            >
+              {isSubmitting
+                ? 'Working…'
+                : hasOwner
+                  ? 'Continue'
+                  : 'Create owner account'}
+              {!isSubmitting ? <ArrowRight size={14} strokeWidth={2.5} aria-hidden /> : null}
+            </button>
+          </form>
+        </div>
+      </div>
     </AuthPageShell>
   )
 }

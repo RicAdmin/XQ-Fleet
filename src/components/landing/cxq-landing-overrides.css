@@ -1,0 +1,207 @@
+@scope (.cxq-landing-page) {
+  .cxq-checkout-nav-strip {
+    background: #fff;
+  }
+
+  .nav.nav--solid-light {
+    color: var(--ink);
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+  }
+  .nav.nav--solid-light .nav-search {
+    background: var(--canvas-2);
+    border: 1px solid var(--line);
+    color: var(--muted);
+  }
+  .nav.nav--solid-light .nav-search input {
+    color: var(--ink);
+  }
+  .nav.nav--solid-light .nav-search input::placeholder {
+    color: var(--muted-2);
+  }
+  .nav.nav--solid-light .nav-right > span.flex {
+    color: var(--muted);
+  }
+  .nav.nav--solid-light .nav-right a:not(.signup) {
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .nav.nav--solid-light .nav-right a:not(.signup):hover {
+    color: var(--ink);
+  }
+  .nav.nav--solid-light .nav-session-pending {
+    background: var(--canvas-2) !important;
+  }
+  .nav.nav--solid-light .nav-avatar {
+    background: var(--canvas-2);
+    border-color: var(--line);
+    color: var(--ink);
+  }
+  .nav.nav--solid-light .nav-avatar:hover {
+    background: var(--line-2);
+  }
+
+  .checkout-page-frame .checkout {
+    max-width: 1200px;
+    margin: 0 auto;
+    border-radius: 0 0 18px 18px;
+  }
+
+  .checkout-header a.close-btn {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .nav-links button,
+  .nav-links a.nav-ghost-link {
+    position: relative;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    font: inherit;
+    font-size: inherit;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: none;
+  }
+  .nav-links button.active::after,
+  .nav-links a.nav-ghost-link.active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -8px;
+    height: 2px;
+    background: var(--brand-sand);
+    border-radius: 2px;
+  }
+  .nav-user-menu a,
+  .nav-user-menu button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--ink);
+    text-decoration: none;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .nav-user-menu a:hover,
+  .nav-user-menu button:hover {
+    background: var(--canvas-2);
+  }
+}
+
+/* Guide pages: match xq-car-web `page-shell` — full canvas width for filters + content */
+@scope (.cxq-landing-page.cxq-guide-app) {
+  .page-shell-guide {
+    min-height: 70vh;
+    background: var(--canvas);
+    padding-bottom: 60px;
+  }
+
+  /* Wider canvas than 1240px — matches xq-car-web feel where tabs + filters fit one row */
+  .page-section {
+    max-width: min(1480px, 100%);
+    padding: 32px clamp(16px, 3.5vw, 36px) 0;
+  }
+
+  .prc-toolbar {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+    padding: 16px 18px;
+    gap: 24px;
+    /* Same as xq-car-web base; minmax(0,1fr) keeps grid from overflowing into column 1 */
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .prc-toolbar > .prc-tabs {
+    min-width: 0;
+    /* Scroll only when the stacked layout or narrow column needs it */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    flex-shrink: 0;
+  }
+
+  .prc-toolbar > .prc-filters {
+    min-width: 0;
+    /* Keeps Group size … Reset on one row; scroll this cell if needed (xq-car-web default is wrap—guide stays single row on lg) */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .prc-tabs {
+    flex-shrink: 0;
+    flex-wrap: nowrap;
+  }
+
+  /* One line of controls on wide viewports — same intent as xq-car-web single-row toolbar */
+  .prc-filters {
+    flex-wrap: nowrap;
+    gap: 14px;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 0;
+  }
+
+  .prc-filter {
+    flex-shrink: 0;
+  }
+
+  /* Reset sits beside filters — keep horizontal text + normal height (not stretched by flex) */
+  .prc-filters > .btn.btn-ghost.btn-sm {
+    align-self: center;
+    flex-shrink: 0;
+    white-space: nowrap;
+    writing-mode: horizontal-tb;
+    height: auto;
+    min-height: 0;
+  }
+
+  .site-footer {
+    margin-top: 60px;
+  }
+
+  /* Stack tabs above filters only on smaller viewports — web uses 1100px for prc-grid only;
+     defer toolbar stack to 900px so 900–1200px laptops keep one toolbar row like the mock. */
+  @media (max-width: 900px) {
+    .prc-toolbar {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .prc-toolbar > .prc-tabs {
+      max-width: none;
+      justify-self: stretch;
+      overflow-x: auto;
+    }
+
+    .prc-toolbar > .prc-filters {
+      overflow-x: visible;
+    }
+
+    .prc-filters {
+      flex-wrap: wrap;
+      row-gap: 12px;
+      justify-content: flex-start;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .page-section {
+      padding-inline: 12px;
+    }
+
+    .prc-toolbar {
+      padding: 14px 14px;
+    }
+  }
+}

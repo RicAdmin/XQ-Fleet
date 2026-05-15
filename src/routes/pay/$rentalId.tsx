@@ -56,6 +56,7 @@ function PaymentRedirectPage() {
         <input type="hidden" name="UserContact" value={formParams.UserContact} />
         <input type="hidden" name="Remark" value={formParams.Remark} />
         <input type="hidden" name="Lang" value={formParams.Lang} />
+        <input type="hidden" name="SignatureType" value={formParams.SignatureType} />
         <input type="hidden" name="Signature" value={formParams.Signature} />
         <input type="hidden" name="ResponseURL" value={formParams.ResponseURL} />
         <input type="hidden" name="BackendURL" value={formParams.BackendURL} />

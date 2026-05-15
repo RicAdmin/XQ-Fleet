@@ -10,7 +10,7 @@ export default function AuthPageShell({ children }: { children: ReactNode }) {
       <header className="auth-page-nav">
         <div className="auth-page-nav-inner page-wrap px-4">
           <Link to="/" className="auth-page-brand">
-            XQ Car Fleet
+            Car XQ
           </Link>
           <Link to="/" className="auth-page-back">
             ← Back to home
