@@ -2,7 +2,7 @@ import './cxq-landing-scoped.css'
 import './cxq-landing-overrides.css'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import {
   ArrowRight,
   Bell,
@@ -136,6 +136,7 @@ function pickCar(cars: PublicCarRow[], cat: CarCategoryKey): PublicCarRow | null
 }
 
 export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] }) {
+  const navigate = useNavigate()
   const [cars, setCars] = useState<PublicCarRow[]>(initialCars)
   const [booking, setBooking] = useState<BookingState>(defaultBooking)
   const [showResults, setShowResults] = useState(false)
@@ -177,6 +178,28 @@ export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] })
   const startYmd = toYmd(booking.pickDate)
   const endYmd = toYmd(booking.retDate)
 
+  const goToCheckout = useCallback(
+    (car: PublicCarRow) => {
+      setOpenCar(null)
+      void navigate({
+        to: '/checkout/$carId',
+        params: { carId: car.id },
+        search: {
+          startDate: startYmd,
+          endDate: endYmd,
+          from: booking.from,
+          retLoc: booking.retLoc,
+          tripType: booking.tripType,
+          pickTime: booking.pickTime,
+          retTime: booking.retTime,
+          adults: String(booking.adults),
+          children: String(booking.children),
+        },
+      })
+    },
+    [navigate, booking, startYmd, endYmd],
+  )
+
   return (
     <div className="cxq-landing-page">
       <div className="page" data-screen-label="Car XQ Landing">
@@ -204,7 +227,7 @@ export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] })
           searching={searching}
         />
 
-        <TopPicksSection cars={cars} startYmd={startYmd} endYmd={endYmd} onOpenCar={setOpenCar} />
+        <TopPicksSection cars={cars} onOpenCar={setOpenCar} />
         <CarCategoriesSection cars={cars} onOpenCar={setOpenCar} />
         <CitiesSection onPickCity={(c) => setBooking((b) => ({ ...b, from: `Car rental in ${c}` }))} />
         <PromosSection />
@@ -225,23 +248,15 @@ export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] })
         />
 
         {showResults && (
-          <ResultsOverlay
-            cars={cars}
-            booking={booking}
-            startYmd={startYmd}
-            endYmd={endYmd}
-            onClose={() => setShowResults(false)}
-            onOpenCar={setOpenCar}
-          />
+          <ResultsOverlay cars={cars} booking={booking} onClose={() => setShowResults(false)} onOpenCar={setOpenCar} />
         )}
         {openCar && (
           <DetailDialog
             car={openCar}
             booking={booking}
             nights={nightsBetween(booking.pickDate, booking.retDate)}
-            startYmd={startYmd}
-            endYmd={endYmd}
             onClose={() => setOpenCar(null)}
+            onBeginCheckout={goToCheckout}
           />
         )}
         {activeReel && <ReelLightbox reel={activeReel} onClose={() => setActiveReel(null)} />}
@@ -250,12 +265,14 @@ export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] })
   )
 }
 
-function LandingNav({
+export function LandingNav({
   sessionPending,
   user,
   navMenuOpen,
   setNavMenuOpen,
   navMenuRef,
+  sectionLinks = 'in-page',
+  appearance = 'on-hero',
   onScrollFleet,
   onScrollCategories,
   onScrollLocations,
@@ -266,17 +283,22 @@ function LandingNav({
   navMenuOpen: boolean
   setNavMenuOpen: (v: boolean | ((b: boolean) => boolean)) => void
   navMenuRef: React.RefObject<HTMLDivElement | null>
-  onScrollFleet: () => void
-  onScrollCategories: () => void
-  onScrollLocations: () => void
-  onScrollHelp: () => void
+  /** `home`: same destinations as the landing page, via `/#…` (for routes outside the long homepage). */
+  sectionLinks?: 'in-page' | 'home'
+  /** `solid-light`: white bar + dark text (e.g. checkout). Default matches hero overlay. */
+  appearance?: 'on-hero' | 'solid-light'
+  onScrollFleet?: () => void
+  onScrollCategories?: () => void
+  onScrollLocations?: () => void
+  onScrollHelp?: () => void
 }) {
   const initials = user?.name ? initialsFromName(user.name) : ''
+  const onHero = appearance === 'on-hero'
 
   return (
-    <nav className="nav">
+    <nav className={'nav' + (onHero ? '' : ' nav--solid-light')}>
       <Link to="/">
-        <div className="brand" style={{ color: '#fff' }}>
+        <div className="brand" style={{ color: onHero ? '#fff' : 'var(--ink)' }}>
           <span className="mark" aria-hidden="true">
             x
           </span>
@@ -286,21 +308,43 @@ function LandingNav({
         </div>
       </Link>
       <div className="nav-links">
-        <button type="button" className="active" onClick={() => scrollToAnchor('booking-dock')}>
-          Find a car
-        </button>
-        <button type="button" onClick={onScrollFleet}>
-          Our fleet
-        </button>
-        <button type="button" onClick={onScrollCategories}>
-          Categories
-        </button>
-        <button type="button" onClick={onScrollLocations}>
-          Locations
-        </button>
-        <button type="button" onClick={onScrollHelp}>
-          Help
-        </button>
+        {sectionLinks === 'home' ? (
+          <>
+            <Link to="/" hash="booking-dock" className="nav-ghost-link active">
+              Find a car
+            </Link>
+            <Link to="/" hash="top-picks" className="nav-ghost-link">
+              Our fleet
+            </Link>
+            <Link to="/" hash="categories" className="nav-ghost-link">
+              Categories
+            </Link>
+            <Link to="/" hash="locations" className="nav-ghost-link">
+              Locations
+            </Link>
+            <Link to="/" hash="faq" className="nav-ghost-link">
+              Help
+            </Link>
+          </>
+        ) : (
+          <>
+            <button type="button" className="active" onClick={() => scrollToAnchor('booking-dock')}>
+              Find a car
+            </button>
+            <button type="button" onClick={onScrollFleet}>
+              Our fleet
+            </button>
+            <button type="button" onClick={onScrollCategories}>
+              Categories
+            </button>
+            <button type="button" onClick={onScrollLocations}>
+              Locations
+            </button>
+            <button type="button" onClick={onScrollHelp}>
+              Help
+            </button>
+          </>
+        )}
       </div>
       <div className="nav-search">
         <Search size={15} />
@@ -312,7 +356,10 @@ function LandingNav({
         </span>
         <ThemeToggle />
         {sessionPending ? (
-          <span style={{ width: 80, height: 32, display: 'inline-block', borderRadius: 999, background: 'rgba(255,255,255,.12)' }} />
+          <span
+            className="nav-session-pending"
+            style={{ width: 80, height: 32, display: 'inline-block', borderRadius: 999, background: 'rgba(255,255,255,.12)' }}
+          />
         ) : !user ? (
           <>
             <Link to="/login">Log In</Link>
@@ -815,13 +862,9 @@ function PaxMenu({
 
 function TopPicksSection({
   cars,
-  startYmd,
-  endYmd,
   onOpenCar,
 }: {
   cars: PublicCarRow[]
-  startYmd: string | undefined
-  endYmd: string | undefined
   onOpenCar: (c: PublicCarRow) => void
 }) {
   const [filter, setFilter] = useState<(typeof TOP_TAGS)[number]>('All')
@@ -851,7 +894,7 @@ function TopPicksSection({
       </div>
       <div className="car-grid">
         {list.slice(0, 8).map((c) => (
-          <FleetCarCard key={c.id} car={c} startYmd={startYmd} endYmd={endYmd} onOpen={() => onOpenCar(c)} />
+          <FleetCarCard key={c.id} car={c} onOpen={() => onOpenCar(c)} />
         ))}
       </div>
       <div className="row-center">
@@ -866,13 +909,9 @@ function TopPicksSection({
 function FleetCarCard({
   car,
   onOpen,
-  startYmd,
-  endYmd,
 }: {
   car: PublicCarRow
   onOpen: () => void
-  startYmd?: string
-  endYmd?: string
 }) {
   const [fav, setFav] = useState(false)
   const [showLuggage, setShowLuggage] = useState(false)
@@ -947,15 +986,16 @@ function FleetCarCard({
                 <span className="per"> / day</span>
               </div>
             </div>
-            <Link
-              to="/book/$carId"
-              params={{ carId: car.id }}
-              search={{ startDate: startYmd, endDate: endYmd }}
+            <button
+              type="button"
               className="btn btn-sm"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation()
+                onOpen()
+              }}
             >
               Rent <ArrowRight size={12} />
-            </Link>
+            </button>
           </div>
         </div>
       </article>
@@ -1971,7 +2011,9 @@ export function SiteFooter({
                   Our fleet
                 </button>
               ) : (
-                <Link to="/#top-picks">Our fleet</Link>
+                <Link to="/" hash="top-picks">
+                  Our fleet
+                </Link>
               )}
             </li>
             <li>
@@ -2013,15 +2055,11 @@ export function SiteFooter({
 function ResultsOverlay({
   cars,
   booking,
-  startYmd,
-  endYmd,
   onClose,
   onOpenCar,
 }: {
   cars: PublicCarRow[]
   booking: BookingState
-  startYmd?: string
-  endYmd?: string
   onClose: () => void
   onOpenCar: (c: PublicCarRow) => void
 }) {
@@ -2133,7 +2171,7 @@ function ResultsOverlay({
 
             <div className="result-cards">
               {filtered.map((c) => (
-                <FleetCarCard key={c.id} car={c} startYmd={startYmd} endYmd={endYmd} onOpen={() => onOpenCar(c)} />
+                <FleetCarCard key={c.id} car={c} onOpen={() => onOpenCar(c)} />
               ))}
             </div>
 
@@ -2166,16 +2204,14 @@ function DetailDialog({
   car,
   booking,
   nights,
-  startYmd,
-  endYmd,
   onClose,
+  onBeginCheckout,
 }: {
   car: PublicCarRow
   booking: BookingState
   nights: number
-  startYmd?: string
-  endYmd?: string
   onClose: () => void
+  onBeginCheckout: (car: PublicCarRow) => void
 }) {
   const [showLuggage, setShowLuggage] = useState(false)
   const n = nights || 1
@@ -2309,9 +2345,14 @@ function DetailDialog({
           </div>
 
           <div className="flex gap-3">
-            <Link to="/book/$carId" params={{ carId: car.id }} search={{ startDate: startYmd, endDate: endYmd }} className="btn btn-leaf btn-lg" style={{ flex: 1, justifyContent: 'center' }} onClick={onClose}>
-              Reserve this car <ArrowRight size={14} />
-            </Link>
+            <button
+              type="button"
+              className="btn btn-leaf btn-lg"
+              style={{ flex: 1, justifyContent: 'center' }}
+              onClick={() => onBeginCheckout(car)}
+            >
+              Continue to checkout <ArrowRight size={14} />
+            </button>
             <Link to="/cars/$carId" params={{ carId: car.id }} className="btn btn-ghost btn-lg" onClick={onClose}>
               Full details
             </Link>

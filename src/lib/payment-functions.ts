@@ -141,7 +141,7 @@ export const initiatePayment = createServerFn({ method: 'POST' })
     if (!session) throw new Error('You must be signed in.')
 
     const { db } = await import('#/db')
-    const { rentals, cars, customers, payments, carPhotos } = await import('#/db/schema')
+    const { rentals, cars, customers, payments } = await import('#/db/schema')
     const { and, eq } = await import('drizzle-orm')
 
     // Load settings

@@ -21,6 +21,16 @@ export type PublicCarDetail = {
   year: number
   category: CarCategory
   dailyRateSen: number
+  priceLowSeasonSen: number
+  pricePeakSeasonSen: number
+  priceSuperPeakSeasonSen: number
+  extHourLowSen: number
+  extHourPeakAndSuperPeakSen: number
+  deliveryFeeAirportSen: number
+  deliveryFeeHotelSen: number
+  minRentalDays: number
+  maxRentalDays: number
+  availableForBooking: boolean
   notes: string | null
   photos: Array<{
     id: string
@@ -137,6 +147,16 @@ export const getPublicCarDetail = createServerFn({ method: 'GET' })
         year: cars.year,
         category: cars.category,
         dailyRateSen: cars.dailyRateSen,
+        priceLowSeasonSen: cars.priceLowSeasonSen,
+        pricePeakSeasonSen: cars.pricePeakSeasonSen,
+        priceSuperPeakSeasonSen: cars.priceSuperPeakSeasonSen,
+        extHourLowSen: cars.extHourLowSen,
+        extHourPeakAndSuperPeakSen: cars.extHourPeakAndSuperPeakSen,
+        deliveryFeeAirportSen: cars.deliveryFeeAirportSen,
+        deliveryFeeHotelSen: cars.deliveryFeeHotelSen,
+        minRentalDays: cars.minRentalDays,
+        maxRentalDays: cars.maxRentalDays,
+        availableForBooking: cars.availableForBooking,
         notes: cars.notes,
       })
       .from(cars)

@@ -47,7 +47,7 @@ export default function CustomerAccountChrome({
 
   const activeTab: CustomerAccountTab = pathname.startsWith('/account/notifications')
     ? 'notifications'
-    : pathname.startsWith('/account/rentals')
+    : pathname.startsWith('/account/rentals') || pathname.startsWith('/account/bookings')
       ? 'rentals'
       : 'profile'
 

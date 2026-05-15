@@ -141,10 +141,19 @@ async function main() {
   const iTitle = col('Title')
   const iSlug = col('Slug')
   const iStatus = col('Status')
+  const iAvailableForBooking = col('Available_For_Booking')
   const iBody = col('Body_Type')
   const iImage = col('Image')
   const iShort = col('Short_Description')
   const iPrice = col('Price_Low_Season')
+  const iPricePeak = col('Price_Peak_Season')
+  const iPriceSuperPeak = col('Price_Super_Peak_Season')
+  const iExtHourLow = col('Ext_Hour_Low')
+  const iExtHourPeak = col('Ext_Hour_Peak_And_Super_Peak')
+  const iDeliveryAirport = col('Delivery_Fee_Airport')
+  const iDeliveryHotel = col('Delivery_Fee_Hotel')
+  const iMinDays = col('Min_Rental_Days')
+  const iMaxDays = col('Max_Rental_Days')
 
   const pool = new pg.Pool({ connectionString: url })
   const db = drizzle(pool, { schema })
@@ -173,6 +182,16 @@ async function main() {
 
     const category = bodyTypeToCategory(cells[iBody] ?? 'other')
     const dailyRateSen = rmToSen(cells[iPrice] ?? '0')
+    const priceLowSeasonSen = rmToSen(cells[iPrice] ?? '0')
+    const pricePeakSeasonSen = rmToSen(cells[iPricePeak] ?? '0')
+    const priceSuperPeakSeasonSen = rmToSen(cells[iPriceSuperPeak] ?? '0')
+    const extHourLowSen = rmToSen(cells[iExtHourLow] ?? '0')
+    const extHourPeakAndSuperPeakSen = rmToSen(cells[iExtHourPeak] ?? '0')
+    const deliveryFeeAirportSen = rmToSen(cells[iDeliveryAirport] ?? '0')
+    const deliveryFeeHotelSen = rmToSen(cells[iDeliveryHotel] ?? '0')
+    const minRentalDays = Number.parseInt(cells[iMinDays]?.trim() ?? '1', 10) || 1
+    const maxRentalDays = Number.parseInt(cells[iMaxDays]?.trim() ?? '30', 10) || 30
+    const availableForBooking = (cells[iAvailableForBooking]?.trim() ?? 'True').toLowerCase() === 'true'
     const notes = (cells[iShort] ?? '').trim() || null
     const requestedImage = (cells[iImage] ?? '').trim()
     const resolvedFile = requestedImage
@@ -192,6 +211,16 @@ async function main() {
         category,
         status: 'available',
         dailyRateSen,
+        priceLowSeasonSen,
+        pricePeakSeasonSen,
+        priceSuperPeakSeasonSen,
+        extHourLowSen,
+        extHourPeakAndSuperPeakSen,
+        deliveryFeeAirportSen,
+        deliveryFeeHotelSen,
+        minRentalDays,
+        maxRentalDays,
+        availableForBooking,
         notes,
         currentMileage: null,
       })

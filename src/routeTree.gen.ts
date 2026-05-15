@@ -26,6 +26,7 @@ import { Route as GuidesPlanDriveRouteImport } from './routes/guides/plan-drive'
 import { Route as GuidesPickupReturnRouteImport } from './routes/guides/pickup-return'
 import { Route as GuidesPickCarRouteImport } from './routes/guides/pick-car'
 import { Route as GuidesKnowHowRouteImport } from './routes/guides/know-how'
+import { Route as CheckoutCarIdRouteImport } from './routes/checkout/$carId'
 import { Route as CarsCarIdRouteImport } from './routes/cars/$carId'
 import { Route as BookCarIdRouteImport } from './routes/book/$carId'
 import { Route as AccountRentalsRouteImport } from './routes/account/rentals'
@@ -136,6 +137,11 @@ const GuidesPickCarRoute = GuidesPickCarRouteImport.update({
 const GuidesKnowHowRoute = GuidesKnowHowRouteImport.update({
   id: '/guides/know-how',
   path: '/guides/know-how',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutCarIdRoute = CheckoutCarIdRouteImport.update({
+  id: '/checkout/$carId',
+  path: '/checkout/$carId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CarsCarIdRoute = CarsCarIdRouteImport.update({
@@ -286,6 +292,7 @@ export interface FileRoutesByFullPath {
   '/account/rentals': typeof AccountRentalsRoute
   '/book/$carId': typeof BookCarIdRoute
   '/cars/$carId': typeof CarsCarIdRoute
+  '/checkout/$carId': typeof CheckoutCarIdRoute
   '/guides/know-how': typeof GuidesKnowHowRoute
   '/guides/pick-car': typeof GuidesPickCarRoute
   '/guides/pickup-return': typeof GuidesPickupReturnRoute
@@ -328,6 +335,7 @@ export interface FileRoutesByTo {
   '/account/rentals': typeof AccountRentalsRoute
   '/book/$carId': typeof BookCarIdRoute
   '/cars/$carId': typeof CarsCarIdRoute
+  '/checkout/$carId': typeof CheckoutCarIdRoute
   '/guides/know-how': typeof GuidesKnowHowRoute
   '/guides/pick-car': typeof GuidesPickCarRoute
   '/guides/pickup-return': typeof GuidesPickupReturnRoute
@@ -374,6 +382,7 @@ export interface FileRoutesById {
   '/account/rentals': typeof AccountRentalsRoute
   '/book/$carId': typeof BookCarIdRoute
   '/cars/$carId': typeof CarsCarIdRoute
+  '/checkout/$carId': typeof CheckoutCarIdRoute
   '/guides/know-how': typeof GuidesKnowHowRoute
   '/guides/pick-car': typeof GuidesPickCarRoute
   '/guides/pickup-return': typeof GuidesPickupReturnRoute
@@ -421,6 +430,7 @@ export interface FileRouteTypes {
     | '/account/rentals'
     | '/book/$carId'
     | '/cars/$carId'
+    | '/checkout/$carId'
     | '/guides/know-how'
     | '/guides/pick-car'
     | '/guides/pickup-return'
@@ -463,6 +473,7 @@ export interface FileRouteTypes {
     | '/account/rentals'
     | '/book/$carId'
     | '/cars/$carId'
+    | '/checkout/$carId'
     | '/guides/know-how'
     | '/guides/pick-car'
     | '/guides/pickup-return'
@@ -508,6 +519,7 @@ export interface FileRouteTypes {
     | '/account/rentals'
     | '/book/$carId'
     | '/cars/$carId'
+    | '/checkout/$carId'
     | '/guides/know-how'
     | '/guides/pick-car'
     | '/guides/pickup-return'
@@ -551,6 +563,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   BookCarIdRoute: typeof BookCarIdRoute
   CarsCarIdRoute: typeof CarsCarIdRoute
+  CheckoutCarIdRoute: typeof CheckoutCarIdRoute
   GuidesKnowHowRoute: typeof GuidesKnowHowRoute
   GuidesPickCarRoute: typeof GuidesPickCarRoute
   GuidesPickupReturnRoute: typeof GuidesPickupReturnRoute
@@ -683,6 +696,13 @@ declare module '@tanstack/react-router' {
       path: '/guides/know-how'
       fullPath: '/guides/know-how'
       preLoaderRoute: typeof GuidesKnowHowRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/$carId': {
+      id: '/checkout/$carId'
+      path: '/checkout/$carId'
+      fullPath: '/checkout/$carId'
+      preLoaderRoute: typeof CheckoutCarIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cars/$carId': {
@@ -950,6 +970,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   BookCarIdRoute: BookCarIdRoute,
   CarsCarIdRoute: CarsCarIdRoute,
+  CheckoutCarIdRoute: CheckoutCarIdRoute,
   GuidesKnowHowRoute: GuidesKnowHowRoute,
   GuidesPickCarRoute: GuidesPickCarRoute,
   GuidesPickupReturnRoute: GuidesPickupReturnRoute,
