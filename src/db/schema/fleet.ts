@@ -120,6 +120,7 @@ export const cars = pgTable(
     extHourLowSen: integer('ext_hour_low_sen').notNull().default(0),
     extHourPeakAndSuperPeakSen: integer('ext_hour_peak_and_super_peak_sen').notNull().default(0),
     deliveryFeeAirportSen: integer('delivery_fee_airport_sen').notNull().default(0),
+    deliveryFeeJettySen: integer('delivery_fee_jetty_sen').notNull().default(0),
     deliveryFeeHotelSen: integer('delivery_fee_hotel_sen').notNull().default(0),
     minRentalDays: integer('min_rental_days').notNull().default(1),
     maxRentalDays: integer('max_rental_days').notNull().default(30),

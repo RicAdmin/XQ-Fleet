@@ -122,6 +122,7 @@ function carToPricing(car: {
   extHourLowSen: number
   extHourPeakAndSuperPeakSen: number
   deliveryFeeAirportSen: number
+  deliveryFeeJettySen: number
   deliveryFeeHotelSen: number
   minRentalDays: number
   maxRentalDays: number
@@ -135,6 +136,7 @@ function carToPricing(car: {
     extHourLowSen: car.extHourLowSen,
     extHourPeakAndSuperPeakSen: car.extHourPeakAndSuperPeakSen,
     deliveryFeeAirportSen: car.deliveryFeeAirportSen,
+    deliveryFeeJettySen: car.deliveryFeeJettySen,
     deliveryFeeHotelSen: car.deliveryFeeHotelSen,
     minRentalDays: car.minRentalDays,
     maxRentalDays: car.maxRentalDays,
@@ -174,6 +176,7 @@ export const previewBookingPrice = createServerFn({ method: 'GET' })
         extHourLowSen: cars.extHourLowSen,
         extHourPeakAndSuperPeakSen: cars.extHourPeakAndSuperPeakSen,
         deliveryFeeAirportSen: cars.deliveryFeeAirportSen,
+        deliveryFeeJettySen: cars.deliveryFeeJettySen,
         deliveryFeeHotelSen: cars.deliveryFeeHotelSen,
         minRentalDays: cars.minRentalDays,
         maxRentalDays: cars.maxRentalDays,
@@ -286,6 +289,7 @@ export const createPortalBooking = createServerFn({ method: 'POST' })
         extHourLowSen: cars.extHourLowSen,
         extHourPeakAndSuperPeakSen: cars.extHourPeakAndSuperPeakSen,
         deliveryFeeAirportSen: cars.deliveryFeeAirportSen,
+        deliveryFeeJettySen: cars.deliveryFeeJettySen,
         deliveryFeeHotelSen: cars.deliveryFeeHotelSen,
         minRentalDays: cars.minRentalDays,
         maxRentalDays: cars.maxRentalDays,

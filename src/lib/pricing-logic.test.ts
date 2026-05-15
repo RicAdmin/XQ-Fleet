@@ -24,6 +24,7 @@ const innova: CarPricing = {
   extHourLowSen: 2000,          // RM 20
   extHourPeakAndSuperPeakSen: 3000, // RM 30
   deliveryFeeAirportSen: 3000,  // RM 30
+  deliveryFeeJettySen: 3000,    // RM 30 (same as airport)
   deliveryFeeHotelSen: 5000,    // RM 50
   minRentalDays: 1,
   maxRentalDays: 30,
@@ -39,6 +40,7 @@ const hondaCity: CarPricing = {
   extHourLowSen: 2000,
   extHourPeakAndSuperPeakSen: 3000,
   deliveryFeeAirportSen: 3000,  // RM 30
+  deliveryFeeJettySen: 3000,    // RM 30 (same as airport)
   deliveryFeeHotelSen: 5000,    // RM 50
   minRentalDays: 1,
   maxRentalDays: 30,
@@ -420,6 +422,6 @@ describe('integration examples', () => {
     expect(result.discountPercent).toBe(10)
     expect(result.discountAmount).toBeCloseTo(68)
     expect(result.finalTotal).toBe(612)
-    expect(result.stripeAmount).toBe(61200)
+    expect(result.amountSen).toBe(61200)
   })
 })

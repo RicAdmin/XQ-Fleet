@@ -20,7 +20,7 @@ import { carPhotos, cars, type CarCategory } from '../src/db/schema/fleet.ts'
 config({ path: ['.env.local', '.env'] })
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
-const csvPath = join(root, 'Car.csv')
+const csvPath = join(root, 'data', 'Car.csv')
 const imageDir = join(root, 'public', 'image', 'car_model')
 const PUBLIC_IMAGE_BASE = '/image/car_model'
 
@@ -217,6 +217,7 @@ async function main() {
         extHourLowSen,
         extHourPeakAndSuperPeakSen,
         deliveryFeeAirportSen,
+        deliveryFeeJettySen: deliveryFeeAirportSen,
         deliveryFeeHotelSen,
         minRentalDays,
         maxRentalDays,

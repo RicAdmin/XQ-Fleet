@@ -19,7 +19,7 @@ import type { SeasonType } from '../src/db/schema/pricing.ts'
 config({ path: ['.env.local', '.env'] })
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
-const csvPath = join(root, 'Season.csv')
+const csvPath = join(root, 'data', 'Season.csv')
 
 const VALID_SEASON_TYPES: SeasonType[] = ['Low', 'Peak', 'Super Peak']
 

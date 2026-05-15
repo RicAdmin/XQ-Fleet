@@ -27,6 +27,7 @@ export type PublicCarDetail = {
   extHourLowSen: number
   extHourPeakAndSuperPeakSen: number
   deliveryFeeAirportSen: number
+  deliveryFeeJettySen: number
   deliveryFeeHotelSen: number
   minRentalDays: number
   maxRentalDays: number
@@ -153,6 +154,7 @@ export const getPublicCarDetail = createServerFn({ method: 'GET' })
         extHourLowSen: cars.extHourLowSen,
         extHourPeakAndSuperPeakSen: cars.extHourPeakAndSuperPeakSen,
         deliveryFeeAirportSen: cars.deliveryFeeAirportSen,
+        deliveryFeeJettySen: cars.deliveryFeeJettySen,
         deliveryFeeHotelSen: cars.deliveryFeeHotelSen,
         minRentalDays: cars.minRentalDays,
         maxRentalDays: cars.maxRentalDays,

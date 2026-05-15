@@ -24,6 +24,7 @@ export type CarPricing = {
   extHourLowSen: number
   extHourPeakAndSuperPeakSen: number
   deliveryFeeAirportSen: number
+  deliveryFeeJettySen: number
   deliveryFeeHotelSen: number
   minRentalDays: number
   maxRentalDays: number
@@ -59,7 +60,7 @@ export type PricingBreakdown = {
   discountPercent: number
   discountAmount: number   // RM
   finalTotal: number       // RM (rounded)
-  stripeAmount: number     // MYR cents
+  amountSen: number        // finalTotal in sen (for payment gateway)
   breakdown: DayEntry[]
 }
 
@@ -206,7 +207,7 @@ export function calculateDeliveryFee(
       case 'Hotel':
         return car.deliveryFeeHotelSen
       case 'Jetty':
-        return car.deliveryFeeAirportSen
+        return car.deliveryFeeJettySen
       case 'Office':
         return 0
       default:
@@ -314,7 +315,7 @@ export function computeFinalTotal(
     discountPercent,
     discountAmount,
     finalTotal,
-    stripeAmount: finalTotal * 100,
+    amountSen: finalTotal * 100,
     breakdown: days,
   }
 }
