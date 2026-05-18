@@ -85,7 +85,7 @@ function AccountRentalsPage() {
             <div className="cxq-profile-empty-icon" aria-hidden>
               <Car size={28} strokeWidth={1.75} />
             </div>
-            <h2>No rentals yet.</h2>
+            <h3>No rentals yet.</h3>
             <p>When you reserve a car, your trip will land here — with one-tap re-rent for next time.</p>
             <Link to="/" className="button-primary cxq-profile-empty-cta">
               Browse cars
@@ -95,9 +95,9 @@ function AccountRentalsPage() {
         ) : (
           <div className="cxq-profile-rentals">
             <div className="cxq-profile-rental-head">
-              <h2>
+              <h3>
                 {bookings.length} rental{bookings.length === 1 ? '' : 's'}
-              </h2>
+              </h3>
               <div className="cxq-profile-rental-tabs" role="tablist" aria-label="Filter rentals">
                 {(
                   [
