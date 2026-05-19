@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { Link } from '@tanstack/react-router'
-import { ArrowRight, Check, Luggage, MapPin, Phone, Shield, X } from 'lucide-react'
+import { ArrowRight, Check, Luggage, MapPin, Shield, X } from 'lucide-react'
 
 import { LuggageFitModal } from '#/components/LuggageFitModal'
 import { heuristicLuggageFit } from '#/lib/fleet-luggage-fit'
@@ -85,18 +84,19 @@ export function CarDetailDialog({
           </button>
 
           <div className="left">
-            <span
-              style={{
-                alignSelf: 'flex-start',
-                background: '#fff',
-                padding: '5px 12px',
-                border: '1px solid var(--line)',
-                borderRadius: 999,
-                fontSize: 12,
-              }}
-            >
-              {car.category}
-            </span>
+            <div className="detail-hero-meta">
+              <span className="detail-category-pill">{car.category}</span>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm detail-hero-luggage-btn"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowLuggage(true)
+                }}
+              >
+                <Luggage size={14} /> Luggage fit guide
+              </button>
+            </div>
             <div className="detail-hero">
               {car.coverPhotoUrl ? (
                 <img src={car.coverPhotoUrl} alt={`${car.make} ${car.model}`} />
@@ -114,17 +114,6 @@ export function CarDetailDialog({
                 <Check size={12} /> Cancel free 48 h before
               </span>
             </div>
-            <button
-              type="button"
-              className="btn btn-ghost btn-sm"
-              style={{ marginTop: 14, alignSelf: 'flex-start' }}
-              onClick={(e) => {
-                e.stopPropagation()
-                setShowLuggage(true)
-              }}
-            >
-              <Luggage size={14} /> Luggage fit guide
-            </button>
           </div>
 
           <div className="right">
@@ -215,25 +204,14 @@ export function CarDetailDialog({
               </div>
             </div>
 
-            <div className="flex gap-3">
-              <button
-                type="button"
-                className="btn btn-leaf btn-lg"
-                style={{ flex: 1, justifyContent: 'center' }}
-                onClick={() => onBeginCheckout(car)}
-              >
-                Continue to checkout <ArrowRight size={14} />
-              </button>
-              <Link to="/cars/$carId" params={{ carId: car.id }} className="btn btn-ghost btn-lg" onClick={onClose}>
-                Full details
-              </Link>
-            </div>
-
-            <div
-              style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--muted)', fontSize: 12, marginTop: 4 }}
+            <button
+              type="button"
+              className="btn btn-leaf btn-lg"
+              style={{ width: '100%', justifyContent: 'center' }}
+              onClick={() => onBeginCheckout(car)}
             >
-              <Phone size={13} /> Questions? WhatsApp us — replies usually under 4 min.
-            </div>
+              Continue to checkout <ArrowRight size={14} />
+            </button>
           </div>
         </div>
       </div>

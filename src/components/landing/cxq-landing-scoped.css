@@ -12,8 +12,8 @@
   /* Brand */
   --ink:          #14181A;
   --ink-soft:     #2A2F33;
-  --muted:        #6B7378;
-  --muted-2:      #9AA1A6;
+  --muted:        #566067;        /* body secondary — AA on white */
+  --muted-2:      #78848A;        /* tertiary / placeholders */
   --line:         #E4E6EA;
   --line-2:       #ECEEF1;
   --canvas:       #F4F5F7;        /* light grey backdrop */
@@ -40,6 +40,11 @@
   /* Shadow */
   --shadow-card: 0 1px 0 rgba(20,24,26,.04), 0 8px 24px -12px rgba(20,24,26,.18);
   --shadow-pop:  0 12px 40px -8px rgba(20,24,26,.22);
+
+  /* Base type — landing is light-first; do not inherit app dark-mode body color */
+  color: var(--ink);
+  background-color: var(--canvas);
+  -webkit-font-smoothing: antialiased;
 }
 
 
@@ -66,6 +71,11 @@ img { display: block; max-width: 100%; }
   font-size: clamp(40px, 5.4vw, 70px);
   line-height: 1.02;
   letter-spacing: -0.03em;
+  color: var(--ink);
+}
+/* Photo hero — never use ink headings on the stage */
+.hero .h-display {
+  color: #fff;
 }
 .h-section {
   font-family: var(--font-sans);
@@ -74,9 +84,10 @@ img { display: block; max-width: 100%; }
   line-height: 1.1;
   letter-spacing: -0.022em;
   margin: 0;
+  color: var(--ink);
 }
 .h-sub {
-  color: var(--muted);
+  color: var(--ink-soft);
   font-size: 16px;
   line-height: 1.55;
   margin: 6px 0 0;
@@ -133,6 +144,7 @@ img { display: block; max-width: 100%; }
 /* Page chrome -------------------------------------------------- */
 .page {
   background: var(--card);
+  color: var(--ink);
   border-radius: var(--r-xl);
   margin: 18px;
   overflow: hidden;
@@ -236,18 +248,33 @@ img { display: block; max-width: 100%; }
   content: "";
   position: absolute; inset: 0;
   background:
-    linear-gradient(180deg, rgba(20,24,26,.55) 0%, rgba(20,24,26,0) 38%, rgba(20,24,26,.45) 100%),
-    linear-gradient(95deg, rgba(20,24,26,.55) 0%, rgba(20,24,26,0) 55%);
+    linear-gradient(180deg, rgba(14,18,20,.72) 0%, rgba(14,18,20,.28) 42%, rgba(14,18,20,.62) 100%),
+    linear-gradient(100deg, rgba(14,18,20,.78) 0%, rgba(14,18,20,.35) 48%, rgba(14,18,20,0) 68%);
 }
 .hero-title-block {
   position: absolute;
   left: 48px; bottom: 120px;
   z-index: 2;
   max-width: 720px;
+  color: #fff;
 }
-.hero-title-block .eyebrow { color: #FFE7B6; }
-.hero-title-block .h-display { color: #fff; margin: 10px 0 10px; }
-.hero-title-block p { color: rgba(255,255,255,.86); margin: 0; max-width: 44ch; font-size: 16px; line-height: 1.55; }
+.hero-title-block .eyebrow {
+  color: #ffedcf;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.45);
+}
+.hero-title-block .h-display {
+  color: #fff;
+  margin: 10px 0 10px;
+  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.5);
+}
+.hero-title-block p {
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0;
+  max-width: 44ch;
+  font-size: 16px;
+  line-height: 1.55;
+  text-shadow: 0 1px 16px rgba(0, 0, 0, 0.4);
+}
 
 /* Hero variant: split */
 .hero.layout-split { display: grid; grid-template-columns: 1.05fr 1fr; align-items: stretch; gap: 0; }
@@ -259,7 +286,7 @@ img { display: block; max-width: 100%; }
   display: flex; flex-direction: column; justify-content: center;
 }
 .hero.layout-split .hero-text .h-display { color: var(--ink); }
-.hero.layout-split .hero-text p { color: var(--muted); }
+.hero.layout-split .hero-text p { color: var(--ink-soft); }
 .hero.layout-split .nav-overlay {
   position: absolute; top: 0; left: 0; right: 0;
 }
@@ -311,6 +338,7 @@ img { display: block; max-width: 100%; }
   position: relative;
   z-index: 4;
   background: #fff;
+  color: var(--ink);
   border: 1px solid var(--line);
   border-radius: 18px;
   box-shadow: var(--shadow-pop);
@@ -537,7 +565,10 @@ img { display: block; max-width: 100%; }
 }
 .car-photo .heart:hover, .car-photo .heart.on { color: var(--brand-coral); }
 .car-info { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
-.car-info .name { font-weight: 600; font-size: 15px; line-height: 1.2; letter-spacing: -0.005em; }
+.car-info .name {
+  font-weight: 600; font-size: 15px; line-height: 1.2; letter-spacing: -0.005em;
+  color: var(--ink);
+}
 .car-info .specs {
   display: flex; gap: 14px; color: var(--muted); font-size: 12px;
   align-items: center;
@@ -600,7 +631,7 @@ img { display: block; max-width: 100%; }
   color: var(--brand-moss);
   margin-bottom: auto;
 }
-.howit .step h4 { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
+.howit .step h4 { margin: 0 0 4px; font-size: 17px; font-weight: 600; color: var(--ink); }
 .howit .step p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
 .howit .step .icon-circle {
   position: absolute; top: 22px; right: 22px;
@@ -3833,6 +3864,51 @@ input[type=range] { width: 100%; accent-color: var(--brand-leaf); }
   perspective: 1200px;
   overflow: hidden;
   border-radius: 18px;
+}
+.detail-hero-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+.detail-category-pill {
+  background: #fff;
+  padding: 5px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-transform: lowercase;
+}
+@keyframes luggageBtnPulse {
+  0%, 100% {
+    background-color: #fff;
+    border-color: var(--line);
+  }
+  50% {
+    background-color: transparent;
+    border-color: rgba(255, 102, 0, 0.45);
+  }
+}
+.detail-hero-luggage-btn {
+  flex-shrink: 0;
+  margin: 0;
+  background: #fff;
+  border-color: var(--line);
+  animation: luggageBtnPulse 2.2s ease-in-out infinite;
+}
+.detail-hero-luggage-btn:hover,
+.detail-hero-luggage-btn:focus-visible {
+  animation: none;
+  background: #fff;
+  border-color: var(--brand-leaf);
+}
+@media (prefers-reduced-motion: reduce) {
+  .detail-hero-luggage-btn {
+    animation: none;
+  }
 }
 .detail-hero img {
   width: 92%;

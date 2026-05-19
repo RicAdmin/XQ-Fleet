@@ -205,3 +205,47 @@
     }
   }
 }
+
+/* App dark theme — light surfaces keep dark type; do NOT blanket .h-display (breaks hero) */
+html.dark .cxq-landing-page,
+html.dark .cxq-landing-page .page {
+  color: #14181A;
+}
+html.dark .cxq-landing-page .section .h-section,
+html.dark .cxq-landing-page .section .h-sub,
+html.dark .cxq-landing-page .booking-dock,
+html.dark .cxq-landing-page .car-info .name {
+  color: inherit;
+}
+html.dark .cxq-landing-page .section .h-section {
+  color: #14181A;
+}
+html.dark .cxq-landing-page .section .h-sub {
+  color: #2A2F33;
+}
+
+/* Hero + nav on photo — always light type (system dark mode included) */
+html.dark .cxq-landing-page .hero,
+html.dark .cxq-landing-page .hero .hero-title-block {
+  color: #fff;
+}
+html.dark .cxq-landing-page .hero .hero-title-block .h-display {
+  color: #fff;
+}
+html.dark .cxq-landing-page .hero .hero-title-block p {
+  color: rgba(255, 255, 255, 0.92);
+}
+html.dark .cxq-landing-page .hero .hero-title-block .eyebrow {
+  color: #ffedcf;
+}
+html.dark .cxq-landing-page .nav:not(.nav--solid-light) {
+  color: #fff;
+}
+html.dark .cxq-landing-page .nav:not(.nav--solid-light) .nav-search,
+html.dark .cxq-landing-page .nav:not(.nav--solid-light) .nav-search input {
+  color: #fff;
+}
+html.dark .cxq-landing-page .nav:not(.nav--solid-light) .nav-right > span,
+html.dark .cxq-landing-page .nav:not(.nav--solid-light) .nav-right a:not(.signup) {
+  color: rgba(255, 255, 255, 0.92);
+}

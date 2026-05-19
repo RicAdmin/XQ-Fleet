@@ -27,7 +27,6 @@ import { Route as GuidesPickupReturnRouteImport } from './routes/guides/pickup-r
 import { Route as GuidesPickCarRouteImport } from './routes/guides/pick-car'
 import { Route as GuidesKnowHowRouteImport } from './routes/guides/know-how'
 import { Route as CheckoutCarIdRouteImport } from './routes/checkout/$carId'
-import { Route as CarsCarIdRouteImport } from './routes/cars/$carId'
 import { Route as BookCarIdRouteImport } from './routes/book/$carId'
 import { Route as AccountRentalsRouteImport } from './routes/account/rentals'
 import { Route as AccountProfileRouteImport } from './routes/account/profile'
@@ -142,11 +141,6 @@ const GuidesKnowHowRoute = GuidesKnowHowRouteImport.update({
 const CheckoutCarIdRoute = CheckoutCarIdRouteImport.update({
   id: '/checkout/$carId',
   path: '/checkout/$carId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CarsCarIdRoute = CarsCarIdRouteImport.update({
-  id: '/cars/$carId',
-  path: '/cars/$carId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookCarIdRoute = BookCarIdRouteImport.update({
@@ -291,7 +285,6 @@ export interface FileRoutesByFullPath {
   '/account/profile': typeof AccountProfileRoute
   '/account/rentals': typeof AccountRentalsRoute
   '/book/$carId': typeof BookCarIdRoute
-  '/cars/$carId': typeof CarsCarIdRoute
   '/checkout/$carId': typeof CheckoutCarIdRoute
   '/guides/know-how': typeof GuidesKnowHowRoute
   '/guides/pick-car': typeof GuidesPickCarRoute
@@ -334,7 +327,6 @@ export interface FileRoutesByTo {
   '/account/profile': typeof AccountProfileRoute
   '/account/rentals': typeof AccountRentalsRoute
   '/book/$carId': typeof BookCarIdRoute
-  '/cars/$carId': typeof CarsCarIdRoute
   '/checkout/$carId': typeof CheckoutCarIdRoute
   '/guides/know-how': typeof GuidesKnowHowRoute
   '/guides/pick-car': typeof GuidesPickCarRoute
@@ -381,7 +373,6 @@ export interface FileRoutesById {
   '/account/profile': typeof AccountProfileRoute
   '/account/rentals': typeof AccountRentalsRoute
   '/book/$carId': typeof BookCarIdRoute
-  '/cars/$carId': typeof CarsCarIdRoute
   '/checkout/$carId': typeof CheckoutCarIdRoute
   '/guides/know-how': typeof GuidesKnowHowRoute
   '/guides/pick-car': typeof GuidesPickCarRoute
@@ -429,7 +420,6 @@ export interface FileRouteTypes {
     | '/account/profile'
     | '/account/rentals'
     | '/book/$carId'
-    | '/cars/$carId'
     | '/checkout/$carId'
     | '/guides/know-how'
     | '/guides/pick-car'
@@ -472,7 +462,6 @@ export interface FileRouteTypes {
     | '/account/profile'
     | '/account/rentals'
     | '/book/$carId'
-    | '/cars/$carId'
     | '/checkout/$carId'
     | '/guides/know-how'
     | '/guides/pick-car'
@@ -518,7 +507,6 @@ export interface FileRouteTypes {
     | '/account/profile'
     | '/account/rentals'
     | '/book/$carId'
-    | '/cars/$carId'
     | '/checkout/$carId'
     | '/guides/know-how'
     | '/guides/pick-car'
@@ -562,7 +550,6 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   BookCarIdRoute: typeof BookCarIdRoute
-  CarsCarIdRoute: typeof CarsCarIdRoute
   CheckoutCarIdRoute: typeof CheckoutCarIdRoute
   GuidesKnowHowRoute: typeof GuidesKnowHowRoute
   GuidesPickCarRoute: typeof GuidesPickCarRoute
@@ -703,13 +690,6 @@ declare module '@tanstack/react-router' {
       path: '/checkout/$carId'
       fullPath: '/checkout/$carId'
       preLoaderRoute: typeof CheckoutCarIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cars/$carId': {
-      id: '/cars/$carId'
-      path: '/cars/$carId'
-      fullPath: '/cars/$carId'
-      preLoaderRoute: typeof CarsCarIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/book/$carId': {
@@ -969,7 +949,6 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   BookCarIdRoute: BookCarIdRoute,
-  CarsCarIdRoute: CarsCarIdRoute,
   CheckoutCarIdRoute: CheckoutCarIdRoute,
   GuidesKnowHowRoute: GuidesKnowHowRoute,
   GuidesPickCarRoute: GuidesPickCarRoute,

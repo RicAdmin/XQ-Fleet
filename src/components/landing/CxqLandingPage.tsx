@@ -37,7 +37,6 @@ import {
   type BookingState,
 } from '#/components/landing/CarDetailDialog'
 
-import ThemeToggle from '#/components/ThemeToggle'
 import { LuggageFitModal } from '#/components/LuggageFitModal'
 import { authClient } from '#/lib/auth-client'
 import { heuristicLuggageFit } from '#/lib/fleet-luggage-fit'
@@ -201,7 +200,6 @@ export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] })
         <PromosSection />
         <WhyChooseUs />
         <StepByStep />
-        <TrustRow />
         <TipsSection />
         <AttractionsSection />
         <EssentialLocations />
@@ -320,7 +318,6 @@ export function LandingNav({
         <span className="flex items-center gap-2" style={{ opacity: 0.9 }}>
           <Globe size={14} /> EN · MYR
         </span>
-        <ThemeToggle />
         {sessionPending ? (
           <span
             className="nav-session-pending"
@@ -826,6 +823,17 @@ function PaxMenu({
   )
 }
 
+const TOP_PICKS_INITIAL_COUNT = 8
+
+function uniquePublicCars(cars: PublicCarRow[]) {
+  const seen = new Set<string>()
+  return cars.filter((car) => {
+    if (seen.has(car.id)) return false
+    seen.add(car.id)
+    return true
+  })
+}
+
 function TopPicksSection({
   cars,
   onOpenCar,
@@ -834,11 +842,17 @@ function TopPicksSection({
   onOpenCar: (c: PublicCarRow) => void
 }) {
   const [filter, setFilter] = useState<(typeof TOP_TAGS)[number]>('All')
+  const [showAll, setShowAll] = useState(false)
+  const fleet = useMemo(() => uniquePublicCars(cars), [cars])
   const list = useMemo(() => {
     const t = tagToCategory(filter)
-    if (t === 'all') return cars
-    return cars.filter((c) => c.category === t)
-  }, [cars, filter])
+    if (t === 'all') return fleet
+    return fleet.filter((c) => c.category === t)
+  }, [fleet, filter])
+
+  const visibleCars = showAll ? list : list.slice(0, TOP_PICKS_INITIAL_COUNT)
+  const hiddenCount = Math.max(0, list.length - visibleCars.length)
+  const canToggle = hiddenCount > 0
 
   return (
     <section id="top-picks" className="section" data-screen-label="Top picks">
@@ -852,22 +866,47 @@ function TopPicksSection({
         </div>
         <div className="flex gap-2" style={{ flexWrap: 'wrap' }}>
           {TOP_TAGS.map((t) => (
-            <button key={t} type="button" className={'chip' + (filter === t ? ' active' : '')} onClick={() => setFilter(t)}>
+            <button
+              key={t}
+              type="button"
+              className={'chip' + (filter === t ? ' active' : '')}
+              onClick={() => {
+                setFilter(t)
+                setShowAll(false)
+              }}
+            >
               {t}
             </button>
           ))}
         </div>
       </div>
       <div className="car-grid">
-        {list.slice(0, 8).map((c) => (
+        {visibleCars.map((c) => (
           <FleetCarCard key={c.id} car={c} onOpen={() => onOpenCar(c)} />
         ))}
       </div>
-      <div className="row-center">
-        <button type="button" className="btn btn-ghost" onClick={() => scrollToAnchor('booking-dock')}>
-          See all vehicles <ArrowRight size={13} />
-        </button>
-      </div>
+      {canToggle ? (
+        <div className="row-center">
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => {
+              setShowAll((expanded) => {
+                const next = !expanded
+                if (!expanded) {
+                  requestAnimationFrame(() => {
+                    document.getElementById('top-picks')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  })
+                }
+                return next
+              })
+            }}
+          >
+            {showAll ? 'Show fewer vehicles' : `See all vehicles (+${hiddenCount} more)`}
+            <ArrowRight size={13} style={showAll ? { transform: 'rotate(-90deg)' } : undefined} />
+          </button>
+        </div>
+      ) : null}
     </section>
   )
 }
@@ -1284,19 +1323,6 @@ function StepByStep() {
         ))}
       </div>
     </section>
-  )
-}
-
-function TrustRow() {
-  const logos = ['Trip Advisor', 'Booking.com', 'Klook', 'Agoda', 'Tourism Malaysia', 'VISA Pay']
-  return (
-    <div className="trust-row" data-screen-label="Trust">
-      {logos.map((l) => (
-        <span key={l} className="logo">
-          {l}
-        </span>
-      ))}
-    </div>
   )
 }
 
