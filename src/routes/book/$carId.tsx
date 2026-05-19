@@ -170,9 +170,15 @@ function BookingPage() {
 
   // ── Coupon apply ─────────────────────────────────────────────────────────
 
-  function handleApplyCoupon(e: React.FormEvent) {
-    e.preventDefault()
+  function handleApplyCoupon() {
     setAppliedCoupon(couponInput.trim().toUpperCase())
+  }
+
+  function handleCouponKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleApplyCoupon()
+    }
   }
 
   function handleRemoveCoupon() {
@@ -437,23 +443,25 @@ function BookingPage() {
                   </button>
                 </div>
               ) : (
-                <form className="booking-coupon-row" onSubmit={handleApplyCoupon}>
+                <div className="booking-coupon-row" role="group" aria-label="Promo code">
                   <input
                     type="text"
                     className="field-input booking-coupon-input"
                     placeholder="Enter promo code"
                     value={couponInput}
                     onChange={(e) => setCouponInput(e.target.value)}
+                    onKeyDown={handleCouponKeyDown}
                     autoCapitalize="characters"
                   />
                   <button
-                    type="submit"
+                    type="button"
                     className="button-secondary booking-coupon-btn"
                     disabled={!couponInput.trim()}
+                    onClick={handleApplyCoupon}
                   >
                     Apply
                   </button>
-                </form>
+                </div>
               )}
             </section>
 

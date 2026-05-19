@@ -16,6 +16,7 @@ import {
   Wrench,
 } from 'lucide-react'
 
+import BrandLogo from '#/components/BrandLogo'
 import { authClient } from '#/lib/auth-client'
 import type { AppRole } from '#/lib/auth-model'
 import { getRoleLabel } from '#/lib/auth-model'
@@ -159,7 +160,7 @@ export default function AdminSidebarShell({
         {/* Brand */}
         <div className="sidebar-brand">
           <span className="sidebar-logo">
-            <Car size={14} />
+            <BrandLogo size={32} />
           </span>
           {!collapsed && <span className="sidebar-brand-name">XQ Fleet</span>}
           <button

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 
 import { Link } from '@tanstack/react-router'
 
+import BrandLogo from '#/components/BrandLogo'
 import Footer from '#/components/Footer'
 
 export default function AuthPageShell({ children }: { children: ReactNode }) {
@@ -10,6 +11,7 @@ export default function AuthPageShell({ children }: { children: ReactNode }) {
       <header className="auth-page-nav">
         <div className="auth-page-nav-inner page-wrap px-4">
           <Link to="/" className="auth-page-brand">
+            <BrandLogo size={32} />
             Car XQ
           </Link>
           <Link to="/" className="auth-page-back">

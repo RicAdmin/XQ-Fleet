@@ -72,7 +72,7 @@ export const Route = createFileRoute('/api/documents/invoice/$rentalId')({
           return new Response('Invoice only available for closed rentals', { status: 400 })
         }
 
-        const logoPath = path.join(process.cwd(), 'public', 'logo512.png')
+        const logoPath = path.join(process.cwd(), 'public', 'image', 'xqCarLogo.png')
 
         const docData: DocumentData = {
           rentalId: row.id,

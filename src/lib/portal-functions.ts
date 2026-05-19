@@ -12,6 +12,7 @@ export type PublicCarRow = {
   category: CarCategory
   dailyRateSen: number
   coverPhotoUrl: string | null
+  notes: string | null
 }
 
 export type PublicCarDetail = {
@@ -55,6 +56,7 @@ export const getPublicCars = createServerFn({ method: 'GET' }).handler(async ():
       category: cars.category,
       dailyRateSen: cars.dailyRateSen,
       coverPhotoUrl: carPhotos.url,
+      notes: cars.notes,
     })
     .from(cars)
     .leftJoin(
@@ -119,6 +121,7 @@ export const filterPublicCars = createServerFn({ method: 'GET' })
         category: cars.category,
         dailyRateSen: cars.dailyRateSen,
         coverPhotoUrl: carPhotos.url,
+        notes: cars.notes,
       })
       .from(cars)
       .leftJoin(

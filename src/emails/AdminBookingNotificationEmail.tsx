@@ -1,6 +1,7 @@
 import { Body, Head, Html, Link, Preview } from '@react-email/components'
 
 import { formatRM, formatBookingDate, formatBookingTime, formatShortDate } from './email-helpers'
+import { EmailBrandMark } from './EmailBrandMark'
 
 export type AdminBookingNotificationEmailProps = {
   rentalId: string
@@ -153,39 +154,7 @@ export function AdminBookingNotificationEmail(props: AdminBookingNotificationEma
                           <tbody>
                             <tr>
                               <td style={{ verticalAlign: 'middle' }}>
-                                <table role="presentation" cellPadding="0" cellSpacing="0">
-                                  <tbody>
-                                    <tr>
-                                      <td style={{ paddingRight: '10px', verticalAlign: 'middle' }}>
-                                        <div
-                                          style={{
-                                            width: '28px',
-                                            height: '28px',
-                                            borderRadius: '8px',
-                                            background: ORANGE,
-                                            color: '#FFFFFF',
-                                            fontSize: '15px',
-                                            fontWeight: 700,
-                                            textAlign: 'center',
-                                            lineHeight: '28px',
-                                          }}
-                                        >
-                                          X
-                                        </div>
-                                      </td>
-                                      <td
-                                        style={{
-                                          fontSize: '15px',
-                                          fontWeight: 600,
-                                          color: '#FFFFFF',
-                                          verticalAlign: 'middle',
-                                        }}
-                                      >
-                                        Car XQ Admin
-                                      </td>
-                                    </tr>
-                                  </tbody>
-                                </table>
+                                <EmailBrandMark size={28} label="Car XQ Admin" labelSize="15px" />
                               </td>
                               <td
                                 style={{
