@@ -14,12 +14,12 @@ export default function CxqAuthMarketingAside({
   perks,
 }: CxqAuthMarketingAsideProps) {
   return (
-    <div className="cxq-auth-left">
-      <div className="cxq-auth-left-inner">
-        <span className="cxq-auth-eyebrow">{eyebrow}</span>
-        <h2 className="cxq-auth-headline">{headline}</h2>
-        <p className="cxq-auth-body">{body}</p>
-        <ul className="cxq-auth-perks">
+    <div className="auth-left">
+      <div className="auth-left-inner">
+        <span className="eyebrow">{eyebrow}</span>
+        <h2>{headline}</h2>
+        <p>{body}</p>
+        <ul className="auth-perks">
           {perks.map((perk) => (
             <li key={perk}>
               <Check size={14} strokeWidth={2.5} />
@@ -31,3 +31,4 @@ export default function CxqAuthMarketingAside({
     </div>
   )
 }
+

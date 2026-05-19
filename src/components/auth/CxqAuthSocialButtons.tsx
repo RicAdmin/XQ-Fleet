@@ -10,20 +10,21 @@ export default function CxqAuthSocialButtons({
   googleLabel = 'Continue with Google',
 }: CxqAuthSocialButtonsProps) {
   return (
-    <div className="cxq-auth-oauth">
+    <div className="auth-oauth">
       <button
         type="button"
-        className="cxq-auth-oauth-btn"
+        className="auth-oauth-btn"
         onClick={() => void onGoogle()}
         disabled={disabled}
       >
-        <span className="cxq-auth-oauth-logo">G</span>
+        <span className="oauth-logo google">G</span>
         {googleLabel}
       </button>
-      <button type="button" className="cxq-auth-oauth-btn" disabled={disabled} title="Coming soon">
-        <span className="cxq-auth-oauth-logo cxq-auth-oauth-logo--apple" aria-hidden />
+      <button type="button" className="auth-oauth-btn" disabled={disabled} title="Coming soon">
+        <span className="oauth-logo apple" aria-hidden />
         Continue with Apple
       </button>
     </div>
   )
 }
+

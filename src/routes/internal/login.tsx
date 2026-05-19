@@ -4,7 +4,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowRight } from 'lucide-react'
 
 import CxqAuthMarketingAside from '#/components/auth/CxqAuthMarketingAside'
-import AuthPageShell from '#/components/shells/AuthPageShell'
+import PublicAuthShell from '#/components/shells/PublicAuthShell'
 import { cxqAuthInternalAside } from '#/lib/cxq-auth-marketing'
 import { authClient } from '#/lib/auth-client'
 import { createInitialOwner } from '#/lib/auth-functions'
@@ -31,25 +31,25 @@ function InternalLoginPage() {
   const title = hasOwner ? 'Sign in' : 'Create the first owner account'
 
   return (
-    <AuthPageShell>
-      <div className="cxq-auth-split">
+    <PublicAuthShell screenLabel="Car XQ Internal login">
+      <div className="auth-page-card">
         <CxqAuthMarketingAside {...cxqAuthInternalAside} />
 
-        <div className="cxq-auth-right">
-          <span className="cxq-auth-badge">Internal workspace</span>
+        <div className="auth-right">
+          <span className="auth-badge">Staff</span>
           <h3>{title}</h3>
-          <p className="cxq-auth-sub">
+          <p className="auth-sub">
             Renting as a customer? <Link to="/login">Customer sign in</Link>
           </p>
 
           {!hasOwner ? (
-            <p className="cxq-auth-internal-note">
+            <p className="auth-internal-note">
               This step only appears before the first owner account exists.
             </p>
           ) : null}
 
           <form
-            className="cxq-auth-internal-form"
+            className="auth-internal-form"
             onSubmit={async (event) => {
               event.preventDefault()
               setError(null)
@@ -93,9 +93,9 @@ function InternalLoginPage() {
               }
             }}
           >
-            <div className="cxq-auth-fields">
+            <div className="auth-fields">
               {!hasOwner ? (
-                <div className="cxq-auth-field">
+                <div className="auth-field">
                   <label htmlFor="owner-name">Owner name</label>
                   <input
                     id="owner-name"
@@ -108,7 +108,7 @@ function InternalLoginPage() {
                 </div>
               ) : null}
 
-              <div className="cxq-auth-field">
+              <div className="auth-field">
                 <label htmlFor="internal-email">Email</label>
                 <input
                   id="internal-email"
@@ -121,7 +121,7 @@ function InternalLoginPage() {
                 />
               </div>
 
-              <div className="cxq-auth-field">
+              <div className="auth-field">
                 <label htmlFor="internal-password">Password</label>
                 <input
                   id="internal-password"
@@ -136,11 +136,11 @@ function InternalLoginPage() {
               </div>
             </div>
 
-            {error ? <p className="cxq-auth-error">{error}</p> : null}
+            {error ? <p className="auth-error-banner">{error}</p> : null}
 
             <button
               type="submit"
-              className="button-primary cxq-auth-submit cxq-auth-submit-with-icon"
+              className="btn btn-leaf btn-lg auth-form-submit"
               disabled={isSubmitting}
             >
               {isSubmitting
@@ -153,6 +153,6 @@ function InternalLoginPage() {
           </form>
         </div>
       </div>
-    </AuthPageShell>
+    </PublicAuthShell>
   )
 }

@@ -6,8 +6,7 @@ import { z } from 'zod'
 
 import CxqAuthLegalFooter from '#/components/auth/CxqAuthLegalFooter'
 import CxqAuthMarketingAside from '#/components/auth/CxqAuthMarketingAside'
-import CxqAuthSocialButtons from '#/components/auth/CxqAuthSocialButtons'
-import AuthPageShell from '#/components/shells/AuthPageShell'
+import PublicAuthShell from '#/components/shells/PublicAuthShell'
 import { cxqAuthSignUpAside } from '#/lib/cxq-auth-marketing'
 import { authClient } from '#/lib/auth-client'
 import { redirectAuthenticatedUser } from '#/lib/route-guards'
@@ -29,34 +28,18 @@ function CustomerRegisterPage() {
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isOAuthLoading, setIsOAuthLoading] = useState(false)
-
-  async function handleGoogleSignUp() {
-    setIsOAuthLoading(true)
-    await authClient.signIn.social({ provider: 'google', callbackURL: returnTo ?? '/account' })
-  }
 
   return (
-    <AuthPageShell>
-      <div className="cxq-auth-split">
+    <PublicAuthShell screenLabel="Car XQ Register" minimal>
+      <div className="auth-page-card">
         <CxqAuthMarketingAside {...cxqAuthSignUpAside} />
 
-        <div className="cxq-auth-right">
-          <span className="cxq-auth-badge">New account</span>
+        <div className="auth-right">
+          <span className="auth-badge">New account</span>
           <h3>Create your account</h3>
-          <p className="cxq-auth-sub">
+          <p className="auth-sub">
             Already a member? <Link to="/login">Sign in</Link>
           </p>
-
-          <CxqAuthSocialButtons
-            onGoogle={handleGoogleSignUp}
-            disabled={isOAuthLoading || isSubmitting}
-            googleLabel={isOAuthLoading ? 'Redirecting…' : 'Continue with Google'}
-          />
-
-          <div className="cxq-auth-divider">
-            <span>or with email</span>
-          </div>
 
           <form
             onSubmit={async (event) => {
@@ -84,8 +67,8 @@ function CustomerRegisterPage() {
               }
             }}
           >
-            <div className="cxq-auth-fields">
-              <div className="cxq-auth-field">
+            <div className="auth-fields">
+              <div className="auth-field">
                 <label htmlFor="customer-name">Full name</label>
                 <input
                   id="customer-name"
@@ -98,7 +81,7 @@ function CustomerRegisterPage() {
                 />
               </div>
 
-              <div className="cxq-auth-field">
+              <div className="auth-field">
                 <label htmlFor="register-email">Email</label>
                 <input
                   id="register-email"
@@ -111,7 +94,7 @@ function CustomerRegisterPage() {
                 />
               </div>
 
-              <div className="cxq-auth-field">
+              <div className="auth-field">
                 <label htmlFor="register-password">Password</label>
                 <input
                   id="register-password"
@@ -125,29 +108,29 @@ function CustomerRegisterPage() {
                 />
               </div>
 
-              <label className="cxq-auth-check">
+              <label className="auth-check">
                 <input
                   type="checkbox"
                   checked={agreedToTerms}
                   onChange={(event) => setAgreedToTerms(event.target.checked)}
                 />
                 I agree to the{' '}
-                <Link to="/about" className="cxq-auth-link">
+                <Link to="/about" className="auth-link">
                   Rental Contract
                 </Link>{' '}
                 and{' '}
-                <Link to="/about" className="cxq-auth-link">
+                <Link to="/about" className="auth-link">
                   Privacy Policy
                 </Link>
               </label>
             </div>
 
-            {error ? <p className="cxq-auth-error">{error}</p> : null}
+            {error ? <p className="auth-error-banner">{error}</p> : null}
 
             <button
               type="submit"
-              className="button-primary cxq-auth-submit cxq-auth-submit-with-icon"
-              disabled={isSubmitting || isOAuthLoading}
+              className="btn btn-leaf btn-lg auth-form-submit"
+              disabled={isSubmitting}
             >
               {isSubmitting ? 'Creating account…' : 'Create account'}
               {!isSubmitting ? <ArrowRight size={14} strokeWidth={2.5} aria-hidden /> : null}
@@ -157,6 +140,6 @@ function CustomerRegisterPage() {
           </form>
         </div>
       </div>
-    </AuthPageShell>
+    </PublicAuthShell>
   )
 }
