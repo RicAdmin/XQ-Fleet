@@ -47,7 +47,7 @@ export const Route = createFileRoute('/api/webhooks/ipay88')({
 
           // Look up payment record by RefNo (payment.id without hyphens)
           const { db } = await import('#/db')
-          const { payments, rentals, cars } = await import('#/db/schema')
+          const { payments, rentals, cars, customers, carPhotos } = await import('#/db/schema')
           const { eq, and } = await import('drizzle-orm')
 
           // Reconstruct UUID from refNo (32 hex chars → UUID format)
@@ -96,14 +96,44 @@ export const Route = createFileRoute('/api/webhooks/ipay88')({
               })
               .where(eq(payments.id, payment.id))
 
-            // Update rental: paidAmountSen, paymentStatus='paid', status stays pending (confirmed by payment)
-            const [rental] = await db
-              .select({ id: rentals.id, carId: rentals.carId, totalAmountSen: rentals.totalAmountSen })
+            // Fetch full rental + car + customer data for email (single join)
+            const [rentalData] = await db
+              .select({
+                id: rentals.id,
+                carId: rentals.carId,
+                startDate: rentals.startDate,
+                endDate: rentals.endDate,
+                pickUpTime: rentals.pickUpTime,
+                returnTime: rentals.returnTime,
+                pickUpLocation: rentals.pickUpLocation,
+                returnLocation: rentals.returnLocation,
+                baseRentalSen: rentals.baseRentalSen,
+                extraChargeSen: rentals.extraChargeSen,
+                addonsTotalSen: rentals.addonsTotalSen,
+                deliveryFeeSen: rentals.deliveryFeeSen,
+                subTotalSen: rentals.subTotalSen,
+                discountAmountSen: rentals.discountAmountSen,
+                discountPercent: rentals.discountPercent,
+                couponCode: rentals.couponCode,
+                totalAmountSen: rentals.totalAmountSen,
+                createdAt: rentals.createdAt,
+                carMake: cars.make,
+                carModel: cars.model,
+                carYear: cars.year,
+                carPlateNumber: cars.plateNumber,
+                carCategory: cars.category,
+                customerName: customers.fullName,
+                customerEmail: customers.email,
+                customerPhone: customers.phone,
+              })
               .from(rentals)
+              .innerJoin(cars, eq(rentals.carId, cars.id))
+              .innerJoin(customers, eq(rentals.customerId, customers.id))
               .where(eq(rentals.id, payment.rentalId))
               .limit(1)
 
-            if (rental) {
+            if (rentalData) {
+              // Update rental: paidAmountSen, paymentStatus='paid'
               await db
                 .update(rentals)
                 .set({
@@ -111,13 +141,82 @@ export const Route = createFileRoute('/api/webhooks/ipay88')({
                   paymentStatus: 'paid',
                   updatedAt: new Date(),
                 })
-                .where(eq(rentals.id, rental.id))
+                .where(eq(rentals.id, rentalData.id))
 
               // Car transitions to reserved (confirmed booking)
               await db
                 .update(cars)
                 .set({ status: 'reserved', updatedAt: new Date() })
-                .where(and(eq(cars.id, rental.carId), eq(cars.status, 'payment-pending')))
+                .where(and(eq(cars.id, rentalData.carId), eq(cars.status, 'payment-pending')))
+
+              // Fetch car cover photo (optional — used in confirmation email)
+              const [coverPhoto] = await db
+                .select({ url: carPhotos.url })
+                .from(carPhotos)
+                .where(and(eq(carPhotos.carId, rentalData.carId), eq(carPhotos.isCover, true)))
+                .limit(1)
+
+              // Fire emails fire-and-forget — never block RECEIVEOK
+              const { makeBookingRef } = await import('#/emails/email-helpers')
+              const { sendBookingSuccessEmails } = await import('#/lib/email-functions')
+              const baseUrl =
+                process.env.SITE_URL ?? process.env.BETTER_AUTH_URL ?? 'http://localhost:3000'
+              const bookingRef = makeBookingRef(rentalData.id)
+              const firstName = rentalData.customerName?.split(' ')[0] ?? 'there'
+
+              sendBookingSuccessEmails(
+                {
+                  customerFirstName: firstName,
+                  customerEmail: rentalData.customerEmail ?? '',
+                  bookingRef,
+                  bookedAt: rentalData.createdAt,
+                  carMake: rentalData.carMake,
+                  carModel: rentalData.carModel,
+                  carYear: rentalData.carYear,
+                  carPlateNumber: rentalData.carPlateNumber,
+                  carCategory: rentalData.carCategory,
+                  carPhotoUrl: coverPhoto?.url ?? null,
+                  pickupDate: rentalData.startDate,
+                  pickupTime: rentalData.pickUpTime,
+                  pickupLocation: rentalData.pickUpLocation,
+                  returnDate: rentalData.endDate,
+                  returnTime: rentalData.returnTime,
+                  returnLocation: rentalData.returnLocation,
+                  baseRentalSen: rentalData.baseRentalSen,
+                  extraChargeSen: rentalData.extraChargeSen,
+                  addonsTotalSen: rentalData.addonsTotalSen,
+                  deliveryFeeSen: rentalData.deliveryFeeSen,
+                  subTotalSen: rentalData.subTotalSen,
+                  discountAmountSen: rentalData.discountAmountSen,
+                  discountPercent: rentalData.discountPercent,
+                  couponCode: rentalData.couponCode,
+                  totalAmountSen: rentalData.totalAmountSen,
+                  paidAmountSen: payment.amountSen,
+                },
+                {
+                  rentalId: rentalData.id,
+                  bookingRef,
+                  adminPanelUrl: `${baseUrl}/admin/rentals/${rentalData.id}`,
+                  customerName: rentalData.customerName,
+                  customerEmail: rentalData.customerEmail ?? '',
+                  customerPhone: rentalData.customerPhone,
+                  carMake: rentalData.carMake,
+                  carModel: rentalData.carModel,
+                  carYear: rentalData.carYear,
+                  carPlateNumber: rentalData.carPlateNumber,
+                  pickupDate: rentalData.startDate,
+                  pickupTime: rentalData.pickUpTime,
+                  pickupLocation: rentalData.pickUpLocation,
+                  returnDate: rentalData.endDate,
+                  returnTime: rentalData.returnTime,
+                  totalAmountSen: rentalData.totalAmountSen,
+                  paidAmountSen: payment.amountSen,
+                  paymentMethod: paymentId || null,
+                  ipay88TransId: transId || null,
+                },
+              ).catch((err: unknown) => {
+                console.error('[iPay88 webhook] email send failed', err)
+              })
             }
           } else {
             // Payment failed — mark payment record
@@ -135,18 +234,59 @@ export const Route = createFileRoute('/api/webhooks/ipay88')({
               })
               .where(eq(payments.id, payment.id))
 
-            // Release car back to available
-            const [rental] = await db
-              .select({ carId: rentals.carId })
+            // Fetch rental + car + customer for failure email
+            const [failedRentalData] = await db
+              .select({
+                id: rentals.id,
+                carId: rentals.carId,
+                startDate: rentals.startDate,
+                pickUpTime: rentals.pickUpTime,
+                pickUpLocation: rentals.pickUpLocation,
+                totalAmountSen: rentals.totalAmountSen,
+                carMake: cars.make,
+                carModel: cars.model,
+                customerName: customers.fullName,
+                customerEmail: customers.email,
+              })
               .from(rentals)
+              .innerJoin(cars, eq(rentals.carId, cars.id))
+              .innerJoin(customers, eq(rentals.customerId, customers.id))
               .where(eq(rentals.id, payment.rentalId))
               .limit(1)
 
-            if (rental) {
+            if (failedRentalData) {
+              // Release car back to available
               await db
                 .update(cars)
                 .set({ status: 'available', updatedAt: new Date() })
-                .where(and(eq(cars.id, rental.carId), eq(cars.status, 'payment-pending')))
+                .where(
+                  and(
+                    eq(cars.id, failedRentalData.carId),
+                    eq(cars.status, 'payment-pending'),
+                  ),
+                )
+
+              // Fire failure email fire-and-forget
+              const { makeBookingRef } = await import('#/emails/email-helpers')
+              const { sendPaymentFailed } = await import('#/lib/email-functions')
+              const baseUrl =
+                process.env.SITE_URL ?? process.env.BETTER_AUTH_URL ?? 'http://localhost:3000'
+              const bookingRef = makeBookingRef(failedRentalData.id)
+
+              sendPaymentFailed({
+                customerFirstName: failedRentalData.customerName?.split(' ')[0] ?? 'there',
+                customerEmail: failedRentalData.customerEmail ?? '',
+                bookingRef,
+                carMake: failedRentalData.carMake,
+                carModel: failedRentalData.carModel,
+                pickupDate: failedRentalData.startDate,
+                pickupTime: failedRentalData.pickUpTime,
+                pickupLocation: failedRentalData.pickUpLocation,
+                totalAmountSen: failedRentalData.totalAmountSen,
+                retryUrl: `${baseUrl}/pay/${failedRentalData.id}`,
+              }).catch((err: unknown) => {
+                console.error('[iPay88 webhook] failure email send failed', err)
+              })
             }
           }
 

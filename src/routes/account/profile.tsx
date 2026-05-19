@@ -80,7 +80,7 @@ function AccountProfilePage() {
             <div className="cxq-profile-card-head">
               <div>
                 <span className="cxq-profile-eyebrow">Personal</span>
-                <h2>Your details</h2>
+                <h3>Your details</h3>
                 <p>Used on every booking and on your driver&apos;s-license check at pickup.</p>
               </div>
               {saved ? (

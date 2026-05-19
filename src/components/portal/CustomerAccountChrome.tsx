@@ -78,15 +78,13 @@ export default function CustomerAccountChrome({
   return (
     <div className="cxq-profile-page">
       <div className="cxq-profile-hero">
-        <div className="cxq-profile-hero-top">
-          <Link to="/" className="cxq-profile-back" aria-label="Back to home">
-            <ArrowLeft size={16} strokeWidth={2.25} />
-          </Link>
-          <button type="button" className="cxq-profile-signout" onClick={() => void handleSignOut()}>
-            <LogOut size={15} strokeWidth={2.25} />
-            <span>Sign out</span>
-          </button>
-        </div>
+        <Link to="/" className="cxq-profile-back" aria-label="Back to home">
+          <ArrowLeft size={16} strokeWidth={2.25} />
+        </Link>
+        <button type="button" className="cxq-profile-signout" onClick={() => void handleSignOut()}>
+          <LogOut size={15} strokeWidth={2.25} />
+          <span>Sign out</span>
+        </button>
 
         <div className="cxq-profile-hero-grid cxq-profile-hero-grid--solo">
           <div className="cxq-profile-id-card">

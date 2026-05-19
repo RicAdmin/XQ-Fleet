@@ -101,7 +101,7 @@ function AccountNotificationsPage() {
           <div className="cxq-profile-card-head">
             <div>
               <span className="cxq-profile-eyebrow">Notifications</span>
-              <h2>Choose what you&apos;d like to hear from us</h2>
+              <h3>Choose what you&apos;d like to hear from us</h3>
               <p>Update any time. We don&apos;t sell your details — ever.</p>
             </div>
           </div>

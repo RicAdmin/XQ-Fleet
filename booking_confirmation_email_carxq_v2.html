@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Booking Confirmed · Car XQ</title>
+</head>
+<body style="margin:0;padding:0;background:#F4F5F7;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#14181A;line-height:1.5;-webkit-font-smoothing:antialiased;">
+
+<!-- Preview text (hidden, shows in inbox preview) -->
+<div style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#F4F5F7;">
+  Order LCR142-4567 confirmed. Pickup 19 May, 8:00 AM at Langkawi Airport. Here's everything you need.
+</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F5F7;padding:18px 0;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="680" cellpadding="0" cellspacing="0" style="max-width:680px;background:#FFFFFF;border-radius:28px;overflow:hidden;box-shadow:0 1px 0 rgba(0,0,0,.02),0 20px 60px -30px rgba(20,24,26,.18);">
+
+        <!-- Nav bar -->
+        <tr>
+          <td style="background:#14181A;padding:18px 28px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td valign="middle">
+                  <table role="presentation" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td valign="middle" style="padding-right:10px;">
+                        <div style="width:30px;height:30px;border-radius:9px;background:#FF6600;color:#FFFFFF;font-size:17px;font-weight:700;text-align:center;line-height:30px;letter-spacing:-0.02em;">X</div>
+                      </td>
+                      <td valign="middle" style="font-size:17px;font-weight:600;color:#FFFFFF;letter-spacing:-0.01em;">Car XQ</td>
+                    </tr>
+                  </table>
+                </td>
+                <td valign="middle" align="right" style="font-size:12px;color:rgba(255,255,255,.7);letter-spacing:.12em;text-transform:uppercase;font-weight:500;">Booking Receipt</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Hero confirmation -->
+        <tr>
+          <td style="padding:48px 36px 28px 36px;">
+            <p style="margin:0 0 14px 0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#FF6600;font-weight:500;">Booking Confirmed</p>
+            <h1 style="margin:0 0 14px 0;font-size:38px;line-height:1.05;letter-spacing:-0.03em;font-weight:500;color:#14181A;">You're all set,<br>{{customer_first_name}}.</h1>
+            <p style="margin:0;font-size:16px;line-height:1.55;color:#6B7378;max-width:48ch;">Your Toyota Innova is reserved. Below is everything you need for pickup day. Save this email and bring it with you.</p>
+          </td>
+        </tr>
+
+        <!-- Prominent Booking ID -->
+        <tr>
+          <td style="padding:0 36px 28px 36px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#14181A;border-radius:14px;">
+              <tr>
+                <td style="padding:18px 22px;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td valign="middle">
+                        <p style="margin:0 0 4px 0;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#FFD2A8;font-weight:500;">Booking ID</p>
+                        <p style="margin:0;font-size:24px;font-weight:500;letter-spacing:-0.01em;color:#FFFFFF;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">LCR142-4567</p>
+                      </td>
+                      <td valign="middle" align="right" style="font-size:12px;color:rgba(255,255,255,.6);">Booked<br><span style="color:rgba(255,255,255,.85);">14 May 2026</span></td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Car card -->
+        <tr>
+          <td style="padding:0 36px 28px 36px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F5F7;border-radius:20px;overflow:hidden;">
+              <!-- Car image -->
+              <tr>
+                <td style="padding:0;background:#FFFFFF;border-bottom:1px solid #ECEEF1;">
+                  <img src="data:image/jpeg;base64,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AREQEREBERAREQEREBERAREQEREBERAREQEREBERAXK4RBz08VyD61wVwg5JyiZQICBD1QIGVyvkog+lxsuFygJv4pn0LhB9brjdcJlBynsTKZQfbMHqenxWypZcgYxnwWqBIOQu+CXl23APwQSGin5SN1MLDXwvjjpaqV8XI/tKedjsPhfjGWn+OxGxVfU87SAeYelbOkq8YaT6vQrEx6M0XxDu9muDK686ZtWp6tla6vZcfKuynM7o+yL3NeHBhLPNIacdOi7eJ3FTUus6qCV1BQabip2SMY6lkM1UWycoeO1IAaSGgZaM9d1Q1NfauFoZFMHNHcSNvesa5ahnIPbVQa3wZ1P/AF61dZytxf7rS0FGYaflYxjcAA/9blVpVzvqah80m7nH3DuXfc699XIQ1vZxD6rM59pPefSsLKjUjlFxlMqKZRMplBzlMnwXGUQcrjdCUKB7Ux6VwiDn2psuFzn0ICbplcIOd1wucrhBz7EyuEQchPYmVwg52XCIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiD6DnDvK+hM8dHFfGVwg7XTyn+ccvguJ6klfKICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIg//Z"
+                       alt="Toyota Innova 8-seater MPV for Langkawi car rental"
+                       width="608"
+                       style="display:block;width:100%;height:auto;max-width:608px;border-radius:20px 20px 0 0;background:#FFFFFF;"
+                       referrerpolicy="no-referrer">
+                </td>
+              </tr>
+              <!-- Car details -->
+              <tr>
+                <td style="padding:20px 24px 16px 24px;">
+                  <p style="margin:0 0 8px 0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#FF6600;font-weight:500;">Your Car</p>
+                  <p style="margin:0 0 6px 0;font-size:26px;font-weight:500;letter-spacing:-0.022em;color:#14181A;line-height:1.1;">Toyota Innova</p>
+                  <p style="margin:0;font-size:14px;color:#6B7378;">8-seater MPV · Auto · Petrol · Plate {{plate_number}}</p>
+                </td>
+              </tr>
+              <!-- Illustration disclaimer -->
+              <tr>
+                <td style="padding:0 24px 18px 24px;">
+                  <p style="margin:0;padding:10px 12px;background:#FFFFFF;border:1px solid #ECEEF1;border-radius:10px;font-size:12px;color:#6B7378;line-height:1.5;">
+                    <span style="color:#14181A;font-weight:500;">Image for illustration only.</span> The car you receive will be the same model and category as shown. Actual color, year, trim, and accessories may vary based on availability. If your assigned unit is unavailable due to maintenance or prior damage, we will provide a vehicle of the same or higher category at no extra cost.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Pickup + return -->
+        <tr>
+          <td style="padding:0 36px 28px 36px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td width="48%" valign="top" style="background:#F4F5F7;border-radius:14px;padding:20px;">
+                  <p style="margin:0 0 10px 0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#FF6600;font-weight:500;">Pickup</p>
+                  <p style="margin:0 0 4px 0;font-size:18px;font-weight:500;letter-spacing:-0.01em;color:#14181A;">Tue, 19 May 2026</p>
+                  <p style="margin:0 0 12px 0;font-size:15px;color:#14181A;">8:00 AM</p>
+                  <p style="margin:0;font-size:13px;color:#6B7378;line-height:1.5;">Langkawi International Airport (LGK), Arrivals Hall</p>
+                </td>
+                <td width="4%"></td>
+                <td width="48%" valign="top" style="background:#F4F5F7;border-radius:14px;padding:20px;">
+                  <p style="margin:0 0 10px 0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#FF6600;font-weight:500;">Return</p>
+                  <p style="margin:0 0 4px 0;font-size:18px;font-weight:500;letter-spacing:-0.01em;color:#14181A;">Sat, 23 May 2026</p>
+                  <p style="margin:0 0 12px 0;font-size:15px;color:#14181A;">8:00 AM</p>
+                  <p style="margin:0;font-size:13px;color:#6B7378;line-height:1.5;">Langkawi International Airport (LGK), Departures</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Divider -->
+        <tr>
+          <td style="padding:0 36px;">
+            <div style="height:1px;background:#E4E6EA;"></div>
+          </td>
+        </tr>
+
+        <!-- Price breakdown -->
+        <tr>
+          <td style="padding:28px 36px;">
+            <p style="margin:0 0 16px 0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#FF6600;font-weight:500;">Price Breakdown</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;">
+              <tr>
+                <td style="padding:10px 0;color:#6B7378;">Base rental (4 days)</td>
+                <td style="padding:10px 0;text-align:right;color:#14181A;">RM 660.00</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0;color:#6B7378;">Extra hours</td>
+                <td style="padding:10px 0;text-align:right;color:#14181A;">RM 0.00</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0;color:#6B7378;">Add-ons</td>
+                <td style="padding:10px 0;text-align:right;color:#14181A;">RM 0.00</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0;color:#6B7378;">Delivery fee</td>
+                <td style="padding:10px 0;text-align:right;color:#14181A;">RM 0.00</td>
+              </tr>
+              <tr>
+                <td style="padding:14px 0 10px 0;color:#14181A;border-top:1px solid #ECEEF1;">Subtotal</td>
+                <td style="padding:14px 0 10px 0;text-align:right;color:#14181A;border-top:1px solid #ECEEF1;">RM 660.00</td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0;color:#FF6600;">Discount · SUMMER10 (10%)</td>
+                <td style="padding:10px 0;text-align:right;color:#FF6600;">-RM 66.00</td>
+              </tr>
+              <tr>
+                <td style="padding:18px 0 0 0;font-weight:500;font-size:22px;letter-spacing:-0.022em;color:#14181A;border-top:2px solid #14181A;">Total paid</td>
+                <td style="padding:18px 0 0 0;text-align:right;font-weight:500;font-size:22px;letter-spacing:-0.022em;color:#14181A;border-top:2px solid #14181A;">RM 594.00</td>
+              </tr>
+            </table>
+            <p style="margin:16px 0 0 0;font-size:13px;color:#6B7378;line-height:1.55;">A separate payment receipt will be sent to you by our payment gateway, <span style="color:#14181A;font-weight:500;">ADAPTIS</span>.</p>
+          </td>
+        </tr>
+
+        <!-- Deposit chip card -->
+        <tr>
+          <td style="padding:0 36px 28px 36px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFD2A8;border-radius:14px;">
+              <tr>
+                <td style="padding:18px 20px;">
+                  <p style="margin:0 0 6px 0;font-size:14px;font-weight:500;color:#14181A;">Refundable security deposit · RM 500</p>
+                  <p style="margin:0;font-size:13px;color:#2A2F33;line-height:1.55;">Collected at pickup via credit card pre-authorization or cash. Released within 3 working days after return, subject to vehicle condition and fuel level.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- What to bring -->
+        <tr>
+          <td style="padding:0 36px 28px 36px;">
+            <p style="margin:0 0 14px 0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#FF6600;font-weight:500;">What to Bring</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td valign="top" style="padding:6px 0;width:28px;color:#FF6600;font-size:14px;font-weight:600;">1.</td>
+                <td valign="top" style="padding:6px 0;font-size:14px;color:#14181A;line-height:1.55;">This confirmation email (printed or on phone)</td>
+              </tr>
+              <tr>
+                <td valign="top" style="padding:6px 0;width:28px;color:#FF6600;font-size:14px;font-weight:600;">2.</td>
+                <td valign="top" style="padding:6px 0;font-size:14px;color:#14181A;line-height:1.55;">Your driving license (original; foreign licenses require an International Driving Permit)</td>
+              </tr>
+              <tr>
+                <td valign="top" style="padding:6px 0;width:28px;color:#FF6600;font-size:14px;font-weight:600;">3.</td>
+                <td valign="top" style="padding:6px 0;font-size:14px;color:#14181A;line-height:1.55;">Your passport or MyKad for identity verification</td>
+              </tr>
+              <tr>
+                <td valign="top" style="padding:6px 0;width:28px;color:#FF6600;font-size:14px;font-weight:600;">4.</td>
+                <td valign="top" style="padding:6px 0;font-size:14px;color:#14181A;line-height:1.55;">The credit card used for booking (for deposit pre-authorization)</td>
+              </tr>
+              <tr>
+                <td valign="top" style="padding:6px 0;width:28px;color:#FF6600;font-size:14px;font-weight:600;">5.</td>
+                <td valign="top" style="padding:6px 0;font-size:14px;color:#14181A;line-height:1.55;">The driver must be the same person named on this booking</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Divider -->
+        <tr>
+          <td style="padding:0 36px;">
+            <div style="height:1px;background:#E4E6EA;"></div>
+          </td>
+        </tr>
+
+        <!-- Driver -->
+        <tr>
+          <td style="padding:28px 36px 16px 36px;">
+            <p style="margin:0 0 10px 0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#FF6600;font-weight:500;">Driver Requirements</p>
+            <p style="margin:0;font-size:14px;color:#14181A;line-height:1.6;">Minimum age 23, license held for 2+ years, clean record. If the driver at pickup does not meet these requirements, the rental will be refused with no refund.</p>
+          </td>
+        </tr>
+
+        <!-- Fuel -->
+        <tr>
+          <td style="padding:16px 36px;">
+            <p style="margin:0 0 10px 0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#FF6600;font-weight:500;">Fuel Policy · Same-to-Same</p>
+            <p style="margin:0;font-size:14px;color:#14181A;line-height:1.6;">Return the car with the same fuel level it had at pickup. If it's lower, you'll be charged for the missing fuel at pump price plus an RM 30 refueling service fee.</p>
+          </td>
+        </tr>
+
+        <!-- Insurance -->
+        <tr>
+          <td style="padding:16px 36px;">
+            <p style="margin:0 0 10px 0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#FF6600;font-weight:500;">Insurance</p>
+            <p style="margin:0 0 8px 0;font-size:14px;color:#14181A;line-height:1.6;">Third-party insurance is included. You are liable up to the excess of <span style="font-weight:500;">RM 1,500</span> for damage to the rented vehicle.</p>
+            <p style="margin:0;font-size:13px;color:#6B7378;line-height:1.55;">Optional upgrade to Comprehensive (RM 50/day) at pickup reduces the excess to RM 500.</p>
+          </td>
+        </tr>
+
+        <!-- Prohibited -->
+        <tr>
+          <td style="padding:16px 36px;">
+            <p style="margin:0 0 10px 0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#FF6600;font-weight:500;">Prohibited Use</p>
+            <p style="margin:0;font-size:14px;color:#14181A;line-height:1.6;">The vehicle cannot be used for: racing or off-road driving, towing, commercial passenger transport (ride-hailing or taxi), carrying more than 8 passengers, crossing borders, transporting illegal goods or pets without prior arrangement, or being driven by anyone not listed as an authorized driver. Violation forfeits the deposit and may incur further charges.</p>
+          </td>
+        </tr>
+
+        <!-- Smoking/pets -->
+        <tr>
+          <td style="padding:16px 36px;">
+            <p style="margin:0 0 10px 0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#FF6600;font-weight:500;">Smoking, Pets, and Cleaning</p>
+            <p style="margin:0;font-size:14px;color:#14181A;line-height:1.6;">No smoking, vaping, or pets inside the vehicle. Violation: <span style="font-weight:500;">RM 500</span> cleaning fee. Please return the car in reasonably clean condition; excessive sand or debris may incur an RM 100 cleaning fee.</p>
+          </td>
+        </tr>
+
+        <!-- Traffic -->
+        <tr>
+          <td style="padding:16px 36px 28px 36px;">
+            <p style="margin:0 0 10px 0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#FF6600;font-weight:500;">Traffic Offenses and Tolls</p>
+            <p style="margin:0;font-size:14px;color:#14181A;line-height:1.6;">You are responsible for all fines, parking tickets, and tolls during your rental. We will charge your card the amount plus an RM 50 administrative fee per offense if any are received after your return.</p>
+          </td>
+        </tr>
+
+        <!-- Divider -->
+        <tr>
+          <td style="padding:0 36px;">
+            <div style="height:1px;background:#E4E6EA;"></div>
+          </td>
+        </tr>
+
+        <!-- In case of accident -->
+        <tr>
+          <td style="padding:28px 36px 16px 36px;">
+            <p style="margin:0 0 14px 0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#FF6600;font-weight:500;">In Case of Accident</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td valign="top" style="padding:6px 0;width:28px;color:#FF6600;font-size:14px;font-weight:600;">1.</td>
+                <td valign="top" style="padding:6px 0;font-size:14px;color:#14181A;line-height:1.55;">Ensure everyone is safe and move out of traffic if possible.</td>
+              </tr>
+              <tr>
+                <td valign="top" style="padding:6px 0;width:28px;color:#FF6600;font-size:14px;font-weight:600;">2.</td>
+                <td valign="top" style="padding:6px 0;font-size:14px;color:#14181A;line-height:1.55;">Call us immediately: <span style="font-weight:500;">+60 12-510 5576</span>.</td>
+              </tr>
+              <tr>
+                <td valign="top" style="padding:6px 0;width:28px;color:#FF6600;font-size:14px;font-weight:600;">3.</td>
+                <td valign="top" style="padding:6px 0;font-size:14px;color:#14181A;line-height:1.55;">Call police (<span style="font-weight:500;">999</span>) and obtain a police report (mandatory for any claim).</td>
+              </tr>
+              <tr>
+                <td valign="top" style="padding:6px 0;width:28px;color:#FF6600;font-size:14px;font-weight:600;">4.</td>
+                <td valign="top" style="padding:6px 0;font-size:14px;color:#14181A;line-height:1.55;">Do not admit fault or sign anything from third parties.</td>
+              </tr>
+              <tr>
+                <td valign="top" style="padding:6px 0;width:28px;color:#FF6600;font-size:14px;font-weight:600;">5.</td>
+                <td valign="top" style="padding:6px 0;font-size:14px;color:#14181A;line-height:1.55;">Take photos of all vehicles, license plates, and the scene.</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Late return -->
+        <tr>
+          <td style="padding:16px 36px;">
+            <p style="margin:0 0 10px 0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#FF6600;font-weight:500;">Late Return</p>
+            <p style="margin:0 0 10px 0;font-size:14px;color:#14181A;line-height:1.6;">30-minute grace period applies. After that:</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;">
+              <tr>
+                <td style="padding:4px 0;color:#6B7378;">30 min to 6 hours late</td>
+                <td style="padding:4px 0;text-align:right;color:#14181A;">RM 20 Low / RM 30 Peak per hour</td>
+              </tr>
+              <tr>
+                <td style="padding:4px 0;color:#6B7378;">More than 6 hours late</td>
+                <td style="padding:4px 0;text-align:right;color:#14181A;">1 extra rental day</td>
+              </tr>
+              <tr>
+                <td style="padding:4px 0;color:#6B7378;">More than 24 hours, no notice</td>
+                <td style="padding:4px 0;text-align:right;color:#14181A;">Deposit forfeited</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Cancellation -->
+        <tr>
+          <td style="padding:16px 36px 28px 36px;">
+            <p style="margin:0 0 10px 0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#FF6600;font-weight:500;">Cancellation Policy</p>
+            <p style="margin:0;font-size:14px;color:#14181A;line-height:1.6;">Refund amounts vary depending on how far in advance you cancel. <a href="https://carxq.com/terms#cancellation" style="color:#FF6600;text-decoration:underline;font-weight:500;">View full cancellation policy</a>.</p>
+          </td>
+        </tr>
+
+        <!-- You might also love (cross-sell: XQ Sunset Cruise) -->
+        <tr>
+          <td style="padding:0 36px 28px 36px;">
+            <p style="margin:0 0 14px 0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#FF6600;font-weight:500;">You might also love</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:20px;overflow:hidden;background:#14181A;">
+              <tr>
+                <!-- Left: sunset illustration -->
+                <td width="42%" valign="top" style="background:#FF6600;line-height:0;font-size:0;">
+                  <!--[if !mso]><!-->
+                  <div style="position:relative;background:linear-gradient(180deg,#FF6600 0%,#FF8A33 55%,#FFC79A 85%,#FFD2A8 100%);min-height:240px;">
+                    <table role="presentation" width="100%" height="240" cellpadding="0" cellspacing="0" style="height:240px;">
+                      <tr>
+                        <td align="center" valign="middle" style="padding:0;">
+                          <!-- Sun -->
+                          <div style="width:90px;height:90px;border-radius:50%;background:radial-gradient(circle at 50% 50%,#FFF4D2 0%,#FFD27A 60%,#FF9E33 100%);box-shadow:0 0 40px rgba(255,210,120,.6);margin:30px auto 0 auto;"></div>
+                          <!-- Boat -->
+                          <div style="margin-top:35px;">
+                            <table role="presentation" cellpadding="0" cellspacing="0" align="center">
+                              <tr>
+                                <td align="center">
+                                  <!-- Sail (white triangle made with border trick) -->
+                                  <div style="width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-bottom:36px solid #FFFFFF;margin:0 auto;"></div>
+                                  <!-- Hull -->
+                                  <div style="width:80px;height:14px;background:#14181A;border-radius:0 0 40px 40px;margin-top:-2px;"></div>
+                                </td>
+                              </tr>
+                            </table>
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                  <!--<![endif]-->
+                  <!--[if mso]>
+                  <table role="presentation" width="100%" height="240" cellpadding="0" cellspacing="0" style="background:#FF6600;">
+                    <tr><td align="center" valign="middle" style="color:#FFFFFF;font-size:48px;">&#9728;</td></tr>
+                  </table>
+                  <![endif]-->
+                </td>
+
+                <!-- Right: content -->
+                <td width="58%" valign="top" style="padding:24px 24px 22px 24px;background:#14181A;">
+                  <!-- Eyebrow chip -->
+                  <table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:14px;">
+                    <tr>
+                      <td style="background:#3A2410;padding:6px 12px;border-radius:999px;font-size:11px;letter-spacing:.10em;text-transform:uppercase;color:#FFD2A8;font-weight:500;">
+                        + New from Car XQ Holidays
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- Title -->
+                  <h2 style="margin:0 0 10px 0;font-size:22px;line-height:1.15;letter-spacing:-0.022em;font-weight:500;color:#FFFFFF;">The XQ Sunset Cruise.</h2>
+
+                  <!-- Description -->
+                  <p style="margin:0 0 16px 0;font-size:13px;line-height:1.55;color:rgba(255,255,255,.75);">Two hours of golden hour off Pantai Kok with fresh seafood, free-flow drinks, and a Langkawi sunset you'll be looking at for years.</p>
+
+                  <!-- Bullet checks -->
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:18px;">
+                    <tr>
+                      <td valign="top" style="padding:3px 0;font-size:12px;color:rgba(255,255,255,.85);">
+                        <span style="color:#FF6600;font-weight:600;">&#10003;</span>&nbsp; Departs daily &middot; 5:30 PM
+                      </td>
+                    </tr>
+                    <tr>
+                      <td valign="top" style="padding:3px 0;font-size:12px;color:rgba(255,255,255,.85);">
+                        <span style="color:#FF6600;font-weight:600;">&#10003;</span>&nbsp; Up to 12 guests &middot; private option
+                      </td>
+                    </tr>
+                    <tr>
+                      <td valign="top" style="padding:3px 0;font-size:12px;color:rgba(255,255,255,.85);">
+                        <span style="color:#FF6600;font-weight:600;">&#10003;</span>&nbsp; Free hotel transfer for renters
+                      </td>
+                    </tr>
+                  </table>
+
+                  <!-- Price -->
+                  <p style="margin:0 0 14px 0;font-size:12px;letter-spacing:.10em;text-transform:uppercase;color:rgba(255,255,255,.55);font-weight:500;">
+                    From <span style="font-size:20px;letter-spacing:-0.02em;color:#FFFFFF;text-transform:none;font-weight:500;">RM 220</span><span style="text-transform:none;color:rgba(255,255,255,.6);font-size:12px;letter-spacing:0;">/pax</span> <span style="text-decoration:line-through;color:rgba(255,255,255,.35);text-transform:none;font-size:12px;letter-spacing:0;">RM 280</span>
+                  </p>
+
+                  <!-- CTA -->
+                  <a href="https://cruise.xqholidays.com.my/sunset"
+                     style="display:inline-block;background:#FF6600;color:#FFFFFF;padding:11px 20px;border-radius:999px;font-size:14px;font-weight:500;text-decoration:none;letter-spacing:-0.01em;">
+                    Book the cruise &rarr;
+                  </a>
+
+                  <!-- Trust line -->
+                  <p style="margin:14px 0 0 0;font-size:11px;color:rgba(255,255,255,.55);line-height:1.55;">
+                    Free cancellation up to 24 h &middot; life jackets &amp; insurance included
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Contact CTA -->
+        <tr>
+          <td style="padding:0 36px 28px 36px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#14181A;border-radius:20px;">
+              <tr>
+                <td style="padding:32px 28px;text-align:center;">
+                  <p style="margin:0 0 8px 0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#FFD2A8;font-weight:500;">Get in Touch</p>
+                  <p style="margin:0 0 18px 0;color:rgba(255,255,255,.85);font-size:15px;line-height:1.55;max-width:42ch;display:inline-block;">For inquiries about our affordable and safe car rental options in Langkawi:</p>
+                  <table role="presentation" cellpadding="0" cellspacing="0" align="center" style="margin:0 auto;">
+                    <tr>
+                      <td valign="middle" style="padding:6px 0;">
+                        <a href="https://wa.me/60125105576?text=Hi%20XQ%20Car%2C%20I%20have%20inquiry%20about%20your%20car%20services..."
+                           style="display:inline-block;background:#FF6600;color:#FFFFFF;padding:12px 22px;border-radius:999px;font-size:14px;font-weight:500;text-decoration:none;">
+                          WhatsApp +60 12-510 5576
+                        </a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td valign="middle" style="padding:10px 0 0 0;text-align:center;">
+                        <a href="tel:+601135215576" style="color:#FFFFFF;font-size:15px;text-decoration:none;font-weight:500;">+60 11-3521 5576</a>
+                        <span style="color:rgba(255,255,255,.4);padding:0 8px;">·</span>
+                        <a href="mailto:cs@xqholidays.com.my" style="color:#FFD2A8;font-size:15px;text-decoration:none;font-weight:500;">cs@xqholidays.com.my</a>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- T&C -->
+        <tr>
+          <td style="padding:0 36px 28px 36px;">
+            <p style="margin:0;font-size:12px;color:#9AA1A6;line-height:1.6;">By completing this booking, you have agreed to our <a href="https://carxq.com/terms" style="color:#14181A;text-decoration:underline;">Terms and Conditions</a>. By accepting the vehicle at pickup, you confirm acceptance of the rental agreement and authorize charges for any additional fees described in this email.</p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#F4F5F7;padding:24px 36px;border-top:1px solid #E4E6EA;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td valign="middle">
+                  <table role="presentation" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td valign="middle" style="padding-right:8px;">
+                        <div style="width:24px;height:24px;border-radius:7px;background:#FF6600;color:#FFFFFF;font-size:14px;font-weight:700;text-align:center;line-height:24px;letter-spacing:-0.02em;">X</div>
+                      </td>
+                      <td valign="middle" style="font-size:14px;font-weight:600;color:#14181A;letter-spacing:-0.01em;">Car XQ</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:14px 0 0 0;font-size:11px;color:#9AA1A6;line-height:1.55;">This email was sent to {{customer_email}} regarding Booking ID LCR142-4567. Please save it until after your trip.</p>
+            <p style="margin:8px 0 0 0;font-size:11px;color:#9AA1A6;line-height:1.55;">Copyright &copy; 2026 XIAO QIANG HOLIDAYS SDN BHD (201301017811). All rights reserved.</p>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>
