@@ -1,6 +1,7 @@
 import { Body, Head, Html, Link, Preview } from '@react-email/components'
 
 import { formatRM, formatShortDate, formatBookingTime } from './email-helpers'
+import { EmailBrandMark } from './EmailBrandMark'
 
 export type PaymentFailedEmailProps = {
   customerFirstName: string
@@ -90,41 +91,7 @@ export function PaymentFailedEmail(props: PaymentFailedEmailProps) {
                           <tbody>
                             <tr>
                               <td style={{ verticalAlign: 'middle' }}>
-                                <table role="presentation" cellPadding="0" cellSpacing="0">
-                                  <tbody>
-                                    <tr>
-                                      <td style={{ paddingRight: '10px', verticalAlign: 'middle' }}>
-                                        <div
-                                          style={{
-                                            width: '30px',
-                                            height: '30px',
-                                            borderRadius: '9px',
-                                            background: ORANGE,
-                                            color: '#FFFFFF',
-                                            fontSize: '17px',
-                                            fontWeight: 700,
-                                            textAlign: 'center',
-                                            lineHeight: '30px',
-                                            letterSpacing: '-0.02em',
-                                          }}
-                                        >
-                                          X
-                                        </div>
-                                      </td>
-                                      <td
-                                        style={{
-                                          fontSize: '17px',
-                                          fontWeight: 600,
-                                          color: '#FFFFFF',
-                                          letterSpacing: '-0.01em',
-                                          verticalAlign: 'middle',
-                                        }}
-                                      >
-                                        Car XQ
-                                      </td>
-                                    </tr>
-                                  </tbody>
-                                </table>
+                                <EmailBrandMark />
                               </td>
                               <td
                                 style={{
@@ -502,40 +469,7 @@ export function PaymentFailedEmail(props: PaymentFailedEmailProps) {
                           <tbody>
                             <tr>
                               <td>
-                                <table role="presentation" cellPadding="0" cellSpacing="0">
-                                  <tbody>
-                                    <tr>
-                                      <td style={{ paddingRight: '8px', verticalAlign: 'middle' }}>
-                                        <div
-                                          style={{
-                                            width: '24px',
-                                            height: '24px',
-                                            borderRadius: '7px',
-                                            background: ORANGE,
-                                            color: '#FFFFFF',
-                                            fontSize: '14px',
-                                            fontWeight: 700,
-                                            textAlign: 'center',
-                                            lineHeight: '24px',
-                                          }}
-                                        >
-                                          X
-                                        </div>
-                                      </td>
-                                      <td
-                                        style={{
-                                          fontSize: '14px',
-                                          fontWeight: 600,
-                                          color: DARK,
-                                          letterSpacing: '-0.01em',
-                                          verticalAlign: 'middle',
-                                        }}
-                                      >
-                                        Car XQ
-                                      </td>
-                                    </tr>
-                                  </tbody>
-                                </table>
+                                <EmailBrandMark size={24} labelColor={DARK} labelSize="14px" />
                               </td>
                             </tr>
                           </tbody>

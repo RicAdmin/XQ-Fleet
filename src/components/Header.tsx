@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 
+import BrandLogo from '#/components/BrandLogo'
 import BetterAuthHeader from '#/integrations/better-auth/header-user'
 import ThemeToggle from '#/components/ThemeToggle'
 
@@ -9,8 +10,9 @@ export default function Header() {
       <nav className="page-wrap flex flex-wrap items-center gap-3 py-4">
         <Link
           to="/"
-          className="brand-mark rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-4 py-2 text-sm font-semibold text-[var(--sea-ink)] no-underline"
+          className="brand-mark rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] no-underline"
         >
+          <BrandLogo size={28} />
           XQ Car Fleet
         </Link>
 

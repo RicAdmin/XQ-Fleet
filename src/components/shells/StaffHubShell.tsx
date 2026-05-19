@@ -10,6 +10,7 @@ import {
   Wrench,
 } from 'lucide-react'
 
+import BrandLogo from '#/components/BrandLogo'
 import { authClient } from '#/lib/auth-client'
 
 type StaffHubShellProps = {
@@ -64,7 +65,7 @@ export default function StaffHubShell({ user }: StaffHubShellProps) {
     <div className="hub-layout">
       <header className="hub-topbar">
         <div className="hub-brand">
-          <Car size={15} />
+          <BrandLogo size={28} />
           <span>XQ Fleet</span>
         </div>
         <div className="hub-topbar-end">

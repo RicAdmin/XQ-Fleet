@@ -157,18 +157,16 @@ img { display: block; max-width: 100%; }
   font-size: 17px;
   letter-spacing: -0.01em;
 }
-.nav .brand .mark {
-  width: 30px; height: 30px;
-  border-radius: 9px;
-  background: var(--brand-leaf);
-  color: #fff;
-  display: grid;
-  place-items: center;
-  font-family: var(--font-sans);
-  font-size: 17px;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -.02em;
+.nav .brand .brand-logo-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.site-footer .brand .brand-logo-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
 }
 .nav-links {
   display: flex;
@@ -5315,7 +5313,7 @@ input[type=range] { width: 100%; accent-color: var(--brand-leaf); }
   .nav-search { order: 5; flex-basis: 100%; max-width: none; }
   .nav .signup { padding: 7px 12px; font-size: 13px; }
   .brand { font-size: 16px; }
-  .nav .brand .mark { width: 26px; height: 26px; font-size: 14px; }
+  .nav .brand .brand-logo-img { width: 30px; height: 30px; }
 
   /* Hero */
   .hero .stage { height: 420px; }
@@ -5522,7 +5520,7 @@ input[type=range] { width: 100%; accent-color: var(--brand-leaf); }
 @media (max-width: 380px) {
   .h-display { font-size: 28px !important; }
   .h-section { font-size: 22px !important; }
-  .nav .brand .mark + span > span { display: none; } /* shorten brand to "Car" */
+  .nav .brand > span:last-child > span { display: none; } /* shorten brand to "Car" */
   .blog-cat { font-size: 11px; padding: 6px 10px; }
   .promo h3 { font-size: 20px; }
   .promo-discount-num { font-size: 26px; }

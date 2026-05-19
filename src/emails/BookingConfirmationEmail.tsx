@@ -8,6 +8,7 @@ import {
   formatShortDate,
   rentalDays,
 } from './email-helpers'
+import { EmailBrandMark } from './EmailBrandMark'
 
 export type BookingConfirmationEmailProps = {
   customerFirstName: string
@@ -135,41 +136,7 @@ export function BookingConfirmationEmail(props: BookingConfirmationEmailProps) {
                           <tbody>
                             <tr>
                               <td style={{ verticalAlign: 'middle' }}>
-                                <table role="presentation" cellPadding="0" cellSpacing="0">
-                                  <tbody>
-                                    <tr>
-                                      <td style={{ paddingRight: '10px', verticalAlign: 'middle' }}>
-                                        <div
-                                          style={{
-                                            width: '30px',
-                                            height: '30px',
-                                            borderRadius: '9px',
-                                            background: ORANGE,
-                                            color: '#FFFFFF',
-                                            fontSize: '17px',
-                                            fontWeight: 700,
-                                            textAlign: 'center',
-                                            lineHeight: '30px',
-                                            letterSpacing: '-0.02em',
-                                          }}
-                                        >
-                                          X
-                                        </div>
-                                      </td>
-                                      <td
-                                        style={{
-                                          fontSize: '17px',
-                                          fontWeight: 600,
-                                          color: '#FFFFFF',
-                                          letterSpacing: '-0.01em',
-                                          verticalAlign: 'middle',
-                                        }}
-                                      >
-                                        Car XQ
-                                      </td>
-                                    </tr>
-                                  </tbody>
-                                </table>
+                                <EmailBrandMark />
                               </td>
                               <td
                                 style={{
@@ -1359,41 +1326,7 @@ export function BookingConfirmationEmail(props: BookingConfirmationEmailProps) {
                           <tbody>
                             <tr>
                               <td style={{ verticalAlign: 'middle' }}>
-                                <table role="presentation" cellPadding="0" cellSpacing="0">
-                                  <tbody>
-                                    <tr>
-                                      <td style={{ paddingRight: '8px', verticalAlign: 'middle' }}>
-                                        <div
-                                          style={{
-                                            width: '24px',
-                                            height: '24px',
-                                            borderRadius: '7px',
-                                            background: ORANGE,
-                                            color: '#FFFFFF',
-                                            fontSize: '14px',
-                                            fontWeight: 700,
-                                            textAlign: 'center',
-                                            lineHeight: '24px',
-                                            letterSpacing: '-0.02em',
-                                          }}
-                                        >
-                                          X
-                                        </div>
-                                      </td>
-                                      <td
-                                        style={{
-                                          fontSize: '14px',
-                                          fontWeight: 600,
-                                          color: DARK,
-                                          letterSpacing: '-0.01em',
-                                          verticalAlign: 'middle',
-                                        }}
-                                      >
-                                        Car XQ
-                                      </td>
-                                    </tr>
-                                  </tbody>
-                                </table>
+                                <EmailBrandMark size={24} labelColor={DARK} labelSize="14px" />
                               </td>
                             </tr>
                           </tbody>

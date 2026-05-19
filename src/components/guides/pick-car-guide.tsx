@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { ArrowRight, Car, DoorOpen, Luggage, Sparkles, Users } from 'lucide-react'
 
 import type { CarCategory } from '#/db/schema'
@@ -6,9 +7,18 @@ import { heuristicLuggageFit } from '#/lib/fleet-luggage-fit'
 import type { PublicCarRow } from '#/lib/portal-functions'
 
 import { LuggageFitModal } from '#/components/LuggageFitModal'
+import {
+  CarDetailDialog,
+  defaultBooking,
+  nightsBetween,
+} from '#/components/landing/CarDetailDialog'
 
-import { PickCarDetailDialog } from './pick-car-detail-dialog'
 import { GuidePageHeader, GuidePageShell } from './guide-shell'
+
+function toYmd(d: Date | null) {
+  if (!d) return undefined
+  return d.toISOString().slice(0, 10)
+}
 
 const GROUP_TABS = ['all', 'Small', 'Comfort', 'Adventure'] as const
 type GroupTab = (typeof GROUP_TABS)[number]
@@ -71,6 +81,8 @@ function formatMYR(sen: number) {
 }
 
 export function PickCarGuide({ cars }: { cars: PublicCarRow[] }) {
+  const navigate = useNavigate()
+  const [booking] = useState(defaultBooking)
   const [tab, setTab] = useState<GroupTab>('all')
   const [size, setSize] = useState<'any' | 'small' | 'mid' | 'big'>('any')
   const [bags, setBags] = useState(0)
@@ -95,6 +107,28 @@ export function PickCarGuide({ cars }: { cars: PublicCarRow[] }) {
     if (g === 'all') return cars.length
     return cars.filter((c) => carMatchesTab(c, g)).length
   }
+
+  const goToCheckout = useCallback(
+    (car: PublicCarRow) => {
+      setDetailCar(null)
+      void navigate({
+        to: '/checkout/$carId',
+        params: { carId: car.id },
+        search: {
+          startDate: toYmd(booking.pickDate),
+          endDate: toYmd(booking.retDate),
+          from: booking.from,
+          retLoc: booking.retLoc,
+          tripType: booking.tripType,
+          pickTime: booking.pickTime,
+          retTime: booking.retTime,
+          adults: String(booking.adults),
+          children: String(booking.children),
+        },
+      })
+    },
+    [navigate, booking],
+  )
 
   return (
     <GuidePageShell>
@@ -307,7 +341,15 @@ export function PickCarGuide({ cars }: { cars: PublicCarRow[] }) {
       </section>
 
       {luggageCar && <LuggageFitModal car={luggageCar} onClose={() => setLuggageCar(null)} />}
-      {detailCar && <PickCarDetailDialog car={detailCar} onClose={() => setDetailCar(null)} />}
+      {detailCar && (
+        <CarDetailDialog
+          car={detailCar}
+          booking={booking}
+          nights={nightsBetween(booking.pickDate, booking.retDate)}
+          onClose={() => setDetailCar(null)}
+          onBeginCheckout={goToCheckout}
+        />
+      )}
     </GuidePageShell>
   )
 }

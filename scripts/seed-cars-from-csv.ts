@@ -1,5 +1,5 @@
 /**
- * Seeds `cars` + `car_photos` from repo-root `Car.csv`.
+ * Seeds `cars` + `car_photos` from `data/Car.csv`.
  * Removes previous seed rows (plate_number like 'DEMO%').
  * Cover image URLs point at static files: `/image/car_model/<filename>`.
  *
@@ -11,11 +11,11 @@ import { fileURLToPath } from 'node:url'
 
 import { config } from 'dotenv'
 import { drizzle } from 'drizzle-orm/node-postgres'
-import { like } from 'drizzle-orm'
+import { inArray, like } from 'drizzle-orm'
 import pg from 'pg'
 
 import * as schema from '../src/db/schema.ts'
-import { carPhotos, cars, type CarCategory } from '../src/db/schema/fleet.ts'
+import { carPhotos, cars, rentals, payments, type CarCategory } from '../src/db/schema/fleet.ts'
 
 config({ path: ['.env.local', '.env'] })
 
@@ -158,8 +158,31 @@ async function main() {
   const pool = new pg.Pool({ connectionString: url })
   const db = drizzle(pool, { schema })
 
-  const removed = await db.delete(cars).where(like(cars.plateNumber, 'DEMO%')).returning({ id: cars.id })
-  console.log(`Removed ${removed.length} previous DEMO* seed car(s).`)
+  // Find DEMO* cars first
+  const demoCars = await db
+    .select({ id: cars.id })
+    .from(cars)
+    .where(like(cars.plateNumber, 'DEMO%'))
+
+  if (demoCars.length > 0) {
+    const demoCarIds = demoCars.map((c) => c.id)
+
+    // Delete child payments before rentals, then rentals before cars (FK RESTRICT)
+    const demoRentals = await db
+      .select({ id: rentals.id })
+      .from(rentals)
+      .where(inArray(rentals.carId, demoCarIds))
+
+    if (demoRentals.length > 0) {
+      const demoRentalIds = demoRentals.map((r) => r.id)
+      await db.delete(payments).where(inArray(payments.rentalId, demoRentalIds))
+      await db.delete(rentals).where(inArray(rentals.id, demoRentalIds))
+      console.log(`Removed ${demoRentals.length} DEMO rental(s) and their payments.`)
+    }
+
+    await db.delete(cars).where(inArray(cars.id, demoCarIds))
+    console.log(`Removed ${demoCars.length} previous DEMO* seed car(s).`)
+  }
 
   let inserted = 0
   for (let r = 1; r < lines.length; r++) {

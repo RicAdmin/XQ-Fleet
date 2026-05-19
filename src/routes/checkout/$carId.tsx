@@ -83,6 +83,7 @@ function detailToRow(car: PublicCarDetail): PublicCarRow {
     category: car.category,
     dailyRateSen: car.dailyRateSen,
     coverPhotoUrl: cover,
+    notes: car.notes,
   }
 }
 

@@ -1,7 +1,8 @@
-import { AlertTriangle, CalendarCheck, Car, ChevronRight, LogOut, Wrench, Users } from 'lucide-react'
+import { AlertTriangle, CalendarCheck, ChevronRight, LogOut, Wrench, Users } from 'lucide-react'
 
 import { Link } from '@tanstack/react-router'
 
+import BrandLogo from '#/components/BrandLogo'
 import { authClient } from '#/lib/auth-client'
 import type { DashboardData, FleetCounts } from '#/lib/dashboard-functions'
 
@@ -72,7 +73,7 @@ export default function StaffDashboard({ user, data }: StaffDashboardProps) {
     <div className="hub-layout">
       <header className="hub-topbar">
         <div className="hub-brand">
-          <Car size={15} />
+          <BrandLogo size={28} />
           <span>XQ Fleet</span>
         </div>
         <div className="hub-topbar-end">
