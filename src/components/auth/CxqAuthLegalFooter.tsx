@@ -2,9 +2,9 @@ import { Link } from '@tanstack/react-router'
 
 export default function CxqAuthLegalFooter() {
   return (
-    <p className="cxq-auth-tos">
+    <p className="auth-tos">
       By continuing you agree to our terms and acknowledge our{' '}
-      <Link to="/about" className="cxq-auth-link">
+      <Link to="/about" className="auth-link">
         Privacy Policy
       </Link>
       .

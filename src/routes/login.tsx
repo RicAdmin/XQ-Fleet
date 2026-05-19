@@ -6,8 +6,7 @@ import { z } from 'zod'
 
 import CxqAuthLegalFooter from '#/components/auth/CxqAuthLegalFooter'
 import CxqAuthMarketingAside from '#/components/auth/CxqAuthMarketingAside'
-import CxqAuthSocialButtons from '#/components/auth/CxqAuthSocialButtons'
-import AuthPageShell from '#/components/shells/AuthPageShell'
+import PublicAuthShell from '#/components/shells/PublicAuthShell'
 import { cxqAuthSignInAside } from '#/lib/cxq-auth-marketing'
 import { authClient } from '#/lib/auth-client'
 import { appRoleFromSessionUser } from '#/lib/auth-model'
@@ -28,34 +27,18 @@ function CustomerLoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isOAuthLoading, setIsOAuthLoading] = useState(false)
-
-  async function handleGoogleSignIn() {
-    setIsOAuthLoading(true)
-    await authClient.signIn.social({ provider: 'google', callbackURL: returnTo ?? '/account' })
-  }
 
   return (
-    <AuthPageShell>
-      <div className="cxq-auth-split">
+    <PublicAuthShell screenLabel="Car XQ Sign in" minimal>
+      <div className="auth-page-card">
         <CxqAuthMarketingAside {...cxqAuthSignInAside} />
 
-        <div className="cxq-auth-right">
-          <span className="cxq-auth-badge">Customer access</span>
+        <div className="auth-right">
+          <span className="auth-badge">Customer access</span>
           <h3>Sign in</h3>
-          <p className="cxq-auth-sub">
+          <p className="auth-sub">
             New to Car XQ? <Link to="/register">Create an account</Link>
           </p>
-
-          <CxqAuthSocialButtons
-            onGoogle={handleGoogleSignIn}
-            disabled={isOAuthLoading || isSubmitting}
-            googleLabel={isOAuthLoading ? 'Redirecting…' : 'Continue with Google'}
-          />
-
-          <div className="cxq-auth-divider">
-            <span>or with email</span>
-          </div>
 
           <form
             onSubmit={async (event) => {
@@ -87,8 +70,8 @@ function CustomerLoginPage() {
               }
             }}
           >
-            <div className="cxq-auth-fields">
-              <div className="cxq-auth-field">
+            <div className="auth-fields">
+              <div className="auth-field">
                 <label htmlFor="customer-email">Email</label>
                 <input
                   id="customer-email"
@@ -101,7 +84,7 @@ function CustomerLoginPage() {
                 />
               </div>
 
-              <div className="cxq-auth-field">
+              <div className="auth-field">
                 <label htmlFor="customer-password">Password</label>
                 <input
                   id="customer-password"
@@ -114,23 +97,19 @@ function CustomerLoginPage() {
                 />
               </div>
 
-              <div className="cxq-auth-row-between">
-                <label className="cxq-auth-check">
-                  <input type="checkbox" />
-                  Remember me on this device
-                </label>
-                <Link to="/forgot-password" className="cxq-auth-link">
+              <div className="auth-row-between">
+                <Link to="/forgot-password" className="auth-link">
                   Forgot password?
                 </Link>
               </div>
             </div>
 
-            {error ? <p className="cxq-auth-error">{error}</p> : null}
+            {error ? <p className="auth-error-banner">{error}</p> : null}
 
             <button
               type="submit"
-              className="button-primary cxq-auth-submit cxq-auth-submit-with-icon"
-              disabled={isSubmitting || isOAuthLoading}
+              className="btn btn-leaf btn-lg auth-form-submit"
+              disabled={isSubmitting}
             >
               {isSubmitting ? 'Signing in…' : 'Sign in'}
               {!isSubmitting ? <ArrowRight size={14} strokeWidth={2.5} aria-hidden /> : null}
@@ -140,6 +119,6 @@ function CustomerLoginPage() {
           </form>
         </div>
       </div>
-    </AuthPageShell>
+    </PublicAuthShell>
   )
 }
