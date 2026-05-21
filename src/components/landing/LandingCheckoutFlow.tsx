@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useId, useState, type ReactNode } from 'react'
 
 import { Link, useNavigate } from '@tanstack/react-router'
 import {
@@ -16,6 +16,7 @@ import {
   Wallet,
 } from 'lucide-react'
 
+import { LoadingSpinner } from '#/components/ui/LoadingSpinner'
 import { checkoutSearchFromBooking, bookingHasCompleteTrip } from '#/lib/checkout-trip'
 import { createPortalBooking } from '#/lib/portal-booking-functions'
 import {
@@ -121,6 +122,65 @@ function validateBuyerAddress(address: BuyerAddress): Record<string, string> {
     e.buyerCountry = 'Select country.'
   }
   return e
+}
+
+function FieldLabel({ children, optional = false }: { children: ReactNode; optional?: boolean }) {
+  return (
+    <span>
+      {children}
+      {optional ? (
+        <span className="checkout-optional"> · optional</span>
+      ) : (
+        <span className="field-required-mark" aria-hidden="true">
+          {' '}
+          *
+        </span>
+      )}
+    </span>
+  )
+}
+
+function CheckoutField({
+  label,
+  optional = false,
+  error,
+  showError = false,
+  className,
+  children,
+}: {
+  label: ReactNode
+  optional?: boolean
+  error?: string
+  showError?: boolean
+  className?: string
+  children: (aria: {
+    'aria-invalid'?: boolean
+    'aria-describedby'?: string
+    'aria-required'?: boolean
+  }) => ReactNode
+}) {
+  const errorId = useId()
+  const invalid = Boolean(showError && error)
+
+  return (
+    <label
+      className={['auth-field', invalid ? 'auth-field--invalid' : '', className]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      <FieldLabel optional={optional}>{label}</FieldLabel>
+      {children({
+        'aria-invalid': invalid ? true : undefined,
+        'aria-describedby': invalid ? errorId : undefined,
+        'aria-required': optional ? undefined : true,
+      })}
+      {invalid ? (
+        <em id={errorId} className="auth-field-error" role="alert">
+          {error}
+        </em>
+      ) : null}
+    </label>
+  )
 }
 
 const ADDONS: Array<{
@@ -285,6 +345,7 @@ export function LandingCheckoutFlow({
   const subtotal = daily * nights
   const discount = Math.round(subtotal * 0.15)
   const [step, setStep] = useState(0)
+  const [guestCheckout, setGuestCheckout] = useState(false)
   const [addons, setAddons] = useState<Record<AddonKey, boolean>>({
     child: false,
     second: false,
@@ -310,6 +371,7 @@ export function LandingCheckoutFlow({
   const [alsoAsDriver, setAlsoAsDriver] = useState(true)
   const [payMethod, setPayMethod] = useState<PayMethod>('card')
   const [errs, setErrs] = useState<Record<string, string>>({})
+  const [showFieldErrors, setShowFieldErrors] = useState(false)
   const [touched, setTouched] = useState<{
     buyerEmail?: boolean
     buyerPhone?: boolean
@@ -319,6 +381,10 @@ export function LandingCheckoutFlow({
   const [rentalId, setRentalId] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [flowError, setFlowError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (user) setGuestCheckout(false)
+  }, [user])
 
   useEffect(() => {
     setBuyer((b) => ({
@@ -368,6 +434,20 @@ export function LandingCheckoutFlow({
 
   const lug = heuristicLuggageFit(car.category)
 
+  const shouldShowError = useCallback(
+    (key: string) => showFieldErrors || Boolean(touched[key as keyof typeof touched]),
+    [showFieldErrors, touched],
+  )
+
+  const patchFieldError = useCallback((key: string, message: string | null) => {
+    setErrs((prev) => {
+      const next = { ...prev }
+      if (message) next[key] = message
+      else delete next[key]
+      return next
+    })
+  }, [])
+
   const validateReview = useCallback(() => {
     const e: Record<string, string> = {}
     if (!buyer.name.trim()) {
@@ -394,12 +474,20 @@ export function LandingCheckoutFlow({
     }
 
     setErrs(e)
+    setShowFieldErrors(true)
     setTouched({
       buyerEmail: true,
       buyerPhone: true,
       driverEmail: true,
       driverPhone: true,
     })
+    if (Object.keys(e).length > 0) {
+      requestAnimationFrame(() => {
+        document
+          .querySelector('.checkout-validation-banner, .auth-field-error')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      })
+    }
     return Object.keys(e).length === 0
   }, [buyer, driver, alsoAsDriver])
 
@@ -472,6 +560,7 @@ export function LandingCheckoutFlow({
           fullName: (alsoAsDriver ? buyer.name : driver.name).trim(),
           icOrPassport: driver.license.trim(),
           phone: (alsoAsDriver ? buyer.phone : driver.phone).trim(),
+          email: buyer.email.trim(),
           address: formatInternationalAddress(buyer) || undefined,
         },
       })
@@ -485,6 +574,22 @@ export function LandingCheckoutFlow({
     }
   }, [car.id, startYmd, endYmd, buyer, driver, alsoAsDriver, booking, addons])
 
+  const tripSearch = useMemo(() => checkoutSearchFromBooking(booking), [booking])
+  const checkoutReturnTo = useMemo(() => {
+    const params = new URLSearchParams()
+    if (tripSearch.startDate) params.set('startDate', tripSearch.startDate)
+    if (tripSearch.endDate) params.set('endDate', tripSearch.endDate)
+    if (tripSearch.pickTime) params.set('pickTime', tripSearch.pickTime)
+    if (tripSearch.retTime) params.set('retTime', tripSearch.retTime)
+    if (tripSearch.from) params.set('from', tripSearch.from)
+    if (tripSearch.retLoc) params.set('retLoc', tripSearch.retLoc)
+    if (tripSearch.tripType) params.set('tripType', tripSearch.tripType)
+    if (tripSearch.adults) params.set('adults', tripSearch.adults)
+    if (tripSearch.children) params.set('children', tripSearch.children)
+    const q = params.toString()
+    return `/checkout/${car.id}${q ? `?${q}` : ''}`
+  }, [car.id, tripSearch])
+
   const advance = useCallback(async () => {
     setFlowError(null)
     if (step === 0) {
@@ -494,7 +599,7 @@ export function LandingCheckoutFlow({
       return
     }
     if (step === 1) {
-      if (!user) return
+      if (!user && !guestCheckout) return
       if (payMethod === 'later' || payMethod === 'grab') {
         setFlowError('Choose card or FPX to continue.')
         return
@@ -505,22 +610,13 @@ export function LandingCheckoutFlow({
     if (step === 2 && rentalId) {
       await navigate({ to: '/pay/$rentalId', params: { rentalId } })
     }
-  }, [step, validateReview, user, payMethod, createBooking, rentalId, navigate])
+  }, [step, validateReview, user, guestCheckout, payMethod, createBooking, rentalId, navigate])
 
-  const tripSearch = useMemo(() => checkoutSearchFromBooking(booking), [booking])
-  const bookReturnQuery = useMemo(() => {
-    const params = new URLSearchParams()
-    if (tripSearch.startDate) params.set('startDate', tripSearch.startDate)
-    if (tripSearch.endDate) params.set('endDate', tripSearch.endDate)
-    if (tripSearch.pickTime) params.set('pickTime', tripSearch.pickTime)
-    if (tripSearch.retTime) params.set('retTime', tripSearch.retTime)
-    if (tripSearch.from) params.set('from', tripSearch.from)
-    if (tripSearch.retLoc) params.set('retLoc', tripSearch.retLoc)
-    if (tripSearch.tripType) params.set('tripType', tripSearch.tripType)
-    const q = params.toString()
-    return q ? `?${q}` : ''
-  }, [tripSearch])
-  const bookReturnTo = `/book/${car.id}${bookReturnQuery}`
+  const continueAsGuest = useCallback(() => {
+    setFlowError(null)
+    setGuestCheckout(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
 
   return (
     <div className="checkout">
@@ -591,118 +687,198 @@ export function LandingCheckoutFlow({
                 <section className="checkout-card">
                   <div className="checkout-card-head">
                     <h3>Buyer information</h3>
-                    <span className="checkout-card-meta">Booking contact &amp; confirmation email</span>
+                    <span className="checkout-card-meta">
+                      Booking contact &amp; confirmation email · <span className="field-required-note">* Required</span>
+                    </span>
                   </div>
+                  {showFieldErrors && Object.keys(errs).length > 0 ? (
+                    <div className="checkout-validation-banner" role="alert">
+                      <strong>Please complete the required fields below.</strong>
+                      <span>
+                        {Object.keys(errs).length} field{Object.keys(errs).length !== 1 ? 's' : ''} need
+                        your attention.
+                      </span>
+                    </div>
+                  ) : null}
                   <div className="form-grid">
-                    <label className="auth-field">
-                      <span>Full name</span>
-                      <input
-                        value={buyer.name}
-                        onChange={(e) => setBuyer((b) => ({ ...b, name: e.target.value }))}
-                        placeholder="John Tan"
-                        autoComplete="name"
-                      />
-                      {errs.buyerName ? <em>{errs.buyerName}</em> : null}
-                    </label>
-                    <label className="auth-field">
-                      <span>Email</span>
-                      <input
-                        type="email"
-                        value={buyer.email}
-                        onChange={(e) => updateContactField('buyer', 'email', e.target.value)}
-                        onBlur={(e) => touchValidateField('buyer', 'email', e.target.value)}
-                        placeholder="john@example.com"
-                        autoComplete="email"
-                        aria-invalid={errs.buyerEmail ? true : undefined}
-                      />
-                      {errs.buyerEmail && touched.buyerEmail ? (
-                        <em className="auth-field-reminder">{errs.buyerEmail}</em>
-                      ) : null}
-                    </label>
-                    <label className="auth-field">
-                      <span>Mobile number</span>
-                      <input
-                        type="tel"
-                        value={buyer.phone}
-                        onChange={(e) => updateContactField('buyer', 'phone', e.target.value)}
-                        onBlur={(e) => touchValidateField('buyer', 'phone', e.target.value)}
-                        placeholder="+60 12 345 6789"
-                        autoComplete="tel"
-                        aria-invalid={errs.buyerPhone ? true : undefined}
-                      />
-                      {errs.buyerPhone && touched.buyerPhone ? (
-                        <em className="auth-field-reminder">{errs.buyerPhone}</em>
-                      ) : null}
-                    </label>
+                    <CheckoutField
+                      label="Full name"
+                      error={errs.buyerName}
+                      showError={shouldShowError('buyerName')}
+                    >
+                      {(aria) => (
+                        <input
+                          {...aria}
+                          value={buyer.name}
+                          onChange={(e) => {
+                            const v = e.target.value
+                            setBuyer((b) => ({ ...b, name: v }))
+                            if (showFieldErrors) {
+                              patchFieldError(
+                                'buyerName',
+                                v.trim() ? null : 'Please enter the name for this booking.',
+                              )
+                            }
+                          }}
+                          placeholder="John Tan"
+                          autoComplete="name"
+                        />
+                      )}
+                    </CheckoutField>
+                    <CheckoutField
+                      label="Email"
+                      error={errs.buyerEmail}
+                      showError={shouldShowError('buyerEmail')}
+                    >
+                      {(aria) => (
+                        <input
+                          {...aria}
+                          type="email"
+                          value={buyer.email}
+                          onChange={(e) => updateContactField('buyer', 'email', e.target.value)}
+                          onBlur={(e) => touchValidateField('buyer', 'email', e.target.value)}
+                          placeholder="john@example.com"
+                          autoComplete="email"
+                        />
+                      )}
+                    </CheckoutField>
+                    <CheckoutField
+                      label="Mobile number"
+                      error={errs.buyerPhone}
+                      showError={shouldShowError('buyerPhone')}
+                    >
+                      {(aria) => (
+                        <input
+                          {...aria}
+                          type="tel"
+                          value={buyer.phone}
+                          onChange={(e) => updateContactField('buyer', 'phone', e.target.value)}
+                          onBlur={(e) => touchValidateField('buyer', 'phone', e.target.value)}
+                          placeholder="+60 12 345 6789"
+                          autoComplete="tel"
+                        />
+                      )}
+                    </CheckoutField>
 
                     <p className="checkout-field-group-label form-grid-span-full">Billing address</p>
-                    <label className="auth-field form-grid-span-full">
-                      <span>Address line 1</span>
-                      <input
-                        value={buyer.addressLine1}
-                        onChange={(e) => setBuyer((b) => ({ ...b, addressLine1: e.target.value }))}
-                        placeholder="Street address, P.O. box, company name"
-                        autoComplete="address-line1"
-                      />
-                      {errs.buyerAddressLine1 ? <em>{errs.buyerAddressLine1}</em> : null}
-                    </label>
-                    <label className="auth-field form-grid-span-full">
-                      <span>
-                        Address line 2 <span className="checkout-optional">· optional</span>
-                      </span>
-                      <input
-                        value={buyer.addressLine2}
-                        onChange={(e) => setBuyer((b) => ({ ...b, addressLine2: e.target.value }))}
-                        placeholder="Apartment, suite, unit, building, floor"
-                        autoComplete="address-line2"
-                      />
-                    </label>
-                    <label className="auth-field">
-                      <span>City / Town</span>
-                      <input
-                        value={buyer.city}
-                        onChange={(e) => setBuyer((b) => ({ ...b, city: e.target.value }))}
-                        placeholder="Kuah"
-                        autoComplete="address-level2"
-                      />
-                      {errs.buyerCity ? <em>{errs.buyerCity}</em> : null}
-                    </label>
-                    <label className="auth-field">
-                      <span>
-                        State / Province / Region <span className="checkout-optional">· optional</span>
-                      </span>
-                      <input
-                        value={buyer.stateProvince}
-                        onChange={(e) => setBuyer((b) => ({ ...b, stateProvince: e.target.value }))}
-                        placeholder="Kedah"
-                        autoComplete="address-level1"
-                      />
-                    </label>
-                    <label className="auth-field">
-                      <span>Postal / ZIP code</span>
-                      <input
-                        value={buyer.postalCode}
-                        onChange={(e) => setBuyer((b) => ({ ...b, postalCode: e.target.value }))}
-                        placeholder="07000"
-                        autoComplete="postal-code"
-                      />
-                      {errs.buyerPostalCode ? <em>{errs.buyerPostalCode}</em> : null}
-                    </label>
-                    <label className="auth-field">
-                      <span>Country</span>
-                      <select
-                        value={buyer.country}
-                        onChange={(e) => setBuyer((b) => ({ ...b, country: e.target.value }))}
-                        autoComplete="country-name"
-                      >
-                        {CHECKOUT_COUNTRIES.map((o) => (
-                          <option key={o} value={o}>
-                            {o}
-                          </option>
-                        ))}
-                      </select>
-                      {errs.buyerCountry ? <em>{errs.buyerCountry}</em> : null}
-                    </label>
+                    <CheckoutField
+                      label="Address line 1"
+                      error={errs.buyerAddressLine1}
+                      showError={shouldShowError('buyerAddressLine1')}
+                      className="form-grid-span-full"
+                    >
+                      {(aria) => (
+                        <input
+                          {...aria}
+                          value={buyer.addressLine1}
+                          onChange={(e) => {
+                            const v = e.target.value
+                            setBuyer((b) => ({ ...b, addressLine1: v }))
+                            if (showFieldErrors) {
+                              patchFieldError(
+                                'buyerAddressLine1',
+                                v.trim() ? null : 'Enter street address, P.O. box, or company name.',
+                              )
+                            }
+                          }}
+                          placeholder="Street address, P.O. box, company name"
+                          autoComplete="address-line1"
+                        />
+                      )}
+                    </CheckoutField>
+                    <CheckoutField label="Address line 2" optional className="form-grid-span-full">
+                      {(aria) => (
+                        <input
+                          {...aria}
+                          value={buyer.addressLine2}
+                          onChange={(e) => setBuyer((b) => ({ ...b, addressLine2: e.target.value }))}
+                          placeholder="Apartment, suite, unit, building, floor"
+                          autoComplete="address-line2"
+                        />
+                      )}
+                    </CheckoutField>
+                    <CheckoutField
+                      label="City / Town"
+                      error={errs.buyerCity}
+                      showError={shouldShowError('buyerCity')}
+                    >
+                      {(aria) => (
+                        <input
+                          {...aria}
+                          value={buyer.city}
+                          onChange={(e) => {
+                            const v = e.target.value
+                            setBuyer((b) => ({ ...b, city: v }))
+                            if (showFieldErrors) {
+                              patchFieldError('buyerCity', v.trim() ? null : 'Enter city or town.')
+                            }
+                          }}
+                          placeholder="Kuah"
+                          autoComplete="address-level2"
+                        />
+                      )}
+                    </CheckoutField>
+                    <CheckoutField label="State / Province / Region" optional>
+                      {(aria) => (
+                        <input
+                          {...aria}
+                          value={buyer.stateProvince}
+                          onChange={(e) => setBuyer((b) => ({ ...b, stateProvince: e.target.value }))}
+                          placeholder="Kedah"
+                          autoComplete="address-level1"
+                        />
+                      )}
+                    </CheckoutField>
+                    <CheckoutField
+                      label="Postal / ZIP code"
+                      error={errs.buyerPostalCode}
+                      showError={shouldShowError('buyerPostalCode')}
+                    >
+                      {(aria) => (
+                        <input
+                          {...aria}
+                          value={buyer.postalCode}
+                          onChange={(e) => {
+                            const v = e.target.value
+                            setBuyer((b) => ({ ...b, postalCode: v }))
+                            if (showFieldErrors) {
+                              patchFieldError(
+                                'buyerPostalCode',
+                                v.trim() ? null : 'Enter postal or ZIP code.',
+                              )
+                            }
+                          }}
+                          placeholder="07000"
+                          autoComplete="postal-code"
+                        />
+                      )}
+                    </CheckoutField>
+                    <CheckoutField
+                      label="Country"
+                      error={errs.buyerCountry}
+                      showError={shouldShowError('buyerCountry')}
+                    >
+                      {(aria) => (
+                        <select
+                          {...aria}
+                          value={buyer.country}
+                          onChange={(e) => {
+                            const v = e.target.value
+                            setBuyer((b) => ({ ...b, country: v }))
+                            if (showFieldErrors) {
+                              patchFieldError('buyerCountry', v.trim() ? null : 'Select country.')
+                            }
+                          }}
+                          autoComplete="country-name"
+                        >
+                          {CHECKOUT_COUNTRIES.map((o) => (
+                            <option key={o} value={o}>
+                              {o}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </CheckoutField>
 
                     <label className={'checkout-also-driver form-grid-span-full' + (alsoAsDriver ? ' on' : '')}>
                       <input
@@ -740,83 +916,125 @@ export function LandingCheckoutFlow({
                     <h3>Driver details</h3>
                     <span className="checkout-card-meta">
                       {alsoAsDriver
-                        ? 'License details for pickup'
-                        : 'Person who will collect and drive the car'}
+                        ? 'License details for pickup · * Required'
+                        : 'Person who will collect and drive the car · * Required'}
                     </span>
                   </div>
                   <div className="form-grid">
                     {!alsoAsDriver ? (
                       <>
-                        <label className="auth-field">
-                          <span>Full name</span>
-                          <input
-                            value={driver.name}
-                            onChange={(e) => setDriver((d) => ({ ...d, name: e.target.value }))}
-                            placeholder="Driver full name"
-                            autoComplete="off"
-                          />
-                          {errs.driverName ? <em>{errs.driverName}</em> : null}
-                        </label>
-                        <label className="auth-field">
-                          <span>Email</span>
-                          <input
-                            type="email"
-                            value={driver.email}
-                            onChange={(e) => updateContactField('driver', 'email', e.target.value)}
-                            onBlur={(e) => touchValidateField('driver', 'email', e.target.value)}
-                            placeholder="driver@example.com"
-                            autoComplete="off"
-                            aria-invalid={errs.driverEmail ? true : undefined}
-                          />
-                          {errs.driverEmail && touched.driverEmail ? (
-                            <em className="auth-field-reminder">{errs.driverEmail}</em>
-                          ) : null}
-                        </label>
-                        <label className="auth-field">
-                          <span>Mobile number</span>
-                          <input
-                            type="tel"
-                            value={driver.phone}
-                            onChange={(e) => updateContactField('driver', 'phone', e.target.value)}
-                            onBlur={(e) => touchValidateField('driver', 'phone', e.target.value)}
-                            placeholder="+60 12 345 6789"
-                            autoComplete="off"
-                            aria-invalid={errs.driverPhone ? true : undefined}
-                          />
-                          {errs.driverPhone && touched.driverPhone ? (
-                            <em className="auth-field-reminder">{errs.driverPhone}</em>
-                          ) : null}
-                        </label>
+                        <CheckoutField
+                          label="Full name"
+                          error={errs.driverName}
+                          showError={shouldShowError('driverName')}
+                        >
+                          {(aria) => (
+                            <input
+                              {...aria}
+                              value={driver.name}
+                              onChange={(e) => {
+                                const v = e.target.value
+                                setDriver((d) => ({ ...d, name: v }))
+                                if (showFieldErrors) {
+                                  patchFieldError(
+                                    'driverName',
+                                    v.trim()
+                                      ? null
+                                      : 'Please enter the driver’s full name as shown on their license.',
+                                  )
+                                }
+                              }}
+                              placeholder="Driver full name"
+                              autoComplete="off"
+                            />
+                          )}
+                        </CheckoutField>
+                        <CheckoutField
+                          label="Email"
+                          error={errs.driverEmail}
+                          showError={shouldShowError('driverEmail')}
+                        >
+                          {(aria) => (
+                            <input
+                              {...aria}
+                              type="email"
+                              value={driver.email}
+                              onChange={(e) => updateContactField('driver', 'email', e.target.value)}
+                              onBlur={(e) => touchValidateField('driver', 'email', e.target.value)}
+                              placeholder="driver@example.com"
+                              autoComplete="off"
+                            />
+                          )}
+                        </CheckoutField>
+                        <CheckoutField
+                          label="Mobile number"
+                          error={errs.driverPhone}
+                          showError={shouldShowError('driverPhone')}
+                        >
+                          {(aria) => (
+                            <input
+                              {...aria}
+                              type="tel"
+                              value={driver.phone}
+                              onChange={(e) => updateContactField('driver', 'phone', e.target.value)}
+                              onBlur={(e) => touchValidateField('driver', 'phone', e.target.value)}
+                              placeholder="+60 12 345 6789"
+                              autoComplete="off"
+                            />
+                          )}
+                        </CheckoutField>
                       </>
                     ) : (
-                      <p className="checkout-driver-linked">
+                      <p className="checkout-driver-linked form-grid-span-full">
                         Using <strong>{buyer.name.trim() || 'buyer name'}</strong>
                         {buyer.email ? ` · ${buyer.email}` : ''}
                         {buyer.phone ? ` · ${buyer.phone}` : ''}
                       </p>
                     )}
-                    <label className="auth-field">
-                      <span>IC / Passport / License no.</span>
-                      <input
-                        value={driver.license}
-                        onChange={(e) => setDriver((d) => ({ ...d, license: e.target.value }))}
-                        placeholder="MyKad / IDP / DL no."
-                      />
-                      {errs.driverLicense ? <em>{errs.driverLicense}</em> : null}
-                    </label>
-                    <label className="auth-field" style={{ gridColumn: alsoAsDriver ? '1 / -1' : undefined }}>
-                      <span>Issuing country</span>
-                      <select
-                        value={driver.country}
-                        onChange={(e) => setDriver((d) => ({ ...d, country: e.target.value }))}
-                      >
-                        {CHECKOUT_COUNTRIES.map((o) => (
-                          <option key={o} value={o}>
-                            {o}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
+                    <CheckoutField
+                      label="IC / Passport / License no."
+                      error={errs.driverLicense}
+                      showError={shouldShowError('driverLicense')}
+                      className={alsoAsDriver ? 'form-grid-span-full' : undefined}
+                    >
+                      {(aria) => (
+                        <input
+                          {...aria}
+                          value={driver.license}
+                          onChange={(e) => {
+                            const v = e.target.value
+                            setDriver((d) => ({ ...d, license: v }))
+                            if (showFieldErrors) {
+                              patchFieldError(
+                                'driverLicense',
+                                v.trim()
+                                  ? null
+                                  : 'Please enter the driver’s IC, passport, or license number.',
+                              )
+                            }
+                          }}
+                          placeholder="MyKad / IDP / DL no."
+                        />
+                      )}
+                    </CheckoutField>
+                    <CheckoutField
+                      label="Issuing country"
+                      className={alsoAsDriver ? 'form-grid-span-full' : undefined}
+                    >
+                      {(aria) => (
+                        <select
+                          {...aria}
+                          value={driver.country}
+                          onChange={(e) => setDriver((d) => ({ ...d, country: e.target.value }))}
+                        >
+                          {CHECKOUT_COUNTRIES.map((o) => (
+                            <option key={o} value={o}>
+                              {o}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </CheckoutField>
                   </div>
                 </section>
 
@@ -824,7 +1042,7 @@ export function LandingCheckoutFlow({
               </div>
             ) : null}
 
-            {step === 1 && user ? (
+            {step === 1 && (user || guestCheckout) ? (
               <div className="checkout-section">
                 <div className="checkout-progress-meta">
                   <span className="eyebrow">Step 2 of 3</span>
@@ -832,7 +1050,9 @@ export function LandingCheckoutFlow({
                     Payment.
                   </h2>
                   <p className="h-sub" style={{ marginTop: 4 }}>
-                    Secure checkout — you&apos;ll finish card or bank payment on the next screen (iPay88).
+                    {guestCheckout && !user
+                      ? 'Complete payment with the details you entered — no account required.'
+                      : "Secure checkout — you'll finish card or bank payment on the next screen (iPay88)."}
                   </p>
                 </div>
 
@@ -859,12 +1079,14 @@ export function LandingCheckoutFlow({
                 </section>
 
                 {flowError ? (
-                  <p style={{ color: 'var(--brand-coral)', margin: 0, fontSize: 14 }}>{flowError}</p>
+                  <p className="checkout-flow-error" role="alert">
+                    {flowError}
+                  </p>
                 ) : null}
               </div>
             ) : null}
 
-            {step === 1 && !user ? (
+            {step === 1 && !user && !guestCheckout ? (
               <div className="checkout-section">
                 <div className="checkout-progress-meta">
                   <span className="eyebrow">Step 2 of 3</span>
@@ -879,19 +1101,22 @@ export function LandingCheckoutFlow({
                   <div className="checkout-card-head">
                     <h3>Customer account</h3>
                   </div>
-                  <p style={{ color: 'var(--muted)', margin: '0 0 16px', fontSize: 14, lineHeight: 1.6 }}>
-                    Use the same email you entered in the previous step after you sign in, or update it on the booking
-                    form.
+                  <p className="checkout-account-copy">
+                    Sign in or create an account to save bookings to your profile — or continue as guest with the
+                    details you already entered.
                   </p>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-                    <Link to="/login" search={{ returnTo: bookReturnTo }} className="btn btn-leaf btn-lg">
+                  <div className="checkout-account-actions">
+                    <Link to="/login" search={{ returnTo: checkoutReturnTo }} className="btn btn-leaf btn-lg">
                       Log in
                     </Link>
-                    <Link to="/register" search={{ returnTo: bookReturnTo }} className="btn btn-ghost btn-lg">
+                    <Link to="/register" search={{ returnTo: checkoutReturnTo }} className="btn btn-ghost btn-lg">
                       Create account
                     </Link>
+                    <button type="button" className="btn btn-ghost btn-lg" onClick={continueAsGuest}>
+                      Continue as guest
+                    </button>
                   </div>
-                  <p style={{ margin: '18px 0 0', fontSize: 13, color: 'var(--muted)' }}>
+                  <p className="checkout-account-footnote">
                     Or continue on the standard booking page (same dates we passed in the link).
                   </p>
                   <Link
@@ -957,10 +1182,6 @@ export function LandingCheckoutFlow({
             </div>
 
             <div className="cs-trip">
-              <div className="cs-trip-duration">
-                <Clock size={13} aria-hidden />
-                <span>{tripDuration}</span>
-              </div>
               <div className="cs-trip-legs">
                 <div className="cs-trip-leg">
                   <span className="cs-trip-lbl">Pickup</span>
@@ -976,6 +1197,10 @@ export function LandingCheckoutFlow({
                     <MapPin size={11} aria-hidden />
                     <span>{pickupLoc}</span>
                   </span>
+                </div>
+                <div className="cs-trip-duration">
+                  <Clock size={13} aria-hidden />
+                  <span>{tripDuration}</span>
                 </div>
                 <div className="cs-trip-leg cs-trip-leg--return">
                   <span className="cs-trip-lbl">Return</span>
@@ -1036,7 +1261,7 @@ export function LandingCheckoutFlow({
             </div>
 
             {step < 2 ? (
-              step === 1 && !user ? (
+              step === 1 && !user && !guestCheckout ? (
                 <button type="button" className="btn btn-ghost btn-lg" onClick={() => setStep(0)}>
                   Back to review
                 </button>
@@ -1048,7 +1273,7 @@ export function LandingCheckoutFlow({
                       : submitting
                         ? 'Creating booking…'
                         : 'Create booking & continue'}
-                    <ArrowRight size={14} />
+                    {submitting ? <LoadingSpinner size={16} aria-hidden /> : <ArrowRight size={14} />}
                   </button>
                   <CheckoutPaymentIcons />
                 </div>

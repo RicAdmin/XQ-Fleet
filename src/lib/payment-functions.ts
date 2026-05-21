@@ -3,6 +3,7 @@ import crypto from 'node:crypto'
 import { createServerFn } from '@tanstack/react-start'
 
 import { getRequestSession } from '#/lib/auth-functions'
+import { publicSitePath } from '#/lib/brand'
 import type { PaymentSettingsRow } from '#/lib/settings-functions'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -140,7 +141,6 @@ export const initiatePayment = createServerFn({ method: 'POST' })
   .inputValidator((input: InitiatePaymentInput) => input)
   .handler(async ({ data }): Promise<InitiatePaymentResult> => {
     const session = await getRequestSession()
-    if (!session) throw new Error('You must be signed in.')
 
     const { db } = await import('#/db')
     const { rentals, cars, customers, payments } = await import('#/db/schema')
@@ -154,34 +154,62 @@ export const initiatePayment = createServerFn({ method: 'POST' })
     const merchantKey = process.env.IPAY88_MERCHANT_KEY
     if (!merchantCode || !merchantKey) throw new Error('Payment gateway credentials are not configured. Set IPAY88_MERCHANT_CODE and IPAY88_MERCHANT_KEY in your environment.')
 
-    // Load rental + customer
-    const [customer] = await db
-      .select({ id: customers.id })
-      .from(customers)
-      .where(eq(customers.authUserId, session.user.id))
-      .limit(1)
-    if (!customer) throw new Error('Customer record not found.')
+    const rentalSelect = {
+      id: rentals.id,
+      carId: rentals.carId,
+      carMake: cars.make,
+      carModel: cars.model,
+      totalAmountSen: rentals.totalAmountSen,
+      status: rentals.status,
+      paymentStatus: rentals.paymentStatus,
+      customerId: rentals.customerId,
+      paymentHoldExpiresAt: rentals.paymentHoldExpiresAt,
+      customerName: customers.fullName,
+      customerEmail: customers.email,
+      customerPhone: customers.phone,
+    }
 
-    const [rental] = await db
-      .select({
-        id: rentals.id,
-        carId: rentals.carId,
-        carMake: cars.make,
-        carModel: cars.model,
-        totalAmountSen: rentals.totalAmountSen,
-        status: rentals.status,
-        paymentStatus: rentals.paymentStatus,
-        customerId: rentals.customerId,
-        paymentHoldExpiresAt: rentals.paymentHoldExpiresAt,
-        customerName: customers.fullName,
-        customerEmail: customers.email,
-        customerPhone: customers.phone,
-      })
-      .from(rentals)
-      .innerJoin(cars, eq(rentals.carId, cars.id))
-      .innerJoin(customers, eq(rentals.customerId, customers.id))
-      .where(and(eq(rentals.id, data.rentalId), eq(rentals.customerId, customer.id)))
-      .limit(1)
+    let rental:
+      | {
+          id: string
+          carId: string
+          carMake: string
+          carModel: string
+          totalAmountSen: number
+          status: string
+          paymentStatus: string
+          customerId: string
+          paymentHoldExpiresAt: Date | null
+          customerName: string | null
+          customerEmail: string | null
+          customerPhone: string | null
+        }
+      | undefined
+
+    if (session) {
+      const [customer] = await db
+        .select({ id: customers.id })
+        .from(customers)
+        .where(eq(customers.authUserId, session.user.id))
+        .limit(1)
+      if (!customer) throw new Error('Customer record not found.')
+
+      ;[rental] = await db
+        .select(rentalSelect)
+        .from(rentals)
+        .innerJoin(cars, eq(rentals.carId, cars.id))
+        .innerJoin(customers, eq(rentals.customerId, customers.id))
+        .where(and(eq(rentals.id, data.rentalId), eq(rentals.customerId, customer.id)))
+        .limit(1)
+    } else {
+      ;[rental] = await db
+        .select(rentalSelect)
+        .from(rentals)
+        .innerJoin(cars, eq(rentals.carId, cars.id))
+        .innerJoin(customers, eq(rentals.customerId, customers.id))
+        .where(eq(rentals.id, data.rentalId))
+        .limit(1)
+    }
 
     if (!rental) throw new Error('Rental not found.')
     if (rental.status !== 'pending') throw new Error('This booking is not awaiting payment.')
@@ -228,7 +256,9 @@ export const initiatePayment = createServerFn({ method: 'POST' })
     const refNo = payment.id.replace(/-/g, '')
     const amountRM = formatAmountRM(chargeSen)
     const currency = 'MYR'
-    const baseUrl = process.env.BETTER_AUTH_URL ?? 'http://localhost:3000'
+    const responsePath = session
+      ? publicSitePath(`/account/bookings/${data.rentalId}?payment=response`)
+      : publicSitePath(`/checkout/confirmed/${data.rentalId}?payment=response`)
 
     const signature = buildRequestSignature(merchantKey, merchantCode, refNo, amountRM, currency)
 
@@ -246,8 +276,8 @@ export const initiatePayment = createServerFn({ method: 'POST' })
       Lang: 'UTF-8',
       SignatureType: 'HMACSHA512',
       Signature: signature,
-      ResponseURL: `${baseUrl}/account/bookings/${data.rentalId}?payment=response`,
-      BackendURL: `${baseUrl}/api/webhooks/ipay88`,
+      ResponseURL: responsePath,
+      BackendURL: publicSitePath('/api/webhooks/ipay88'),
       gatewayUrl: IPAY88_GATEWAY_URL,
     }
 

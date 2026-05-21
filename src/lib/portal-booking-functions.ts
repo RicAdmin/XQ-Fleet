@@ -233,14 +233,106 @@ type CreatePortalBookingInput = {
   fullName: string
   icOrPassport: string
   phone: string
+  email: string
   address?: string
+}
+
+function isValidBookingEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+}
+
+async function upsertPortalCustomer(opts: {
+  session: Awaited<ReturnType<typeof getRequestSession>>
+  fullName: string
+  icOrPassport: string
+  phone: string
+  email: string
+  address?: string
+}): Promise<string> {
+  const { db } = await import('#/db')
+  const { or, eq } = await import('drizzle-orm')
+  const { fullName, icOrPassport, phone, email, address } = opts
+  const addressValue = address?.trim() || null
+
+  if (opts.session) {
+    const authUserId = opts.session.user.id
+    const existingRows = await db
+      .select()
+      .from(customers)
+      .where(or(eq(customers.authUserId, authUserId), eq(customers.icOrPassport, icOrPassport)))
+      .limit(2)
+
+    const existingCustomer =
+      existingRows.find((r) => r.authUserId === authUserId) ?? existingRows[0] ?? null
+
+    if (existingCustomer) {
+      await db
+        .update(customers)
+        .set({
+          authUserId,
+          fullName,
+          icOrPassport,
+          phone,
+          email,
+          address: addressValue,
+          updatedAt: new Date(),
+        })
+        .where(eq(customers.id, existingCustomer.id))
+      return existingCustomer.id
+    }
+
+    const [newCustomer] = await db
+      .insert(customers)
+      .values({
+        authUserId,
+        fullName,
+        icOrPassport,
+        phone,
+        email,
+        address: addressValue,
+      })
+      .returning({ id: customers.id })
+    return newCustomer.id
+  }
+
+  const [existingGuest] = await db
+    .select()
+    .from(customers)
+    .where(eq(customers.icOrPassport, icOrPassport))
+    .limit(1)
+
+  if (existingGuest) {
+    await db
+      .update(customers)
+      .set({
+        fullName,
+        phone,
+        email,
+        address: addressValue,
+        updatedAt: new Date(),
+      })
+      .where(eq(customers.id, existingGuest.id))
+    return existingGuest.id
+  }
+
+  const [newGuest] = await db
+    .insert(customers)
+    .values({
+      authUserId: null,
+      fullName,
+      icOrPassport,
+      phone,
+      email,
+      address: addressValue,
+    })
+    .returning({ id: customers.id })
+  return newGuest.id
 }
 
 export const createPortalBooking = createServerFn({ method: 'POST' })
   .inputValidator((input: CreatePortalBookingInput) => input)
   .handler(async ({ data }): Promise<{ rentalId: string }> => {
     const session = await getRequestSession()
-    if (!session) throw new Error('You must be signed in to book a car.')
 
     const startDate = new Date(data.startDate)
     const endDate = new Date(data.endDate)
@@ -251,9 +343,11 @@ export const createPortalBooking = createServerFn({ method: 'POST' })
     const fullName = data.fullName.trim()
     const icOrPassport = data.icOrPassport.trim()
     const phone = data.phone.trim()
+    const email = data.email.trim()
     if (!fullName) throw new Error('Full name is required.')
     if (!icOrPassport) throw new Error('IC or passport number is required.')
     if (!phone) throw new Error('Phone number is required.')
+    if (!isValidBookingEmail(email)) throw new Error('A valid email is required for your booking confirmation.')
 
     const { db } = await import('#/db')
 
@@ -331,48 +425,14 @@ export const createPortalBooking = createServerFn({ method: 'POST' })
     const subTotalSen = Math.round(pricing.subTotal * 100)
     const totalAmountSen = pricing.finalTotal * 100 // already rounded
 
-    // Upsert customer — check by authUserId first, then icOrPassport
-    const { or } = await import('drizzle-orm')
-    const existingRows = await db
-      .select()
-      .from(customers)
-      .where(or(eq(customers.authUserId, session.user.id), eq(customers.icOrPassport, icOrPassport)))
-      .limit(2)
-
-    // Prefer the row already linked to this auth user
-    const existingCustomer =
-      existingRows.find((r) => r.authUserId === session.user.id) ?? existingRows[0] ?? null
-
-    let customerId: string
-    if (existingCustomer) {
-      customerId = existingCustomer.id
-      // Link authUserId and update profile fields on every booking
-      await db
-        .update(customers)
-        .set({
-          authUserId: session.user.id,
-          fullName,
-          icOrPassport,
-          phone,
-          email: session.user.email,
-          address: data.address?.trim() || null,
-          updatedAt: new Date(),
-        })
-        .where(eq(customers.id, existingCustomer.id))
-    } else {
-      const [newCustomer] = await db
-        .insert(customers)
-        .values({
-          authUserId: session.user.id,
-          fullName,
-          icOrPassport,
-          phone,
-          email: session.user.email,
-          address: data.address?.trim() || null,
-        })
-        .returning({ id: customers.id })
-      customerId = newCustomer.id
-    }
+    const customerId = await upsertPortalCustomer({
+      session,
+      fullName,
+      icOrPassport,
+      phone,
+      email,
+      address: data.address,
+    })
 
     const { getPaymentSettings } = await import('#/lib/settings-functions')
     const paymentConfig = await getPaymentSettings()
@@ -413,7 +473,7 @@ export const createPortalBooking = createServerFn({ method: 'POST' })
         depositAmountSen,
         paidAmountSen: 0,
         paymentHoldExpiresAt: holdExpiry,
-        createdByUserId: session.user.id,
+        createdByUserId: session?.user.id ?? null,
       })
       .returning({ id: rentals.id })
 
@@ -606,6 +666,44 @@ export const getBookingDetail = createServerFn({ method: 'GET' })
       .innerJoin(cars, eq(rentals.carId, cars.id))
       .leftJoin(carPhotos, and(eq(carPhotos.carId, cars.id), eq(carPhotos.isCover, true)))
       .where(and(eq(rentals.id, data.rentalId), eq(rentals.customerId, customer.id)))
+      .limit(1)
+
+    if (!row) return null
+    return { ...row, customerStatus: deriveCustomerStatus(row.rentalStatus, row.paymentStatus) }
+  })
+
+export type GuestBookingSummary = {
+  id: string
+  carMake: string
+  carModel: string
+  carYear: number
+  startDate: Date
+  endDate: Date
+  totalAmountSen: number
+  customerStatus: CustomerFacingStatus
+  paymentStatus: string
+}
+
+export const getGuestBookingSummary = createServerFn({ method: 'GET' })
+  .inputValidator((input: GetBookingDetailInput) => input)
+  .handler(async ({ data }): Promise<GuestBookingSummary | null> => {
+    const { db } = await import('#/db')
+
+    const [row] = await db
+      .select({
+        id: rentals.id,
+        carMake: cars.make,
+        carModel: cars.model,
+        carYear: cars.year,
+        startDate: rentals.startDate,
+        endDate: rentals.endDate,
+        totalAmountSen: rentals.totalAmountSen,
+        rentalStatus: rentals.status,
+        paymentStatus: rentals.paymentStatus,
+      })
+      .from(rentals)
+      .innerJoin(cars, eq(rentals.carId, cars.id))
+      .where(eq(rentals.id, data.rentalId))
       .limit(1)
 
     if (!row) return null

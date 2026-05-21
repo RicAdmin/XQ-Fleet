@@ -85,6 +85,7 @@ export function tripDurationParts(
   const ms = end.getTime() - start.getTime()
   if (ms <= 0) return null
   const totalHours = Math.floor(ms / 3_600_000)
+  if (totalHours < 24) return { days: 1, hours: 0 }
   return { days: Math.floor(totalHours / 24), hours: totalHours % 24 }
 }
 
@@ -98,7 +99,6 @@ export function formatTripDuration(
   const parts = tripDurationParts(pickDate, pickTime, retDate, retTime)
   if (!parts) return '—'
   const { days, hours } = parts
-  if (days === 0 && hours === 0) return '< 1 hr'
   const labels: string[] = []
   if (days > 0) labels.push(`${days} day${days !== 1 ? 's' : ''}`)
   if (hours > 0) labels.push(`${hours} hr${hours !== 1 ? 's' : ''}`)

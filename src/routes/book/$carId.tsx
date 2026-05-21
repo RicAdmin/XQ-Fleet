@@ -24,7 +24,7 @@ export const Route = createFileRoute('/book/$carId')({
         },
       })
     }
-    return { session }
+    return { sessionEmail: session.user.email }
   },
   loader: async ({ params }) => {
     const car = await getPublicCarDetail({ data: { carId: params.carId } })
@@ -76,6 +76,7 @@ function toTimeHms(hhmm: string): string {
 function BookingPage() {
   const navigate = Route.useNavigate()
   const { carId } = Route.useParams()
+  const { sessionEmail } = Route.useRouteContext()
   const { startDate: initStart = '', endDate: initEnd = '' } = Route.useSearch()
   const { car } = Route.useLoaderData()
 
@@ -212,6 +213,7 @@ function BookingPage() {
           fullName,
           icOrPassport,
           phone,
+          email: sessionEmail,
           address,
         },
       })

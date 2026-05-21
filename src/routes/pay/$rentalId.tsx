@@ -1,6 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useEffect } from 'react'
 
+import { getRequestSession } from '#/lib/auth-functions'
 import { initiatePayment } from '#/lib/payment-functions'
 
 export const Route = createFileRoute('/pay/$rentalId')({
@@ -9,12 +10,18 @@ export const Route = createFileRoute('/pay/$rentalId')({
       const result = await initiatePayment({ data: { rentalId: params.rentalId } })
       return { formParams: result.formParams, error: null }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Payment could not be initiated.'
-      // Redirect back to booking with error flag
+      const session = await getRequestSession()
+      if (session) {
+        throw redirect({
+          to: '/account/bookings/$rentalId',
+          params: { rentalId: params.rentalId },
+          search: { payment: 'error' },
+        })
+      }
       throw redirect({
-        to: '/account/bookings/$rentalId',
+        to: '/checkout/confirmed/$rentalId',
         params: { rentalId: params.rentalId },
-        search: { payment: 'error' } as any,
+        search: { payment: 'error' },
       })
     }
   },

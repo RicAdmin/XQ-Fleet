@@ -42,6 +42,8 @@ import { Route as AdminCustomersIndexRouteImport } from './routes/admin/customer
 import { Route as AdminCarsIndexRouteImport } from './routes/admin/cars/index'
 import { Route as AccountBookingsIndexRouteImport } from './routes/account/bookings/index'
 import { Route as InternalInviteTokenRouteImport } from './routes/internal/invite/$token'
+import { Route as CheckoutConfirmedRentalIdRouteImport } from './routes/checkout/confirmed/$rentalId'
+import { Route as BookingConfirmedRentalIdRouteImport } from './routes/booking/confirmed/$rentalId'
 import { Route as AppRentalsRentalIdRouteImport } from './routes/app/rentals/$rentalId'
 import { Route as AppCustomersCustomerIdRouteImport } from './routes/app/customers/$customerId'
 import { Route as ApiWebhooksIpay88RouteImport } from './routes/api/webhooks/ipay88'
@@ -218,6 +220,18 @@ const InternalInviteTokenRoute = InternalInviteTokenRouteImport.update({
   path: '/internal/invite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutConfirmedRentalIdRoute =
+  CheckoutConfirmedRentalIdRouteImport.update({
+    id: '/checkout/confirmed/$rentalId',
+    path: '/checkout/confirmed/$rentalId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const BookingConfirmedRentalIdRoute =
+  BookingConfirmedRentalIdRouteImport.update({
+    id: '/booking/confirmed/$rentalId',
+    path: '/booking/confirmed/$rentalId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AppRentalsRentalIdRoute = AppRentalsRentalIdRouteImport.update({
   id: '/rentals/$rentalId',
   path: '/rentals/$rentalId',
@@ -303,6 +317,8 @@ export interface FileRoutesByFullPath {
   '/api/webhooks/ipay88': typeof ApiWebhooksIpay88Route
   '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
   '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
+  '/booking/confirmed/$rentalId': typeof BookingConfirmedRentalIdRoute
+  '/checkout/confirmed/$rentalId': typeof CheckoutConfirmedRentalIdRoute
   '/internal/invite/$token': typeof InternalInviteTokenRoute
   '/account/bookings/': typeof AccountBookingsIndexRoute
   '/admin/cars/': typeof AdminCarsIndexRoute
@@ -345,6 +361,8 @@ export interface FileRoutesByTo {
   '/api/webhooks/ipay88': typeof ApiWebhooksIpay88Route
   '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
   '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
+  '/booking/confirmed/$rentalId': typeof BookingConfirmedRentalIdRoute
+  '/checkout/confirmed/$rentalId': typeof CheckoutConfirmedRentalIdRoute
   '/internal/invite/$token': typeof InternalInviteTokenRoute
   '/account/bookings': typeof AccountBookingsIndexRoute
   '/admin/cars': typeof AdminCarsIndexRoute
@@ -391,6 +409,8 @@ export interface FileRoutesById {
   '/api/webhooks/ipay88': typeof ApiWebhooksIpay88Route
   '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
   '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
+  '/booking/confirmed/$rentalId': typeof BookingConfirmedRentalIdRoute
+  '/checkout/confirmed/$rentalId': typeof CheckoutConfirmedRentalIdRoute
   '/internal/invite/$token': typeof InternalInviteTokenRoute
   '/account/bookings/': typeof AccountBookingsIndexRoute
   '/admin/cars/': typeof AdminCarsIndexRoute
@@ -438,6 +458,8 @@ export interface FileRouteTypes {
     | '/api/webhooks/ipay88'
     | '/app/customers/$customerId'
     | '/app/rentals/$rentalId'
+    | '/booking/confirmed/$rentalId'
+    | '/checkout/confirmed/$rentalId'
     | '/internal/invite/$token'
     | '/account/bookings/'
     | '/admin/cars/'
@@ -480,6 +502,8 @@ export interface FileRouteTypes {
     | '/api/webhooks/ipay88'
     | '/app/customers/$customerId'
     | '/app/rentals/$rentalId'
+    | '/booking/confirmed/$rentalId'
+    | '/checkout/confirmed/$rentalId'
     | '/internal/invite/$token'
     | '/account/bookings'
     | '/admin/cars'
@@ -525,6 +549,8 @@ export interface FileRouteTypes {
     | '/api/webhooks/ipay88'
     | '/app/customers/$customerId'
     | '/app/rentals/$rentalId'
+    | '/booking/confirmed/$rentalId'
+    | '/checkout/confirmed/$rentalId'
     | '/internal/invite/$token'
     | '/account/bookings/'
     | '/admin/cars/'
@@ -559,6 +585,8 @@ export interface RootRouteChildren {
   PayRentalIdRoute: typeof PayRentalIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiWebhooksIpay88Route: typeof ApiWebhooksIpay88Route
+  BookingConfirmedRentalIdRoute: typeof BookingConfirmedRentalIdRoute
+  CheckoutConfirmedRentalIdRoute: typeof CheckoutConfirmedRentalIdRoute
   InternalInviteTokenRoute: typeof InternalInviteTokenRoute
   ApiDocumentsAgreementRentalIdRoute: typeof ApiDocumentsAgreementRentalIdRoute
   ApiDocumentsInvoiceRentalIdRoute: typeof ApiDocumentsInvoiceRentalIdRoute
@@ -797,6 +825,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InternalInviteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout/confirmed/$rentalId': {
+      id: '/checkout/confirmed/$rentalId'
+      path: '/checkout/confirmed/$rentalId'
+      fullPath: '/checkout/confirmed/$rentalId'
+      preLoaderRoute: typeof CheckoutConfirmedRentalIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/booking/confirmed/$rentalId': {
+      id: '/booking/confirmed/$rentalId'
+      path: '/booking/confirmed/$rentalId'
+      fullPath: '/booking/confirmed/$rentalId'
+      preLoaderRoute: typeof BookingConfirmedRentalIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/rentals/$rentalId': {
       id: '/app/rentals/$rentalId'
       path: '/rentals/$rentalId'
@@ -958,6 +1000,8 @@ const rootRouteChildren: RootRouteChildren = {
   PayRentalIdRoute: PayRentalIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiWebhooksIpay88Route: ApiWebhooksIpay88Route,
+  BookingConfirmedRentalIdRoute: BookingConfirmedRentalIdRoute,
+  CheckoutConfirmedRentalIdRoute: CheckoutConfirmedRentalIdRoute,
   InternalInviteTokenRoute: InternalInviteTokenRoute,
   ApiDocumentsAgreementRentalIdRoute: ApiDocumentsAgreementRentalIdRoute,
   ApiDocumentsInvoiceRentalIdRoute: ApiDocumentsInvoiceRentalIdRoute,

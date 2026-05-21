@@ -8,6 +8,7 @@ import { z } from 'zod'
 
 import { LandingNav, SiteFooter } from '#/components/landing/CxqLandingPage'
 import { LandingCheckoutFlow, type BookingState } from '#/components/landing/LandingCheckoutFlow'
+import { LoadingSpinner } from '#/components/ui/LoadingSpinner'
 import { toLocalYmd } from '#/lib/booking-datetime'
 import {
   bookingHasCompleteTrip,
@@ -53,8 +54,20 @@ export const Route = createFileRoute('/checkout/$carId')({
     if (!car) throw redirect({ to: '/' })
     return { carRow: detailToRow(car) }
   },
+  pendingComponent: CheckoutRoutePending,
   component: CheckoutPage,
 })
+
+function CheckoutRoutePending() {
+  return (
+    <div className="cxq-landing-page">
+      <div className="page page--checkout cxq-route-loading" data-screen-label="Car XQ Checkout">
+        <LoadingSpinner size={32} label="Loading checkout" />
+        <p className="cxq-route-loading-text">Loading checkout…</p>
+      </div>
+    </div>
+  )
+}
 
 function CheckoutPage() {
   const navigate = useNavigate()

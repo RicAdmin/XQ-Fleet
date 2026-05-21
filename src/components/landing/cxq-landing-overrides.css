@@ -43,6 +43,7 @@
   }
   .nav.nav--solid-light .nav-session-pending {
     background: var(--canvas-2) !important;
+    color: var(--muted);
   }
   .nav.nav--solid-light .nav-avatar {
     background: var(--canvas-2);
@@ -75,6 +76,23 @@
     margin-top: 0;
     border-bottom-left-radius: var(--r-xl);
     border-bottom-right-radius: var(--r-xl);
+  }
+
+  .cxq-route-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex: 1;
+    min-height: 50vh;
+    color: var(--muted);
+  }
+  .cxq-route-loading-text {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
   }
 
   .checkout-header a.close-btn {

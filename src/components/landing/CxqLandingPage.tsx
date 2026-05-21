@@ -30,6 +30,7 @@ import {
 } from 'lucide-react'
 
 import BrandLogo from '#/components/BrandLogo'
+import { LoadingSpinner } from '#/components/ui/LoadingSpinner'
 import {
   CarDetailDialog,
   cloneBooking,
@@ -628,10 +629,9 @@ export function LandingNav({
           <Globe size={14} /> EN · MYR
         </span>
         {sessionPending ? (
-          <span
-            className="nav-session-pending"
-            style={{ width: 80, height: 32, display: 'inline-block', borderRadius: 999, background: 'rgba(255,255,255,.12)' }}
-          />
+          <span className="nav-session-pending" aria-label="Loading account">
+            <LoadingSpinner size={16} />
+          </span>
         ) : !user ? (
           <>
             <Link to="/login">Log In</Link>
@@ -712,19 +712,43 @@ function BookingField({
   label,
   value,
   menu,
+  required = false,
+  invalid = false,
+  error,
 }: {
   active: boolean
   onToggle: () => void
   label: ReactNode
   value: ReactNode
   menu: ReactNode | null
+  required?: boolean
+  invalid?: boolean
+  error?: string | null
 }) {
   return (
-    <div className={'bk-field' + (active ? ' active' : '')} style={{ position: 'relative' }}>
-      <button type="button" className="bk-field-trigger" onClick={onToggle}>
-        <span className="lbl">{label}</span>
+    <div
+      className={
+        'bk-field' + (active ? ' active' : '') + (invalid ? ' bk-field--invalid' : '')
+      }
+      style={{ position: 'relative' }}
+    >
+      <button
+        type="button"
+        className="bk-field-trigger"
+        onClick={onToggle}
+        aria-invalid={invalid || undefined}
+      >
+        <span className="lbl">
+          {label}
+          {required ? <span className="field-required-mark" aria-hidden="true"> *</span> : null}
+        </span>
         <span className="val">{value}</span>
       </button>
+      {error ? (
+        <span className="bk-field-error" role="alert">
+          {error}
+        </span>
+      ) : null}
       {menu}
     </div>
   )
@@ -789,11 +813,14 @@ function BookingDock({
     booking.retTime,
   )
   const totalPax = booking.adults + booking.children
+  const showFieldWarnings = Boolean(prompt)
+  const missingPick = !booking.pickDate || !booking.pickTime.trim()
+  const missingRet = !booking.retDate || !booking.retTime.trim()
 
   return (
     <div id="booking-dock" className="booking-dock" ref={rootRef}>
       {prompt ? (
-        <p className="bk-prompt" role="status">
+        <p className="bk-prompt" role="alert">
           {prompt}
         </p>
       ) : null}
@@ -875,6 +902,9 @@ function BookingDock({
           active={open === 'pick'}
           onToggle={() => openField(open === 'pick' ? null : 'pick')}
           label="Pickup"
+          required
+          invalid={showFieldWarnings && missingPick}
+          error={showFieldWarnings && missingPick ? 'Select pickup date and time.' : null}
           value={
             <>
               <Calendar size={14} className="icon" />
@@ -928,6 +958,9 @@ function BookingDock({
             openField(open === 'ret' ? null : 'ret')
           }}
           label="Return"
+          required
+          invalid={showFieldWarnings && missingRet}
+          error={showFieldWarnings && missingRet ? 'Select return date and time.' : null}
           value={
             <>
               <Calendar size={14} className="icon" />
@@ -1016,7 +1049,16 @@ function BookingDock({
             datesReady ? undefined : 'Choose pickup and return dates and times first'
           }
         >
-          <Search size={15} /> {searching ? 'Searching…' : 'Search cars'}
+          {searching ? (
+            <>
+              <LoadingSpinner size={15} aria-hidden />
+              Searching…
+            </>
+          ) : (
+            <>
+              <Search size={15} /> Search cars
+            </>
+          )}
         </button>
       </div>
     </div>
