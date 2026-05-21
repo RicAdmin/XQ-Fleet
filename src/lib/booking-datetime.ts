@@ -38,6 +38,18 @@ export function parseLocalYmd(s: string | null | undefined): Date | null {
   return Number.isNaN(d.getTime()) ? null : d
 }
 
+/** Parse and validate a booking date range (YYYY-MM-DD, local calendar days). */
+export function parseBookingDateRange(
+  startDate: string,
+  endDate: string,
+): { startDate: Date; endDate: Date } {
+  const start = parseLocalYmd(startDate)
+  const end = parseLocalYmd(endDate)
+  if (!start || !end) throw new Error('Invalid dates provided.')
+  if (end <= start) throw new Error('Return date must be after pickup date.')
+  return { startDate: start, endDate: end }
+}
+
 /** Calendar date at local midnight, plus N days. */
 export function addCalendarDays(date: Date, days: number): Date {
   const d = new Date(date)

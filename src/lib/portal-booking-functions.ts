@@ -1,9 +1,10 @@
 import { createServerFn } from '@tanstack/react-start'
-import { and, desc, eq, gt, inArray, lt } from 'drizzle-orm'
+import { and, desc, eq, gt, inArray, lt, notExists } from 'drizzle-orm'
 
 import { cars, customers, payments, rentals, seasonCalendar, promos } from '#/db/schema'
 import type { CarCategory, RentalStatus } from '#/db/schema'
 import { getRequestSession } from '#/lib/auth-functions'
+import { parseBookingDateRange } from '#/lib/booking-datetime'
 import { HOLD_MINUTES } from '#/lib/payment-functions'
 import {
   computeFinalTotal,
@@ -190,11 +191,13 @@ export const previewBookingPrice = createServerFn({ method: 'GET' })
     const calendar = await loadCalendar()
     const promoList = await loadPromos(data.couponCode)
 
+    const { startDate, endDate } = parseBookingDateRange(data.startDate, data.endDate)
+
     const result = computeFinalTotal(
       carToPricing(car),
-      new Date(data.startDate),
+      startDate,
       data.pickUpTime,
-      new Date(data.endDate),
+      endDate,
       data.returnTime,
       data.pickUpLocation,
       data.returnLocation,
@@ -239,6 +242,64 @@ type CreatePortalBookingInput = {
 
 function isValidBookingEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+}
+
+async function findCustomerIdForBooking(
+  db: Awaited<typeof import('#/db')>['db'],
+  session: Awaited<ReturnType<typeof getRequestSession>>,
+  email: string,
+): Promise<string | null> {
+  if (session) {
+    const [authCustomer] = await db
+      .select({ id: customers.id })
+      .from(customers)
+      .where(eq(customers.authUserId, session.user.id))
+      .limit(1)
+    if (authCustomer) return authCustomer.id
+  }
+
+  const [guestCustomer] = await db
+    .select({ id: customers.id })
+    .from(customers)
+    .where(eq(customers.email, email))
+    .limit(1)
+  return guestCustomer?.id ?? null
+}
+
+/** Cancel unresolved pending holds for this customer on this car so checkout can retry. */
+async function releaseCustomerPendingHolds(
+  db: Awaited<typeof import('#/db')>['db'],
+  customerId: string,
+  carId: string,
+): Promise<void> {
+  const stale = await db
+    .select({ id: rentals.id })
+    .from(rentals)
+    .where(
+      and(
+        eq(rentals.customerId, customerId),
+        eq(rentals.carId, carId),
+        eq(rentals.status, 'pending'),
+        notExists(
+          db
+            .select({ id: payments.id })
+            .from(payments)
+            .where(and(eq(payments.rentalId, rentals.id), eq(payments.status, 'successful'))),
+        ),
+      ),
+    )
+
+  if (stale.length === 0) return
+
+  await db
+    .update(rentals)
+    .set({ status: 'cancelled', updatedAt: new Date() })
+    .where(inArray(rentals.id, stale.map((row) => row.id)))
+
+  await db
+    .update(cars)
+    .set({ status: 'available', updatedAt: new Date() })
+    .where(and(eq(cars.id, carId), eq(cars.status, 'payment-pending')))
 }
 
 async function upsertPortalCustomer(opts: {
@@ -334,11 +395,7 @@ export const createPortalBooking = createServerFn({ method: 'POST' })
   .handler(async ({ data }): Promise<{ rentalId: string }> => {
     const session = await getRequestSession()
 
-    const startDate = new Date(data.startDate)
-    const endDate = new Date(data.endDate)
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()))
-      throw new Error('Invalid dates provided.')
-    if (endDate <= startDate) throw new Error('Return date must be after pickup date.')
+    const { startDate, endDate } = parseBookingDateRange(data.startDate, data.endDate)
 
     const fullName = data.fullName.trim()
     const icOrPassport = data.icOrPassport.trim()
@@ -353,6 +410,11 @@ export const createPortalBooking = createServerFn({ method: 'POST' })
 
     const { expirePaymentHolds } = await import('#/lib/payment-functions')
     await expirePaymentHolds()
+
+    const existingCustomerId = await findCustomerIdForBooking(db, session, email)
+    if (existingCustomerId) {
+      await releaseCustomerPendingHolds(db, existingCustomerId, data.carId)
+    }
 
     // Overlap check
     const overlap = await db

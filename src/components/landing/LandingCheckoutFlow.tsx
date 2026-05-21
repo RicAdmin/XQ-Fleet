@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useId, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useId, useState, type AnimationEvent, type ReactNode } from 'react'
 
 import { Link, useNavigate } from '@tanstack/react-router'
 import {
@@ -7,13 +7,8 @@ import {
   Check,
   Clock,
   Cog,
-  Globe,
-  Key,
   MapPin,
   Phone,
-  Shield,
-  Sparkles,
-  Wallet,
 } from 'lucide-react'
 
 import { LoadingSpinner } from '#/components/ui/LoadingSpinner'
@@ -26,6 +21,13 @@ import {
   tripExtraHours,
 } from '#/lib/booking-datetime'
 import { heuristicLuggageFit } from '#/lib/fleet-luggage-fit'
+import {
+  COUNTRY_OPTIONS,
+  DEFAULT_COUNTRY_CODE,
+  getCountryName,
+  isValidCountryCode,
+  normalizeCountryCode,
+} from '#/lib/countries'
 import type { PublicCarRow } from '#/lib/portal-functions'
 
 function toPricingLocation(label: string): string {
@@ -71,26 +73,26 @@ type SessionUserLite = { name?: string | null; email: string }
 
 type AddonKey = 'child' | 'second'
 
-type PayMethod = 'card' | 'fpx' | 'grab' | 'later'
-
-const CHECKOUT_COUNTRIES = [
-  'Malaysia',
-  'Singapore',
-  'Thailand',
-  'Indonesia',
-  'Philippines',
-  'United States',
-  'United Kingdom',
-  'Australia',
-  'Other',
-] as const
-
 type BuyerAddress = {
   addressLine1: string
   addressLine2: string
   city: string
   stateProvince: string
   postalCode: string
+  country: string
+}
+
+type CheckoutBuyer = BuyerAddress & {
+  name: string
+  email: string
+  phone: string
+}
+
+type CheckoutDriver = {
+  name: string
+  email: string
+  phone: string
+  license: string
   country: string
 }
 
@@ -101,7 +103,7 @@ function formatInternationalAddress(address: BuyerAddress): string {
     address.addressLine1.trim(),
     address.addressLine2.trim(),
     region,
-    address.country.trim(),
+    getCountryName(address.country),
   ]
     .filter(Boolean)
     .join('\n')
@@ -120,6 +122,8 @@ function validateBuyerAddress(address: BuyerAddress): Record<string, string> {
   }
   if (!address.country.trim()) {
     e.buyerCountry = 'Select country.'
+  } else if (!isValidCountryCode(address.country)) {
+    e.buyerCountry = 'Select a valid country.'
   }
   return e
 }
@@ -140,12 +144,36 @@ function FieldLabel({ children, optional = false }: { children: ReactNode; optio
   )
 }
 
+const CHECKOUT_AUTOFILL_ANIMATION = 'cxq-autofill-start'
+
+function syncAutofillValue(
+  event: AnimationEvent<HTMLInputElement | HTMLSelectElement>,
+  apply: (value: string) => void,
+) {
+  if (event.animationName === CHECKOUT_AUTOFILL_ANIMATION) {
+    apply(event.currentTarget.value)
+  }
+}
+
+type CheckoutFieldInputProps = {
+  id: string
+  name: string
+  autoComplete?: string
+  onAutofill?: (event: AnimationEvent<HTMLInputElement | HTMLSelectElement>) => void
+  'aria-invalid'?: boolean
+  'aria-describedby'?: string
+  'aria-required'?: boolean
+}
+
 function CheckoutField({
   label,
   optional = false,
   error,
   showError = false,
   className,
+  inputId: inputIdProp,
+  inputName,
+  autoComplete,
   children,
 }: {
   label: ReactNode
@@ -153,33 +181,40 @@ function CheckoutField({
   error?: string
   showError?: boolean
   className?: string
-  children: (aria: {
-    'aria-invalid'?: boolean
-    'aria-describedby'?: string
-    'aria-required'?: boolean
-  }) => ReactNode
+  inputId?: string
+  inputName?: string
+  autoComplete?: string
+  children: (field: CheckoutFieldInputProps) => ReactNode
 }) {
-  const errorId = useId()
+  const generatedId = useId()
+  const inputId = inputIdProp ?? generatedId.replace(/:/g, '')
   const invalid = Boolean(showError && error)
 
+  const fieldProps: CheckoutFieldInputProps = {
+    id: inputId,
+    name: inputName ?? inputId,
+    autoComplete,
+    'aria-invalid': invalid ? true : undefined,
+    'aria-describedby': invalid ? `${inputId}-error` : undefined,
+    'aria-required': optional ? undefined : true,
+  }
+
   return (
-    <label
+    <div
       className={['auth-field', invalid ? 'auth-field--invalid' : '', className]
         .filter(Boolean)
         .join(' ')}
     >
-      <FieldLabel optional={optional}>{label}</FieldLabel>
-      {children({
-        'aria-invalid': invalid ? true : undefined,
-        'aria-describedby': invalid ? errorId : undefined,
-        'aria-required': optional ? undefined : true,
-      })}
+      <label htmlFor={inputId}>
+        <FieldLabel optional={optional}>{label}</FieldLabel>
+      </label>
+      {children(fieldProps)}
       {invalid ? (
-        <em id={errorId} className="auth-field-error" role="alert">
+        <em id={`${inputId}-error`} className="auth-field-error" role="alert">
           {error}
         </em>
       ) : null}
-    </label>
+    </div>
   )
 }
 
@@ -204,19 +239,6 @@ const ADDONS: Array<{
     price: 20,
     per: 'one time',
   },
-]
-
-const PAY_METHODS: Array<{
-  id: PayMethod
-  title: string
-  desc: string
-  icon: typeof Wallet
-  disabled?: boolean
-}> = [
-  { id: 'card', title: 'Credit / Debit card', desc: 'Visa, Mastercard, AMEX — via secure gateway', icon: Wallet },
-  { id: 'fpx', title: 'Online banking (FPX)', desc: 'Maybank, CIMB, RHB, Public Bank, +14', icon: Globe },
-  { id: 'grab', title: 'GrabPay', desc: 'Coming soon', icon: Sparkles, disabled: true },
-  { id: 'later', title: 'Pay at pickup', desc: 'Not available for online holds yet', icon: Key, disabled: true },
 ]
 
 const IPAY88_PAYMENTS = [
@@ -273,53 +295,9 @@ function validateDriverPhone(value: string): string | null {
   return null
 }
 
-function PayMethodPicker({
-  payMethod,
-  onChange,
-  name,
-  compact = false,
-}: {
-  payMethod: PayMethod
-  onChange: (id: PayMethod) => void
-  name: string
-  compact?: boolean
-}) {
-  return (
-    <div className={'pay-methods' + (compact ? ' pay-methods--compact' : '')}>
-      {PAY_METHODS.map((m) => {
-        const Icon = m.icon
-        return (
-          <label
-            key={m.id}
-            className={'pay-method' + (payMethod === m.id ? ' on' : '')}
-            style={
-              m.disabled
-                ? { cursor: 'not-allowed', opacity: 0.55, pointerEvents: 'none' as const }
-                : undefined
-            }
-          >
-            <input
-              type="radio"
-              name={name}
-              disabled={m.disabled}
-              checked={payMethod === m.id}
-              onChange={() => {
-                if (!m.disabled) onChange(m.id)
-              }}
-            />
-            <span className="pay-method-radio" />
-            <span className="pay-method-icon">
-              <Icon size={compact ? 14 : 16} />
-            </span>
-            <span className="pay-method-body">
-              <strong>{m.title}</strong>
-              <span>{m.desc}</span>
-            </span>
-          </label>
-        )
-      })}
-    </div>
-  )
+function normalizePhoneInput(value: string): string {
+  if (!value || value.startsWith('+')) return value
+  return `+${value}`
 }
 
 type LandingCheckoutFlowProps = {
@@ -350,7 +328,7 @@ export function LandingCheckoutFlow({
     child: false,
     second: false,
   })
-  const [buyer, setBuyer] = useState({
+  const [buyer, setBuyer] = useState<CheckoutBuyer>({
     name: user?.name ?? '',
     email: user?.email ?? '',
     phone: '',
@@ -359,17 +337,16 @@ export function LandingCheckoutFlow({
     city: '',
     stateProvince: '',
     postalCode: '',
-    country: 'Malaysia',
+    country: DEFAULT_COUNTRY_CODE,
   })
-  const [driver, setDriver] = useState({
+  const [driver, setDriver] = useState<CheckoutDriver>({
     name: user?.name ?? '',
     email: user?.email ?? '',
     phone: '',
     license: '',
-    country: 'Malaysia',
+    country: DEFAULT_COUNTRY_CODE,
   })
   const [alsoAsDriver, setAlsoAsDriver] = useState(true)
-  const [payMethod, setPayMethod] = useState<PayMethod>('card')
   const [errs, setErrs] = useState<Record<string, string>>({})
   const [showFieldErrors, setShowFieldErrors] = useState(false)
   const [touched, setTouched] = useState<{
@@ -378,7 +355,6 @@ export function LandingCheckoutFlow({
     driverEmail?: boolean
     driverPhone?: boolean
   }>({})
-  const [rentalId, setRentalId] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [flowError, setFlowError] = useState<string | null>(null)
 
@@ -517,10 +493,11 @@ export function LandingCheckoutFlow({
         | 'buyerPhone'
         | 'driverEmail'
         | 'driverPhone'
+      const nextValue = field === 'phone' ? normalizePhoneInput(value) : value
       const setter = scope === 'buyer' ? setBuyer : setDriver
-      setter((prev) => ({ ...prev, [field]: value }))
+      setter((prev) => ({ ...prev, [field]: nextValue }))
       if (touched[key]) {
-        const msg = field === 'email' ? validateDriverEmail(value) : validateDriverPhone(value)
+        const msg = field === 'email' ? validateDriverEmail(nextValue) : validateDriverPhone(nextValue)
         setErrs((prev) => {
           const next = { ...prev }
           if (msg) next[key] = msg
@@ -564,15 +541,13 @@ export function LandingCheckoutFlow({
           address: formatInternationalAddress(buyer) || undefined,
         },
       })
-      setRentalId(id)
-      setStep(2)
-      window.scrollTo({ top: 0, behavior: 'instant' })
+      await navigate({ to: '/pay/$rentalId', params: { rentalId: id } })
     } catch (err) {
       setFlowError(err instanceof Error ? err.message : 'Could not create booking.')
     } finally {
       setSubmitting(false)
     }
-  }, [car.id, startYmd, endYmd, buyer, driver, alsoAsDriver, booking, addons])
+  }, [car.id, startYmd, endYmd, buyer, driver, alsoAsDriver, booking, addons, navigate])
 
   const tripSearch = useMemo(() => checkoutSearchFromBooking(booking), [booking])
   const checkoutReturnTo = useMemo(() => {
@@ -600,17 +575,9 @@ export function LandingCheckoutFlow({
     }
     if (step === 1) {
       if (!user && !guestCheckout) return
-      if (payMethod === 'later' || payMethod === 'grab') {
-        setFlowError('Choose card or FPX to continue.')
-        return
-      }
       await createBooking()
-      return
     }
-    if (step === 2 && rentalId) {
-      await navigate({ to: '/pay/$rentalId', params: { rentalId } })
-    }
-  }, [step, validateReview, user, guestCheckout, payMethod, createBooking, rentalId, navigate])
+  }, [step, validateReview, user, guestCheckout, createBooking])
 
   const continueAsGuest = useCallback(() => {
     setFlowError(null)
@@ -625,13 +592,13 @@ export function LandingCheckoutFlow({
           <ArrowLeft size={16} />
         </Link>
         <div className="checkout-stepbar">
-          {(['Review', 'Payment', 'Confirmation'] as const).map((label, i) => (
+          {(['Review', 'Payment'] as const).map((label, i) => (
             <div key={label} className={'checkout-step' + (step === i ? ' on' : step > i ? ' done' : '')}>
               <span className="checkout-step-num">
                 {step > i ? <Check size={12} /> : String(i + 1).padStart(2, '0')}
               </span>
               <span>{label}</span>
-              {i < 2 ? <span className="checkout-step-line" /> : null}
+              {i < 1 ? <span className="checkout-step-line" /> : null}
             </div>
           ))}
         </div>
@@ -645,7 +612,7 @@ export function LandingCheckoutFlow({
             {step === 0 ? (
               <div className="checkout-section">
                 <div className="checkout-progress-meta">
-                  <span className="eyebrow">Step 1 of 3</span>
+                  <span className="eyebrow">Step 1 of 2</span>
                   <h2 className="h-section" style={{ marginTop: 4 }}>
                     Review your rental.
                   </h2>
@@ -700,15 +667,24 @@ export function LandingCheckoutFlow({
                       </span>
                     </div>
                   ) : null}
-                  <div className="form-grid">
+                  <form
+                    className="form-grid"
+                    autoComplete="on"
+                    noValidate
+                    onSubmit={(event) => event.preventDefault()}
+                  >
                     <CheckoutField
                       label="Full name"
+                      inputId="checkout-buyer-name"
+                      inputName="name"
+                      autoComplete="name"
                       error={errs.buyerName}
                       showError={shouldShowError('buyerName')}
                     >
-                      {(aria) => (
+                      {(field) => (
                         <input
-                          {...aria}
+                          {...field}
+                          type="text"
                           value={buyer.name}
                           onChange={(e) => {
                             const v = e.target.value
@@ -720,42 +696,66 @@ export function LandingCheckoutFlow({
                               )
                             }
                           }}
+                          onAnimationStart={(event) =>
+                            syncAutofillValue(event, (value) => {
+                              setBuyer((b) => ({ ...b, name: value }))
+                              if (showFieldErrors) {
+                                patchFieldError(
+                                  'buyerName',
+                                  value.trim() ? null : 'Please enter the name for this booking.',
+                                )
+                              }
+                            })
+                          }
                           placeholder="John Tan"
-                          autoComplete="name"
                         />
                       )}
                     </CheckoutField>
                     <CheckoutField
                       label="Email"
+                      inputId="checkout-buyer-email"
+                      inputName="email"
+                      autoComplete="email"
                       error={errs.buyerEmail}
                       showError={shouldShowError('buyerEmail')}
                     >
-                      {(aria) => (
+                      {(field) => (
                         <input
-                          {...aria}
+                          {...field}
                           type="email"
                           value={buyer.email}
                           onChange={(e) => updateContactField('buyer', 'email', e.target.value)}
                           onBlur={(e) => touchValidateField('buyer', 'email', e.target.value)}
+                          onAnimationStart={(event) =>
+                            syncAutofillValue(event, (value) => {
+                              updateContactField('buyer', 'email', value)
+                            })
+                          }
                           placeholder="john@example.com"
-                          autoComplete="email"
                         />
                       )}
                     </CheckoutField>
                     <CheckoutField
                       label="Mobile number"
+                      inputId="checkout-buyer-tel"
+                      inputName="tel"
+                      autoComplete="tel"
                       error={errs.buyerPhone}
                       showError={shouldShowError('buyerPhone')}
                     >
-                      {(aria) => (
+                      {(field) => (
                         <input
-                          {...aria}
+                          {...field}
                           type="tel"
                           value={buyer.phone}
                           onChange={(e) => updateContactField('buyer', 'phone', e.target.value)}
                           onBlur={(e) => touchValidateField('buyer', 'phone', e.target.value)}
+                          onAnimationStart={(event) =>
+                            syncAutofillValue(event, (value) => {
+                              updateContactField('buyer', 'phone', value)
+                            })
+                          }
                           placeholder="+60 12 345 6789"
-                          autoComplete="tel"
                         />
                       )}
                     </CheckoutField>
@@ -763,13 +763,17 @@ export function LandingCheckoutFlow({
                     <p className="checkout-field-group-label form-grid-span-full">Billing address</p>
                     <CheckoutField
                       label="Address line 1"
+                      inputId="checkout-buyer-address-line1"
+                      inputName="address-line1"
+                      autoComplete="billing address-line1"
                       error={errs.buyerAddressLine1}
                       showError={shouldShowError('buyerAddressLine1')}
                       className="form-grid-span-full"
                     >
-                      {(aria) => (
+                      {(field) => (
                         <input
-                          {...aria}
+                          {...field}
+                          type="text"
                           value={buyer.addressLine1}
                           onChange={(e) => {
                             const v = e.target.value
@@ -781,30 +785,56 @@ export function LandingCheckoutFlow({
                               )
                             }
                           }}
+                          onAnimationStart={(event) =>
+                            syncAutofillValue(event, (value) => {
+                              setBuyer((b) => ({ ...b, addressLine1: value }))
+                              if (showFieldErrors) {
+                                patchFieldError(
+                                  'buyerAddressLine1',
+                                  value.trim() ? null : 'Enter street address, P.O. box, or company name.',
+                                )
+                              }
+                            })
+                          }
                           placeholder="Street address, P.O. box, company name"
-                          autoComplete="address-line1"
                         />
                       )}
                     </CheckoutField>
-                    <CheckoutField label="Address line 2" optional className="form-grid-span-full">
-                      {(aria) => (
+                    <CheckoutField
+                      label="Address line 2"
+                      optional
+                      inputId="checkout-buyer-address-line2"
+                      inputName="address-line2"
+                      autoComplete="billing address-line2"
+                      className="form-grid-span-full"
+                    >
+                      {(field) => (
                         <input
-                          {...aria}
+                          {...field}
+                          type="text"
                           value={buyer.addressLine2}
                           onChange={(e) => setBuyer((b) => ({ ...b, addressLine2: e.target.value }))}
+                          onAnimationStart={(event) =>
+                            syncAutofillValue(event, (value) => {
+                              setBuyer((b) => ({ ...b, addressLine2: value }))
+                            })
+                          }
                           placeholder="Apartment, suite, unit, building, floor"
-                          autoComplete="address-line2"
                         />
                       )}
                     </CheckoutField>
                     <CheckoutField
                       label="City / Town"
+                      inputId="checkout-buyer-city"
+                      inputName="city"
+                      autoComplete="billing address-level2"
                       error={errs.buyerCity}
                       showError={shouldShowError('buyerCity')}
                     >
-                      {(aria) => (
+                      {(field) => (
                         <input
-                          {...aria}
+                          {...field}
+                          type="text"
                           value={buyer.city}
                           onChange={(e) => {
                             const v = e.target.value
@@ -813,30 +843,53 @@ export function LandingCheckoutFlow({
                               patchFieldError('buyerCity', v.trim() ? null : 'Enter city or town.')
                             }
                           }}
+                          onAnimationStart={(event) =>
+                            syncAutofillValue(event, (value) => {
+                              setBuyer((b) => ({ ...b, city: value }))
+                              if (showFieldErrors) {
+                                patchFieldError('buyerCity', value.trim() ? null : 'Enter city or town.')
+                              }
+                            })
+                          }
                           placeholder="Kuah"
-                          autoComplete="address-level2"
                         />
                       )}
                     </CheckoutField>
-                    <CheckoutField label="State / Province / Region" optional>
-                      {(aria) => (
+                    <CheckoutField
+                      label="State / Province / Region"
+                      optional
+                      inputId="checkout-buyer-state"
+                      inputName="state"
+                      autoComplete="billing address-level1"
+                    >
+                      {(field) => (
                         <input
-                          {...aria}
+                          {...field}
+                          type="text"
                           value={buyer.stateProvince}
                           onChange={(e) => setBuyer((b) => ({ ...b, stateProvince: e.target.value }))}
+                          onAnimationStart={(event) =>
+                            syncAutofillValue(event, (value) => {
+                              setBuyer((b) => ({ ...b, stateProvince: value }))
+                            })
+                          }
                           placeholder="Kedah"
-                          autoComplete="address-level1"
                         />
                       )}
                     </CheckoutField>
                     <CheckoutField
                       label="Postal / ZIP code"
+                      inputId="checkout-buyer-postal-code"
+                      inputName="postal-code"
+                      autoComplete="billing postal-code"
                       error={errs.buyerPostalCode}
                       showError={shouldShowError('buyerPostalCode')}
                     >
-                      {(aria) => (
+                      {(field) => (
                         <input
-                          {...aria}
+                          {...field}
+                          type="text"
+                          inputMode="numeric"
                           value={buyer.postalCode}
                           onChange={(e) => {
                             const v = e.target.value
@@ -848,32 +901,67 @@ export function LandingCheckoutFlow({
                               )
                             }
                           }}
+                          onAnimationStart={(event) =>
+                            syncAutofillValue(event, (value) => {
+                              setBuyer((b) => ({ ...b, postalCode: value }))
+                              if (showFieldErrors) {
+                                patchFieldError(
+                                  'buyerPostalCode',
+                                  value.trim() ? null : 'Enter postal or ZIP code.',
+                                )
+                              }
+                            })
+                          }
                           placeholder="07000"
-                          autoComplete="postal-code"
                         />
                       )}
                     </CheckoutField>
                     <CheckoutField
                       label="Country"
+                      inputId="checkout-buyer-country"
+                      inputName="country"
+                      autoComplete="billing country"
                       error={errs.buyerCountry}
                       showError={shouldShowError('buyerCountry')}
                     >
-                      {(aria) => (
+                      {(field) => (
                         <select
-                          {...aria}
+                          {...field}
                           value={buyer.country}
                           onChange={(e) => {
-                            const v = e.target.value
+                            const v = normalizeCountryCode(e.target.value)
                             setBuyer((b) => ({ ...b, country: v }))
                             if (showFieldErrors) {
-                              patchFieldError('buyerCountry', v.trim() ? null : 'Select country.')
+                              patchFieldError(
+                                'buyerCountry',
+                                !v.trim()
+                                  ? 'Select country.'
+                                  : isValidCountryCode(v)
+                                    ? null
+                                    : 'Select a valid country.',
+                              )
                             }
                           }}
-                          autoComplete="country-name"
+                          onAnimationStart={(event) =>
+                            syncAutofillValue(event, (value) => {
+                              const v = normalizeCountryCode(value)
+                              setBuyer((b) => ({ ...b, country: v }))
+                              if (showFieldErrors) {
+                                patchFieldError(
+                                  'buyerCountry',
+                                  !v.trim()
+                                    ? 'Select country.'
+                                    : isValidCountryCode(v)
+                                      ? null
+                                      : 'Select a valid country.',
+                                )
+                              }
+                            })
+                          }
                         >
-                          {CHECKOUT_COUNTRIES.map((o) => (
-                            <option key={o} value={o}>
-                              {o}
+                          {COUNTRY_OPTIONS.map(({ code, name }) => (
+                            <option key={code} value={code}>
+                              {name}
                             </option>
                           ))}
                         </select>
@@ -908,7 +996,7 @@ export function LandingCheckoutFlow({
                         </span>
                       </span>
                     </label>
-                  </div>
+                  </form>
                 </section>
 
                 <section className="checkout-card">
@@ -925,12 +1013,16 @@ export function LandingCheckoutFlow({
                       <>
                         <CheckoutField
                           label="Full name"
+                          inputId="checkout-driver-name"
+                          inputName="driver-name"
+                          autoComplete="off"
                           error={errs.driverName}
                           showError={shouldShowError('driverName')}
                         >
-                          {(aria) => (
+                          {(field) => (
                             <input
-                              {...aria}
+                              {...field}
+                              type="text"
                               value={driver.name}
                               onChange={(e) => {
                                 const v = e.target.value
@@ -945,41 +1037,44 @@ export function LandingCheckoutFlow({
                                 }
                               }}
                               placeholder="Driver full name"
-                              autoComplete="off"
                             />
                           )}
                         </CheckoutField>
                         <CheckoutField
                           label="Email"
+                          inputId="checkout-driver-email"
+                          inputName="driver-email"
+                          autoComplete="off"
                           error={errs.driverEmail}
                           showError={shouldShowError('driverEmail')}
                         >
-                          {(aria) => (
+                          {(field) => (
                             <input
-                              {...aria}
+                              {...field}
                               type="email"
                               value={driver.email}
                               onChange={(e) => updateContactField('driver', 'email', e.target.value)}
                               onBlur={(e) => touchValidateField('driver', 'email', e.target.value)}
                               placeholder="driver@example.com"
-                              autoComplete="off"
                             />
                           )}
                         </CheckoutField>
                         <CheckoutField
                           label="Mobile number"
+                          inputId="checkout-driver-tel"
+                          inputName="driver-tel"
+                          autoComplete="off"
                           error={errs.driverPhone}
                           showError={shouldShowError('driverPhone')}
                         >
-                          {(aria) => (
+                          {(field) => (
                             <input
-                              {...aria}
+                              {...field}
                               type="tel"
                               value={driver.phone}
                               onChange={(e) => updateContactField('driver', 'phone', e.target.value)}
                               onBlur={(e) => touchValidateField('driver', 'phone', e.target.value)}
                               placeholder="+60 12 345 6789"
-                              autoComplete="off"
                             />
                           )}
                         </CheckoutField>
@@ -991,50 +1086,59 @@ export function LandingCheckoutFlow({
                         {buyer.phone ? ` · ${buyer.phone}` : ''}
                       </p>
                     )}
-                    <CheckoutField
-                      label="IC / Passport / License no."
-                      error={errs.driverLicense}
-                      showError={shouldShowError('driverLicense')}
-                      className={alsoAsDriver ? 'form-grid-span-full' : undefined}
-                    >
-                      {(aria) => (
-                        <input
-                          {...aria}
-                          value={driver.license}
-                          onChange={(e) => {
-                            const v = e.target.value
-                            setDriver((d) => ({ ...d, license: v }))
-                            if (showFieldErrors) {
-                              patchFieldError(
-                                'driverLicense',
-                                v.trim()
-                                  ? null
-                                  : 'Please enter the driver’s IC, passport, or license number.',
-                              )
+                    <div className="driver-id-row form-grid-span-full">
+                      <CheckoutField
+                        label="IC / Passport / License no."
+                        inputId="checkout-driver-license"
+                        inputName="driver-license"
+                        autoComplete="off"
+                        error={errs.driverLicense}
+                        showError={shouldShowError('driverLicense')}
+                      >
+                        {(field) => (
+                          <input
+                            {...field}
+                            type="text"
+                            value={driver.license}
+                            onChange={(e) => {
+                              const v = e.target.value
+                              setDriver((d) => ({ ...d, license: v }))
+                              if (showFieldErrors) {
+                                patchFieldError(
+                                  'driverLicense',
+                                  v.trim()
+                                    ? null
+                                    : 'Please enter the driver’s IC, passport, or license number.',
+                                )
+                              }
+                            }}
+                            placeholder="MyKad / IDP / DL no."
+                          />
+                        )}
+                      </CheckoutField>
+                      <CheckoutField
+                        label="Issuing country"
+                        inputId="checkout-driver-country"
+                        inputName="driver-country"
+                        autoComplete="off"
+                      >
+                        {(field) => (
+                          <select
+                            {...field}
+                            value={driver.country}
+                            onChange={(e) =>
+                              setDriver((d) => ({ ...d, country: normalizeCountryCode(e.target.value) }))
                             }
-                          }}
-                          placeholder="MyKad / IDP / DL no."
-                        />
-                      )}
-                    </CheckoutField>
-                    <CheckoutField
-                      label="Issuing country"
-                      className={alsoAsDriver ? 'form-grid-span-full' : undefined}
-                    >
-                      {(aria) => (
-                        <select
-                          {...aria}
-                          value={driver.country}
-                          onChange={(e) => setDriver((d) => ({ ...d, country: e.target.value }))}
-                        >
-                          {CHECKOUT_COUNTRIES.map((o) => (
-                            <option key={o} value={o}>
-                              {o}
-                            </option>
-                          ))}
-                        </select>
-                      )}
-                    </CheckoutField>
+                          >
+                            {COUNTRY_OPTIONS.map(({ code, name }) => (
+                              <option key={code} value={code}>
+                                {name}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </CheckoutField>
+                    </div>
                   </div>
                 </section>
 
@@ -1045,7 +1149,7 @@ export function LandingCheckoutFlow({
             {step === 1 && (user || guestCheckout) ? (
               <div className="checkout-section">
                 <div className="checkout-progress-meta">
-                  <span className="eyebrow">Step 2 of 3</span>
+                  <span className="eyebrow">Step 2 of 2</span>
                   <h2 className="h-section" style={{ marginTop: 4 }}>
                     Payment.
                   </h2>
@@ -1055,28 +1159,6 @@ export function LandingCheckoutFlow({
                       : "Secure checkout — you'll finish card or bank payment on the next screen (iPay88)."}
                   </p>
                 </div>
-
-                <section className="checkout-card">
-                  <div className="checkout-card-head">
-                    <h3>Choose a payment method</h3>
-                    <span className="checkout-card-meta">
-                      <Shield size={11} /> Encrypted connection
-                    </span>
-                  </div>
-                  <div className="pay-methods">
-                    <PayMethodPicker payMethod={payMethod} onChange={setPayMethod} name="method-main" />
-                  </div>
-                </section>
-
-                <section className="checkout-card">
-                  <div className="checkout-card-head">
-                    <h3>What happens next</h3>
-                  </div>
-                  <p style={{ color: 'var(--muted)', margin: 0, fontSize: 14, lineHeight: 1.6 }}>
-                    We&apos;ll create your booking and take you to our payment page. Your car is held for a short window
-                    while you complete payment.
-                  </p>
-                </section>
 
                 {flowError ? (
                   <p className="checkout-flow-error" role="alert">
@@ -1089,7 +1171,7 @@ export function LandingCheckoutFlow({
             {step === 1 && !user && !guestCheckout ? (
               <div className="checkout-section">
                 <div className="checkout-progress-meta">
-                  <span className="eyebrow">Step 2 of 3</span>
+                  <span className="eyebrow">Step 2 of 2</span>
                   <h2 className="h-section" style={{ marginTop: 4 }}>
                     Sign in to continue.
                   </h2>
@@ -1133,37 +1215,6 @@ export function LandingCheckoutFlow({
                 </section>
               </div>
             ) : null}
-
-            {step === 2 && rentalId ? (
-              <div className="checkout-section">
-                <div className="confirmation-hero">
-                  <div className="confirmation-tick">
-                    <Check size={26} />
-                  </div>
-                  <span className="eyebrow" style={{ color: 'var(--brand-leaf)' }}>
-                    Step 3 of 3 · Booking created
-                  </span>
-                  <h2 className="h-section">You&apos;re almost there.</h2>
-                  <p className="h-sub" style={{ marginTop: 4 }}>
-                    We&apos;ve saved your trip for <b style={{ color: 'var(--ink)' }}>{buyer.email}</b>. Complete
-                    payment now to confirm — show your booking reference at pickup.
-                  </p>
-                  <div className="confirmation-id">
-                    <span>Booking ref</span>
-                    <strong>{rentalId.slice(0, 8).toUpperCase()}</strong>
-                  </div>
-                </div>
-
-                <section className="checkout-card">
-                  <div className="checkout-card-head">
-                    <h3>Secure payment</h3>
-                  </div>
-                  <p style={{ color: 'var(--muted)', margin: 0, fontSize: 14, lineHeight: 1.6 }}>
-                    You&apos;ll pay <b>RM {total}</b> (or your deposit, if applicable) on the next screen via iPay88.
-                  </p>
-                </section>
-              </div>
-            ) : null}
           </main>
 
           <aside className="checkout-summary">
@@ -1173,8 +1224,14 @@ export function LandingCheckoutFlow({
               ) : (
                 <div style={{ width: 96, height: 60, background: 'var(--canvas-2)', borderRadius: 10 }} />
               )}
-              <div>
-                <div className="cs-car-name">{vehicleTitle(car)}</div>
+              <div className="cs-car-body">
+                <div className="cs-car-head">
+                  <div className="cs-car-name">{vehicleTitle(car)}</div>
+                  <div className="cs-trip-duration">
+                    <Clock size={13} aria-hidden />
+                    <span>{tripDuration}</span>
+                  </div>
+                </div>
                 <div className="cs-car-meta">
                   <Cog size={11} /> {car.category} · <span>{lug.seats} seats</span>
                 </div>
@@ -1197,10 +1254,6 @@ export function LandingCheckoutFlow({
                     <MapPin size={11} aria-hidden />
                     <span>{pickupLoc}</span>
                   </span>
-                </div>
-                <div className="cs-trip-duration">
-                  <Clock size={13} aria-hidden />
-                  <span>{tripDuration}</span>
                 </div>
                 <div className="cs-trip-leg cs-trip-leg--return">
                   <span className="cs-trip-lbl">Return</span>
@@ -1260,8 +1313,7 @@ export function LandingCheckoutFlow({
               </span>
             </div>
 
-            {step < 2 ? (
-              step === 1 && !user && !guestCheckout ? (
+            {step === 1 && !user && !guestCheckout ? (
                 <button type="button" className="btn btn-ghost btn-lg" onClick={() => setStep(0)}>
                   Back to review
                 </button>
@@ -1271,21 +1323,13 @@ export function LandingCheckoutFlow({
                     {step === 0
                       ? 'Continue to payment'
                       : submitting
-                        ? 'Creating booking…'
-                        : 'Create booking & continue'}
+                        ? 'Redirecting to payment…'
+                        : `Pay RM ${total}`}
                     {submitting ? <LoadingSpinner size={16} aria-hidden /> : <ArrowRight size={14} />}
                   </button>
                   <CheckoutPaymentIcons />
                 </div>
-              )
-            ) : (
-              <div className="cs-pay-actions">
-                <button type="button" className="btn btn-leaf btn-lg" onClick={() => void advance()} disabled={!rentalId}>
-                  Pay RM {total} <ArrowRight size={14} />
-                </button>
-                <CheckoutPaymentIcons />
-              </div>
-            )}
+              )}
 
           </aside>
         </div>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatTripDuration, tripDurationParts } from './booking-datetime'
+import { formatTripDuration, parseBookingDateRange, tripDurationParts } from './booking-datetime'
 
 const d = (ymd: string) => new Date(`${ymd}T12:00:00`)
 
@@ -21,6 +21,22 @@ describe('tripDurationParts', () => {
     expect(
       tripDurationParts(d('2026-05-21'), '10:00 AM', d('2026-05-22'), '10:00 AM'),
     ).toEqual({ days: 1, hours: 0 })
+  })
+})
+
+describe('parseBookingDateRange', () => {
+  it('parses YYYY-MM-DD using local calendar days', () => {
+    const { startDate, endDate } = parseBookingDateRange('2026-05-22', '2026-05-23')
+    expect(startDate.getFullYear()).toBe(2026)
+    expect(startDate.getMonth()).toBe(4)
+    expect(startDate.getDate()).toBe(22)
+    expect(endDate.getDate()).toBe(23)
+  })
+
+  it('rejects return on or before pickup', () => {
+    expect(() => parseBookingDateRange('2026-05-22', '2026-05-22')).toThrow(
+      'Return date must be after pickup date.',
+    )
   })
 })
 

@@ -3,6 +3,7 @@ import { and, eq, gt, inArray, lt, notInArray } from 'drizzle-orm'
 
 import { carPhotos, cars, rentals } from '#/db/schema'
 import type { CarCategory } from '#/db/schema'
+import { parseLocalYmd } from '#/lib/booking-datetime'
 
 export type PublicCarRow = {
   id: string
@@ -94,8 +95,9 @@ export const filterPublicCars = createServerFn({ method: 'GET' })
 
     // If date range provided, exclude cars with overlapping rentals
     if (data.startDate && data.endDate) {
-      const start = new Date(data.startDate)
-      const end = new Date(data.endDate)
+      const start = parseLocalYmd(data.startDate)
+      const end = parseLocalYmd(data.endDate)
+      if (!start || !end) return []
 
       const conflicting = await db
         .select({ carId: rentals.carId })
