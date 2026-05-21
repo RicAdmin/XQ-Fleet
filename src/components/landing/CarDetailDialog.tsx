@@ -1,8 +1,12 @@
-import { useState } from 'react'
-import { ArrowRight, Check, Luggage, MapPin, Shield, X } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Accessibility, ArrowRight, Check, CirclePlay, Luggage, MapPin, Shield, X } from 'lucide-react'
 
 import { LuggageFitModal } from '#/components/LuggageFitModal'
-import { heuristicLuggageFit } from '#/lib/fleet-luggage-fit'
+import { OkuFeatureModal } from '#/components/OkuFeatureModal'
+import { formatTripDuration } from '#/lib/booking-datetime'
+import { getCategoryAlternatives } from '#/lib/detail-car-alternatives'
+import { isHondaNBox, OKU_NBOX_FEATURES, OKU_NBOX_HEADLINE, OKU_NBOX_SUMMARY } from '#/lib/fleet-oku'
+import { fleetFuelType, heuristicLuggageFit } from '#/lib/fleet-luggage-fit'
 import type { PublicCarRow } from '#/lib/portal-functions'
 
 export type TripType = 'round' | 'oneway'
@@ -19,6 +23,12 @@ export type BookingState = {
   children: number
 }
 
+/** Pickup and return dates chosen with return after pickup. */
+export function hasTripDates(booking: Pick<BookingState, 'pickDate' | 'retDate'>): boolean {
+  if (!booking.pickDate || !booking.retDate) return false
+  return booking.retDate.getTime() > booking.pickDate.getTime()
+}
+
 export function defaultBooking(): BookingState {
   const d1 = new Date()
   d1.setDate(d1.getDate() + 5)
@@ -32,8 +42,8 @@ export function defaultBooking(): BookingState {
     tripType: 'round',
     pickDate: d1,
     retDate: d2,
-    pickTime: '10:30 AM',
-    retTime: '04:30 PM',
+    pickTime: '07:00 AM',
+    retTime: '07:00 AM',
     adults: 2,
     children: 0,
   }
@@ -45,29 +55,121 @@ export function nightsBetween(a: Date | null, b: Date | null) {
   return ms > 0 ? Math.max(1, Math.round(ms / 86_400_000)) : 0
 }
 
+export function cloneBooking(booking: BookingState): BookingState {
+  return {
+    ...booking,
+    pickDate: booking.pickDate ? new Date(booking.pickDate.getTime()) : null,
+    retDate: booking.retDate ? new Date(booking.retDate.getTime()) : null,
+  }
+}
+
+/** Pickup / return line for price box and results — matches active search criteria. */
+export function bookingLocationSummary(booking: BookingState): string {
+  const pickup = booking.from.trim() || 'Pickup location TBC'
+  if (booking.tripType === 'round') {
+    return pickup
+  }
+  const ret = booking.retLoc.trim()
+  if (ret && ret !== pickup) {
+    return `${pickup} → ${ret}`
+  }
+  return pickup
+}
+
+function estimateTripTotal(dailyRateSen: number, tripDays: number) {
+  const daily = Math.round(dailyRateSen / 100)
+  const subtotal = daily * tripDays
+  const discount = Math.round(subtotal * 0.15)
+  return subtotal - discount
+}
+
 export function CarDetailDialog({
   car,
+  fleet,
   booking,
   nights,
   onClose,
   onBeginCheckout,
+  onSelectCar,
 }: {
   car: PublicCarRow
+  fleet: PublicCarRow[]
   booking: BookingState
   nights: number
   onClose: () => void
   onBeginCheckout: (car: PublicCarRow) => void
+  onSelectCar: (car: PublicCarRow) => void
 }) {
   const [showLuggage, setShowLuggage] = useState(false)
+  const [showOku, setShowOku] = useState(false)
+  const isOkuNBox = isHondaNBox(car)
   const n = nights || 1
   const daily = Math.round(car.dailyRateSen / 100)
   const subtotal = daily * n
   const discount = Math.round(subtotal * 0.15)
-  const insurance = 18 * n
-  const total = subtotal - discount + insurance
+  const total = subtotal - discount
   const fmt = (d: Date | null) =>
     d ? d.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short' }) : '—'
   const lug = heuristicLuggageFit(car.category)
+  const fuelType = fleetFuelType(car)
+  const pickupLoc = booking.from.trim() || 'Pickup location TBC'
+  const returnLoc =
+    booking.tripType === 'round' ? pickupLoc : booking.retLoc.trim() || pickupLoc
+  const tripDuration = formatTripDuration(
+    booking.pickDate,
+    booking.pickTime,
+    booking.retDate,
+    booking.retTime,
+  )
+  const alternatives = useMemo(() => getCategoryAlternatives(car, fleet), [car, fleet])
+  const categoryLabel = car.category === 'other' ? 'this class' : car.category
+
+  const alternativesBlock = (placement: 'gallery' | 'tail') =>
+    alternatives.length > 0 ? (
+      <div className={`detail-alternatives detail-alternatives--${placement}`}>
+        <p className="detail-alternatives-title">Also consider in {categoryLabel}</p>
+        <ul className="detail-alternatives-list">
+          {alternatives.map(({ car: alt }) => {
+            const altDaily = Math.round(alt.dailyRateSen / 100)
+            const altTrip = estimateTripTotal(alt.dailyRateSen, n)
+            return (
+              <li key={alt.id}>
+                <button
+                  type="button"
+                  className="detail-alt-card"
+                  onClick={() => onSelectCar(alt)}
+                >
+                  <span className="detail-alt-thumb">
+                    {alt.coverPhotoUrl ? (
+                      <img src={alt.coverPhotoUrl} alt="" />
+                    ) : (
+                      <span className="detail-alt-thumb-empty">No photo</span>
+                    )}
+                  </span>
+                  <span className="detail-alt-body">
+                    <span className="detail-alt-name">
+                      {alt.make} {alt.model}
+                    </span>
+                    <span className="detail-alt-price">
+                      <span className="detail-alt-price-row">
+                        <span className="detail-alt-price-main">RM {altDaily}</span>
+                        <span className="detail-alt-price-per">/day</span>
+                      </span>
+                      <span className="detail-alt-price-trip">
+                        <span className="detail-alt-price-est">Est. RM {altTrip}</span>
+                        <span className="detail-alt-price-days">
+                          for {n} day{n > 1 ? 's' : ''}
+                        </span>
+                      </span>
+                    </span>
+                  </span>
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    ) : null
 
   return (
     <>
@@ -83,9 +185,15 @@ export function CarDetailDialog({
             <X size={16} />
           </button>
 
-          <div className="left">
+          <div className="detail-dialog-inner">
+            <section className="detail-dialog-gallery" aria-label="Vehicle photo">
             <div className="detail-hero-meta">
-              <span className="detail-category-pill">{car.category}</span>
+              <div className="detail-hero-pills">
+                <span className="detail-category-pill">{car.category}</span>
+                {isOkuNBox ? (
+                  <span className="detail-category-pill detail-category-pill--oku">OKU friendly</span>
+                ) : null}
+              </div>
               <button
                 type="button"
                 className="btn btn-ghost btn-sm detail-hero-luggage-btn"
@@ -101,64 +209,75 @@ export function CarDetailDialog({
               {car.coverPhotoUrl ? (
                 <img src={car.coverPhotoUrl} alt={`${car.make} ${car.model}`} />
               ) : (
-                <div style={{ padding: 40 }}>No photo</div>
+                <div className="detail-hero-empty">No photo</div>
               )}
             </div>
-            <div
-              style={{ display: 'flex', gap: 16, flexWrap: 'wrap', color: 'var(--muted)', fontSize: 13, marginTop: 12 }}
-            >
+            <div className="detail-trust-badges">
               <span>
-                <Shield size={12} /> Insurance included
+                <Shield size={12} aria-hidden /> Insurance included
               </span>
               <span>
-                <Check size={12} /> Cancel free 48 h before
+                <Check size={12} aria-hidden /> Cancel free 48 h before
               </span>
             </div>
-          </div>
+            {alternativesBlock('gallery')}
+            </section>
 
-          <div className="right">
-            <div>
+            <section className="detail-dialog-details">
+            <div className="detail-dialog-head">
               <span className="eyebrow">{car.category}</span>
-              <h2
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontWeight: 600,
-                  fontSize: 34,
-                  lineHeight: 1.05,
-                  margin: '4px 0 4px',
-                  letterSpacing: '-.025em',
-                }}
-              >
+              <h2 className="detail-dialog-title">
                 {car.make} {car.model}
               </h2>
             </div>
 
-            <div className="spec-grid">
-              <div className="spec">
-                <span className="lbl">Year</span>
-                <span className="val">{car.year}</span>
+            <div className="detail-spec-grid" role="list" aria-label="Vehicle highlights">
+              <div className="detail-spec" role="listitem">
+                <span className="detail-spec-label">Passengers</span>
+                <span className="detail-spec-value">{lug.seats}</span>
               </div>
-              <div className="spec">
-                <span className="lbl">Category</span>
-                <span className="val">{car.category}</span>
+              <div className="detail-spec" role="listitem">
+                <span className="detail-spec-label">Fuel</span>
+                <span className="detail-spec-value">{fuelType}</span>
               </div>
-              <div className="spec">
-                <span className="lbl">Luggage (guide)</span>
-                <span className="val">
-                  {lug.lg} large · {lug.sm} small
+              <div className="detail-spec detail-spec--luggage" role="listitem">
+                <span className="detail-spec-label">Luggage</span>
+                <span
+                  className="detail-spec-value"
+                  title={`${lug.lg} large · ${lug.sm} small`}
+                >
+                  {lug.lg}L · {lug.sm}S
                 </span>
               </div>
             </div>
 
-            <div>
-              <b style={{ fontSize: 14 }}>What&apos;s included</b>
-              <ul style={{ paddingLeft: 18, margin: '8px 0 0', color: 'var(--ink-soft)', fontSize: 14, lineHeight: 1.8 }}>
-                <li>Third-Party Liability Insurance</li>
-                <li>Free pickup at airport, jetty or hotel</li>
-                <li>Unlimited island miles</li>
-                <li>24/7 roadside assistance</li>
-              </ul>
-            </div>
+            {isOkuNBox ? (
+              <div className="detail-oku-card">
+                <div className="detail-oku-head">
+                  <div className="detail-oku-title">
+                    <span className="detail-oku-icon" aria-hidden>
+                      <Accessibility size={18} />
+                    </span>
+                    <strong>{OKU_NBOX_HEADLINE}</strong>
+                  </div>
+                  <button
+                    type="button"
+                    className="detail-oku-video-btn"
+                    onClick={() => setShowOku(true)}
+                    aria-label="Watch how to use OKU features on this car"
+                  >
+                    <CirclePlay size={18} strokeWidth={1.75} aria-hidden />
+                    <span>Watch guide</span>
+                  </button>
+                </div>
+                <p className="detail-oku-summary">{OKU_NBOX_SUMMARY}</p>
+                <ul className="detail-oku-features">
+                  {OKU_NBOX_FEATURES.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
 
             <div className="price-box">
               <div className="price-dates">
@@ -166,20 +285,25 @@ export function CarDetailDialog({
                   <span className="price-leg-lbl">Pickup</span>
                   <strong>{fmt(booking.pickDate)}</strong>
                   <em>{booking.pickTime}</em>
+                  <span className="price-leg-loc">
+                    <MapPin size={11} aria-hidden />
+                    <span>{pickupLoc}</span>
+                  </span>
                 </div>
                 <div className="price-leg-mid">
-                  <span className="price-leg-days">
-                    {n} day{n > 1 ? 's' : ''}
+                  <span className="price-leg-days" title={`${tripDuration} rental`}>
+                    {tripDuration}
                   </span>
                 </div>
                 <div className="price-leg">
                   <span className="price-leg-lbl">Return</span>
                   <strong>{fmt(booking.retDate)}</strong>
                   <em>{booking.retTime}</em>
+                  <span className="price-leg-loc">
+                    <MapPin size={11} aria-hidden />
+                    <span>{returnLoc}</span>
+                  </span>
                 </div>
-              </div>
-              <div className="price-loc">
-                <MapPin size={11} /> {booking.from}
               </div>
               <div className="price-divider" />
               <div className="row">
@@ -194,28 +318,28 @@ export function CarDetailDialog({
                   −RM {discount}
                 </span>
               </div>
-              <div className="row">
-                <span>Insurance &amp; protection</span>
-                <span className="v muted">RM {insurance}</span>
-              </div>
               <div className="row total">
                 <span>Total estimate</span>
                 <span>RM {total}</span>
               </div>
             </div>
 
-            <button
-              type="button"
-              className="btn btn-leaf btn-lg"
-              style={{ width: '100%', justifyContent: 'center' }}
-              onClick={() => onBeginCheckout(car)}
-            >
-              Continue to checkout <ArrowRight size={14} />
-            </button>
+            <div className="detail-dialog-footer">
+              <button
+                type="button"
+                className="btn btn-leaf btn-lg detail-checkout-btn"
+                onClick={() => onBeginCheckout(car)}
+              >
+                Continue to checkout <ArrowRight size={14} />
+              </button>
+            </div>
+            {alternativesBlock('tail')}
+            </section>
           </div>
         </div>
       </div>
       {showLuggage && <LuggageFitModal car={car} onClose={() => setShowLuggage(false)} />}
+      {showOku && isOkuNBox && <OkuFeatureModal car={car} onClose={() => setShowOku(false)} />}
     </>
   )
 }

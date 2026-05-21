@@ -87,7 +87,7 @@ const KNOWHOW: Array<{
     icon: 'phone',
     accent: '#0F766E',
     title: 'Accident handling',
-    intro: "Small bumps happen. Keep calm and follow these three steps — you're fully insured.",
+    intro: 'Small bumps happen. Keep calm and follow these three steps — we will guide you through it.',
     points: [
       {
         t: "1. Make sure everyone's safe",
@@ -107,7 +107,7 @@ const KNOWHOW: Array<{
       },
       {
         t: "Insurance — what's covered",
-        d: 'Third-party liability included on every rental. Extra collision damage waiver (RM 25/day) takes excess to zero.',
+        d: 'Coverage varies by booking. Ask us about optional collision damage waiver (from RM 25/day) before you travel.',
       },
     ],
   },

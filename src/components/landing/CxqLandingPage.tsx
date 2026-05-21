@@ -32,7 +32,9 @@ import {
 import BrandLogo from '#/components/BrandLogo'
 import {
   CarDetailDialog,
+  cloneBooking,
   defaultBooking,
+  hasTripDates,
   nightsBetween,
   type BookingState,
 } from '#/components/landing/CarDetailDialog'
@@ -40,6 +42,7 @@ import {
 import { LuggageFitModal } from '#/components/LuggageFitModal'
 import { authClient } from '#/lib/auth-client'
 import { heuristicLuggageFit } from '#/lib/fleet-luggage-fit'
+import { isHondaNBox } from '#/lib/fleet-oku'
 import { filterPublicCars } from '#/lib/portal-functions'
 import type { PublicCarRow } from '#/lib/portal-functions'
 
@@ -105,11 +108,16 @@ function pickCar(cars: PublicCarRow[], cat: CarCategoryKey): PublicCarRow | null
 export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] }) {
   const navigate = useNavigate()
   const [cars, setCars] = useState<PublicCarRow[]>(initialCars)
-  const [booking, setBooking] = useState<BookingState>(defaultBooking)
-  const [showResults, setShowResults] = useState(false)
+  const [booking, setBooking] = useState<BookingState>(() => ({
+    ...defaultBooking(),
+    pickDate: null,
+    retDate: null,
+  }))
+  const [searchCriteria, setSearchCriteria] = useState<BookingState | null>(null)
   const [openCar, setOpenCar] = useState<PublicCarRow | null>(null)
   const [activeReel, setActiveReel] = useState<(typeof REELS)[number] | null>(null)
   const [searching, setSearching] = useState(false)
+  const [bookingPrompt, setBookingPrompt] = useState<string | null>(null)
   const [navMenuOpen, setNavMenuOpen] = useState(false)
   const navMenuRef = useRef<HTMLDivElement>(null)
 
@@ -124,7 +132,25 @@ export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] })
     return () => document.removeEventListener('mousedown', onDoc)
   }, [])
 
+  const focusBookingDates = useCallback(() => {
+    scrollToAnchor('booking-dock')
+  }, [])
+
+  const requireBookingSearch = useCallback(() => {
+    const message = !hasTripDates(booking)
+      ? 'Choose pickup and return dates above, then tap Search cars to view vehicles and book.'
+      : 'Tap Search cars to check what’s available for your trip.'
+    setBookingPrompt(message)
+    scrollToAnchor('booking-dock')
+  }, [booking])
+
   const runSearch = useCallback(async () => {
+    if (!hasTripDates(booking)) {
+      requireBookingSearch()
+      return
+    }
+    setBookingPrompt(null)
+    setSearchCriteria(cloneBooking(booking))
     setSearching(true)
     try {
       const start = toYmd(booking.pickDate)
@@ -136,35 +162,65 @@ export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] })
         },
       })
       setCars(results)
-      setShowResults(true)
+      requestAnimationFrame(() => scrollToAnchor('top-picks'))
     } finally {
       setSearching(false)
     }
-  }, [booking.pickDate, booking.retDate])
+  }, [booking, requireBookingSearch])
 
-  const startYmd = toYmd(booking.pickDate)
-  const endYmd = toYmd(booking.retDate)
+  const canBrowseFleet = Boolean(searchCriteria && hasTripDates(searchCriteria))
+
+  const tryOpenCar = useCallback(
+    (car: PublicCarRow) => {
+      if (!canBrowseFleet) {
+        requireBookingSearch()
+        return
+      }
+      setOpenCar(car)
+    },
+    [canBrowseFleet, requireBookingSearch],
+  )
+
+  useEffect(() => {
+    if (!searchCriteria) return
+    const samePick =
+      searchCriteria.pickDate?.getTime() === booking.pickDate?.getTime()
+    const sameRet =
+      searchCriteria.retDate?.getTime() === booking.retDate?.getTime()
+    if (!samePick || !sameRet) {
+      setSearchCriteria(null)
+    }
+  }, [booking.pickDate, booking.retDate, searchCriteria])
+
+  const trip = searchCriteria ?? booking
+  const startYmd = toYmd(trip.pickDate)
+  const endYmd = toYmd(trip.retDate)
 
   const goToCheckout = useCallback(
     (car: PublicCarRow) => {
+      if (!searchCriteria || !hasTripDates(searchCriteria)) {
+        requireBookingSearch()
+        return
+      }
+      const checkoutTrip = searchCriteria
       setOpenCar(null)
       void navigate({
         to: '/checkout/$carId',
         params: { carId: car.id },
         search: {
-          startDate: startYmd,
-          endDate: endYmd,
-          from: booking.from,
-          retLoc: booking.retLoc,
-          tripType: booking.tripType,
-          pickTime: booking.pickTime,
-          retTime: booking.retTime,
-          adults: String(booking.adults),
-          children: String(booking.children),
+          startDate: toYmd(checkoutTrip.pickDate),
+          endDate: toYmd(checkoutTrip.retDate),
+          from: checkoutTrip.from,
+          retLoc: checkoutTrip.retLoc,
+          tripType: checkoutTrip.tripType,
+          pickTime: checkoutTrip.pickTime,
+          retTime: checkoutTrip.retTime,
+          adults: String(checkoutTrip.adults),
+          children: String(checkoutTrip.children),
         },
       })
     },
-    [navigate, booking, startYmd, endYmd],
+    [navigate, searchCriteria, requireBookingSearch],
   )
 
   return (
@@ -192,10 +248,24 @@ export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] })
           setBooking={setBooking}
           onSearch={runSearch}
           searching={searching}
+          datesReady={hasTripDates(booking)}
+          prompt={bookingPrompt}
+          onClearPrompt={() => setBookingPrompt(null)}
         />
 
-        <TopPicksSection cars={cars} onOpenCar={setOpenCar} />
-        <CarCategoriesSection cars={cars} onOpenCar={setOpenCar} />
+        <TopPicksSection
+          cars={cars}
+          matchedSearch={canBrowseFleet}
+          fleetLocked={!canBrowseFleet}
+          onRequireTrip={requireBookingSearch}
+          onOpenCar={tryOpenCar}
+        />
+        <CarCategoriesSection
+          cars={cars}
+          fleetLocked={!canBrowseFleet}
+          onRequireTrip={requireBookingSearch}
+          onOpenCar={tryOpenCar}
+        />
         <CitiesSection onPickCity={(c) => setBooking((b) => ({ ...b, from: `Car rental in ${c}` }))} />
         <PromosSection />
         <WhyChooseUs />
@@ -213,16 +283,15 @@ export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] })
           onScrollFleet={() => scrollToAnchor('top-picks')}
         />
 
-        {showResults && (
-          <ResultsOverlay cars={cars} booking={booking} onClose={() => setShowResults(false)} onOpenCar={setOpenCar} />
-        )}
-        {openCar && (
+        {openCar && canBrowseFleet && (
           <CarDetailDialog
             car={openCar}
-            booking={booking}
-            nights={nightsBetween(booking.pickDate, booking.retDate)}
+            fleet={cars}
+            booking={trip}
+            nights={nightsBetween(trip.pickDate, trip.retDate)}
             onClose={() => setOpenCar(null)}
             onBeginCheckout={goToCheckout}
+            onSelectCar={setOpenCar}
           />
         )}
         {activeReel && <ReelLightbox reel={activeReel} onClose={() => setActiveReel(null)} />}
@@ -402,11 +471,17 @@ function BookingDock({
   setBooking,
   onSearch,
   searching,
+  datesReady,
+  prompt,
+  onClearPrompt,
 }: {
   booking: BookingState
   setBooking: React.Dispatch<React.SetStateAction<BookingState>>
   onSearch: () => void
   searching: boolean
+  datesReady: boolean
+  prompt?: string | null
+  onClearPrompt?: () => void
 }) {
   const [open, setOpen] = useState<'from' | 'to' | 'pick' | 'ret' | 'pax' | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -419,11 +494,30 @@ function BookingDock({
     return () => document.removeEventListener('mousedown', onDoc)
   }, [])
 
+  useEffect(() => {
+    if (!prompt) return
+    if (!datesReady) {
+      setOpen('pick')
+      return
+    }
+    rootRef.current?.querySelector<HTMLButtonElement>('.bk-search-btn')?.focus()
+  }, [prompt, datesReady])
+
+  const openField = (field: typeof open) => {
+    onClearPrompt?.()
+    setOpen(field)
+  }
+
   const nights = nightsBetween(booking.pickDate, booking.retDate)
   const totalPax = booking.adults + booking.children
 
   return (
     <div id="booking-dock" className="booking-dock" ref={rootRef}>
+      {prompt ? (
+        <p className="bk-prompt" role="status">
+          {prompt}
+        </p>
+      ) : null}
       <div className="bk-top">
         <div className="bk-trip-tabs">
           <button
@@ -441,9 +535,6 @@ function BookingDock({
             <ArrowRight size={12} /> Different return
           </button>
         </div>
-        <span className="bk-cancel">
-          <Shield size={12} /> Free cancellation up to 48&nbsp;h before pickup
-        </span>
         {nights > 0 && (
           <span className="bk-nights">
             <Clock size={12} />
@@ -459,8 +550,8 @@ function BookingDock({
           role="button"
           tabIndex={0}
           className={'bk-field' + (open === 'from' ? ' active' : '')}
-          onClick={() => setOpen(open === 'from' ? null : 'from')}
-          onKeyDown={(e) => e.key === 'Enter' && setOpen(open === 'from' ? null : 'from')}
+          onClick={() => openField(open === 'from' ? null : 'from')}
+          onKeyDown={(e) => e.key === 'Enter' && openField(open === 'from' ? null : 'from')}
           style={{ position: 'relative' }}
         >
           <span className="lbl">Pickup location</span>
@@ -485,8 +576,8 @@ function BookingDock({
             role="button"
             tabIndex={0}
             className={'bk-field' + (open === 'to' ? ' active' : '')}
-            onClick={() => setOpen(open === 'to' ? null : 'to')}
-            onKeyDown={(e) => e.key === 'Enter' && setOpen(open === 'to' ? null : 'to')}
+            onClick={() => openField(open === 'to' ? null : 'to')}
+            onKeyDown={(e) => e.key === 'Enter' && openField(open === 'to' ? null : 'to')}
             style={{ position: 'relative' }}
           >
             <span className="lbl">Return location</span>
@@ -509,8 +600,8 @@ function BookingDock({
           role="button"
           tabIndex={0}
           className={'bk-field' + (open === 'pick' ? ' active' : '')}
-          onClick={() => setOpen(open === 'pick' ? null : 'pick')}
-          onKeyDown={(e) => e.key === 'Enter' && setOpen(open === 'pick' ? null : 'pick')}
+          onClick={() => openField(open === 'pick' ? null : 'pick')}
+          onKeyDown={(e) => e.key === 'Enter' && openField(open === 'pick' ? null : 'pick')}
           style={{ position: 'relative' }}
         >
           <span className="lbl">Pickup</span>
@@ -518,7 +609,7 @@ function BookingDock({
             <Calendar size={14} className="icon" />
             <span className="bk-date">{fmtDate(booking.pickDate)}</span>
             <span className="bk-sep">·</span>
-            <span className="bk-time">{booking.pickTime || '—'}</span>
+            <span className="bk-time">{booking.pickTime}</span>
           </span>
           {open === 'pick' && (
             <DateTimeMenu
@@ -543,8 +634,8 @@ function BookingDock({
           role="button"
           tabIndex={0}
           className={'bk-field' + (open === 'ret' ? ' active' : '')}
-          onClick={() => setOpen(open === 'ret' ? null : 'ret')}
-          onKeyDown={(e) => e.key === 'Enter' && setOpen(open === 'ret' ? null : 'ret')}
+          onClick={() => openField(open === 'ret' ? null : 'ret')}
+          onKeyDown={(e) => e.key === 'Enter' && openField(open === 'ret' ? null : 'ret')}
           style={{ position: 'relative' }}
         >
           <span className="lbl">Return</span>
@@ -552,7 +643,7 @@ function BookingDock({
             <Calendar size={14} className="icon" />
             <span className="bk-date">{fmtDate(booking.retDate)}</span>
             <span className="bk-sep">·</span>
-            <span className="bk-time">{booking.retTime || '—'}</span>
+            <span className="bk-time">{booking.retTime}</span>
           </span>
           {open === 'ret' && (
             <DateTimeMenu
@@ -576,8 +667,8 @@ function BookingDock({
           role="button"
           tabIndex={0}
           className={'bk-field' + (open === 'pax' ? ' active' : '')}
-          onClick={() => setOpen(open === 'pax' ? null : 'pax')}
-          onKeyDown={(e) => e.key === 'Enter' && setOpen(open === 'pax' ? null : 'pax')}
+          onClick={() => openField(open === 'pax' ? null : 'pax')}
+          onKeyDown={(e) => e.key === 'Enter' && openField(open === 'pax' ? null : 'pax')}
           style={{ position: 'relative' }}
         >
           <span className="lbl">
@@ -610,7 +701,16 @@ function BookingDock({
           )}
         </div>
 
-        <button type="button" className="bk-search-btn" onClick={onSearch} disabled={searching}>
+        <button
+          type="button"
+          className="bk-search-btn"
+          onClick={() => {
+            onClearPrompt?.()
+            onSearch()
+          }}
+          disabled={searching || !datesReady}
+          title={datesReady ? undefined : 'Choose pickup and return dates first'}
+        >
           <Search size={15} /> {searching ? 'Searching…' : 'Search cars'}
         </button>
       </div>
@@ -756,19 +856,26 @@ function DateTimeMenu({
           })}
         </div>
       </div>
-      <div className="dt-time">
-        <h5>Pick a time</h5>
-        <div className="dt-time-grid">
-          {PICK_TIMES.map((t) => (
-            <button key={t} type="button" className={time === t ? 'on' : ''} onClick={() => onPick(undefined, t)}>
-              {t}
-            </button>
-          ))}
+      {date ? (
+        <div className="dt-time">
+          <h5>Pick a time</h5>
+          <div className="dt-time-grid">
+            {PICK_TIMES.map((t) => (
+              <button
+                key={t}
+                type="button"
+                className={time === t ? 'on' : ''}
+                onClick={() => {
+                  onPick(undefined, t)
+                  onDone()
+                }}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
         </div>
-        <button type="button" className="btn btn-leaf btn-sm dt-done" onClick={onDone}>
-          Confirm <Check size={12} />
-        </button>
-      </div>
+      ) : null}
     </div>
   )
 }
@@ -836,9 +943,15 @@ function uniquePublicCars(cars: PublicCarRow[]) {
 
 function TopPicksSection({
   cars,
+  matchedSearch,
+  fleetLocked,
+  onRequireTrip,
   onOpenCar,
 }: {
   cars: PublicCarRow[]
+  matchedSearch: boolean
+  fleetLocked: boolean
+  onRequireTrip: () => void
   onOpenCar: (c: PublicCarRow) => void
 }) {
   const [filter, setFilter] = useState<(typeof TOP_TAGS)[number]>('All')
@@ -858,10 +971,13 @@ function TopPicksSection({
     <section id="top-picks" className="section" data-screen-label="Top picks">
       <div className="section-head">
         <div className="lead">
-          <h2 className="h-section">Top picks this month</h2>
+          <h2 className="h-section">
+            {matchedSearch ? 'Top picks matched your search' : 'Top picks this month'}
+          </h2>
           <p className="h-sub">
-            Hand-curated by our Langkawi team — the rides our guests rebook the most. Every car is fully insured and
-            freshly detailed.
+            {matchedSearch
+              ? 'Available for your pickup and return dates — tap a vehicle for details and checkout.'
+              : 'Choose pickup and return dates above, then search to see what’s available for your trip.'}
           </p>
         </div>
         <div className="flex gap-2" style={{ flexWrap: 'wrap' }}>
@@ -882,7 +998,13 @@ function TopPicksSection({
       </div>
       <div className="car-grid">
         {visibleCars.map((c) => (
-          <FleetCarCard key={c.id} car={c} onOpen={() => onOpenCar(c)} />
+          <FleetCarCard
+            key={c.id}
+            car={c}
+            needsSearch={fleetLocked}
+            onRequireTrip={onRequireTrip}
+            onOpen={() => onOpenCar(c)}
+          />
         ))}
       </div>
       {canToggle ? (
@@ -913,9 +1035,13 @@ function TopPicksSection({
 
 function FleetCarCard({
   car,
+  needsSearch,
+  onRequireTrip,
   onOpen,
 }: {
   car: PublicCarRow
+  needsSearch?: boolean
+  onRequireTrip?: () => void
   onOpen: () => void
 }) {
   const [fav, setFav] = useState(false)
@@ -923,16 +1049,25 @@ function FleetCarCard({
   const fit = heuristicLuggageFit(car.category)
   const totalBags = fit.lg + fit.sm
 
+  const handleOpen = () => {
+    if (needsSearch) {
+      onRequireTrip?.()
+      return
+    }
+    onOpen()
+  }
+
   return (
     <>
       <article
         className="car-card"
-        onClick={onOpen}
-        onKeyDown={(e) => e.key === 'Enter' && onOpen()}
+        onClick={handleOpen}
+        onKeyDown={(e) => e.key === 'Enter' && handleOpen()}
         role="button"
         tabIndex={0}
       >
         <div className="car-photo">
+          {isHondaNBox(car) ? <span className="tag-oku">OKU friendly</span> : null}
           <span className="tag">{car.category}</span>
           <span
             className={'heart' + (fav ? ' on' : '')}
@@ -996,7 +1131,7 @@ function FleetCarCard({
               className="btn btn-sm"
               onClick={(e) => {
                 e.stopPropagation()
-                onOpen()
+                handleOpen()
               }}
             >
               Rent <ArrowRight size={12} />
@@ -1009,7 +1144,25 @@ function FleetCarCard({
   )
 }
 
-function CarCategoriesSection({ cars, onOpenCar }: { cars: PublicCarRow[]; onOpenCar: (c: PublicCarRow) => void }) {
+function CarCategoriesSection({
+  cars,
+  fleetLocked,
+  onRequireTrip,
+  onOpenCar,
+}: {
+  cars: PublicCarRow[]
+  fleetLocked: boolean
+  onRequireTrip: () => void
+  onOpenCar: (c: PublicCarRow) => void
+}) {
+  const openCar = (car: PublicCarRow | null) => {
+    if (!car) return
+    if (fleetLocked) {
+      onRequireTrip()
+      return
+    }
+    onOpenCar(car)
+  }
   const cats = [
     {
       n: '01',
@@ -1100,12 +1253,12 @@ function CarCategoriesSection({ cars, onOpenCar }: { cars: PublicCarRow[]; onOpe
                   </span>
                 </div>
                 <div className="cat3-foot">
-                  <button type="button" className="btn cat3-cta" onClick={() => sample && onOpenCar(sample)} disabled={!sample}>
+                  <button type="button" className="btn cat3-cta" onClick={() => openCar(sample)} disabled={!sample}>
                     See {c.title} cars <ArrowRight size={14} />
                   </button>
                   <div className="cat3-mini">
                     {fleetCars.slice(0, 5).map((fc) => (
-                      <button key={fc.id} type="button" className="cat3-mini-chip" onClick={() => onOpenCar(fc)} title={`${fc.make} ${fc.model}`}>
+                      <button key={fc.id} type="button" className="cat3-mini-chip" onClick={() => openCar(fc)} title={`${fc.make} ${fc.model}`}>
                         {fc.coverPhotoUrl ? <img src={fc.coverPhotoUrl} alt={`${fc.make} ${fc.model}`} /> : <span className="text-xs">{fc.model}</span>}
                       </button>
                     ))}
@@ -1113,7 +1266,7 @@ function CarCategoriesSection({ cars, onOpenCar }: { cars: PublicCarRow[]; onOpe
                   </div>
                 </div>
               </div>
-              <div className="cat3-art" role="presentation" onClick={() => sample && onOpenCar(sample)}>
+              <div className="cat3-art" role="presentation" onClick={() => openCar(sample)}>
                 {sample?.coverPhotoUrl ? (
                   <img src={sample.coverPhotoUrl} alt={`${sample.make} ${sample.model}`} />
                 ) : (
@@ -1234,12 +1387,12 @@ function WhyChooseUs() {
     bigSub: 'on Langkawi roads',
     title: 'A family-run rental — quietly excellent since 2015.',
     body: 'Same humans answer the phone. Same team meets you at the door. Same fairness in every quote.',
-    bullets: ['Freshly serviced at authorized dealers', 'Detailed between every rental', 'Fully insured — no surprises', 'OKU-friendly vehicles available'],
+    bullets: ['Freshly serviced at authorized dealers', 'Detailed between every rental', 'Upfront quotes — no hidden fees', 'OKU-friendly vehicles available'],
   }
   const perks = [
     { i: <Sparkles size={18} />, t: 'Comfortable prices', d: 'Upfront pricing, fits any wallet. Even better when you book weekly or monthly.', stat: '0', statLabel: 'hidden fees' },
     { i: <Calendar size={18} />, t: 'Easy 90-second booking', d: 'Reserve online. Free delivery to the airport, jetty, or hotel.', stat: '<2 min', statLabel: 'WhatsApp reply' },
-    { i: <Shield size={18} />, t: 'Drive with confidence', d: 'Third-party liability included. 24/7 roadside help anywhere on the island.', stat: '24/7', statLabel: 'roadside cover' },
+    { i: <Shield size={18} />, t: 'Drive with confidence', d: 'Local team on WhatsApp for pickup help and island tips.', stat: '24/7', statLabel: 'WhatsApp line' },
     { i: <MapPin size={18} />, t: 'A car for every adventure', d: 'Compact city cars to family MPVs — all clean and ready.', stat: 'Fleet', statLabel: 'live availability' },
   ]
   return (
@@ -1887,7 +2040,7 @@ function CruiseBanner() {
             </button>
           </div>
           <span className="cruise-foot">
-            <Shield size={11} /> Free cancellation up to 24 h · life jackets &amp; insurance included
+            Ask our team about cruise inclusions when you book
           </span>
         </div>
       </article>
@@ -2039,154 +2192,6 @@ export function SiteFooter({
         </span>
       </div>
     </footer>
-  )
-}
-
-function ResultsOverlay({
-  cars,
-  booking,
-  onClose,
-  onOpenCar,
-}: {
-  cars: PublicCarRow[]
-  booking: BookingState
-  onClose: () => void
-  onOpenCar: (c: PublicCarRow) => void
-}) {
-  const [maxPrice, setMaxPrice] = useState(700)
-  const [catPick, setCatPick] = useState<Record<CarCategoryKey, boolean>>({
-    economy: true,
-    mpv: true,
-    suv: true,
-    other: true,
-  })
-  const [sort, setSort] = useState<'popular' | 'price-asc' | 'price-desc'>('popular')
-
-  const nights = nightsBetween(booking.pickDate, booking.retDate) || 1
-
-  const filtered = useMemo(() => {
-    let list = cars.filter((c) => Math.round(c.dailyRateSen / 100) <= maxPrice)
-    const want = (Object.keys(catPick) as CarCategoryKey[]).filter((k) => catPick[k])
-    if (want.length > 0 && want.length < 4) list = list.filter((c) => want.includes(c.category))
-    const sorted = [...list]
-    if (sort === 'price-asc') sorted.sort((a, b) => a.dailyRateSen - b.dailyRateSen)
-    else if (sort === 'price-desc') sorted.sort((a, b) => b.dailyRateSen - a.dailyRateSen)
-    return sorted
-  }, [cars, maxPrice, catPick, sort])
-
-  const fmt = (d: Date | null) => (d ? d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : '—')
-
-  return (
-    <div className="results-overlay" role="presentation" onClick={onClose}>
-      <div className="results-panel" role="dialog" aria-modal="true" aria-label="Search results" onClick={(e) => e.stopPropagation()}>
-        <div className="results-bar">
-          <div className="crumbs">
-            <span className="pill">
-              <MapPin size={12} style={{ color: 'var(--brand-moss)' }} />
-              <b>{booking.from || 'Langkawi Intl Airport (LGK)'}</b>
-            </span>
-            <span className="pill">
-              <Calendar size={12} />
-              {fmt(booking.pickDate)} → {fmt(booking.retDate)}{' '}
-              <span style={{ color: 'var(--muted)' }}>
-                ({nights} day{nights > 1 ? 's' : ''})
-              </span>
-            </span>
-            <button type="button" className="chip" onClick={onClose}>
-              <Plus size={12} style={{ transform: 'rotate(45deg)' }} /> Edit search
-            </button>
-          </div>
-          <button type="button" className="close-btn" aria-label="Close" onClick={onClose}>
-            <X size={16} />
-          </button>
-        </div>
-
-        <div className="results-body">
-          <aside className="filters">
-            <h4>Filters</h4>
-            <div className="group">
-              <div className="flex between">
-                <b style={{ fontSize: 14 }}>Price per day</b>
-              </div>
-              <input type="range" min={50} max={700} value={maxPrice} step={10} onChange={(e) => setMaxPrice(+e.target.value)} />
-              <div className="range-row">
-                <span>RM 50</span>
-                <b>up to RM {maxPrice}</b>
-              </div>
-            </div>
-            <div className="group">
-              <b style={{ fontSize: 14 }}>Category</b>
-              <div style={{ marginTop: 8 }}>
-                {(['economy', 'mpv', 'suv', 'other'] as const).map((t) => (
-                  <label key={t}>
-                    <input type="checkbox" checked={!!catPick[t]} onChange={() => setCatPick((p) => ({ ...p, [t]: !p[t] }))} />
-                    {t}
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div className="group">
-              <b style={{ fontSize: 14 }}>Perks included</b>
-              <div style={{ marginTop: 8 }}>
-                <label>
-                  <input type="checkbox" defaultChecked readOnly /> Free cancellation
-                </label>
-                <label>
-                  <input type="checkbox" defaultChecked readOnly /> Airport delivery
-                </label>
-                <label>
-                  <input type="checkbox" /> Unlimited mileage
-                </label>
-                <label>
-                  <input type="checkbox" /> Pay at pickup
-                </label>
-              </div>
-            </div>
-          </aside>
-
-          <main>
-            <div className="results-head">
-              <div>
-                <div className="count">{filtered.length} cars available</div>
-                <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 2 }}>
-                  Prices shown are for {nights} day{nights > 1 ? 's' : ''} · taxes &amp; insurance included
-                </div>
-              </div>
-              <select className="sort-select" value={sort} onChange={(e) => setSort(e.target.value as typeof sort)}>
-                <option value="popular">Sort: Most popular</option>
-                <option value="price-asc">Price · low to high</option>
-                <option value="price-desc">Price · high to low</option>
-              </select>
-            </div>
-
-            <div className="result-cards">
-              {filtered.map((c) => (
-                <FleetCarCard key={c.id} car={c} onOpen={() => onOpenCar(c)} />
-              ))}
-            </div>
-
-            {filtered.length === 0 && (
-              <div style={{ background: '#fff', border: '1px solid var(--line)', padding: 40, borderRadius: 18, textAlign: 'center' }}>
-                <h3 style={{ fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 24, margin: 0, letterSpacing: '-.02em' }}>
-                  No cars match those filters.
-                </h3>
-                <p style={{ color: 'var(--muted)' }}>Try loosening one of them.</p>
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  onClick={() => {
-                    setCatPick({ economy: true, mpv: true, suv: true, other: true })
-                    setMaxPrice(700)
-                  }}
-                >
-                  Reset filters
-                </button>
-              </div>
-            )}
-          </main>
-        </div>
-      </div>
-    </div>
   )
 }
 

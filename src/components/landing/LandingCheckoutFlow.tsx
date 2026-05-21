@@ -9,6 +9,7 @@ import {
   Cog,
   Globe,
   Key,
+  MapPin,
   Phone,
   Shield,
   Sparkles,
@@ -16,6 +17,12 @@ import {
 } from 'lucide-react'
 
 import { createPortalBooking } from '#/lib/portal-booking-functions'
+import {
+  estimateExtraHoursCharge,
+  formatExtraHours,
+  formatTripDuration,
+  tripExtraHours,
+} from '#/lib/booking-datetime'
 import { heuristicLuggageFit } from '#/lib/fleet-luggage-fit'
 import type { PublicCarRow } from '#/lib/portal-functions'
 
@@ -60,9 +67,60 @@ export type BookingState = {
 
 type SessionUserLite = { name?: string | null; email: string }
 
-type AddonKey = 'full' | 'child' | 'gps' | 'second'
+type AddonKey = 'child' | 'second'
 
 type PayMethod = 'card' | 'fpx' | 'grab' | 'later'
+
+const CHECKOUT_COUNTRIES = [
+  'Malaysia',
+  'Singapore',
+  'Thailand',
+  'Indonesia',
+  'Philippines',
+  'United States',
+  'United Kingdom',
+  'Australia',
+  'Other',
+] as const
+
+type BuyerAddress = {
+  addressLine1: string
+  addressLine2: string
+  city: string
+  stateProvince: string
+  postalCode: string
+  country: string
+}
+
+function formatInternationalAddress(address: BuyerAddress): string {
+  const locality = [address.postalCode.trim(), address.city.trim()].filter(Boolean).join(' ')
+  const region = [locality, address.stateProvince.trim()].filter(Boolean).join(', ')
+  return [
+    address.addressLine1.trim(),
+    address.addressLine2.trim(),
+    region,
+    address.country.trim(),
+  ]
+    .filter(Boolean)
+    .join('\n')
+}
+
+function validateBuyerAddress(address: BuyerAddress): Record<string, string> {
+  const e: Record<string, string> = {}
+  if (!address.addressLine1.trim()) {
+    e.buyerAddressLine1 = 'Enter street address, P.O. box, or company name.'
+  }
+  if (!address.city.trim()) {
+    e.buyerCity = 'Enter city or town.'
+  }
+  if (!address.postalCode.trim()) {
+    e.buyerPostalCode = 'Enter postal or ZIP code.'
+  }
+  if (!address.country.trim()) {
+    e.buyerCountry = 'Select country.'
+  }
+  return e
+}
 
 const ADDONS: Array<{
   key: AddonKey
@@ -70,16 +128,7 @@ const ADDONS: Array<{
   desc: string
   price: number
   per: string
-  recommended?: boolean
 }> = [
-  {
-    key: 'full',
-    title: 'Full collision protection',
-    desc: 'Reduce excess to zero. Drive with total peace of mind.',
-    price: 25,
-    per: '/ day',
-    recommended: true,
-  },
   {
     key: 'child',
     title: 'Child safety seat',
@@ -88,18 +137,11 @@ const ADDONS: Array<{
     per: 'one time',
   },
   {
-    key: 'gps',
-    title: 'GPS navigation device',
-    desc: 'Pre-loaded with our top 10 island spots and beach routes.',
-    price: 12,
-    per: '/ day',
-  },
-  {
     key: 'second',
     title: 'Additional driver',
     desc: 'Add a friend or family member. License required at pickup.',
     price: 20,
-    per: '/ day',
+    per: 'one time',
   },
 ]
 
@@ -116,20 +158,107 @@ const PAY_METHODS: Array<{
   { id: 'later', title: 'Pay at pickup', desc: 'Not available for online holds yet', icon: Key, disabled: true },
 ]
 
+const IPAY88_PAYMENTS = [
+  { id: 'visa', label: 'Visa', src: '/images/payments/visalogo.png' },
+  { id: 'mastercard', label: 'Mastercard', src: '/images/payments/masterlogo.jpeg' },
+  { id: 'unionpay', label: 'UnionPay', src: '/images/payments/union.png' },
+  { id: 'fpx', label: 'FPX Online Banking', src: '/images/payments/FPX-Logo.jpg' },
+  { id: 'duitnow', label: 'DuitNow', src: '/images/payments/duitnow.png' },
+  { id: 'tng', label: "Touch 'n Go eWallet", src: '/images/payments/TngGO.jpg' },
+] as const
+
+function CheckoutPaymentIcons() {
+  return (
+    <div className="cs-pay-icons" aria-label="Accepted payment methods via iPay88">
+      {IPAY88_PAYMENTS.map(({ id, label, src }) => (
+        <div key={id} className="cs-pay-chip" title={label}>
+          <img src={src} alt={label} loading="lazy" decoding="async" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function nightsBetween(a: Date | null, b: Date | null) {
   if (!a || !b) return 1
   const ms = b.getTime() - a.getTime()
   return ms > 0 ? Math.max(1, Math.round(ms / 86_400_000)) : 1
 }
 
-function fmtShort(d: Date | null) {
-  return d
-    ? d.toLocaleDateString('en-GB', { weekday: 'long', day: '2-digit', month: 'long' })
-    : '—'
-}
-
 function vehicleTitle(car: PublicCarRow) {
   return `${car.year} ${car.make} ${car.model}`
+}
+
+function validateDriverEmail(value: string): string | null {
+  const v = value.trim()
+  if (!v) {
+    return 'Add the email where you’d like your booking confirmation sent.'
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+    return 'That email doesn’t look quite right — try something like name@example.com.'
+  }
+  return null
+}
+
+function validateDriverPhone(value: string): string | null {
+  const v = value.trim()
+  if (!v) {
+    return 'We’ll use this to reach you about pickup — please add your mobile number.'
+  }
+  const digits = v.replace(/\D/g, '')
+  if (digits.length < 8 || digits.length > 15) {
+    return 'Enter a valid mobile number (8–15 digits; country code optional, e.g. +60 12 345 6789).'
+  }
+  return null
+}
+
+function PayMethodPicker({
+  payMethod,
+  onChange,
+  name,
+  compact = false,
+}: {
+  payMethod: PayMethod
+  onChange: (id: PayMethod) => void
+  name: string
+  compact?: boolean
+}) {
+  return (
+    <div className={'pay-methods' + (compact ? ' pay-methods--compact' : '')}>
+      {PAY_METHODS.map((m) => {
+        const Icon = m.icon
+        return (
+          <label
+            key={m.id}
+            className={'pay-method' + (payMethod === m.id ? ' on' : '')}
+            style={
+              m.disabled
+                ? { cursor: 'not-allowed', opacity: 0.55, pointerEvents: 'none' as const }
+                : undefined
+            }
+          >
+            <input
+              type="radio"
+              name={name}
+              disabled={m.disabled}
+              checked={payMethod === m.id}
+              onChange={() => {
+                if (!m.disabled) onChange(m.id)
+              }}
+            />
+            <span className="pay-method-radio" />
+            <span className="pay-method-icon">
+              <Icon size={compact ? 14 : 16} />
+            </span>
+            <span className="pay-method-body">
+              <strong>{m.title}</strong>
+              <span>{m.desc}</span>
+            </span>
+          </label>
+        )
+      })}
+    </div>
+  )
 }
 
 type LandingCheckoutFlowProps = {
@@ -139,7 +268,6 @@ type LandingCheckoutFlowProps = {
   endYmd?: string
   user?: SessionUserLite
   backHref: string
-  onEditTrip: () => void
 }
 
 export function LandingCheckoutFlow({
@@ -149,67 +277,171 @@ export function LandingCheckoutFlow({
   endYmd,
   user,
   backHref,
-  onEditTrip,
 }: LandingCheckoutFlowProps) {
   const navigate = useNavigate()
   const nights = nightsBetween(booking.pickDate, booking.retDate)
   const daily = Math.round(car.dailyRateSen / 100)
   const subtotal = daily * nights
   const discount = Math.round(subtotal * 0.15)
-  const insurance = 18 * nights
-
   const [step, setStep] = useState(0)
   const [addons, setAddons] = useState<Record<AddonKey, boolean>>({
-    full: true,
     child: false,
-    gps: false,
     second: false,
   })
-  const [details, setDetails] = useState({
+  const [buyer, setBuyer] = useState({
+    name: user?.name ?? '',
+    email: user?.email ?? '',
+    phone: '',
+    addressLine1: '',
+    addressLine2: '',
+    city: '',
+    stateProvince: '',
+    postalCode: '',
+    country: 'Malaysia',
+  })
+  const [driver, setDriver] = useState({
     name: user?.name ?? '',
     email: user?.email ?? '',
     phone: '',
     license: '',
     country: 'Malaysia',
   })
+  const [alsoAsDriver, setAlsoAsDriver] = useState(true)
   const [payMethod, setPayMethod] = useState<PayMethod>('card')
   const [errs, setErrs] = useState<Record<string, string>>({})
+  const [touched, setTouched] = useState<{
+    buyerEmail?: boolean
+    buyerPhone?: boolean
+    driverEmail?: boolean
+    driverPhone?: boolean
+  }>({})
   const [rentalId, setRentalId] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [flowError, setFlowError] = useState<string | null>(null)
 
   useEffect(() => {
-    setDetails((d) => ({
-      ...d,
-      name: user?.name ?? d.name,
-      email: user?.email ?? d.email,
+    setBuyer((b) => ({
+      ...b,
+      name: user?.name ?? b.name,
+      email: user?.email ?? b.email,
     }))
   }, [user?.name, user?.email])
+
+  useEffect(() => {
+    if (!alsoAsDriver) return
+    setDriver((d) => ({
+      ...d,
+      name: buyer.name,
+      email: buyer.email,
+      phone: buyer.phone,
+    }))
+  }, [alsoAsDriver, buyer.name, buyer.email, buyer.phone])
 
   const addonCost = useMemo(() => {
     let sum = 0
     if (addons.child) sum += 30
-    if (addons.gps) sum += 12 * nights
-    if (addons.second) sum += 20 * nights
-    if (addons.full) sum += 25 * nights
+    if (addons.second) sum += 20
     return sum
-  }, [addons, nights])
+  }, [addons])
 
-  const tax = Math.round((subtotal - discount + insurance + addonCost) * 0.06)
-  const total = subtotal - discount + insurance + addonCost + tax
+  const pickupLoc = booking.from.trim() || 'Pickup location TBC'
+  const returnLoc =
+    booking.tripType === 'round' ? pickupLoc : booking.retLoc.trim() || pickupLoc
+  const tripDuration = formatTripDuration(
+    booking.pickDate,
+    booking.pickTime,
+    booking.retDate,
+    booking.retTime,
+  )
+  const extraHours = tripExtraHours(
+    booking.pickDate,
+    booking.pickTime,
+    booking.retDate,
+    booking.retTime,
+    nights,
+  )
+  const extraHoursCharge = estimateExtraHoursCharge(extraHours, car.extHourLowSen, car.dailyRateSen)
+
+  const tax = Math.round((subtotal - discount + addonCost + extraHoursCharge) * 0.06)
+  const total = subtotal - discount + addonCost + extraHoursCharge + tax
 
   const lug = heuristicLuggageFit(car.category)
-  const returnLabel = booking.tripType === 'round' ? `${booking.from} (same)` : booking.retLoc || booking.from
 
   const validateReview = useCallback(() => {
     const e: Record<string, string> = {}
-    if (!details.name.trim()) e.name = 'Required'
-    if (!/^[^@]+@[^@]+\.[^@]+$/.test(details.email)) e.email = 'Use a valid email'
-    if (!details.phone.trim()) e.phone = 'Required'
-    if (!details.license.trim()) e.license = 'Required'
+    if (!buyer.name.trim()) {
+      e.buyerName = 'Please enter the name for this booking.'
+    }
+    const buyerEmailErr = validateDriverEmail(buyer.email)
+    if (buyerEmailErr) e.buyerEmail = buyerEmailErr
+    const buyerPhoneErr = validateDriverPhone(buyer.phone)
+    if (buyerPhoneErr) e.buyerPhone = buyerPhoneErr
+    Object.assign(e, validateBuyerAddress(buyer))
+
+    if (!alsoAsDriver) {
+      if (!driver.name.trim()) {
+        e.driverName = 'Please enter the driver’s full name as shown on their license.'
+      }
+      const driverEmailErr = validateDriverEmail(driver.email)
+      if (driverEmailErr) e.driverEmail = driverEmailErr
+      const driverPhoneErr = validateDriverPhone(driver.phone)
+      if (driverPhoneErr) e.driverPhone = driverPhoneErr
+    }
+
+    if (!driver.license.trim()) {
+      e.driverLicense = 'Please enter the driver’s IC, passport, or license number.'
+    }
+
     setErrs(e)
+    setTouched({
+      buyerEmail: true,
+      buyerPhone: true,
+      driverEmail: true,
+      driverPhone: true,
+    })
     return Object.keys(e).length === 0
-  }, [details])
+  }, [buyer, driver, alsoAsDriver])
+
+  const touchValidateField = useCallback(
+    (scope: 'buyer' | 'driver', field: 'email' | 'phone', value: string) => {
+      const key = `${scope}${field.charAt(0).toUpperCase()}${field.slice(1)}` as
+        | 'buyerEmail'
+        | 'buyerPhone'
+        | 'driverEmail'
+        | 'driverPhone'
+      setTouched((t) => ({ ...t, [key]: true }))
+      const msg = field === 'email' ? validateDriverEmail(value) : validateDriverPhone(value)
+      setErrs((prev) => {
+        const next = { ...prev }
+        if (msg) next[key] = msg
+        else delete next[key]
+        return next
+      })
+    },
+    [],
+  )
+
+  const updateContactField = useCallback(
+    (scope: 'buyer' | 'driver', field: 'email' | 'phone', value: string) => {
+      const key = `${scope}${field.charAt(0).toUpperCase()}${field.slice(1)}` as
+        | 'buyerEmail'
+        | 'buyerPhone'
+        | 'driverEmail'
+        | 'driverPhone'
+      const setter = scope === 'buyer' ? setBuyer : setDriver
+      setter((prev) => ({ ...prev, [field]: value }))
+      if (touched[key]) {
+        const msg = field === 'email' ? validateDriverEmail(value) : validateDriverPhone(value)
+        setErrs((prev) => {
+          const next = { ...prev }
+          if (msg) next[key] = msg
+          else delete next[key]
+          return next
+        })
+      }
+    },
+    [touched],
+  )
 
   const createBooking = useCallback(async () => {
     if (!startYmd || !endYmd) {
@@ -232,10 +464,10 @@ export function LandingCheckoutFlow({
           childSeat: addons.child,
           secondDriver: addons.second,
           couponCode: null,
-          fullName: details.name.trim(),
-          icOrPassport: details.license.trim(),
-          phone: details.phone.trim(),
-          address: details.country ? `Country: ${details.country}` : undefined,
+          fullName: (alsoAsDriver ? buyer.name : driver.name).trim(),
+          icOrPassport: driver.license.trim(),
+          phone: (alsoAsDriver ? buyer.phone : driver.phone).trim(),
+          address: formatInternationalAddress(buyer) || undefined,
         },
       })
       setRentalId(id)
@@ -246,7 +478,7 @@ export function LandingCheckoutFlow({
     } finally {
       setSubmitting(false)
     }
-  }, [car.id, startYmd, endYmd, details, booking, addons])
+  }, [car.id, startYmd, endYmd, buyer, driver, alsoAsDriver, booking, addons])
 
   const advance = useCallback(async () => {
     setFlowError(null)
@@ -310,37 +542,6 @@ export function LandingCheckoutFlow({
 
                 <section className="checkout-card">
                   <div className="checkout-card-head">
-                    <h3>Trip details</h3>
-                    <button type="button" className="checkout-edit" onClick={onEditTrip}>
-                      Edit
-                    </button>
-                  </div>
-                  <div className="trip-grid">
-                    <div className="trip-bit">
-                      <span className="lbl">Pickup</span>
-                      <strong>{booking.from}</strong>
-                      <span className="sub">
-                        {fmtShort(booking.pickDate)} · {booking.pickTime}
-                      </span>
-                    </div>
-                    <div className="trip-arrow">
-                      <ArrowRight size={16} />
-                    </div>
-                    <div className="trip-bit">
-                      <span className="lbl">Return</span>
-                      <strong>{returnLabel}</strong>
-                      <span className="sub">
-                        {fmtShort(booking.retDate)} · {booking.retTime}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="trip-note">
-                    <Clock size={12} /> {nights} day{nights > 1 ? 's' : ''} rental · free meet-and-greet at pickup
-                  </div>
-                </section>
-
-                <section className="checkout-card">
-                  <div className="checkout-card-head">
                     <h3>Add-ons &amp; protection</h3>
                     <span className="checkout-card-meta">Optional · skip any you don&apos;t need</span>
                   </div>
@@ -357,10 +558,7 @@ export function LandingCheckoutFlow({
                         </div>
                         <div className="addon-body">
                           <div className="addon-top">
-                            <span className="addon-name">
-                              {a.title}{' '}
-                              {a.recommended ? <span className="addon-rec">Recommended</span> : null}
-                            </span>
+                            <span className="addon-name">{a.title}</span>
                             <span className="addon-price">
                               + RM {a.price} <span>{a.per}</span>
                             </span>
@@ -374,64 +572,227 @@ export function LandingCheckoutFlow({
 
                 <section className="checkout-card">
                   <div className="checkout-card-head">
-                    <h3>Driver details</h3>
-                    <span className="checkout-card-meta">As shown on your driver&apos;s license</span>
+                    <h3>Buyer information</h3>
+                    <span className="checkout-card-meta">Booking contact &amp; confirmation email</span>
                   </div>
                   <div className="form-grid">
                     <label className="auth-field">
                       <span>Full name</span>
                       <input
-                        value={details.name}
-                        onChange={(e) => setDetails((d) => ({ ...d, name: e.target.value }))}
+                        value={buyer.name}
+                        onChange={(e) => setBuyer((b) => ({ ...b, name: e.target.value }))}
                         placeholder="John Tan"
+                        autoComplete="name"
                       />
-                      {errs.name ? <em>{errs.name}</em> : null}
+                      {errs.buyerName ? <em>{errs.buyerName}</em> : null}
                     </label>
                     <label className="auth-field">
                       <span>Email</span>
                       <input
                         type="email"
-                        value={details.email}
-                        onChange={(e) => setDetails((d) => ({ ...d, email: e.target.value }))}
+                        value={buyer.email}
+                        onChange={(e) => updateContactField('buyer', 'email', e.target.value)}
+                        onBlur={(e) => touchValidateField('buyer', 'email', e.target.value)}
                         placeholder="john@example.com"
+                        autoComplete="email"
+                        aria-invalid={errs.buyerEmail ? true : undefined}
                       />
-                      {errs.email ? <em>{errs.email}</em> : null}
+                      {errs.buyerEmail && touched.buyerEmail ? (
+                        <em className="auth-field-reminder">{errs.buyerEmail}</em>
+                      ) : null}
                     </label>
                     <label className="auth-field">
                       <span>Mobile number</span>
                       <input
-                        value={details.phone}
-                        onChange={(e) => setDetails((d) => ({ ...d, phone: e.target.value }))}
+                        type="tel"
+                        value={buyer.phone}
+                        onChange={(e) => updateContactField('buyer', 'phone', e.target.value)}
+                        onBlur={(e) => touchValidateField('buyer', 'phone', e.target.value)}
                         placeholder="+60 12 345 6789"
+                        autoComplete="tel"
+                        aria-invalid={errs.buyerPhone ? true : undefined}
                       />
-                      {errs.phone ? <em>{errs.phone}</em> : null}
+                      {errs.buyerPhone && touched.buyerPhone ? (
+                        <em className="auth-field-reminder">{errs.buyerPhone}</em>
+                      ) : null}
                     </label>
+
+                    <p className="checkout-field-group-label form-grid-span-full">Billing address</p>
+                    <label className="auth-field form-grid-span-full">
+                      <span>Address line 1</span>
+                      <input
+                        value={buyer.addressLine1}
+                        onChange={(e) => setBuyer((b) => ({ ...b, addressLine1: e.target.value }))}
+                        placeholder="Street address, P.O. box, company name"
+                        autoComplete="address-line1"
+                      />
+                      {errs.buyerAddressLine1 ? <em>{errs.buyerAddressLine1}</em> : null}
+                    </label>
+                    <label className="auth-field form-grid-span-full">
+                      <span>
+                        Address line 2 <span className="checkout-optional">· optional</span>
+                      </span>
+                      <input
+                        value={buyer.addressLine2}
+                        onChange={(e) => setBuyer((b) => ({ ...b, addressLine2: e.target.value }))}
+                        placeholder="Apartment, suite, unit, building, floor"
+                        autoComplete="address-line2"
+                      />
+                    </label>
+                    <label className="auth-field">
+                      <span>City / Town</span>
+                      <input
+                        value={buyer.city}
+                        onChange={(e) => setBuyer((b) => ({ ...b, city: e.target.value }))}
+                        placeholder="Kuah"
+                        autoComplete="address-level2"
+                      />
+                      {errs.buyerCity ? <em>{errs.buyerCity}</em> : null}
+                    </label>
+                    <label className="auth-field">
+                      <span>
+                        State / Province / Region <span className="checkout-optional">· optional</span>
+                      </span>
+                      <input
+                        value={buyer.stateProvince}
+                        onChange={(e) => setBuyer((b) => ({ ...b, stateProvince: e.target.value }))}
+                        placeholder="Kedah"
+                        autoComplete="address-level1"
+                      />
+                    </label>
+                    <label className="auth-field">
+                      <span>Postal / ZIP code</span>
+                      <input
+                        value={buyer.postalCode}
+                        onChange={(e) => setBuyer((b) => ({ ...b, postalCode: e.target.value }))}
+                        placeholder="07000"
+                        autoComplete="postal-code"
+                      />
+                      {errs.buyerPostalCode ? <em>{errs.buyerPostalCode}</em> : null}
+                    </label>
+                    <label className="auth-field">
+                      <span>Country</span>
+                      <select
+                        value={buyer.country}
+                        onChange={(e) => setBuyer((b) => ({ ...b, country: e.target.value }))}
+                        autoComplete="country-name"
+                      >
+                        {CHECKOUT_COUNTRIES.map((o) => (
+                          <option key={o} value={o}>
+                            {o}
+                          </option>
+                        ))}
+                      </select>
+                      {errs.buyerCountry ? <em>{errs.buyerCountry}</em> : null}
+                    </label>
+
+                    <label className={'checkout-also-driver form-grid-span-full' + (alsoAsDriver ? ' on' : '')}>
+                      <input
+                        type="checkbox"
+                        className="checkout-also-driver-input"
+                        checked={alsoAsDriver}
+                        onChange={(e) => {
+                          const on = e.target.checked
+                          setAlsoAsDriver(on)
+                          if (on) {
+                            setDriver((d) => ({
+                              ...d,
+                              name: buyer.name,
+                              email: buyer.email,
+                              phone: buyer.phone,
+                            }))
+                          }
+                        }}
+                      />
+                      <span className="checkout-also-driver-tick" aria-hidden>
+                        <Check size={14} strokeWidth={2.5} />
+                      </span>
+                      <span className="checkout-also-driver-label">
+                        <strong>Also as driver</strong>
+                        <span className="checkout-also-driver-hint">
+                          Use these details for the person picking up the car
+                        </span>
+                      </span>
+                    </label>
+                  </div>
+                </section>
+
+                <section className="checkout-card">
+                  <div className="checkout-card-head">
+                    <h3>Driver details</h3>
+                    <span className="checkout-card-meta">
+                      {alsoAsDriver
+                        ? 'License details for pickup'
+                        : 'Person who will collect and drive the car'}
+                    </span>
+                  </div>
+                  <div className="form-grid">
+                    {!alsoAsDriver ? (
+                      <>
+                        <label className="auth-field">
+                          <span>Full name</span>
+                          <input
+                            value={driver.name}
+                            onChange={(e) => setDriver((d) => ({ ...d, name: e.target.value }))}
+                            placeholder="Driver full name"
+                            autoComplete="off"
+                          />
+                          {errs.driverName ? <em>{errs.driverName}</em> : null}
+                        </label>
+                        <label className="auth-field">
+                          <span>Email</span>
+                          <input
+                            type="email"
+                            value={driver.email}
+                            onChange={(e) => updateContactField('driver', 'email', e.target.value)}
+                            onBlur={(e) => touchValidateField('driver', 'email', e.target.value)}
+                            placeholder="driver@example.com"
+                            autoComplete="off"
+                            aria-invalid={errs.driverEmail ? true : undefined}
+                          />
+                          {errs.driverEmail && touched.driverEmail ? (
+                            <em className="auth-field-reminder">{errs.driverEmail}</em>
+                          ) : null}
+                        </label>
+                        <label className="auth-field">
+                          <span>Mobile number</span>
+                          <input
+                            type="tel"
+                            value={driver.phone}
+                            onChange={(e) => updateContactField('driver', 'phone', e.target.value)}
+                            onBlur={(e) => touchValidateField('driver', 'phone', e.target.value)}
+                            placeholder="+60 12 345 6789"
+                            autoComplete="off"
+                            aria-invalid={errs.driverPhone ? true : undefined}
+                          />
+                          {errs.driverPhone && touched.driverPhone ? (
+                            <em className="auth-field-reminder">{errs.driverPhone}</em>
+                          ) : null}
+                        </label>
+                      </>
+                    ) : (
+                      <p className="checkout-driver-linked">
+                        Using <strong>{buyer.name.trim() || 'buyer name'}</strong>
+                        {buyer.email ? ` · ${buyer.email}` : ''}
+                        {buyer.phone ? ` · ${buyer.phone}` : ''}
+                      </p>
+                    )}
                     <label className="auth-field">
                       <span>IC / Passport / License no.</span>
                       <input
-                        value={details.license}
-                        onChange={(e) => setDetails((d) => ({ ...d, license: e.target.value }))}
+                        value={driver.license}
+                        onChange={(e) => setDriver((d) => ({ ...d, license: e.target.value }))}
                         placeholder="MyKad / IDP / DL no."
                       />
-                      {errs.license ? <em>{errs.license}</em> : null}
+                      {errs.driverLicense ? <em>{errs.driverLicense}</em> : null}
                     </label>
-                    <label className="auth-field" style={{ gridColumn: '1 / -1' }}>
+                    <label className="auth-field" style={{ gridColumn: alsoAsDriver ? '1 / -1' : undefined }}>
                       <span>Issuing country</span>
                       <select
-                        value={details.country}
-                        onChange={(e) => setDetails((d) => ({ ...d, country: e.target.value }))}
+                        value={driver.country}
+                        onChange={(e) => setDriver((d) => ({ ...d, country: e.target.value }))}
                       >
-                        {[
-                          'Malaysia',
-                          'Singapore',
-                          'Thailand',
-                          'Indonesia',
-                          'Philippines',
-                          'United States',
-                          'United Kingdom',
-                          'Australia',
-                          'Other',
-                        ].map((o) => (
+                        {CHECKOUT_COUNTRIES.map((o) => (
                           <option key={o} value={o}>
                             {o}
                           </option>
@@ -441,16 +802,7 @@ export function LandingCheckoutFlow({
                   </div>
                 </section>
 
-                <section className="checkout-card cancel-card">
-                  <Shield size={20} style={{ color: 'var(--brand-leaf)', flex: '0 0 auto' }} />
-                  <div>
-                    <strong>Free cancellation until 48 hours before pickup.</strong>
-                    <p>
-                      Plans change — we get it. Cancel up to 2 days before your pickup time and we&apos;ll refund every
-                      ringgit, no questions asked.
-                    </p>
-                  </div>
-                </section>
+
               </div>
             ) : null}
 
@@ -474,38 +826,7 @@ export function LandingCheckoutFlow({
                     </span>
                   </div>
                   <div className="pay-methods">
-                    {PAY_METHODS.map((m) => {
-                      const Icon = m.icon
-                      return (
-                        <label
-                          key={m.id}
-                          className={'pay-method' + (payMethod === m.id ? ' on' : '')}
-                          style={
-                            m.disabled
-                              ? { cursor: 'not-allowed', opacity: 0.55, pointerEvents: 'none' as const }
-                              : undefined
-                          }
-                        >
-                          <input
-                            type="radio"
-                            name="method"
-                            disabled={m.disabled}
-                            checked={payMethod === m.id}
-                            onChange={() => {
-                              if (!m.disabled) setPayMethod(m.id)
-                            }}
-                          />
-                          <span className="pay-method-radio" />
-                          <span className="pay-method-icon">
-                            <Icon size={16} />
-                          </span>
-                          <span className="pay-method-body">
-                            <strong>{m.title}</strong>
-                            <span>{m.desc}</span>
-                          </span>
-                        </label>
-                      )
-                    })}
+                    <PayMethodPicker payMethod={payMethod} onChange={setPayMethod} name="method-main" />
                   </div>
                 </section>
 
@@ -573,7 +894,7 @@ export function LandingCheckoutFlow({
                   </span>
                   <h2 className="h-section">You&apos;re almost there.</h2>
                   <p className="h-sub" style={{ marginTop: 4 }}>
-                    We&apos;ve saved your trip for <b style={{ color: 'var(--ink)' }}>{details.email}</b>. Complete
+                    We&apos;ve saved your trip for <b style={{ color: 'var(--ink)' }}>{buyer.email}</b>. Complete
                     payment now to confirm — show your booking reference at pickup.
                   </p>
                   <div className="confirmation-id">
@@ -609,25 +930,42 @@ export function LandingCheckoutFlow({
               </div>
             </div>
 
-            <div className="cs-dates">
-              <div>
-                <span>Pickup</span>
-                <strong>
-                  {booking.pickDate?.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short' })}
-                </strong>
-                <em>{booking.pickTime}</em>
+            <div className="cs-trip">
+              <div className="cs-trip-duration">
+                <Clock size={13} aria-hidden />
+                <span>{tripDuration}</span>
               </div>
-              <div className="cs-dates-mid">
-                <span className="cs-dates-days">
-                  {nights} day{nights > 1 ? 's' : ''}
-                </span>
-              </div>
-              <div>
-                <span>Return</span>
-                <strong>
-                  {booking.retDate?.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short' })}
-                </strong>
-                <em>{booking.retTime}</em>
+              <div className="cs-trip-legs">
+                <div className="cs-trip-leg">
+                  <span className="cs-trip-lbl">Pickup</span>
+                  <strong>
+                    {booking.pickDate?.toLocaleDateString('en-GB', {
+                      weekday: 'short',
+                      day: '2-digit',
+                      month: 'short',
+                    })}
+                  </strong>
+                  <em>{booking.pickTime}</em>
+                  <span className="cs-trip-loc">
+                    <MapPin size={11} aria-hidden />
+                    <span>{pickupLoc}</span>
+                  </span>
+                </div>
+                <div className="cs-trip-leg cs-trip-leg--return">
+                  <span className="cs-trip-lbl">Return</span>
+                  <strong>
+                    {booking.retDate?.toLocaleDateString('en-GB', {
+                      weekday: 'short',
+                      day: '2-digit',
+                      month: 'short',
+                    })}
+                  </strong>
+                  <em>{booking.retTime}</em>
+                  <span className="cs-trip-loc">
+                    <MapPin size={11} aria-hidden />
+                    <span>{returnLoc}</span>
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -643,16 +981,18 @@ export function LandingCheckoutFlow({
                 <span>Early-bird discount</span>
                 <span style={{ color: 'var(--brand-coral)' }}>−RM {discount}</span>
               </div>
-              <div className="cs-row">
-                <span>Insurance</span>
-                <span>RM {insurance}</span>
-              </div>
-              {addonCost > 0 ? (
+              {extraHours > 0 ? (
                 <div className="cs-row">
-                  <span>Add-ons</span>
-                  <span>RM {addonCost}</span>
+                  <span>Extra hours ({formatExtraHours(extraHours)})</span>
+                  <span>RM {extraHoursCharge}</span>
                 </div>
               ) : null}
+              {ADDONS.filter((a) => addons[a.key]).map((a) => (
+                <div key={a.key} className="cs-row">
+                  <span>{a.title}</span>
+                  <span>RM {a.price}</span>
+                </div>
+              ))}
               <div className="cs-row">
                 <span>Service tax (6%)</span>
                 <span>RM {tax}</span>
@@ -665,9 +1005,6 @@ export function LandingCheckoutFlow({
             </div>
             <div className="cs-trust">
               <span>
-                <Shield size={11} /> Insurance &amp; 48-h cancellation included
-              </span>
-              <span>
                 <Check size={11} /> No charge until you complete payment
               </span>
             </div>
@@ -678,20 +1015,27 @@ export function LandingCheckoutFlow({
                   Back to review
                 </button>
               ) : (
-                <button type="button" className="btn btn-leaf btn-lg" onClick={() => void advance()} disabled={submitting}>
-                  {step === 0
-                    ? 'Continue to payment'
-                    : submitting
-                      ? 'Creating booking…'
-                      : 'Create booking & continue'}
-                  <ArrowRight size={14} />
-                </button>
+                <div className="cs-pay-actions">
+                  <button type="button" className="btn btn-leaf btn-lg" onClick={() => void advance()} disabled={submitting}>
+                    {step === 0
+                      ? 'Continue to payment'
+                      : submitting
+                        ? 'Creating booking…'
+                        : 'Create booking & continue'}
+                    <ArrowRight size={14} />
+                  </button>
+                  <CheckoutPaymentIcons />
+                </div>
               )
             ) : (
-              <button type="button" className="btn btn-leaf btn-lg" onClick={() => void advance()} disabled={!rentalId}>
-                Pay RM {total} <ArrowRight size={14} />
-              </button>
+              <div className="cs-pay-actions">
+                <button type="button" className="btn btn-leaf btn-lg" onClick={() => void advance()} disabled={!rentalId}>
+                  Pay RM {total} <ArrowRight size={14} />
+                </button>
+                <CheckoutPaymentIcons />
+              </div>
             )}
+
           </aside>
         </div>
     </div>

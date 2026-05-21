@@ -11,6 +11,8 @@ export type PublicCarRow = {
   year: number
   category: CarCategory
   dailyRateSen: number
+  extHourLowSen?: number
+  extHourPeakAndSuperPeakSen?: number
   coverPhotoUrl: string | null
   notes: string | null
 }

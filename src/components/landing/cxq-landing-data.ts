@@ -59,6 +59,8 @@ export const PICK_TIMES = [
   '06:00 PM',
   '07:00 PM',
   '08:00 PM',
+  '09:00 PM',
+  '10:00 PM',
 ] as const
 
 export const BLOG_TIPS = [
@@ -210,7 +212,7 @@ export const FAQS = [
   {
     c: 'Insurance & Safety',
     q: 'Is insurance included?',
-    a: 'Yes — every rental includes Third-Party Liability Insurance, and you can add extra coverage for additional peace of mind.',
+    a: 'Coverage depends on the vehicle and your booking. Message us before you travel and we will confirm what applies to your rental.',
   },
   {
     c: 'Pickup & Extras',
@@ -220,7 +222,7 @@ export const FAQS = [
   {
     c: 'Insurance & Safety',
     q: 'What happens if I have a breakdown?',
-    a: 'Call our 24-hour roadside line and help will be on the way. We typically reach you within 30 minutes anywhere on Langkawi.',
+    a: 'Call our 24-hour line on +60 11 3521 5576 and we will guide you through the next steps.',
   },
   {
     c: 'Eligibility',

@@ -36,8 +36,8 @@ function defaultBooking(): BookingState {
     tripType: 'round',
     pickDate: d1,
     retDate: d2,
-    pickTime: '10:30 AM',
-    retTime: '04:30 PM',
+    pickTime: '07:00 AM',
+    retTime: '07:00 AM',
     adults: 2,
     children: 0,
   }
@@ -82,6 +82,8 @@ function detailToRow(car: PublicCarDetail): PublicCarRow {
     year: car.year,
     category: car.category,
     dailyRateSen: car.dailyRateSen,
+    extHourLowSen: car.extHourLowSen,
+    extHourPeakAndSuperPeakSen: car.extHourPeakAndSuperPeakSen,
     coverPhotoUrl: cover,
     notes: car.notes,
   }
@@ -121,7 +123,7 @@ function CheckoutPage() {
 
   return (
     <div className="cxq-landing-page">
-      <div className="page" data-screen-label="Car XQ Checkout">
+      <div className="page page--checkout" data-screen-label="Car XQ Checkout">
         <div className="layout-bleed cxq-checkout-nav-strip">
           <LandingNav
             appearance="solid-light"
@@ -142,13 +144,17 @@ function CheckoutPage() {
             endYmd={endYmd}
             user={user ? { name: user.name, email: user.email } : undefined}
             backHref="/"
-            onEditTrip={() => {
-              void navigate({ to: '/', hash: 'booking-dock' })
-            }}
           />
         </div>
 
-        <SiteFooter />
+        <SiteFooter
+          onScrollBooking={() => {
+            void navigate({ to: '/', hash: 'booking-dock' })
+          }}
+          onScrollFleet={() => {
+            void navigate({ to: '/', hash: 'top-picks' })
+          }}
+        />
       </div>
     </div>
   )

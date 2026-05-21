@@ -1,5 +1,12 @@
 import type { CarCategory } from '#/db/schema'
 
+type CarSpecInput = {
+  make: string
+  model: string
+  category: CarCategory
+  notes?: string | null
+}
+
 /** Illustrative luggage fit (75 L “large”, 35 L “small”) by fleet category — same rules as the pick-car guide. */
 export type HeuristicLuggageFit = {
   seats: number
@@ -49,4 +56,19 @@ export function heuristicLuggageFit(category: CarCategory): HeuristicLuggageFit 
         groups: ['Comfort'],
       }
   }
+}
+
+/** Passenger capacity label for cards and detail UI. */
+export function fleetPassengerLabel(car: CarSpecInput): string {
+  const seats = heuristicLuggageFit(car.category).seats
+  return `${seats} passengers`
+}
+
+/** Fuel type from notes or common fleet naming; defaults to petrol. */
+export function fleetFuelType(car: CarSpecInput): string {
+  const hay = `${car.make} ${car.model} ${car.notes ?? ''}`.toLowerCase()
+  if (/\bdiesel\b/.test(hay)) return 'Diesel'
+  if (/\b(hybrid|phev|plug-in)\b/.test(hay)) return 'Hybrid'
+  if (/\bev\b|electric\b/.test(hay)) return 'Electric'
+  return 'Petrol'
 }

@@ -45,7 +45,25 @@
   .checkout-page-frame .checkout {
     max-width: 1200px;
     margin: 0 auto;
-    border-radius: 0 0 18px 18px;
+    border-radius: 0;
+  }
+
+  .page.page--checkout {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100dvh - 36px);
+    overflow: visible;
+  }
+
+  .page.page--checkout .checkout-page-frame {
+    flex: 1 0 auto;
+  }
+
+  .page.page--checkout .site-footer {
+    flex-shrink: 0;
+    margin-top: 0;
+    border-bottom-left-radius: var(--r-xl);
+    border-bottom-right-radius: var(--r-xl);
   }
 
   .checkout-header a.close-btn {

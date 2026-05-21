@@ -10,7 +10,6 @@ import {
   Copy,
   MapPin,
   Phone,
-  Shield,
   Wallet,
   XCircle,
 } from 'lucide-react'
@@ -194,12 +193,6 @@ function BookingDetailPage() {
                 <span>
                   <Wallet size={11} strokeWidth={2} aria-hidden />
                   <span>{formatRM(booking.totalAmountSen)}</span>
-                </span>
-              </div>
-              <div className="cxq-booking-detail-trust">
-                <span>
-                  <Shield size={12} strokeWidth={2} aria-hidden />
-                  Insurance included · free cancellation up to 48&nbsp;h before pickup
                 </span>
               </div>
               <div className="cxq-booking-detail-actions">

@@ -344,10 +344,12 @@ export function PickCarGuide({ cars }: { cars: PublicCarRow[] }) {
       {detailCar && (
         <CarDetailDialog
           car={detailCar}
+          fleet={cars}
           booking={booking}
           nights={nightsBetween(booking.pickDate, booking.retDate)}
           onClose={() => setDetailCar(null)}
           onBeginCheckout={goToCheckout}
+          onSelectCar={setDetailCar}
         />
       )}
     </GuidePageShell>
