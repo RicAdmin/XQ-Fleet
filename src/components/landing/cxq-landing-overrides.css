@@ -19,6 +19,17 @@
   .nav.nav--solid-light .nav-search input::placeholder {
     color: var(--muted-2);
   }
+  .nav.nav--solid-light .nav-search-clear {
+    background: var(--canvas-2);
+    color: var(--muted);
+  }
+  .nav.nav--solid-light .nav-search-clear:hover {
+    background: var(--line);
+    color: var(--ink);
+  }
+  .nav.nav--solid-light .nav-search-menu {
+    border-color: var(--line);
+  }
   .nav.nav--solid-light .nav-right > span.flex {
     color: var(--muted);
   }

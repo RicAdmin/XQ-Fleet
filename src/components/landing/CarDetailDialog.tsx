@@ -3,7 +3,7 @@ import { Accessibility, ArrowRight, Check, CirclePlay, Luggage, MapPin, Shield, 
 
 import { LuggageFitModal } from '#/components/LuggageFitModal'
 import { OkuFeatureModal } from '#/components/OkuFeatureModal'
-import { formatTripDuration } from '#/lib/booking-datetime'
+import { addCalendarDays, formatTripDuration, isAllowedPickupDate, isAllowedReturnDate } from '#/lib/booking-datetime'
 import { getCategoryAlternatives } from '#/lib/detail-car-alternatives'
 import { isHondaNBox, OKU_NBOX_FEATURES, OKU_NBOX_HEADLINE, OKU_NBOX_SUMMARY } from '#/lib/fleet-oku'
 import { fleetFuelType, heuristicLuggageFit } from '#/lib/fleet-luggage-fit'
@@ -23,10 +23,31 @@ export type BookingState = {
   children: number
 }
 
-/** Pickup and return dates chosen with return after pickup. */
-export function hasTripDates(booking: Pick<BookingState, 'pickDate' | 'retDate'>): boolean {
-  if (!booking.pickDate || !booking.retDate) return false
-  return booking.retDate.getTime() > booking.pickDate.getTime()
+/** Pickup/return dates and times chosen; pickup must be tomorrow or later. */
+export function hasTripDates(
+  booking: Pick<BookingState, 'pickDate' | 'retDate' | 'pickTime' | 'retTime'>,
+): boolean {
+  return (
+    isAllowedReturnDate(booking.pickDate, booking.retDate) &&
+    Boolean(booking.pickTime.trim()) &&
+    Boolean(booking.retTime.trim())
+  )
+}
+
+export function sanitizeBookingDates(booking: BookingState): BookingState {
+  const b = cloneBooking(booking)
+  if (!isAllowedPickupDate(b.pickDate)) {
+    b.pickDate = null
+    b.retDate = null
+    b.pickTime = ''
+    b.retTime = ''
+    return b
+  }
+  if (!isAllowedReturnDate(b.pickDate, b.retDate)) {
+    b.retDate = null
+    b.retTime = ''
+  }
+  return b
 }
 
 export function defaultBooking(): BookingState {
@@ -42,8 +63,8 @@ export function defaultBooking(): BookingState {
     tripType: 'round',
     pickDate: d1,
     retDate: d2,
-    pickTime: '07:00 AM',
-    retTime: '07:00 AM',
+    pickTime: '',
+    retTime: '',
     adults: 2,
     children: 0,
   }
@@ -88,6 +109,7 @@ export function CarDetailDialog({
   fleet,
   booking,
   nights,
+  checkoutReady = true,
   onClose,
   onBeginCheckout,
   onSelectCar,
@@ -96,6 +118,7 @@ export function CarDetailDialog({
   fleet: PublicCarRow[]
   booking: BookingState
   nights: number
+  checkoutReady?: boolean
   onClose: () => void
   onBeginCheckout: (car: PublicCarRow) => void
   onSelectCar: (car: PublicCarRow) => void
@@ -231,16 +254,16 @@ export function CarDetailDialog({
               </h2>
             </div>
 
-            <div className="detail-spec-grid" role="list" aria-label="Vehicle highlights">
-              <div className="detail-spec" role="listitem">
+            <div className="detail-spec-grid" aria-label="Vehicle highlights">
+              <div className="detail-spec">
                 <span className="detail-spec-label">Passengers</span>
                 <span className="detail-spec-value">{lug.seats}</span>
               </div>
-              <div className="detail-spec" role="listitem">
+              <div className="detail-spec">
                 <span className="detail-spec-label">Fuel</span>
                 <span className="detail-spec-value">{fuelType}</span>
               </div>
-              <div className="detail-spec detail-spec--luggage" role="listitem">
+              <div className="detail-spec">
                 <span className="detail-spec-label">Luggage</span>
                 <span
                   className="detail-spec-value"
@@ -328,6 +351,8 @@ export function CarDetailDialog({
               <button
                 type="button"
                 className="btn btn-leaf btn-lg detail-checkout-btn"
+                disabled={!checkoutReady}
+                title={checkoutReady ? undefined : 'Search again with valid pickup and return dates'}
                 onClick={() => onBeginCheckout(car)}
               >
                 Continue to checkout <ArrowRight size={14} />

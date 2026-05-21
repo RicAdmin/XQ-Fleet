@@ -16,6 +16,7 @@ import {
   Wallet,
 } from 'lucide-react'
 
+import { checkoutSearchFromBooking, bookingHasCompleteTrip } from '#/lib/checkout-trip'
 import { createPortalBooking } from '#/lib/portal-booking-functions'
 import {
   estimateExtraHoursCharge,
@@ -444,6 +445,10 @@ export function LandingCheckoutFlow({
   )
 
   const createBooking = useCallback(async () => {
+    if (!bookingHasCompleteTrip(booking)) {
+      setFlowError('Pickup and return dates and times are required. Go back and complete your search.')
+      return
+    }
     if (!startYmd || !endYmd) {
       setFlowError('Pick valid dates from the search bar first.')
       return
@@ -502,7 +507,20 @@ export function LandingCheckoutFlow({
     }
   }, [step, validateReview, user, payMethod, createBooking, rentalId, navigate])
 
-  const bookReturnTo = `/book/${car.id}?startDate=${encodeURIComponent(startYmd ?? '')}&endDate=${encodeURIComponent(endYmd ?? '')}`
+  const tripSearch = useMemo(() => checkoutSearchFromBooking(booking), [booking])
+  const bookReturnQuery = useMemo(() => {
+    const params = new URLSearchParams()
+    if (tripSearch.startDate) params.set('startDate', tripSearch.startDate)
+    if (tripSearch.endDate) params.set('endDate', tripSearch.endDate)
+    if (tripSearch.pickTime) params.set('pickTime', tripSearch.pickTime)
+    if (tripSearch.retTime) params.set('retTime', tripSearch.retTime)
+    if (tripSearch.from) params.set('from', tripSearch.from)
+    if (tripSearch.retLoc) params.set('retLoc', tripSearch.retLoc)
+    if (tripSearch.tripType) params.set('tripType', tripSearch.tripType)
+    const q = params.toString()
+    return q ? `?${q}` : ''
+  }, [tripSearch])
+  const bookReturnTo = `/book/${car.id}${bookReturnQuery}`
 
   return (
     <div className="checkout">
@@ -876,7 +894,15 @@ export function LandingCheckoutFlow({
                   <p style={{ margin: '18px 0 0', fontSize: 13, color: 'var(--muted)' }}>
                     Or continue on the standard booking page (same dates we passed in the link).
                   </p>
-                  <Link to="/book/$carId" params={{ carId: car.id }} search={{ startDate: startYmd, endDate: endYmd }} className="checkout-edit">
+                  <Link
+                    to="/book/$carId"
+                    params={{ carId: car.id }}
+                    search={{
+                      startDate: tripSearch.startDate,
+                      endDate: tripSearch.endDate,
+                    }}
+                    className="checkout-edit"
+                  >
                     Open booking form →
                   </Link>
                 </section>
@@ -945,7 +971,7 @@ export function LandingCheckoutFlow({
                       month: 'short',
                     })}
                   </strong>
-                  <em>{booking.pickTime}</em>
+                  <em>{booking.pickTime.trim() || '—'}</em>
                   <span className="cs-trip-loc">
                     <MapPin size={11} aria-hidden />
                     <span>{pickupLoc}</span>
@@ -960,7 +986,7 @@ export function LandingCheckoutFlow({
                       month: 'short',
                     })}
                   </strong>
-                  <em>{booking.retTime}</em>
+                  <em>{booking.retTime.trim() || '—'}</em>
                   <span className="cs-trip-loc">
                     <MapPin size={11} aria-hidden />
                     <span>{returnLoc}</span>

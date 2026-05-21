@@ -1,3 +1,51 @@
+/** Calendar date at local midnight. */
+export function startOfLocalDay(date: Date = new Date()): Date {
+  const d = new Date(date)
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+/** Earliest bookable pickup — tomorrow (today and past dates are not allowed). */
+export function earliestPickupDate(from: Date = new Date()): Date {
+  return addCalendarDays(startOfLocalDay(from), 1)
+}
+
+export function isAllowedPickupDate(date: Date | null, from: Date = new Date()): boolean {
+  if (!date) return false
+  return startOfLocalDay(date) >= earliestPickupDate(from)
+}
+
+export function isAllowedReturnDate(pickDate: Date | null, retDate: Date | null): boolean {
+  if (!pickDate || !retDate) return false
+  if (!isAllowedPickupDate(pickDate)) return false
+  const earliestReturn = addCalendarDays(startOfLocalDay(pickDate), 1)
+  return startOfLocalDay(retDate) >= earliestReturn
+}
+
+/** Serialize a local calendar date as YYYY-MM-DD (avoids UTC shift from toISOString). */
+export function toLocalYmd(date: Date | null | undefined): string | undefined {
+  if (!date) return undefined
+  const d = startOfLocalDay(date)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+export function parseLocalYmd(s: string | null | undefined): Date | null {
+  if (!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return null
+  const d = new Date(`${s}T12:00:00`)
+  return Number.isNaN(d.getTime()) ? null : d
+}
+
+/** Calendar date at local midnight, plus N days. */
+export function addCalendarDays(date: Date, days: number): Date {
+  const d = new Date(date)
+  d.setHours(0, 0, 0, 0)
+  d.setDate(d.getDate() + days)
+  return d
+}
+
 /** Parse "10:30 AM" / "16:30" / "10:30:00" to HH:MM:SS for Date.setHours. */
 export function bookingTimeToHms(time: string): string {
   const t = time.trim()
@@ -17,7 +65,7 @@ export function bookingTimeToHms(time: string): string {
 }
 
 export function bookingDateTime(date: Date | null, time: string): Date | null {
-  if (!date) return null
+  if (!date || !time.trim()) return null
   const [h, m, s] = bookingTimeToHms(time).split(':').map(Number)
   const dt = new Date(date)
   dt.setHours(h, m, s ?? 0, 0)

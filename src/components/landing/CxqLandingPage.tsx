@@ -1,7 +1,7 @@
 import './cxq-landing-scoped.css'
 import './cxq-landing-overrides.css'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import {
   ArrowRight,
@@ -36,11 +36,15 @@ import {
   defaultBooking,
   hasTripDates,
   nightsBetween,
+  sanitizeBookingDates,
   type BookingState,
 } from '#/components/landing/CarDetailDialog'
 
 import { LuggageFitModal } from '#/components/LuggageFitModal'
 import { authClient } from '#/lib/auth-client'
+import { addCalendarDays, earliestPickupDate, formatTripDuration, isAllowedReturnDate, startOfLocalDay, toLocalYmd } from '#/lib/booking-datetime'
+import { checkoutSearchFromBooking } from '#/lib/checkout-trip'
+import { loadTripSearch, saveTripSearch } from '#/lib/trip-search-storage'
 import { heuristicLuggageFit } from '#/lib/fleet-luggage-fit'
 import { isHondaNBox } from '#/lib/fleet-oku'
 import { filterPublicCars } from '#/lib/portal-functions'
@@ -65,11 +69,6 @@ const LOC_JETTY = 'Langkawi Ferry Jetty (Kuah)'
 
 function formatMYR(sen: number) {
   return `RM ${Math.round(sen / 100).toLocaleString()}`
-}
-
-function toYmd(d: Date | null) {
-  if (!d) return undefined
-  return d.toISOString().slice(0, 10)
 }
 
 function fmtDate(d: Date | null) {
@@ -105,15 +104,25 @@ function pickCar(cars: PublicCarRow[], cat: CarCategoryKey): PublicCarRow | null
   return cars.find((c) => c.category === cat) ?? cars[0] ?? null
 }
 
-export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] }) {
+export function CxqLandingPage({
+  initialCars,
+  initialModelQuery = '',
+}: {
+  initialCars: PublicCarRow[]
+  initialModelQuery?: string
+}) {
   const navigate = useNavigate()
   const [cars, setCars] = useState<PublicCarRow[]>(initialCars)
+  const [modelQuery, setModelQuery] = useState(initialModelQuery)
   const [booking, setBooking] = useState<BookingState>(() => ({
     ...defaultBooking(),
     pickDate: null,
     retDate: null,
+    pickTime: '',
+    retTime: '',
   }))
   const [searchCriteria, setSearchCriteria] = useState<BookingState | null>(null)
+  const [tripSearchReady, setTripSearchReady] = useState(false)
   const [openCar, setOpenCar] = useState<PublicCarRow | null>(null)
   const [activeReel, setActiveReel] = useState<(typeof REELS)[number] | null>(null)
   const [searching, setSearching] = useState(false)
@@ -132,14 +141,66 @@ export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] })
     return () => document.removeEventListener('mousedown', onDoc)
   }, [])
 
+  useEffect(() => {
+    const stored = loadTripSearch()
+    if (stored) {
+      setBooking(stored.booking)
+      const criteria =
+        stored.searchCriteria && hasTripDates(stored.searchCriteria) ? stored.searchCriteria : null
+      setSearchCriteria(criteria)
+      if (criteria) {
+        const start = toLocalYmd(criteria.pickDate)
+        const end = toLocalYmd(criteria.retDate)
+        if (start && end) {
+          void filterPublicCars({ data: { startDate: start, endDate: end } })
+            .then(setCars)
+            .catch(() => {})
+        }
+      }
+    }
+    setTripSearchReady(true)
+  }, [])
+
+  useEffect(() => {
+    if (!tripSearchReady) return
+    saveTripSearch(booking, searchCriteria)
+  }, [booking, searchCriteria, tripSearchReady])
+
+  useEffect(() => {
+    if (!tripSearchReady) return
+    setBooking((b) => {
+      const sanitized = sanitizeBookingDates(b)
+      if (
+        sanitized.pickDate?.getTime() === b.pickDate?.getTime() &&
+        sanitized.retDate?.getTime() === b.retDate?.getTime()
+      ) {
+        return b
+      }
+      return sanitized
+    })
+    setSearchCriteria((criteria) => {
+      if (!criteria) return criteria
+      const sanitized = sanitizeBookingDates(criteria)
+      return hasTripDates(sanitized) ? sanitized : null
+    })
+  }, [tripSearchReady])
+
+  const clearModelQuery = useCallback(() => {
+    setModelQuery('')
+    void navigate({ to: '/', search: {}, replace: true })
+  }, [navigate])
+
   const focusBookingDates = useCallback(() => {
     scrollToAnchor('booking-dock')
   }, [])
 
   const requireBookingSearch = useCallback(() => {
-    const message = !hasTripDates(booking)
-      ? 'Choose pickup and return dates above, then tap Search cars to view vehicles and book.'
-      : 'Tap Search cars to check what’s available for your trip.'
+    let message = 'Tap Search cars to check what’s available for your trip.'
+    if (!isAllowedReturnDate(booking.pickDate, booking.retDate)) {
+      message = 'Choose pickup and return dates above, then tap Search cars to view vehicles and book.'
+    } else if (!booking.pickTime.trim() || !booking.retTime.trim()) {
+      message = 'Choose pickup and return times — both are required before you can search.'
+    }
     setBookingPrompt(message)
     scrollToAnchor('booking-dock')
   }, [booking])
@@ -150,11 +211,13 @@ export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] })
       return
     }
     setBookingPrompt(null)
-    setSearchCriteria(cloneBooking(booking))
+    const committed = cloneBooking(booking)
+    setSearchCriteria(committed)
+    saveTripSearch(booking, committed)
     setSearching(true)
     try {
-      const start = toYmd(booking.pickDate)
-      const end = toYmd(booking.retDate)
+      const start = toLocalYmd(booking.pickDate)
+      const end = toLocalYmd(booking.retDate)
       const results = await filterPublicCars({
         data: {
           startDate: start,
@@ -187,14 +250,16 @@ export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] })
       searchCriteria.pickDate?.getTime() === booking.pickDate?.getTime()
     const sameRet =
       searchCriteria.retDate?.getTime() === booking.retDate?.getTime()
-    if (!samePick || !sameRet) {
+    const samePickTime = searchCriteria.pickTime === booking.pickTime
+    const sameRetTime = searchCriteria.retTime === booking.retTime
+    if (!samePick || !sameRet || !samePickTime || !sameRetTime) {
       setSearchCriteria(null)
     }
-  }, [booking.pickDate, booking.retDate, searchCriteria])
+  }, [booking.pickDate, booking.retDate, booking.pickTime, booking.retTime, searchCriteria])
 
   const trip = searchCriteria ?? booking
-  const startYmd = toYmd(trip.pickDate)
-  const endYmd = toYmd(trip.retDate)
+  const startYmd = toLocalYmd(trip.pickDate)
+  const endYmd = toLocalYmd(trip.retDate)
 
   const goToCheckout = useCallback(
     (car: PublicCarRow) => {
@@ -203,21 +268,12 @@ export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] })
         return
       }
       const checkoutTrip = searchCriteria
+      saveTripSearch(checkoutTrip, checkoutTrip)
       setOpenCar(null)
       void navigate({
         to: '/checkout/$carId',
         params: { carId: car.id },
-        search: {
-          startDate: toYmd(checkoutTrip.pickDate),
-          endDate: toYmd(checkoutTrip.retDate),
-          from: checkoutTrip.from,
-          retLoc: checkoutTrip.retLoc,
-          tripType: checkoutTrip.tripType,
-          pickTime: checkoutTrip.pickTime,
-          retTime: checkoutTrip.retTime,
-          adults: String(checkoutTrip.adults),
-          children: String(checkoutTrip.children),
-        },
+        search: checkoutSearchFromBooking(checkoutTrip),
       })
     },
     [navigate, searchCriteria, requireBookingSearch],
@@ -234,6 +290,15 @@ export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] })
               navMenuOpen={navMenuOpen}
               setNavMenuOpen={setNavMenuOpen}
               navMenuRef={navMenuRef}
+              cars={cars}
+              modelQuery={modelQuery}
+              onModelQueryChange={setModelQuery}
+              onClearModelQuery={clearModelQuery}
+              onModelSelect={(car) => {
+                setModelQuery(carModelLabel(car))
+                scrollToAnchor('top-picks')
+                tryOpenCar(car)
+              }}
               onScrollFleet={() => scrollToAnchor('top-picks')}
               onScrollCategories={() => scrollToAnchor('categories')}
               onScrollLocations={() => scrollToAnchor('locations')}
@@ -251,10 +316,13 @@ export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] })
           datesReady={hasTripDates(booking)}
           prompt={bookingPrompt}
           onClearPrompt={() => setBookingPrompt(null)}
+          onPrompt={setBookingPrompt}
         />
 
         <TopPicksSection
           cars={cars}
+          modelQuery={modelQuery}
+          onClearModelQuery={clearModelQuery}
           matchedSearch={canBrowseFleet}
           fleetLocked={!canBrowseFleet}
           onRequireTrip={requireBookingSearch}
@@ -283,12 +351,13 @@ export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] })
           onScrollFleet={() => scrollToAnchor('top-picks')}
         />
 
-        {openCar && canBrowseFleet && (
+        {openCar && (
           <CarDetailDialog
             car={openCar}
             fleet={cars}
             booking={trip}
             nights={nightsBetween(trip.pickDate, trip.retDate)}
+            checkoutReady={canBrowseFleet}
             onClose={() => setOpenCar(null)}
             onBeginCheckout={goToCheckout}
             onSelectCar={setOpenCar}
@@ -296,6 +365,155 @@ export function CxqLandingPage({ initialCars }: { initialCars: PublicCarRow[] })
         )}
         {activeReel && <ReelLightbox reel={activeReel} onClose={() => setActiveReel(null)} />}
       </div>
+    </div>
+  )
+}
+
+function carModelLabel(car: PublicCarRow) {
+  return `${car.make} ${car.model}`.trim()
+}
+
+function matchCarModel(car: PublicCarRow, query: string) {
+  const q = query.trim().toLowerCase()
+  if (!q) return true
+  const label = carModelLabel(car).toLowerCase()
+  return (
+    label.includes(q) ||
+    car.make.toLowerCase().includes(q) ||
+    car.model.toLowerCase().includes(q)
+  )
+}
+
+function NavModelSearch({
+  cars,
+  query,
+  onQueryChange,
+  onClear,
+  onSelect,
+  onScrollFleet,
+}: {
+  cars?: PublicCarRow[]
+  query: string
+  onQueryChange: (value: string) => void
+  onClear?: () => void
+  onSelect?: (car: PublicCarRow) => void
+  onScrollFleet?: () => void
+}) {
+  const navigate = useNavigate()
+  const rootRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [open, setOpen] = useState(false)
+  const fleet = useMemo(() => uniquePublicCars(cars ?? []), [cars])
+
+  const clearSearch = () => {
+    if (onClear) {
+      onClear()
+    } else {
+      onQueryChange('')
+    }
+    setOpen(false)
+    inputRef.current?.focus()
+  }
+
+  const matches = useMemo(() => {
+    if (!query.trim()) return []
+    return fleet.filter((car) => matchCarModel(car, query)).slice(0, 6)
+  }, [fleet, query])
+
+  useEffect(() => {
+    const onDoc = (e: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    return () => document.removeEventListener('mousedown', onDoc)
+  }, [])
+
+  const commitSearch = () => {
+    const trimmed = query.trim()
+    if (!trimmed) return
+
+    if (fleet.length > 0) {
+      const hit = fleet.find((car) => matchCarModel(car, trimmed))
+      if (hit && onSelect) {
+        onSelect(hit)
+        setOpen(false)
+        return
+      }
+      onScrollFleet?.()
+      setOpen(false)
+      return
+    }
+
+    void navigate({ to: '/', hash: 'top-picks', search: { model: trimmed } })
+    setOpen(false)
+  }
+
+  return (
+    <div
+      ref={rootRef}
+      className="nav-search"
+    >
+      <Search size={15} aria-hidden />
+      <input
+        ref={inputRef}
+        type="search"
+        value={query}
+        placeholder="Search car model…"
+        aria-label="Search car model"
+        aria-expanded={open && matches.length > 0}
+        aria-controls={matches.length > 0 ? 'nav-model-search-list' : undefined}
+        autoComplete="off"
+        onChange={(e) => {
+          onQueryChange(e.target.value)
+          setOpen(true)
+        }}
+        onFocus={() => setOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            commitSearch()
+          }
+          if (e.key === 'Escape') {
+            if (query.trim()) {
+              e.preventDefault()
+              clearSearch()
+            } else {
+              setOpen(false)
+            }
+          }
+        }}
+      />
+      {query.trim() ? (
+        <button
+          type="button"
+          className="nav-search-clear"
+          aria-label="Clear search"
+          onClick={clearSearch}
+        >
+          <X size={14} aria-hidden />
+        </button>
+      ) : null}
+      {open && matches.length > 0 ? (
+        <ul id="nav-model-search-list" className="nav-search-menu" role="listbox">
+          {matches.map((car) => (
+            <li key={car.id} role="presentation">
+              <button
+                type="button"
+                role="option"
+                className="nav-search-option"
+                onClick={() => {
+                  onQueryChange(carModelLabel(car))
+                  onSelect?.(car)
+                  setOpen(false)
+                }}
+              >
+                <span className="nav-search-option-name">{carModelLabel(car)}</span>
+                <span className="nav-search-option-meta">{car.category}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </div>
   )
 }
@@ -312,6 +530,11 @@ export function LandingNav({
   onScrollCategories,
   onScrollLocations,
   onScrollHelp,
+  cars,
+  modelQuery,
+  onModelQueryChange,
+  onClearModelQuery,
+  onModelSelect,
 }: {
   sessionPending: boolean
   user: { name?: string | null; email: string } | undefined
@@ -326,7 +549,20 @@ export function LandingNav({
   onScrollCategories?: () => void
   onScrollLocations?: () => void
   onScrollHelp?: () => void
+  cars?: PublicCarRow[]
+  modelQuery?: string
+  onModelQueryChange?: (query: string) => void
+  onClearModelQuery?: () => void
+  onModelSelect?: (car: PublicCarRow) => void
 }) {
+  const [localModelQuery, setLocalModelQuery] = useState('')
+  const resolvedModelQuery = modelQuery ?? localModelQuery
+  const resolvedOnModelQueryChange = onModelQueryChange ?? setLocalModelQuery
+  const resolvedOnClearModelQuery =
+    onClearModelQuery ??
+    (() => {
+      resolvedOnModelQueryChange('')
+    })
   const initials = user?.name ? initialsFromName(user.name) : ''
   const onHero = appearance === 'on-hero'
 
@@ -379,10 +615,14 @@ export function LandingNav({
           </>
         )}
       </div>
-      <div className="nav-search">
-        <Search size={15} />
-        <input readOnly placeholder="Search destination, model, deal…" aria-label="Search" />
-      </div>
+      <NavModelSearch
+        cars={cars}
+        query={resolvedModelQuery}
+        onQueryChange={resolvedOnModelQueryChange}
+        onClear={resolvedOnClearModelQuery}
+        onSelect={onModelSelect}
+        onScrollFleet={onScrollFleet}
+      />
       <div className="nav-right">
         <span className="flex items-center gap-2" style={{ opacity: 0.9 }}>
           <Globe size={14} /> EN · MYR
@@ -466,6 +706,34 @@ function Hero() {
   )
 }
 
+function BookingField({
+  active,
+  onToggle,
+  label,
+  value,
+  menu,
+}: {
+  active: boolean
+  onToggle: () => void
+  label: ReactNode
+  value: ReactNode
+  menu: ReactNode | null
+}) {
+  return (
+    <div className={'bk-field' + (active ? ' active' : '')} style={{ position: 'relative' }}>
+      <button type="button" className="bk-field-trigger" onClick={onToggle}>
+        <span className="lbl">{label}</span>
+        <span className="val">{value}</span>
+      </button>
+      {menu}
+    </div>
+  )
+}
+
+function fmtTime(time: string) {
+  return time.trim() || 'Select time'
+}
+
 function BookingDock({
   booking,
   setBooking,
@@ -474,6 +742,7 @@ function BookingDock({
   datesReady,
   prompt,
   onClearPrompt,
+  onPrompt,
 }: {
   booking: BookingState
   setBooking: React.Dispatch<React.SetStateAction<BookingState>>
@@ -482,13 +751,16 @@ function BookingDock({
   datesReady: boolean
   prompt?: string | null
   onClearPrompt?: () => void
+  onPrompt?: (message: string) => void
 }) {
   const [open, setOpen] = useState<'from' | 'to' | 'pick' | 'ret' | 'pax' | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(null)
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        window.requestAnimationFrame(() => setOpen(null))
+      }
     }
     document.addEventListener('mousedown', onDoc)
     return () => document.removeEventListener('mousedown', onDoc)
@@ -497,18 +769,25 @@ function BookingDock({
   useEffect(() => {
     if (!prompt) return
     if (!datesReady) {
-      setOpen('pick')
+      if (!booking.pickDate || !booking.pickTime.trim()) setOpen('pick')
+      else if (!booking.retDate || !booking.retTime.trim()) setOpen('ret')
+      else setOpen('pick')
       return
     }
     rootRef.current?.querySelector<HTMLButtonElement>('.bk-search-btn')?.focus()
-  }, [prompt, datesReady])
+  }, [prompt, datesReady, booking.pickDate, booking.pickTime, booking.retDate, booking.retTime])
 
   const openField = (field: typeof open) => {
     onClearPrompt?.()
     setOpen(field)
   }
 
-  const nights = nightsBetween(booking.pickDate, booking.retDate)
+  const tripDuration = formatTripDuration(
+    booking.pickDate,
+    booking.pickTime,
+    booking.retDate,
+    booking.retTime,
+  )
   const totalPax = booking.adults + booking.children
 
   return (
@@ -535,171 +814,195 @@ function BookingDock({
             <ArrowRight size={12} /> Different return
           </button>
         </div>
-        {nights > 0 && (
+        {tripDuration !== '—' && (
           <span className="bk-nights">
             <Clock size={12} />
-            <span>
-              {nights} day{nights > 1 ? 's' : ''}
-            </span>
+            <span>{tripDuration}</span>
           </span>
         )}
       </div>
 
       <div className={'booking-row ' + (booking.tripType === 'oneway' ? 'with-return' : 'simple')}>
-        <div
-          role="button"
-          tabIndex={0}
-          className={'bk-field' + (open === 'from' ? ' active' : '')}
-          onClick={() => openField(open === 'from' ? null : 'from')}
-          onKeyDown={(e) => e.key === 'Enter' && openField(open === 'from' ? null : 'from')}
-          style={{ position: 'relative' }}
-        >
-          <span className="lbl">Pickup location</span>
-          <span className="val">
-            <MapPin size={14} className="icon" />
-            {booking.from || 'Airport, jetty or hotel'}
-          </span>
-          {open === 'from' && (
-            <LocationMenu
-              onPick={(l) => {
-                const updates: Partial<BookingState> = { from: l }
-                if (booking.tripType === 'round') updates.retLoc = l
-                setBooking((b) => ({ ...b, ...updates }))
-                setOpen('pick')
-              }}
-            />
-          )}
-        </div>
-
-        {booking.tripType === 'oneway' && (
-          <div
-            role="button"
-            tabIndex={0}
-            className={'bk-field' + (open === 'to' ? ' active' : '')}
-            onClick={() => openField(open === 'to' ? null : 'to')}
-            onKeyDown={(e) => e.key === 'Enter' && openField(open === 'to' ? null : 'to')}
-            style={{ position: 'relative' }}
-          >
-            <span className="lbl">Return location</span>
-            <span className="val">
+        <BookingField
+          active={open === 'from'}
+          onToggle={() => openField(open === 'from' ? null : 'from')}
+          label="Pickup location"
+          value={
+            <>
               <MapPin size={14} className="icon" />
-              {booking.retLoc || 'Airport or jetty'}
-            </span>
-            {open === 'to' && (
+              {booking.from || 'Airport, jetty or hotel'}
+            </>
+          }
+          menu={
+            open === 'from' ? (
               <LocationMenu
                 onPick={(l) => {
-                  setBooking((b) => ({ ...b, retLoc: l }))
-                  setOpen('pick')
+                  const updates: Partial<BookingState> = { from: l }
+                  if (booking.tripType === 'round') updates.retLoc = l
+                  setBooking((b) => ({ ...b, ...updates }))
+                  window.requestAnimationFrame(() => setOpen('pick'))
                 }}
               />
-            )}
-          </div>
+            ) : null
+          }
+        />
+
+        {booking.tripType === 'oneway' && (
+          <BookingField
+            active={open === 'to'}
+            onToggle={() => openField(open === 'to' ? null : 'to')}
+            label="Return location"
+            value={
+              <>
+                <MapPin size={14} className="icon" />
+                {booking.retLoc || 'Airport or jetty'}
+              </>
+            }
+            menu={
+              open === 'to' ? (
+                <LocationMenu
+                  onPick={(l) => {
+                    setBooking((b) => ({ ...b, retLoc: l }))
+                    window.requestAnimationFrame(() => setOpen('pick'))
+                  }}
+                />
+              ) : null
+            }
+          />
         )}
 
-        <div
-          role="button"
-          tabIndex={0}
-          className={'bk-field' + (open === 'pick' ? ' active' : '')}
-          onClick={() => openField(open === 'pick' ? null : 'pick')}
-          onKeyDown={(e) => e.key === 'Enter' && openField(open === 'pick' ? null : 'pick')}
-          style={{ position: 'relative' }}
-        >
-          <span className="lbl">Pickup</span>
-          <span className="val">
-            <Calendar size={14} className="icon" />
-            <span className="bk-date">{fmtDate(booking.pickDate)}</span>
-            <span className="bk-sep">·</span>
-            <span className="bk-time">{booking.pickTime}</span>
-          </span>
-          {open === 'pick' && (
-            <DateTimeMenu
-              date={booking.pickDate}
-              time={booking.pickTime}
-              minDate={null}
-              onPick={(d, t) => {
-                setBooking((b) => {
-                  const u: Partial<BookingState> = {}
-                  if (d !== undefined) u.pickDate = d
-                  if (t !== undefined) u.pickTime = t
-                  if (u.pickDate && b.retDate && u.pickDate >= b.retDate) u.retDate = null
-                  return { ...b, ...u }
-                })
-              }}
-              onDone={() => setOpen('ret')}
-            />
-          )}
-        </div>
+        <BookingField
+          active={open === 'pick'}
+          onToggle={() => openField(open === 'pick' ? null : 'pick')}
+          label="Pickup"
+          value={
+            <>
+              <Calendar size={14} className="icon" />
+              <span className="bk-date">{fmtDate(booking.pickDate)}</span>
+              <span className="bk-sep">·</span>
+              <span className={'bk-time' + (booking.pickTime.trim() ? '' : ' bk-time--empty')}>
+                {fmtTime(booking.pickTime)}
+              </span>
+            </>
+          }
+          menu={
+            open === 'pick' ? (
+              <DateTimeMenu
+                date={booking.pickDate}
+                time={booking.pickTime}
+                minDate={earliestPickupDate()}
+                onPick={(d, t) => {
+                  setBooking((b) => {
+                    const u: Partial<BookingState> = {}
+                    if (d !== undefined) {
+                      u.pickDate = d
+                      u.pickTime = ''
+                    }
+                    if (t !== undefined) u.pickTime = t
+                    if (u.pickDate && b.retDate) {
+                      const earliestReturn = addCalendarDays(u.pickDate, 1)
+                      if (b.retDate < earliestReturn) {
+                        u.retDate = null
+                        u.retTime = ''
+                      }
+                    }
+                    return { ...b, ...u }
+                  })
+                }}
+                onDone={() => window.requestAnimationFrame(() => setOpen('ret'))}
+              />
+            ) : null
+          }
+        />
 
-        <div
-          role="button"
-          tabIndex={0}
-          className={'bk-field' + (open === 'ret' ? ' active' : '')}
-          onClick={() => openField(open === 'ret' ? null : 'ret')}
-          onKeyDown={(e) => e.key === 'Enter' && openField(open === 'ret' ? null : 'ret')}
-          style={{ position: 'relative' }}
-        >
-          <span className="lbl">Return</span>
-          <span className="val">
-            <Calendar size={14} className="icon" />
-            <span className="bk-date">{fmtDate(booking.retDate)}</span>
-            <span className="bk-sep">·</span>
-            <span className="bk-time">{booking.retTime}</span>
-          </span>
-          {open === 'ret' && (
-            <DateTimeMenu
-              date={booking.retDate}
-              time={booking.retTime}
-              minDate={booking.pickDate}
-              onPick={(d, t) => {
-                setBooking((b) => {
-                  const u: Partial<BookingState> = {}
-                  if (d !== undefined) u.retDate = d
-                  if (t !== undefined) u.retTime = t
-                  return { ...b, ...u }
-                })
-              }}
-              onDone={() => setOpen(null)}
-            />
-          )}
-        </div>
+        <BookingField
+          active={open === 'ret'}
+          onToggle={() => {
+            if (open !== 'ret') {
+              if (!booking.pickDate || !booking.pickTime.trim()) {
+                onPrompt?.('Select a pickup date and time before choosing return.')
+                setOpen('pick')
+                return
+              }
+            }
+            openField(open === 'ret' ? null : 'ret')
+          }}
+          label="Return"
+          value={
+            <>
+              <Calendar size={14} className="icon" />
+              <span className="bk-date">{fmtDate(booking.retDate)}</span>
+              <span className="bk-sep">·</span>
+              <span className={'bk-time' + (booking.retTime.trim() ? '' : ' bk-time--empty')}>
+                {fmtTime(booking.retTime)}
+              </span>
+            </>
+          }
+          menu={
+            open === 'ret' ? (
+              <DateTimeMenu
+                date={booking.retDate}
+                time={booking.retTime}
+                minDate={
+                  booking.pickDate
+                    ? addCalendarDays(booking.pickDate, 1)
+                    : addCalendarDays(earliestPickupDate(), 1)
+                }
+                onPick={(d, t) => {
+                  setBooking((b) => {
+                    const u: Partial<BookingState> = {}
+                    if (d !== undefined) {
+                      u.retDate = d
+                      u.retTime = ''
+                    }
+                    if (t !== undefined) u.retTime = t
+                    return { ...b, ...u }
+                  })
+                }}
+                onDone={() => window.requestAnimationFrame(() => setOpen(null))}
+              />
+            ) : null
+          }
+        />
 
-        <div
-          role="button"
-          tabIndex={0}
-          className={'bk-field' + (open === 'pax' ? ' active' : '')}
-          onClick={() => openField(open === 'pax' ? null : 'pax')}
-          onKeyDown={(e) => e.key === 'Enter' && openField(open === 'pax' ? null : 'pax')}
-          style={{ position: 'relative' }}
-        >
-          <span className="lbl">
-            Passengers <span className="bk-optional">· optional</span>
-          </span>
-          <span className="val">
-            <Users size={14} className="icon" />
-            {totalPax > 0 ? (
-              <>
-                <span>
-                  {totalPax} passenger{totalPax > 1 ? 's' : ''}
-                </span>
-                <span className="bk-sep">·</span>
-                <span className="bk-time">
-                  {booking.adults} adult{booking.adults !== 1 ? 's' : ''}
-                  {booking.children > 0 ? `, ${booking.children} child` : ''}
-                </span>
-              </>
-            ) : (
-              <span>Any group size</span>
-            )}
-          </span>
-          {open === 'pax' && (
-            <PaxMenu
-              adults={booking.adults}
-              children={booking.children}
-              onChange={(a, c) => setBooking((b) => ({ ...b, adults: a, children: c }))}
-              onDone={() => setOpen(null)}
-            />
-          )}
-        </div>
+        <BookingField
+          active={open === 'pax'}
+          onToggle={() => openField(open === 'pax' ? null : 'pax')}
+          label={
+            <>
+              Passengers <span className="bk-optional">· optional</span>
+            </>
+          }
+          value={
+            <>
+              <Users size={14} className="icon" />
+              {totalPax > 0 ? (
+                <>
+                  <span>
+                    {totalPax} passenger{totalPax > 1 ? 's' : ''}
+                  </span>
+                  <span className="bk-sep">·</span>
+                  <span className="bk-time">
+                    {booking.adults} adult{booking.adults !== 1 ? 's' : ''}
+                    {booking.children > 0 ? `, ${booking.children} child` : ''}
+                  </span>
+                </>
+              ) : (
+                <span>Any group size</span>
+              )}
+            </>
+          }
+          menu={
+            open === 'pax' ? (
+              <PaxMenu
+                adults={booking.adults}
+                children={booking.children}
+                onChange={(a, c) => setBooking((b) => ({ ...b, adults: a, children: c }))}
+                onDone={() => window.requestAnimationFrame(() => setOpen(null))}
+              />
+            ) : null
+          }
+        />
 
         <button
           type="button"
@@ -709,7 +1012,9 @@ function BookingDock({
             onSearch()
           }}
           disabled={searching || !datesReady}
-          title={datesReady ? undefined : 'Choose pickup and return dates first'}
+          title={
+            datesReady ? undefined : 'Choose pickup and return dates and times first'
+          }
         >
           <Search size={15} /> {searching ? 'Searching…' : 'Search cars'}
         </button>
@@ -796,12 +1101,8 @@ function DateTimeMenu({
   onPick: (d?: Date, t?: string) => void
   onDone: () => void
 }) {
-  const today = useMemo(() => {
-    const d = new Date()
-    d.setHours(0, 0, 0, 0)
-    return d
-  }, [])
-  const earliest = minDate || today
+  const today = useMemo(() => startOfLocalDay(), [])
+  const earliest = minDate ?? addCalendarDays(today, 1)
   const initialView = date || earliest
   const [view, setView] = useState(() => new Date(initialView.getFullYear(), initialView.getMonth(), 1))
 
@@ -840,18 +1141,17 @@ function DateTimeMenu({
             if (disabled) cls.push('disabled')
             if (sameDay(d, date)) cls.push('start')
             return (
-              <div
+              <button
                 key={i}
-                role="button"
-                tabIndex={0}
+                type="button"
+                disabled={disabled}
                 className={cls.join(' ')}
                 onClick={() => {
                   if (!disabled) onPick(d, undefined)
                 }}
-                onKeyDown={(e) => e.key === 'Enter' && !disabled && onPick(d, undefined)}
               >
                 {d.getDate()}
-              </div>
+              </button>
             )
           })}
         </div>
@@ -859,6 +1159,7 @@ function DateTimeMenu({
       {date ? (
         <div className="dt-time">
           <h5>Pick a time</h5>
+          {!time.trim() ? <p className="dt-time-hint">Required — choose a time to continue</p> : null}
           <div className="dt-time-grid">
             {PICK_TIMES.map((t) => (
               <button
@@ -943,12 +1244,16 @@ function uniquePublicCars(cars: PublicCarRow[]) {
 
 function TopPicksSection({
   cars,
+  modelQuery,
+  onClearModelQuery,
   matchedSearch,
   fleetLocked,
   onRequireTrip,
   onOpenCar,
 }: {
   cars: PublicCarRow[]
+  modelQuery: string
+  onClearModelQuery: () => void
   matchedSearch: boolean
   fleetLocked: boolean
   onRequireTrip: () => void
@@ -959,9 +1264,12 @@ function TopPicksSection({
   const fleet = useMemo(() => uniquePublicCars(cars), [cars])
   const list = useMemo(() => {
     const t = tagToCategory(filter)
-    if (t === 'all') return fleet
-    return fleet.filter((c) => c.category === t)
-  }, [fleet, filter])
+    let next = t === 'all' ? fleet : fleet.filter((c) => c.category === t)
+    if (modelQuery.trim()) {
+      next = next.filter((car) => matchCarModel(car, modelQuery))
+    }
+    return next
+  }, [fleet, filter, modelQuery])
 
   const visibleCars = showAll ? list : list.slice(0, TOP_PICKS_INITIAL_COUNT)
   const hiddenCount = Math.max(0, list.length - visibleCars.length)
@@ -972,13 +1280,33 @@ function TopPicksSection({
       <div className="section-head">
         <div className="lead">
           <h2 className="h-section">
-            {matchedSearch ? 'Top picks matched your search' : 'Top picks this month'}
+            {modelQuery.trim()
+              ? `Models matching “${modelQuery.trim()}”`
+              : matchedSearch
+                ? 'Top picks matched your search'
+                : 'Top picks this month'}
           </h2>
           <p className="h-sub">
-            {matchedSearch
-              ? 'Available for your pickup and return dates — tap a vehicle for details and checkout.'
-              : 'Choose pickup and return dates above, then search to see what’s available for your trip.'}
+            {modelQuery.trim()
+              ? list.length > 0
+                ? `${list.length} vehicle${list.length === 1 ? '' : 's'} in our fleet — tap for details.`
+                : 'No models match that name. Try another make or model.'
+              : matchedSearch
+                ? 'Available for your pickup and return dates — tap a vehicle for details and checkout.'
+                : 'Choose pickup and return dates above, then search to see what’s available for your trip.'}
           </p>
+          {modelQuery.trim() ? (
+            <div className="model-search-bar">
+              <span className="model-search-chip">
+                <Search size={13} aria-hidden />
+                {modelQuery.trim()}
+              </span>
+              <button type="button" className="model-search-clear" onClick={onClearModelQuery}>
+                <X size={14} aria-hidden />
+                Clear search
+              </button>
+            </div>
+          ) : null}
         </div>
         <div className="flex gap-2" style={{ flexWrap: 'wrap' }}>
           {TOP_TAGS.map((t) => (
