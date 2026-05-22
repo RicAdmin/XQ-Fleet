@@ -1,3 +1,4 @@
+import { loadEnv } from 'vite'
 import { defineConfig } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
@@ -8,15 +9,21 @@ import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import netlify from '@netlify/vite-plugin-tanstack-start'
 
-const config = defineConfig({
-  plugins: [
-    devtools(),
-    tsconfigPaths({ projects: ['./tsconfig.json'] }),
-    tailwindcss(),
-    tanstackStart(),
-    viteReact(),
-    netlify(),
-  ],
-})
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  const siteUrl = env.SITE_URL || env.BETTER_AUTH_URL || 'http://localhost:3000'
 
-export default config
+  return {
+    plugins: [
+      devtools(),
+      tsconfigPaths({ projects: ['./tsconfig.json'] }),
+      tailwindcss(),
+      tanstackStart(),
+      viteReact(),
+      netlify(),
+    ],
+    define: {
+      'import.meta.env.VITE_SITE_URL': JSON.stringify(siteUrl),
+    },
+  }
+})

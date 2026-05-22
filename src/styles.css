@@ -1,49 +1,49 @@
-@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
+@import "./styles/admin-ui.css";
 
 @custom-variant dark (&:is(.dark *));
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-display: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 :root {
-  /* ── Warm Slate palette (legacy names — kept for backward compat) ── */
-  --sea-ink: #1a1916;
-  --sea-ink-soft: #6b6760;
-  --lagoon: #c4780a;
-  --lagoon-deep: #a06208;
+  /* ── Car XQ brand tokens (aligned with cxq-landing-scoped.css) ── */
+  --sea-ink: #14181a;
+  --sea-ink-soft: #566067;
+  --sea-border: #e4e6ea;
+  --sea-glass: #eef0f3;
+  --lagoon: #ff6600;
+  --lagoon-deep: #e55a00;
   --palm: #276749;
-  --sand: #f4f3f0;
-  --foam: #faf9f7;
-  --surface: rgba(255, 255, 255, 0.92);
+  --sand: #f4f5f7;
+  --foam: #f4f5f7;
+  --surface: #ffffff;
   --surface-strong: #ffffff;
-  --surface-muted: rgba(244, 243, 240, 0.6);
-  --line: rgba(26, 25, 22, 0.1);
+  --surface-muted: #eef0f3;
+  --line: #e4e6ea;
   --inset-glint: rgba(255, 255, 255, 0.9);
-  --kicker: #6b6760;
-  --bg-base: #faf9f7;
-  --header-bg: rgba(250, 249, 247, 0.94);
-  --chip-bg: rgba(255, 255, 255, 0.9);
-  --chip-line: rgba(26, 25, 22, 0.1);
-  --link-bg-hover: rgba(244, 243, 240, 0.9);
-  --hero-a: rgba(196, 120, 10, 0.08);
-  --hero-b: rgba(26, 25, 22, 0.04);
-  /* ── Carbon & Ember design system tokens ── */
-  /* Brand accent — ember (replaces split --lagoon / --amber usage) */
-  --ember: #c4780a;
-  --ember-deep: #a06208;
-  --ember-wash: rgba(196, 120, 10, 0.08);
-  --ember-border: rgba(196, 120, 10, 0.22);
+  --kicker: #566067;
+  --bg-base: #f4f5f7;
+  --header-bg: rgba(255, 255, 255, 0.94);
+  --chip-bg: #ffffff;
+  --chip-line: #e4e6ea;
+  --link-bg-hover: #eef0f3;
+  --hero-a: rgba(255, 102, 0, 0.06);
+  --hero-b: rgba(20, 24, 26, 0.03);
+  /* Brand accent — ember orange (matches landing --brand-leaf) */
+  --ember: #ff6600;
+  --ember-deep: #e55a00;
+  --ember-wash: rgba(255, 102, 0, 0.08);
+  --ember-border: rgba(255, 102, 0, 0.22);
   /* Semantic: warning (shares hue with ember; always paired with icon/text) */
-  --warning: #c4780a;
-  --warning-wash: rgba(196, 120, 10, 0.08);
-  --warning-border: rgba(196, 120, 10, 0.22);
+  --warning: #ff6600;
+  --warning-wash: rgba(255, 102, 0, 0.08);
+  --warning-border: rgba(255, 102, 0, 0.22);
   /* Semantic: success */
   --success: #276749;
   --success-wash: rgba(39, 103, 73, 0.08);
@@ -67,15 +67,15 @@
   --status-payment-pending-text: #5b3ea8;
   --status-rented-bg: rgba(26, 25, 22, 0.08);
   --status-rented-text: var(--sea-ink);
-  --status-maintenance-bg: rgba(196, 120, 10, 0.10);
-  --status-maintenance-text: #7a5010;
+  --status-maintenance-bg: rgba(255, 102, 0, 0.1);
+  --status-maintenance-text: #e55a00;
   --status-damaged-bg: rgba(220, 60, 60, 0.10);
   --status-damaged-text: #c02020;
   --status-retired-bg: rgba(100, 100, 100, 0.10);
   --status-retired-text: #666666;
   /* Fleet status dot colors */
   --dot-available: #3aab6a;
-  --dot-rented: var(--lagoon);
+  --dot-rented: #ff6600;
   --dot-reserved: #7c5cbf;
   --dot-maintenance: #e8a030;
   --dot-damaged: #dd4444;
@@ -119,8 +119,8 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  --primary: #ff6600;
+  --primary-foreground: #ffffff;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -150,8 +150,8 @@
 :root[data-theme="dark"] {
   --sea-ink: #f0ede8;
   --sea-ink-soft: #a09b94;
-  --lagoon: #e0921a;
-  --lagoon-deep: #d4880f;
+  --lagoon: #ff8533;
+  --lagoon-deep: #ff6600;
   --palm: #5ead89;
   --sand: #1c1b19;
   --foam: #141311;
@@ -169,13 +169,13 @@
   --hero-a: rgba(224, 146, 26, 0.12);
   --hero-b: rgba(26, 25, 22, 0.6);
   /* Carbon & Ember dark overrides */
-  --ember: #e0921a;
-  --ember-deep: #d4880f;
-  --ember-wash: rgba(224, 146, 26, 0.12);
-  --ember-border: rgba(224, 146, 26, 0.25);
-  --warning: #e0921a;
-  --warning-wash: rgba(224, 146, 26, 0.12);
-  --warning-border: rgba(224, 146, 26, 0.25);
+  --ember: #ff8533;
+  --ember-deep: #ff6600;
+  --ember-wash: rgba(255, 102, 0, 0.14);
+  --ember-border: rgba(255, 102, 0, 0.28);
+  --warning: #ff8533;
+  --warning-wash: rgba(255, 102, 0, 0.14);
+  --warning-border: rgba(255, 102, 0, 0.28);
   --success: #5ead89;
   --success-wash: rgba(94, 173, 137, 0.12);
   --success-border: rgba(94, 173, 137, 0.25);
@@ -293,29 +293,19 @@ body::before {
   inset: 0;
   pointer-events: none;
   z-index: -1;
-  opacity: 0.5;
+  opacity: 0.35;
   background:
     radial-gradient(900px 500px at 0% -5%, var(--hero-a), transparent 60%),
     radial-gradient(700px 400px at 100% -8%, var(--hero-b), transparent 55%);
 }
 
 body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  opacity: 0.035;
-  background-image:
-    linear-gradient(rgba(26, 25, 22, 0.5) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(26, 25, 22, 0.4) 1px, transparent 1px);
-  background-size: 32px 32px;
-  mask-image: radial-gradient(circle at 50% 20%, black, transparent 70%);
+  display: none;
 }
 
 a {
   color: var(--lagoon-deep);
-  text-decoration-color: rgba(160, 98, 8, 0.3);
+  text-decoration-color: rgba(229, 90, 0, 0.28);
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
 }
@@ -358,8 +348,8 @@ pre code {
 .island-shell {
   background: var(--surface-strong);
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  border-radius: 14px;
+  box-shadow: 0 1px 0 rgba(20, 24, 26, 0.04), 0 8px 24px -12px rgba(20, 24, 26, 0.08);
 }
 
 .feature-card {
@@ -386,7 +376,7 @@ a {
   text-transform: uppercase;
   font-weight: 700;
   font-size: 0.69rem;
-  color: var(--kicker);
+  color: var(--ember);
 }
 
 .nav-link {
@@ -580,16 +570,17 @@ a {
 }
 
 .button-primary {
-  border: 1px solid var(--amber-border);
-  background: linear-gradient(135deg, #d4890e, #a06208);
+  border: 1px solid var(--ember-deep);
+  background: var(--ember);
   color: white;
-  box-shadow: 0 2px 8px rgba(160, 98, 8, 0.22);
+  box-shadow: 0 1px 0 rgba(20, 24, 26, 0.04), 0 8px 24px -12px rgba(255, 102, 0, 0.35);
 }
 
 .button-primary:hover {
   color: white;
+  background: var(--ember-deep);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(160, 98, 8, 0.3);
+  box-shadow: 0 1px 0 rgba(20, 24, 26, 0.04), 0 12px 32px -10px rgba(255, 102, 0, 0.42);
 }
 
 .button-primary:disabled {
@@ -702,6 +693,63 @@ a {
    ADMIN SIDEBAR SHELL
    ================================================================ */
 
+/* Dashboard routes (/admin, /app) — always light, same canvas as landing (#F4F5F7) */
+.cxq-dashboard-root,
+.cxq-light-surface {
+  color-scheme: light;
+  --sea-ink: #14181a;
+  --sea-ink-soft: #566067;
+  --sea-border: #e4e6ea;
+  --sea-glass: #eef0f3;
+  --lagoon: #ff6600;
+  --lagoon-deep: #e55a00;
+  --sand: #f4f5f7;
+  --foam: #f4f5f7;
+  --surface: #ffffff;
+  --surface-strong: #ffffff;
+  --surface-muted: #eef0f3;
+  --line: #e4e6ea;
+  --kicker: #566067;
+  --bg-base: #f4f5f7;
+  --header-bg: rgba(255, 255, 255, 0.94);
+  --chip-bg: #ffffff;
+  --chip-line: #e4e6ea;
+  --link-bg-hover: #eef0f3;
+  --ember: #ff6600;
+  --ember-deep: #e55a00;
+  --ember-wash: rgba(255, 102, 0, 0.08);
+  --ember-border: rgba(255, 102, 0, 0.22);
+  --background: #f4f5f7;
+  --foreground: #14181a;
+  --card: #ffffff;
+  --card-foreground: #14181a;
+  --popover: #ffffff;
+  --popover-foreground: #14181a;
+  --primary: #ff6600;
+  --primary-foreground: #ffffff;
+  --secondary: #eef0f3;
+  --secondary-foreground: #14181a;
+  --muted: #eef0f3;
+  --muted-foreground: #566067;
+  --accent: #eef0f3;
+  --accent-foreground: #14181a;
+  --border: #e4e6ea;
+  --input: #e4e6ea;
+  --ring: rgba(255, 102, 0, 0.35);
+  color: var(--sea-ink);
+  background-color: #f4f5f7;
+}
+
+html.dark .cxq-dashboard-root,
+html.dark .cxq-light-surface {
+  color-scheme: light;
+}
+
+.cxq-dashboard-root {
+  min-height: 100dvh;
+  background-color: #f4f5f7;
+}
+
 .admin-layout {
   display: flex;
   height: 100dvh;
@@ -719,7 +767,7 @@ a {
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--line);
-  background: var(--sand);
+  background: var(--surface-strong);
   overflow-y: auto;
   overflow-x: hidden;
   transition: width 220ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -754,11 +802,12 @@ a {
 .sidebar-brand-name {
   font-family: var(--font-display);
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--sea-ink);
   white-space: nowrap;
   flex: 1;
   overflow: hidden;
+  letter-spacing: -0.02em;
 }
 
 .sidebar-collapse-btn {
@@ -834,8 +883,8 @@ a {
 }
 
 .sidebar-nav-item.is-active {
-  background: var(--amber-bg);
-  color: var(--lagoon-deep);
+  background: var(--ember-wash);
+  color: var(--ember-deep);
   font-weight: 600;
 }
 
@@ -890,7 +939,7 @@ a {
   height: 2rem;
   flex-shrink: 0;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--lagoon), var(--palm));
+  background: var(--ember);
   font-size: 0.75rem;
   font-weight: 800;
   color: white;
@@ -950,6 +999,7 @@ a {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  background: #f4f5f7;
 }
 
 .admin-topbar {
@@ -983,9 +1033,10 @@ a {
 
 .admin-topbar-title {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--sea-ink);
+  letter-spacing: -0.02em;
 }
 
 .admin-topbar-end {
@@ -1066,6 +1117,7 @@ a {
   width: 100%;
   margin-inline: auto;
   padding-bottom: 2.5rem;
+  background: #f4f5f7;
 }
 
 .hub-topbar {
@@ -1258,10 +1310,10 @@ a {
 }
 
 .hub-action-btn--primary {
-  background: linear-gradient(135deg, rgba(212, 137, 14, 0.95), rgba(160, 98, 8, 0.92));
-  border-color: rgba(160, 98, 8, 0.24);
+  background: var(--ember);
+  border-color: var(--ember-deep);
   color: white;
-  box-shadow: 0 10px 24px rgba(160, 98, 8, 0.18);
+  box-shadow: 0 1px 0 rgba(20, 24, 26, 0.04), 0 8px 24px -12px rgba(255, 102, 0, 0.35);
 }
 
 .hub-action-btn--secondary {
@@ -1563,9 +1615,9 @@ a {
   color: var(--sea-ink);
 }
 .status-tab.is-active {
-  background: var(--sea-ink);
+  background: var(--ember);
   color: #fff;
-  border-color: var(--sea-ink);
+  border-color: var(--ember);
 }
 .status-tab.is-active .tab-count {
   background: rgba(255,255,255,0.2);
@@ -1727,9 +1779,9 @@ select.field-input {
 .sort-indicator svg { opacity: 0.5; }
 
 @theme inline {
-  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-heading: var(--font-display);
-  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -3465,11 +3517,29 @@ select.field-input {
 
 /* ─── Admin settings page ────────────────────────────────────────────────── */
 
+.admin-settings-page {
+  max-width: 42rem;
+}
+
+.admin-settings-intro {
+  margin: 0 0 1.25rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--sea-ink-soft);
+}
+
 .settings-form {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  max-width: 600px;
+  max-width: 42rem;
+}
+
+.settings-section.island-shell {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 .settings-section {
@@ -3541,7 +3611,7 @@ select.field-input {
 }
 
 .settings-toggle--on {
-  background: var(--sea-ink);
+  background: var(--ember);
 }
 
 .settings-toggle-thumb {
@@ -3581,7 +3651,7 @@ select.field-input {
 }
 
 .settings-radio {
-  accent-color: var(--sea-ink);
+  accent-color: var(--ember);
 }
 
 .settings-input-prefix-group {
@@ -5211,3 +5281,203 @@ select.field-input {
     grid-template-columns: 1fr;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────
+   Admin module — skeletons, error panel, KPI grid, drawer chrome
+   Added for Admin Module Phase 0–3
+   ───────────────────────────────────────────────────────────────────── */
+
+@keyframes admin-skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.admin-skeleton-bar {
+  display: inline-block;
+  background: linear-gradient(90deg, rgba(26, 25, 22, 0.06) 0%, rgba(26, 25, 22, 0.12) 50%, rgba(26, 25, 22, 0.06) 100%);
+  border-radius: 6px;
+  animation: admin-skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+/* Table skeleton */
+.table-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.table-skeleton-head,
+.table-skeleton-row {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 5), minmax(0, 1fr));
+  gap: 0.75rem;
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px solid var(--line);
+}
+.table-skeleton-head-cell {
+  height: 12px;
+  width: 60%;
+  background: rgba(26, 25, 22, 0.1);
+  border-radius: 4px;
+  animation: admin-skeleton-pulse 1.5s ease-in-out infinite;
+}
+.table-skeleton-cell {
+  height: 14px;
+  width: 80%;
+  background: rgba(26, 25, 22, 0.06);
+  border-radius: 4px;
+  animation: admin-skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+/* KPI skeleton */
+.kpi-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.kpi-skeleton-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1rem;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.kpi-skeleton-label { height: 10px; width: 50%; background: rgba(26, 25, 22, 0.08); border-radius: 4px; animation: admin-skeleton-pulse 1.5s ease-in-out infinite; }
+.kpi-skeleton-value { height: 22px; width: 70%; background: rgba(26, 25, 22, 0.12); border-radius: 5px; animation: admin-skeleton-pulse 1.5s ease-in-out infinite; }
+.kpi-skeleton-delta { height: 10px; width: 35%; background: rgba(26, 25, 22, 0.06); border-radius: 4px; animation: admin-skeleton-pulse 1.5s ease-in-out infinite; }
+
+/* Error panel */
+.error-panel {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--error-border);
+  background: var(--error-wash);
+  border-radius: 12px;
+  margin: 1rem 0;
+}
+.error-panel-icon {
+  color: var(--error);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.error-panel-body { flex: 1; }
+.error-panel-title { font-weight: 600; color: var(--sea-ink); margin: 0; }
+.error-panel-message { color: var(--sea-ink-soft); font-size: 0.875rem; margin-top: 0.25rem; }
+
+/* KPI grid */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.kpi-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  background: var(--surface-strong);
+  box-shadow: 0 1px 0 rgba(20, 24, 26, 0.04), 0 8px 24px -12px rgba(20, 24, 26, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.kpi-card-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sea-ink-soft);
+  font-weight: 600;
+}
+.kpi-card-value {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--sea-ink);
+}
+.kpi-card-delta {
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.kpi-card-delta.is-up { color: var(--success); }
+.kpi-card-delta.is-down { color: var(--error); }
+.kpi-card-delta.is-flat { color: var(--sea-ink-soft); }
+
+/* Admin tab switcher reuses .status-tabs */
+.admin-tab-panel { margin-top: 1rem; }
+
+/* Admin filters bar */
+.admin-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 1rem;
+}
+.admin-filter-bar .field-input {
+  min-width: 180px;
+}
+.admin-filter-bar .filter-spacer { flex: 1; }
+
+/* Admin pagination footer */
+.admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--sea-ink-soft);
+}
+
+/* Booking drawer */
+.booking-drawer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+.booking-drawer-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+.booking-drawer-row dt {
+  color: var(--sea-ink-soft);
+  font-weight: 500;
+}
+.booking-drawer-row dd { margin: 0; color: var(--sea-ink); }
+
+/* Promo form sheet, affiliate form sheet — shared */
+.admin-form-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 0 1rem;
+}
+.admin-form-sheet label.field-label { font-size: 0.78rem; }
+
+/* Mini time series chart */
+.mini-chart-wrap {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1rem;
+}
+.mini-chart-title { font-weight: 600; color: var(--sea-ink); margin-bottom: 0.5rem; }
+.mini-chart-svg { width: 100%; height: 180px; }
+.mini-chart-bar { fill: var(--ember-wash); stroke: var(--ember); stroke-width: 1; }
+.mini-chart-line { fill: none; stroke: var(--lagoon-deep); stroke-width: 2; }
+.mini-chart-dot { fill: var(--lagoon-deep); }
+.mini-chart-axis { stroke: var(--line); stroke-width: 1; }
+.mini-chart-label { font-size: 10px; fill: var(--sea-ink-soft); }

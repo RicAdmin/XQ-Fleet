@@ -16,9 +16,24 @@ const sessionInactivitySeconds = Number(
   process.env.SESSION_INACTIVITY_SECONDS ?? 60 * 60 * 8,
 )
 
+const extraTrustedOrigins = (process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean)
+
+const trustedOrigins = Array.from(
+  new Set([
+    defaultBaseUrl,
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    ...extraTrustedOrigins,
+  ]),
+)
+
 export const auth = betterAuth({
   baseURL: defaultBaseUrl,
   secret: defaultSecret,
+  trustedOrigins,
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema,
@@ -36,7 +51,7 @@ export const auth = betterAuth({
   user: {
     additionalFields: {
       role: {
-        type: appRoles,
+        type: [...appRoles],
         required: false,
         defaultValue: 'customer',
         input: false,

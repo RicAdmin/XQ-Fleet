@@ -1,7 +1,8 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { CreditCard, Info, Save } from 'lucide-react'
+import { Info, Save } from 'lucide-react'
 import { useState } from 'react'
 
+import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
 import type { PaymentMode } from '#/db/schema'
 import type { PaymentSettingsRow } from '#/lib/settings-functions'
 import { getPaymentSettings, updatePaymentSettings } from '#/lib/settings-functions'
@@ -11,7 +12,7 @@ export const Route = createFileRoute('/admin/settings/')({
     const { session } = context as unknown as {
       session: { user: { role: string; name: string; email: string } }
     }
-    if (session.user.role !== 'owner') {
+    if (session.user.role !== 'owner' && session.user.role !== 'super_admin') {
       throw redirect({ to: '/admin/cars' })
     }
     const settings = await getPaymentSettings()
@@ -21,7 +22,10 @@ export const Route = createFileRoute('/admin/settings/')({
 })
 
 function AdminSettingsPage() {
-  const { settings } = Route.useRouteContext()
+  const { session, settings } = Route.useRouteContext() as unknown as {
+    session: { user: { role: string; name: string; email: string } }
+    settings: PaymentSettingsRow
+  }
 
   const [paymentMode, setPaymentMode] = useState<PaymentMode>(settings.paymentMode)
   const [depositAmountRM, setDepositAmountRM] = useState(
@@ -33,9 +37,6 @@ function AdminSettingsPage() {
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const merchantCode = typeof window === 'undefined' ? '' : '' // displayed from env — not exposed to browser
-  const hasCredentials = true // credentials are in env vars, we just indicate configured status
-
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
@@ -43,7 +44,8 @@ function AdminSettingsPage() {
     setError(null)
 
     try {
-      const depositSen = paymentMode === 'deposit' ? Math.round(parseFloat(depositAmountRM || '0') * 100) : 0
+      const depositSen =
+        paymentMode === 'deposit' ? Math.round(parseFloat(depositAmountRM || '0') * 100) : 0
       await updatePaymentSettings({
         data: {
           paymentMode,
@@ -62,31 +64,24 @@ function AdminSettingsPage() {
   }
 
   return (
-    <div className="hub-layout">
-      <div className="hub-content">
-        <div className="hub-page-header">
-          <div className="hub-page-title-row">
-            <CreditCard size={22} className="hub-page-icon" />
-            <h1 className="hub-page-title">Settings</h1>
-          </div>
-        </div>
+    <AdminSidebarShell user={session.user} pageTitle="Settings">
+      <div className="admin-settings-page">
+        <p className="admin-settings-intro">
+          Configure how online payments are collected through iPay88 during customer checkout.
+        </p>
 
         <form onSubmit={handleSave} className="settings-form">
-          {/* Payment gateway section */}
-          <div className="settings-section island-shell">
+          <section className="settings-section island-shell">
             <h2 className="settings-section-title">iPay88 Payment Gateway</h2>
 
-            {/* Credentials info */}
             <div className="settings-info-banner">
-              <Info size={15} />
+              <Info size={15} aria-hidden />
               <span>
                 Merchant credentials are configured via environment variables (
-                <code>IPAY88_MERCHANT_CODE</code>, <code>IPAY88_MERCHANT_KEY</code>
-                ).
+                <code>IPAY88_MERCHANT_CODE</code>, <code>IPAY88_MERCHANT_KEY</code>).
               </span>
             </div>
 
-            {/* Sandbox toggle */}
             <div className="settings-field-row">
               <div className="settings-field-label-group">
                 <label className="settings-label" htmlFor="sandbox-mode">
@@ -108,7 +103,6 @@ function AdminSettingsPage() {
               </button>
             </div>
 
-            {/* Enable/disable online payment */}
             <div className="settings-field-row">
               <div className="settings-field-label-group">
                 <label className="settings-label" htmlFor="payment-enabled">
@@ -129,15 +123,13 @@ function AdminSettingsPage() {
                 <span className="settings-toggle-thumb" />
               </button>
             </div>
-          </div>
+          </section>
 
-          {/* Payment mode section */}
-          <div className="settings-section island-shell">
-            <h2 className="settings-section-title">Payment Collection</h2>
+          <section className="settings-section island-shell">
+            <h2 className="settings-section-title">Payment collection</h2>
 
-            {/* Full vs deposit */}
             <div className="settings-field-col">
-              <label className="settings-label">Charge amount</label>
+              <span className="settings-label">Charge amount</span>
               <div className="settings-radio-group">
                 <label className="settings-radio-label">
                   <input
@@ -164,7 +156,6 @@ function AdminSettingsPage() {
               </div>
             </div>
 
-            {/* Deposit amount (shown only in deposit mode) */}
             {paymentMode === 'deposit' && (
               <div className="settings-field-col">
                 <label className="settings-label" htmlFor="deposit-amount">
@@ -186,20 +177,19 @@ function AdminSettingsPage() {
                 </div>
               </div>
             )}
-          </div>
+          </section>
 
-          {/* Save */}
-          {error && <p className="settings-error">{error}</p>}
-          {saved && <p className="settings-saved">Settings saved.</p>}
+          {error ? <p className="settings-error">{error}</p> : null}
+          {saved ? <p className="settings-saved">Settings saved.</p> : null}
 
           <div className="settings-actions">
             <button type="submit" className="button-primary" disabled={saving}>
-              <Save size={15} />
+              <Save size={15} aria-hidden />
               {saving ? 'Saving…' : 'Save settings'}
             </button>
           </div>
         </form>
       </div>
-    </div>
+    </AdminSidebarShell>
   )
 }

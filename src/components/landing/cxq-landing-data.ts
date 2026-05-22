@@ -1,7 +1,9 @@
 /** Static marketing content ported from xq-car-web (Car XQ landing). */
 
-export const HERO_BG =
-  'https://images.unsplash.com/photo-1493238792000-8113da705763?w=1800&q=85'
+export const HERO_BG = '/image/Rent a Car in Langkawi for Every Adventure.png'
+
+export const FOOTER_CTA_FLEET_IMAGE = '/image/Langkawi Car Rental - Pick This Car.JPG'
+export const FOOTER_CTA_SCENERY_IMAGE = '/image/Langkawi Car Rental - Pick This Car.png'
 
 export const HOTELS = [
   'The Datai Langkawi',
@@ -27,19 +29,75 @@ export const HOTELS = [
   'La Pari-Pari Langkawi',
 ] as const
 
-export const CITIES = [
-  'Pantai Cenang',
-  'Pantai Tengah',
-  'Kuah Town',
-  'Pantai Kok',
-  'Tanjung Rhu',
-  'Datai Bay',
-  'Padang Matsirat',
-  'Burau Bay',
-  'Telaga Harbour',
-  'Langkawi Airport',
-  'Kuah Jetty',
-  'Pulau Tuba',
+export const RENTAL_LOCATIONS = [
+  {
+    name: 'Pantai Cenang',
+    mapsUrl:
+      'https://www.google.com/maps/search/?api=1&query=Pantai+Cenang&query_place_id=ChIJG4L3oguISzARA2GH9QhW8MM',
+    mapPin: { x: 38, y: 74 },
+  },
+  {
+    name: 'Pantai Tengah',
+    mapsUrl:
+      'https://www.google.com/maps/search/?api=1&query=Pantai+Tengah&query_place_id=ChIJs-oS_tmHSzAR7jq4QsnAaZw3',
+    mapPin: { x: 50, y: 80 },
+  },
+  {
+    name: 'Kuah Town',
+    mapsUrl:
+      'https://www.google.com/maps/search/?api=1&query=Kuah+Town&query_place_id=ChIJ_dVImWl_TDARotw9Phl8eZo4',
+    mapPin: { x: 66, y: 64 },
+  },
+  {
+    name: 'Pantai Kok',
+    mapsUrl:
+      'https://www.google.com/maps/search/?api=1&query=Pantai+Kok&query_place_id=ChIJaTf5g_l2TDARClav_l-juEU5',
+    mapPin: { x: 20, y: 46 },
+  },
+  {
+    name: 'Tanjung Rhu',
+    mapsUrl:
+      'https://www.google.com/maps/search/?api=1&query=Tanjung+Rhu&query_place_id=ChIJ24wk0n6ASzARL8_bB2636t46',
+    mapPin: { x: 74, y: 20 },
+  },
+  {
+    name: 'Datai Bay',
+    mapsUrl:
+      'https://www.google.com/maps/search/?api=1&query=Datai+Bay&query_place_id=ChIJ_6S8XBlxTDARsWHSoW65WVg7',
+    mapPin: { x: 16, y: 22 },
+  },
+  {
+    name: 'Padang Matsirat',
+    mapsUrl:
+      'https://www.google.com/maps/search/?api=1&query=Padang+Matsirat&query_place_id=ChIJZ4rFEC54TDARxU8NaqYscWs8',
+    mapPin: { x: 30, y: 52 },
+  },
+  {
+    name: 'Burau Bay',
+    mapsUrl:
+      'https://www.google.com/maps/search/?api=1&query=Teluk+Burau&query_place_id=ChIJ-_w1gNJ3TDARmygU9stQ9xY9',
+    mapPin: { x: 14, y: 58 },
+  },
+  {
+    name: 'Telaga Harbour',
+    mapsUrl:
+      'https://www.google.com/maps/search/?api=1&query=Telaga+Harbour+Marina&query_place_id=ChIJtUj7kP12TDARxr_X505F1-I',
+    mapPin: { x: 18, y: 36 },
+  },
+  {
+    name: 'Langkawi Airport',
+    mapsUrl:
+      'https://www.google.com/maps/search/?api=1&query=Langkawi+International+Airport&query_place_id=ChIJYUtZgiN4TDARtnk2wHq0-eU',
+    mapPin: { x: 26, y: 58 },
+    meetPoint: true,
+  },
+  {
+    name: 'Kuah Jetty',
+    mapsUrl:
+      'https://www.google.com/maps/search/?api=1&query=Kuah+Jetty&query_place_id=ChIJ1cx-v4WASzARMlr2BgqXguU',
+    mapPin: { x: 70, y: 70 },
+    meetPoint: true,
+  },
 ] as const
 
 export const PICK_TIMES = [
@@ -66,29 +124,37 @@ export const PICK_TIMES = [
 export const BLOG_TIPS = [
   {
     id: 'ten-tips-driving-langkawi',
-    tag: 'Tips',
+    slug: 'driving-langkawi-first-time',
+    tag: 'Driving',
     title: '10 essential tips for driving in Langkawi',
     excerpt:
       'From left-hand-drive etiquette to navigating Pantai Cenang on a Friday evening — the basics every tourist needs.',
-    img: 'https://images.unsplash.com/photo-1502920514313-52581002a659?w=1600&q=85',
+    img: '/image/Attractions/Sky%20bridge.png',
   },
   {
     id: 'book-rental-step-by-step',
+    slug: 'book-car-rental-langkawi-online',
     tag: 'Guides',
     title: 'How to book your Car XQ rental online — step by step',
     excerpt: 'A quick visual walkthrough of every screen, so your first rental feels like your tenth.',
-    img: 'https://images.unsplash.com/photo-1449965408869-eaa3f487e32f?w=1600&q=85',
+    img: '/image/Attractions/pantai%20cenang.png',
   },
   {
     id: 'monsoon-travel-langkawi',
-    tag: 'Seasonal',
+    slug: 'langkawi-monsoon-season-car-rental',
+    tag: 'Planning',
     title: 'Why monsoon season is the quietest time to explore',
     excerpt: 'Fewer crowds, greener hills, and off-peak rates — what to expect if you visit between May and June.',
-    img: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1600&q=85',
+    img: '/image/Attractions/Kilim%20Geoforest%20Park.png',
   },
 ] as const
 
 export const ATTR_CATS = ['All', 'Beaches', 'Adventure', 'Nature', 'Landmarks'] as const
+
+/** Local attraction photos in `public/image/Attractions/`. */
+function attractionImage(filename: string): string {
+  return `/image/Attractions/${encodeURIComponent(filename)}`
+}
 
 export const ATTRACTIONS = [
   {
@@ -96,100 +162,171 @@ export const ATTRACTIONS = [
     t: 'Langkawi Sky Bridge',
     c: 'Adventure',
     d: 'Curved 125m suspension bridge with panoramic island and Andaman Sea views.',
-    airport: '20 km',
-    jetty: '27 km',
-    time: '40 min drive',
-    img: 'https://images.unsplash.com/photo-1542448308-5cd00b95da6e?w=1400&q=85',
+    airport: '18 km',
+    jetty: '31 km',
+    cenang: '20 km',
+    kuah: '29 km',
+    time: '32 min drive',
+    mapsUrl: 'https://www.google.com/maps/place/Langkawi+Sky+Bridge/@6.3860,99.6622,17z',
+    img: attractionImage('Sky bridge.png'),
   },
   {
     n: '02',
     t: 'Langkawi Cable Car (SkyCab)',
     c: 'Adventure',
     d: 'Thrilling ride up to the peak of Gunung Mat Cincang.',
-    airport: '19 km',
-    jetty: '26 km',
-    time: '38 min drive',
-    img: 'https://images.unsplash.com/photo-1605649461784-d6f5b5dca8e7?w=900&q=80',
+    airport: '18 km',
+    jetty: '31 km',
+    cenang: '19 km',
+    kuah: '28 km',
+    time: '28 min drive',
+    mapsUrl: 'https://www.google.com/maps/place/Langkawi+Cable+Car/@6.3710,99.6719,17z',
+    img: attractionImage('Skycab.png'),
   },
   {
     n: '03',
     t: 'Pantai Cenang',
     c: 'Beaches',
     d: 'Lively beach with white sand, water sports, and nightlife.',
-    airport: '7 km',
-    jetty: '20 km',
-    time: '14 min drive',
-    img: 'https://images.unsplash.com/photo-1559554498-bc0fe9b97f56?w=900&q=80',
+    airport: '4 km',
+    jetty: '22 km',
+    cenang: 'Here',
+    kuah: '19 km',
+    time: '9 min drive',
+    mapsUrl: 'https://www.google.com/maps/place/Pantai+Cenang/@6.2913,99.7289,17z',
+    img: attractionImage('pantai cenang.png'),
   },
   {
     n: '04',
     t: 'Kilim Geoforest Park',
     c: 'Nature',
     d: 'UNESCO-recognized mangrove park, sea caves and diverse wildlife.',
-    airport: '25 km',
-    jetty: '8 km',
-    time: '50 min drive',
-    img: 'https://images.unsplash.com/photo-1502630859934-b3b41d18206c?w=900&q=80',
+    airport: '24 km',
+    jetty: '12 km',
+    cenang: '29 km',
+    kuah: '11 km',
+    time: '28 min drive',
+    mapsUrl: 'https://www.google.com/maps/place/Kilim+Karst+Geoforest+Park/@6.4050,99.8582,17z',
+    img: attractionImage('Kilim Geoforest Park.png'),
   },
   {
     n: '05',
     t: 'Tanjung Rhu Beach',
     c: 'Beaches',
     d: 'Serene beach with clear waters and a tranquil atmosphere.',
-    airport: '25 km',
-    jetty: '22 km',
-    time: '45 min drive',
-    img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=900&q=80',
+    airport: '22 km',
+    jetty: '25 km',
+    cenang: '26 km',
+    kuah: '24 km',
+    time: '31 min drive',
+    mapsUrl: 'https://www.google.com/maps/place/Pantai+Tanjung+Rhu/@6.4581,99.8249,17z',
+    img: attractionImage('Tanjung Rhu.png'),
   },
   {
     n: '06',
     t: 'Underwater World Langkawi',
     c: 'Landmarks',
     d: "One of Malaysia's largest aquariums.",
-    airport: '7 km',
-    jetty: '20 km',
-    time: '14 min drive',
-    img: 'https://images.unsplash.com/photo-1582967788606-a171c1080cb0?w=900&q=80',
+    airport: '5 km',
+    jetty: '22 km',
+    cenang: '1 km',
+    kuah: '19 km',
+    time: '10 min drive',
+    mapsUrl: 'https://www.google.com/maps/place/Underwater+World+Langkawi/@6.2878,99.7286,17z',
+    img: attractionImage('Underwater World.png'),
   },
   {
     n: '07',
     t: 'Eagle Square (Dataran Lang)',
     c: 'Landmarks',
     d: 'Iconic giant eagle sculpture overlooking the bay.',
-    airport: '20 km',
-    jetty: '3 km',
-    time: '35 min drive',
-    img: 'https://images.unsplash.com/photo-1599577180589-0a4d1cd9bf45?w=900&q=80',
+    airport: '17 km',
+    jetty: '1 km',
+    cenang: '22 km',
+    kuah: '4 km',
+    time: '21 min drive',
+    mapsUrl: 'https://www.google.com/maps/place/Eagle+Square+Langkawi/@6.3083,99.8520,17z',
+    img: attractionImage('Eagle Square.png'),
   },
   {
     n: '08',
     t: 'Telaga Tujuh Waterfalls',
     c: 'Nature',
     d: 'Seven natural pools, perfect for a swim and a picnic.',
-    airport: '13 km',
-    jetty: '24 km',
+    airport: '18 km',
+    jetty: '31 km',
+    cenang: '20 km',
+    kuah: '29 km',
     time: '28 min drive',
-    img: 'https://images.unsplash.com/photo-1546587348-d12660c30c50?w=900&q=80',
+    mapsUrl: 'https://www.google.com/maps/place/Air+Terjun+Telaga+Tujuh/@6.3818,99.6729,17z',
+    img: attractionImage('Telaga Tujuh Waterfall.png'),
   },
   {
     n: '09',
     t: 'Langkawi Wildlife Park',
     c: 'Nature',
     d: 'Interactive park with hundreds of species.',
-    airport: '20 km',
-    jetty: '10 km',
-    time: '32 min drive',
-    img: 'https://images.unsplash.com/photo-1474314243412-cd4a79f02c6a?w=900&q=80',
+    airport: '23 km',
+    jetty: '11 km',
+    cenang: '28 km',
+    kuah: '10 km',
+    time: '26 min drive',
+    mapsUrl: 'https://www.google.com/maps/place/Langkawi+Wildlife+Park/@6.3873,99.8619,17z',
+    img: attractionImage('Wildlife Park.png'),
   },
   {
     n: '10',
     t: 'Pulau Payar Marine Park',
     c: 'Beaches',
     d: 'Coral reefs and snorkeling — boat transfer from Kuah Jetty.',
-    airport: '32 km',
+    airport: 'boat',
     jetty: 'boat',
+    cenang: 'boat',
+    kuah: 'boat',
     time: '45 min ferry',
-    img: 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=900&q=80',
+    mapsUrl: 'https://www.google.com/maps/place/Pulau+Payar+Marine+Park/@6.0740,100.0562,17z',
+    img: attractionImage('Pulau Payar Marine Park.png'),
+  },
+] as const
+
+export const ESSENTIAL_LOCATIONS = [
+  {
+    t: 'Langkawi Intl Airport',
+    sub: 'Door 3 · LGK',
+    meet: 'Outside Arrivals',
+    hours: '24/7 counter',
+    tag: 'Pickup',
+    icon: 'airport' as const,
+    mapsUrl: 'https://maps.app.goo.gl/BSUAGPQsuR5oAFkt6',
+  },
+  {
+    t: 'Langkawi Ferry Jetty',
+    sub: 'Kuah Terminal',
+    meet: 'Ferry exit, taxi stand',
+    hours: '06:00 – 22:00',
+    tag: 'Pickup',
+    icon: 'jetty' as const,
+    mapsUrl: 'https://maps.app.goo.gl/FppwKtKuAusHUKJVA',
+  },
+  {
+    t: 'Sultanah Maliha Hospital',
+    sub: 'Primary hospital',
+    meet: 'Jalan Kuah–Padang Matsirat',
+    hours: '24/7 ER',
+    tag: 'Good to know',
+    icon: 'info' as const,
+    phone: '+60 4 966 3333',
+    mapsUrl: 'https://maps.app.goo.gl/KmbasG1kWhUhKXZ46',
+  },
+  {
+    t: 'Langkawi Police HQ',
+    sub: 'IPD Langkawi',
+    meet: 'Persiaran Mutiara, Kuah',
+    hours: '24/7',
+    tag: 'Good to know',
+    icon: 'info' as const,
+    phone: '+60 4 966 6222',
+    mapsUrl: 'https://maps.app.goo.gl/GdeKj3xTT7X6iES28',
   },
 ] as const
 
@@ -216,8 +353,8 @@ export const FAQS = [
   },
   {
     c: 'Pickup & Extras',
-    q: 'Can I pick up my rental right at the airport?',
-    a: 'Yes. Let us know your flight and we can arrange meet-and-greet at Langkawi International Airport — Door 3, outside Arrivals.',
+    q: 'Can I pick up my rental car at Langkawi International Airport?',
+    a: 'Yes — Langkawi airport car rental is our most popular service. We meet you at Door 3 in the Arrivals Hall of Langkawi International Airport (LGK), available 24/7. Just share your flight number when you book and we handle the rest at no extra charge.',
   },
   {
     c: 'Insurance & Safety',
@@ -259,6 +396,11 @@ export const FAQS = [
     q: 'Can I rent a car for my whole stay?',
     a: 'Absolutely. We offer flexible weekly and monthly rates so you can explore at your own pace.',
   },
+  {
+    c: 'Booking & Pricing',
+    q: 'What is the cheapest car rental option in Langkawi?',
+    a: 'Our economy cars start from RM 70/day — the most affordable way to get around Langkawi independently. Booking early or staying 7+ nights unlocks further discounts, automatically applied at checkout.',
+  },
 ] as const
 
 export const FAQ_CATS = [
@@ -267,134 +409,4 @@ export const FAQ_CATS = [
   { id: 'Eligibility', label: 'Eligibility & drivers' },
   { id: 'Pickup & Extras', label: 'Pickup & extras' },
   { id: 'Insurance & Safety', label: 'Insurance & safety' },
-] as const
-
-export const REVIEWS = [
-  {
-    n: 'Yvonne Koh',
-    r: 5,
-    role: 'Solo traveller · Kuala Lumpur',
-    body: 'Cars were so new and clean — best price I compared across the island. Will definitely choose Car XQ again.',
-    date: 'Apr 2026',
-    trip: '4-day rental · Perodua Bezza',
-  },
-  {
-    n: 'Angel Lee',
-    r: 5,
-    role: 'Couples trip · Penang',
-    body: 'First time in Langkawi with my partner. Jason and the team handled the car and our activities — total peace of mind.',
-    date: 'Mar 2026',
-    trip: '3-day rental · Honda City',
-  },
-  {
-    n: 'Gigi Soon',
-    r: 5,
-    role: 'Family of four · Singapore',
-    body: 'Super attentive service. Booked our hotel and car through them and both were spot on.',
-    date: 'Feb 2026',
-    trip: '6-day rental · Toyota Innova',
-  },
-  {
-    n: 'Mily Keh',
-    r: 5,
-    role: 'Weekend getaway · Ipoh',
-    body: "The car was spotless. Saved me hours of planning — recommended Jason and Bin's service to all my friends.",
-    date: 'Jan 2026',
-    trip: '3-day rental · Perodua Alza',
-  },
-  {
-    n: 'Jocelyn Teoh',
-    r: 5,
-    role: 'Friends trip · Kuching',
-    body: 'Good service and value. Genuinely hassle-free trip — would recommend to anyone heading to Langkawi.',
-    date: 'Dec 2025',
-    trip: '5-day rental · Toyota Veloz',
-  },
-  {
-    n: 'Weikei Yap',
-    r: 5,
-    role: 'Wedding party · Johor Bahru',
-    body: 'Even after just renting a car, they suggested island-hopping packages, restaurants, and entrance tickets. Above and beyond.',
-    date: 'Nov 2025',
-    trip: '7-day rental · Hyundai Staria',
-  },
-  {
-    n: 'Tiffany Tai',
-    r: 5,
-    role: 'Photographers · Bali',
-    body: "Car pickup and drop-off were so convenient. They handled tickets and island hop — we didn't have to do any homework.",
-    date: 'Oct 2025',
-    trip: '5-day rental · Mini Convertible',
-  },
-  {
-    n: 'Shrek Lim',
-    r: 5,
-    role: 'Holiday travellers · Bangkok',
-    body: 'Good service. Highly recommended for holiday travelers to Langkawi.',
-    date: 'Sep 2025',
-    trip: '4-day rental · Suzuki Jimny',
-  },
-] as const
-
-export const REELS = [
-  {
-    id: 'r1',
-    name: 'Yvonne Koh',
-    city: 'KL',
-    caption: 'Sunrise drive to Pantai Cenang. Stress-free pickup at Door 3.',
-    views: '12.4K',
-    likes: '1.2K',
-    clip: 'https://cdn.coverr.co/videos/coverr-driving-on-an-empty-highway-3041/1080p.mp4',
-    thumb: 'https://images.unsplash.com/photo-1502920514313-52581002a659?w=600&q=80',
-  },
-  {
-    id: 'r2',
-    name: 'Angel Lee',
-    city: 'Penang',
-    caption: 'Top of the Sky Bridge with the family. Staria was a gem.',
-    views: '8.6K',
-    likes: '880',
-    clip: 'https://cdn.coverr.co/videos/coverr-driving-through-the-forest-3036/1080p.mp4',
-    thumb: 'https://images.unsplash.com/photo-1542448308-5cd00b95da6e?w=600&q=80',
-  },
-  {
-    id: 'r3',
-    name: 'Gigi Soon',
-    city: 'Singapore',
-    caption: 'Veloz fit all our luggage and the dog. Easy island life.',
-    views: '23.1K',
-    likes: '2.4K',
-    clip: 'https://cdn.coverr.co/videos/coverr-driving-on-a-road-1582/1080p.mp4',
-    thumb: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80',
-  },
-  {
-    id: 'r4',
-    name: 'Mily Keh',
-    city: 'Ipoh',
-    caption: "Tanjung Rhu detour. Calmest beach we've seen this year.",
-    views: '5.2K',
-    likes: '612',
-    clip: 'https://cdn.coverr.co/videos/coverr-driving-down-a-country-road-2632/1080p.mp4',
-    thumb: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80',
-  },
-  {
-    id: 'r5',
-    name: 'Weikei Yap',
-    city: 'Johor',
-    caption: 'Mini convertible at sunset. Worth every ringgit.',
-    views: '31.8K',
-    likes: '3.1K',
-    clip: 'https://cdn.coverr.co/videos/coverr-driving-on-a-coastal-road-2541/1080p.mp4',
-    thumb: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=600&q=80',
-  },
-  {
-    id: 'r6',
-    name: 'Tiffany Tai',
-    city: 'Bali',
-    caption: 'Kilim Geoforest morning loop. Booking was 90 seconds, swear.',
-    views: '9.4K',
-    likes: '1.0K',
-    clip: 'https://cdn.coverr.co/videos/coverr-driving-down-the-mountain-3038/1080p.mp4',
-    thumb: 'https://images.unsplash.com/photo-1502630859934-b3b41d18206c?w=600&q=80',
-  },
 ] as const

@@ -250,6 +250,10 @@ export const rentals = pgTable(
       mode: 'date',
       withTimezone: true,
     }),
+    // Captured at booking time from the `aff_ref` cookie (Phase 3). FK to the
+    // attribution row is set when the same transaction inserts the attribution.
+    affiliateRefCode: text('affiliate_ref_code'),
+    affiliateAttributionId: uuid('affiliate_attribution_id'),
     createdByUserId: text('created_by_user_id').references(() => users.id, {
       onDelete: 'set null',
     }),
@@ -337,6 +341,27 @@ export const maintenanceEvents = pgTable(
     index('maintenance_events_car_id_idx').on(table.carId),
     index('maintenance_events_status_idx').on(table.status),
   ],
+)
+
+export const rentalNotes = pgTable(
+  'rental_notes',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    rentalId: uuid('rental_id')
+      .notNull()
+      .references(() => rentals.id, { onDelete: 'cascade' }),
+    authorUserId: text('author_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    body: text('body').notNull(),
+    createdAt: timestamp('created_at', {
+      mode: 'date',
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [index('rental_notes_rental_idx').on(table.rentalId)],
 )
 
 export const carServiceConfig = pgTable('car_service_config', {

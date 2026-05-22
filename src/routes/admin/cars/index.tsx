@@ -16,6 +16,7 @@ import {
 } from '#/components/ui/sheet'
 import { StatusBadge } from '#/components/ui/StatusBadge'
 import type { CarCategory, CarColor, CarStatus } from '#/db/schema'
+import { isFullAdminRole, type AppRole } from '#/lib/auth-model'
 import {
   createCar,
   getCars,
@@ -176,12 +177,7 @@ function sortCars(cars: CarRow[], key: SortKey, dir: 'asc' | 'desc'): CarRow[] {
   })
 }
 
-// ─── Row action button (compact, for use inside table rows) ──────────────────
-
-const ROW_BTN =
-  'inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] text-[var(--sea-ink)] shadow-[0_1px_3px_rgba(30,90,72,0.08)] hover:-translate-y-px transition-transform cursor-pointer disabled:cursor-not-allowed disabled:opacity-50'
-
-// ─── Component ────────────────────────────────────────────────────────────────
+import { UI_BTN_XS, UI_BTN_XS_DANGER } from '#/lib/admin-ui-classes'
 
 function CarsPage() {
   const { session, cars: initialCars } = Route.useRouteContext() as unknown as {
@@ -189,7 +185,7 @@ function CarsPage() {
     cars: CarRow[]
   }
 
-  const isOwner = session.user.role === 'owner'
+  const isOwner = isFullAdminRole(session.user.role as AppRole)
 
   const [cars, setCars] = useState<CarRow[]>(initialCars)
   const [activeTab, setActiveTab] = useState<CarStatus | 'all'>('all')
@@ -432,7 +428,7 @@ function CarsPage() {
               <>
                 <button
                   type="button"
-                  className={`${ROW_BTN} mr-1.5`}
+                  className={`${UI_BTN_XS} mr-1.5`}
                   onClick={() => openEdit(car)}
                   disabled={car.status === 'retired'}
                   title={car.status === 'retired' ? 'Retired vehicles cannot be edited' : 'Edit vehicle'}
@@ -443,7 +439,7 @@ function CarsPage() {
                 {car.status !== 'retired' && (
                   <button
                     type="button"
-                    className={`${ROW_BTN} opacity-60 hover:opacity-100`}
+                    className={UI_BTN_XS_DANGER}
                     onClick={() => setConfirmingRetire(car)}
                   >
                     Retire

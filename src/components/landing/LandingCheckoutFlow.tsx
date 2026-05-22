@@ -12,8 +12,10 @@ import {
 } from 'lucide-react'
 
 import { LoadingSpinner } from '#/components/ui/LoadingSpinner'
+import { PaymentMethodIcons } from '#/components/landing/payment-method-icons'
 import { checkoutSearchFromBooking, bookingHasCompleteTrip } from '#/lib/checkout-trip'
 import { createPortalBooking } from '#/lib/portal-booking-functions'
+import { validatePromo } from '#/lib/promo-functions'
 import {
   estimateExtraHoursCharge,
   formatExtraHours,
@@ -241,25 +243,8 @@ const ADDONS: Array<{
   },
 ]
 
-const IPAY88_PAYMENTS = [
-  { id: 'visa', label: 'Visa', src: '/images/payments/visalogo.png' },
-  { id: 'mastercard', label: 'Mastercard', src: '/images/payments/masterlogo.jpeg' },
-  { id: 'unionpay', label: 'UnionPay', src: '/images/payments/union.png' },
-  { id: 'fpx', label: 'FPX Online Banking', src: '/images/payments/FPX-Logo.jpg' },
-  { id: 'duitnow', label: 'DuitNow', src: '/images/payments/duitnow.png' },
-  { id: 'tng', label: "Touch 'n Go eWallet", src: '/images/payments/TngGO.jpg' },
-] as const
-
 function CheckoutPaymentIcons() {
-  return (
-    <div className="cs-pay-icons" aria-label="Accepted payment methods via iPay88">
-      {IPAY88_PAYMENTS.map(({ id, label, src }) => (
-        <div key={id} className="cs-pay-chip" title={label}>
-          <img src={src} alt={label} loading="lazy" decoding="async" />
-        </div>
-      ))}
-    </div>
-  )
+  return <PaymentMethodIcons className="cs-pay-icons" chipClassName="cs-pay-chip" />
 }
 
 function nightsBetween(a: Date | null, b: Date | null) {
@@ -321,7 +306,6 @@ export function LandingCheckoutFlow({
   const nights = nightsBetween(booking.pickDate, booking.retDate)
   const daily = Math.round(car.dailyRateSen / 100)
   const subtotal = daily * nights
-  const discount = Math.round(subtotal * 0.15)
   const [step, setStep] = useState(0)
   const [guestCheckout, setGuestCheckout] = useState(false)
   const [addons, setAddons] = useState<Record<AddonKey, boolean>>({
@@ -357,6 +341,18 @@ export function LandingCheckoutFlow({
   }>({})
   const [submitting, setSubmitting] = useState(false)
   const [flowError, setFlowError] = useState<string | null>(null)
+
+  // Promo code state — wired to `validatePromo` server fn.
+  const [promoInput, setPromoInput] = useState('')
+  const [appliedPromo, setAppliedPromo] = useState<{
+    code: string
+    discountSen: number
+  } | null>(null)
+  const [promoError, setPromoError] = useState<string | null>(null)
+  const [promoBusy, setPromoBusy] = useState(false)
+
+  // Promo discount is the only source of truth for the discount line item.
+  const discount = appliedPromo ? Math.round(appliedPromo.discountSen / 100) : 0
 
   useEffect(() => {
     if (user) setGuestCheckout(false)
@@ -533,7 +529,7 @@ export function LandingCheckoutFlow({
           returnLocation: toPricingLocation(returnLoc),
           childSeat: addons.child,
           secondDriver: addons.second,
-          couponCode: null,
+          couponCode: appliedPromo?.code ?? null,
           fullName: (alsoAsDriver ? buyer.name : driver.name).trim(),
           icOrPassport: driver.license.trim(),
           phone: (alsoAsDriver ? buyer.phone : driver.phone).trim(),
@@ -547,7 +543,92 @@ export function LandingCheckoutFlow({
     } finally {
       setSubmitting(false)
     }
-  }, [car.id, startYmd, endYmd, buyer, driver, alsoAsDriver, booking, addons, navigate])
+  }, [
+    car.id,
+    startYmd,
+    endYmd,
+    buyer,
+    driver,
+    alsoAsDriver,
+    booking,
+    addons,
+    navigate,
+    appliedPromo,
+  ])
+
+  const applyPromoCode = useCallback(async () => {
+    const code = promoInput.trim().toUpperCase()
+    if (!code) return
+    setPromoBusy(true)
+    setPromoError(null)
+    try {
+      const result = await validatePromo({
+        data: {
+          code,
+          cartContext: {
+            carId: car.id,
+            carCategory: car.category,
+            subTotalSen: subtotal * 100,
+            customerEmail: buyer.email.trim() || undefined,
+          },
+        },
+      })
+      if (result.valid) {
+        setAppliedPromo({ code: result.code, discountSen: result.discountSen })
+      } else {
+        setAppliedPromo(null)
+        setPromoError(result.reason)
+      }
+    } catch (err) {
+      setPromoError(err instanceof Error ? err.message : 'Could not validate promo.')
+    } finally {
+      setPromoBusy(false)
+    }
+  }, [promoInput, car.id, car.category, subtotal, buyer.email])
+
+  const removePromoCode = useCallback(() => {
+    setAppliedPromo(null)
+    setPromoError(null)
+    setPromoInput('')
+  }, [])
+
+  // If the subtotal changes (date adjustments etc.), re-validate the applied
+  // promo silently. This keeps the discount accurate without surprising
+  // failures at checkout.
+  useEffect(() => {
+    if (!appliedPromo) return
+    let cancelled = false
+    void (async () => {
+      try {
+        const res = await validatePromo({
+          data: {
+            code: appliedPromo.code,
+            cartContext: {
+              carId: car.id,
+              carCategory: car.category,
+              subTotalSen: subtotal * 100,
+              customerEmail: buyer.email.trim() || undefined,
+            },
+          },
+        })
+        if (cancelled) return
+        if (res.valid) {
+          setAppliedPromo({ code: res.code, discountSen: res.discountSen })
+        } else {
+          setAppliedPromo(null)
+          setPromoError(res.reason)
+        }
+      } catch {
+        // Ignore — user can retry manually.
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+    // Intentionally not depending on buyer.email — only re-validate on cart
+    // size changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subtotal, car.id, car.category])
 
   const tripSearch = useMemo(() => checkoutSearchFromBooking(booking), [booking])
   const checkoutReturnTo = useMemo(() => {
@@ -1281,10 +1362,28 @@ export function LandingCheckoutFlow({
                 </span>
                 <span>RM {subtotal}</span>
               </div>
-              <div className="cs-row">
-                <span>Early-bird discount</span>
-                <span style={{ color: 'var(--brand-coral)' }}>−RM {discount}</span>
-              </div>
+              {appliedPromo ? (
+                <div className="cs-row">
+                  <span>
+                    Promo <code style={{ fontFamily: 'monospace' }}>{appliedPromo.code}</code>{' '}
+                    <button
+                      type="button"
+                      onClick={removePromoCode}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--brand-coral)',
+                        cursor: 'pointer',
+                        textDecoration: 'underline',
+                        fontSize: '0.85em',
+                      }}
+                    >
+                      remove
+                    </button>
+                  </span>
+                  <span style={{ color: 'var(--brand-coral)' }}>−RM {discount}</span>
+                </div>
+              ) : null}
               {extraHours > 0 ? (
                 <div className="cs-row">
                   <span>Extra hours ({formatExtraHours(extraHours)})</span>
@@ -1302,6 +1401,37 @@ export function LandingCheckoutFlow({
                 <span>RM {tax}</span>
               </div>
             </div>
+            {!appliedPromo ? (
+              <div className="cs-promo">
+                <label htmlFor="cs-promo-input" className="cs-promo-label">
+                  Have a promo code?
+                </label>
+                <div className="cs-promo-row">
+                  <input
+                    id="cs-promo-input"
+                    type="text"
+                    value={promoInput}
+                    onChange={(e) => {
+                      setPromoInput(e.target.value.toUpperCase())
+                      if (promoError) setPromoError(null)
+                    }}
+                    placeholder="ENTER CODE"
+                    autoComplete="off"
+                    disabled={promoBusy}
+                    className="cs-promo-input"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void applyPromoCode()}
+                    disabled={!promoInput.trim() || promoBusy}
+                    className="cs-promo-btn"
+                  >
+                    {promoBusy ? <LoadingSpinner size={14} aria-hidden /> : 'Apply'}
+                  </button>
+                </div>
+                {promoError ? <p className="cs-promo-error">{promoError}</p> : null}
+              </div>
+            ) : null}
             <div className="cs-divider" />
             <div className="cs-total">
               <span>Total to pay</span>

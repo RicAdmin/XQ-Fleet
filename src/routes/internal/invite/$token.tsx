@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 
 import AuthFrame from '#/components/auth/AuthFrame'
-import PublicPageShell from '#/components/shells/PublicPageShell'
+import PublicAuthShell from '#/components/shells/PublicAuthShell'
 import { authClient } from '#/lib/auth-client'
 import { acceptStaffInvitation, getStaffInvitation } from '#/lib/auth-functions'
 
@@ -34,28 +34,27 @@ function AcceptInvitePage() {
             : 'We could not verify that invitation.'
 
     return (
-      <PublicPageShell className="page-wrap px-4 pb-12 pt-8">
-        <section className="island-shell rise-in rounded-[2rem] px-6 py-8 sm:px-10 sm:py-10">
-          <p className="island-kicker mb-3">Invitation status</p>
-          <h1 className="display-title mb-4 text-4xl font-bold text-[var(--sea-ink)] sm:text-5xl">
-            {message}
-          </h1>
-          <p className="m-0 text-base leading-8 text-[var(--sea-ink-soft)]">
-            Ask the owner for a fresh internal invite if you still need access.
-          </p>
-          <div className="mt-6">
-            <Link to="/internal/login" className="button-secondary">
+      <PublicAuthShell screenLabel="Staff invitation">
+        <div className="auth-page-card auth-page-card--single">
+          <section className="auth-right">
+            <span className="auth-badge">Invitation status</span>
+            <h3>{message}</h3>
+            <p className="auth-sub">
+              Ask the owner for a fresh internal invite if you still need access.
+            </p>
+            <Link to="/internal/login" className="btn btn-ghost auth-form-submit">
               Back to internal login
             </Link>
-          </div>
-        </section>
-      </PublicPageShell>
+          </section>
+        </div>
+      </PublicAuthShell>
     )
   }
 
   return (
-    <PublicPageShell className="page-wrap px-4 pb-12 pt-8">
-      <AuthFrame
+    <PublicAuthShell screenLabel="Staff invitation">
+      <div className="auth-page-card">
+        <AuthFrame
         badge="Staff invitation"
         title="Accept your internal invite"
         description={`Create your staff credentials for ${invitation.email}. Once you finish, you'll land in the operational workspace.`}
@@ -125,6 +124,7 @@ function AcceptInvitePage() {
           </button>
         </form>
       </AuthFrame>
-    </PublicPageShell>
+      </div>
+    </PublicAuthShell>
   )
 }

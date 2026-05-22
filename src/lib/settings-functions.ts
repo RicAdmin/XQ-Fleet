@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 
 import type { PaymentMode } from '#/db/schema'
 import { getRequestSession } from '#/lib/auth-functions'
+import { fullAdminRoles } from '#/lib/auth-model'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -48,7 +49,9 @@ export const updatePaymentSettings = createServerFn({ method: 'POST' })
   .inputValidator((input: UpdatePaymentSettingsInput) => input)
   .handler(async ({ data }): Promise<void> => {
     const session = await getRequestSession()
-    if (!session || session.user.role !== 'owner') throw new Error('Forbidden')
+    if (!session || !fullAdminRoles.includes(session.user.role)) {
+      throw new Error('Forbidden')
+    }
 
     const { db } = await import('#/db')
     const { paymentSettings } = await import('#/db/schema')

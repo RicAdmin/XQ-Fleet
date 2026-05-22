@@ -1,0 +1,98 @@
+{
+  "readme": "Edit car_videos: order, video (public/video/), car_model, description. Specs/pricing come from carCatalog — add aliases if you use a new label.",
+  "carCatalog": {
+    "Suzuki Jimny": {
+      "aliases": ["Suzuki Jimmy"],
+      "make": "Suzuki",
+      "model": "Jimny",
+      "category": "Adventure",
+      "pricePerDay": 350,
+      "seats": 2,
+      "doors": 4,
+      "transmission": "Auto",
+      "body": "Compact SUV",
+      "fuel": "Petrol",
+      "luggage": "2 carry-ons",
+      "image": "Suzuki Jimny for Langkawi Car Rental.png",
+      "highlights": ["True 4×4", "Limited 2 units", "Most photogenic"]
+    },
+    "Mini Cooper Convertible": {
+      "aliases": [],
+      "make": "Mini",
+      "model": "Cooper Convertible",
+      "category": "Adventure",
+      "pricePerDay": 550,
+      "seats": 2,
+      "doors": 2,
+      "transmission": "Auto",
+      "body": "Convertible",
+      "fuel": "Petrol",
+      "luggage": "1 large · 2 carry-ons",
+      "image": "Mini Cooper Convertible for Langkawi Car Rental.png",
+      "highlights": ["Open-top convertible", "Single unit", "Sunset cruise ready"]
+    },
+    "Mini Cooper Seaside (Limited Edition)": {
+      "aliases": ["Mini Convertible Seaside", "Mini Cooper Seaside"],
+      "make": "Mini",
+      "model": "Cooper Seaside (Limited Edition)",
+      "category": "Adventure",
+      "pricePerDay": 650,
+      "seats": 2,
+      "doors": 2,
+      "transmission": "Auto",
+      "body": "Convertible",
+      "fuel": "Petrol",
+      "luggage": "1 large · 2 carry-ons",
+      "image": "Mini Cooper Seaside for Langkawi Car Rental.png",
+      "highlights": ["Limited edition", "Rarest on the island", "Open-top exclusivity"]
+    },
+    "Honda N-Box": {
+      "aliases": [],
+      "make": "Honda",
+      "model": "N-Box",
+      "category": "Small",
+      "pricePerDay": 200,
+      "seats": 4,
+      "doors": 4,
+      "transmission": "Auto",
+      "body": "Kei car",
+      "fuel": "Petrol",
+      "luggage": "1 large · 2 carry-ons",
+      "image": "Honda N-Box for Langkawi Car Rental.png",
+      "highlights": ["OKU friendly", "Sliding rear doors", "Tall cabin"],
+      "oku": true
+    }
+  },
+  "car_videos": [
+    {
+      "order": 1,
+      "video": "Rent a Car in Langkawi for Every Adventure  - Suzuki Jimmy 1.mp4",
+      "car_model": "Suzuki Jimmy",
+      "description": "Rent a car in Langkawi for every adventure with the rugged Suzuki Jimmy from XQ Holidays (小强假期). This compact 4x4 is built to conquer Langkawi's winding coastal roads, hidden beach trails, and scenic hilltop viewpoints with confidence. Fuel-efficient, easy to handle, and packed with off-road character, the Suzuki Jimmy is the perfect Langkawi car rental for couples, solo travellers, and adventure seekers who want to explore beyond the tourist map. Book your Suzuki Jimmy car rental in Langkawi today and enjoy a worry-free island road trip."
+    },
+    {
+      "order": 2,
+      "video": "Luxury Drive in Langkawi with XQ Holidays - Mini Cooper Convertible.mp4",
+      "car_model": "Mini Cooper Convertible",
+      "description": "Experience a luxury drive in Langkawi with the iconic Mini Cooper Convertible from XQ Holidays. Drop the top, feel the island breeze, and cruise along Langkawi's stunning beachfront roads in unmatched style. Perfect for honeymooners, anniversary getaways, and travellers who want to turn every kilometre into a memory, this premium Langkawi car rental delivers both elegance and excitement. Rent a Mini Cooper Convertible in Langkawi with XQ Holidays for an adventure that's as unforgettable as the island itself."
+    },
+    {
+      "order": 3,
+      "video": "Honda N-Box OKU Friendly - How-to - Honda N-Box.mp4",
+      "car_model": "Honda N-Box",
+      "description": "Discover the Honda N-Box, an OKU-friendly (disabled-friendly) car rental in Langkawi offered exclusively by XQ Holidays. Designed with wheelchair accessibility, a low-step entry, and a spacious, comfortable interior, the Honda N-Box ensures every traveller can enjoy Langkawi without limits. This how-to guide walks you through its accessibility features so families, seniors, and guests with mobility needs can rent a car in Langkawi for every adventure — safely, comfortably, and independently. Inclusive travel starts with XQ Holidays Langkawi car rental."
+    },
+    {
+      "order": 4,
+      "video": "Have fun travelling Langkawi - Suzuki Jimmy.mp4",
+      "car_model": "Suzuki Jimmy",
+      "description": "Have fun travelling around Langkawi with the Suzuki Jimmy from XQ Holidays — the ultimate compact adventure car for island explorers. From Pantai Cenang to Tanjung Rhu, Gunung Raya to the Langkawi Sky Bridge, this nimble and stylish 4x4 makes every drive an adventure. Affordable, reliable, and Instagram-ready, the Suzuki Jimmy is one of the most popular Langkawi car rentals among young travellers and groups. Rent a car in Langkawi for every adventure with XQ Holidays and unlock the island your way."
+    },
+    {
+      "order": 5,
+      "video": "Experiences Luxury Drive in Langkawi with XQ Holidays - Mini Convertible Seaside.mp4",
+      "car_model": "Mini Cooper Seaside (Limited Edition)",
+      "description": "Experience the ultimate luxury seaside drive in Langkawi with the Mini Cooper Convertible from XQ Holidays. Roof down, ocean views, and that signature Mini styling — this is how island holidays were meant to be lived. Cruise along Langkawi's most scenic coastal routes, stop for sunset photos, and make every moment feel like a movie scene. Whether it's a romantic escape or a milestone celebration, rent this Mini Convertible in Langkawi with XQ Holidays for a premium car rental adventure that pairs glamour with the freedom of the open road."
+    }
+  ]
+}

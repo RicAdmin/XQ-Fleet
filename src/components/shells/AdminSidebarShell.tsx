@@ -3,7 +3,6 @@ import type { ReactNode } from 'react'
 
 import { Link } from '@tanstack/react-router'
 import {
-  BarChart3,
   CalendarCheck,
   Car,
   ChevronLeft,
@@ -12,8 +11,9 @@ import {
   LogOut,
   Menu,
   Settings,
+  Tag,
   Users,
-  Wrench,
+  UserPlus,
 } from 'lucide-react'
 
 import BrandLogo from '#/components/BrandLogo'
@@ -25,13 +25,13 @@ type NavLinkTo =
   | '/admin'
   | '/admin/cars'
   | '/admin/customers'
-  | '/admin/maintenance'
   | '/admin/rentals'
-  | '/admin/reports'
   | '/admin/settings'
+  | '/admin/promos'
+  | '/admin/affiliates'
+  | '/admin/affiliates/payouts'
   | '/app/customers'
   | '/app/rentals'
-  | '/app/maintenance'
 
 type NavSectionItem =
   | {
@@ -84,16 +84,27 @@ const NAV_SECTIONS: NavSection[] = [
         icon: <Users size={16} />,
         exact: false,
       },
+    ],
+  },
+  {
+    label: 'Growth',
+    items: [
       {
         type: 'link',
-        label: 'Maintenance',
-        to: '/admin/maintenance',
-        staffTo: '/app/maintenance',
-        icon: <Wrench size={16} />,
+        label: 'Promo codes',
+        icon: <Tag size={16} />,
+        to: '/admin/promos',
         exact: false,
-        ownerOnly: false,
+        ownerOnly: true,
       },
-      { type: 'link', label: 'Reports', icon: <BarChart3 size={16} />, to: '/admin/reports', exact: false, ownerOnly: true },
+      {
+        type: 'link',
+        label: 'Affiliates',
+        icon: <UserPlus size={16} />,
+        to: '/admin/affiliates',
+        exact: false,
+        ownerOnly: true,
+      },
     ],
   },
   {
@@ -131,7 +142,8 @@ export default function AdminSidebarShell({
 
   const initial = user.name.length > 0 ? user.name[0].toUpperCase() : 'A'
   const roleLabel = user.role ? getRoleLabel(user.role as AppRole) : 'Owner'
-  const isOwner = user.role === 'owner' || !user.role
+  const isOwner =
+    user.role === 'owner' || user.role === 'super_admin' || !user.role
 
   const handleSignOut = async () => {
     await authClient.signOut()
@@ -139,7 +151,7 @@ export default function AdminSidebarShell({
   }
 
   return (
-    <div className="admin-layout">
+    <div className="admin-layout cxq-light-surface">
       {mobileOpen && (
         <div
           className="admin-overlay"
@@ -162,7 +174,7 @@ export default function AdminSidebarShell({
           <span className="sidebar-logo">
             <BrandLogo size={32} />
           </span>
-          {!collapsed && <span className="sidebar-brand-name">XQ Fleet</span>}
+          {!collapsed && <span className="sidebar-brand-name">Car XQ</span>}
           <button
             type="button"
             className="sidebar-collapse-btn"

@@ -13,6 +13,17 @@ const STATUS_LABELS: Record<string, string> = {
   unpaid: 'Unpaid',
   partial: 'Partial',
   paid: 'Paid',
+  successful: 'Successful',
+  failed: 'Failed',
+  voided: 'Voided',
+  earned: 'Earned',
+  paused: 'Paused',
+  archived: 'Archived',
+  inactive: 'Inactive',
+  expired: 'Expired',
+  exhausted: 'Exhausted',
+  'walk-in': 'Walk-in',
+  booking: 'Booking',
 }
 
 type StatusBadgeProps = {

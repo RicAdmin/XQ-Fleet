@@ -115,11 +115,11 @@ function CustomerRegisterPage() {
                   onChange={(event) => setAgreedToTerms(event.target.checked)}
                 />
                 I agree to the{' '}
-                <Link to="/about" className="auth-link">
+                <Link to="/rental-agreement" className="auth-link">
                   Rental Contract
                 </Link>{' '}
                 and{' '}
-                <Link to="/about" className="auth-link">
+                <Link to="/privacy" className="auth-link">
                   Privacy Policy
                 </Link>
               </label>

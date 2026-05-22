@@ -4,6 +4,7 @@ import { and, desc, eq, ne, or, sql } from 'drizzle-orm'
 import { carPhotos, cars, rentals } from '#/db/schema'
 import type { CarCategory, CarColor } from '#/db/schema'
 import { requireRole } from '#/lib/auth-functions'
+import { fleetOpsRoles, fullAdminRoles } from '#/lib/auth-model'
 
 type CreateCarInput = {
   plateNumber: string
@@ -73,7 +74,7 @@ function validateCarFields(data: {
 }
 
 export const getCars = createServerFn({ method: 'GET' }).handler(async () => {
-  await requireRole(['owner', 'staff'])
+  await requireRole(fleetOpsRoles)
   const { db } = await import('#/db')
   return db.select().from(cars).orderBy(desc(cars.createdAt))
 })
@@ -81,7 +82,7 @@ export const getCars = createServerFn({ method: 'GET' }).handler(async () => {
 export const getCarById = createServerFn({ method: 'GET' })
   .inputValidator((input: GetCarByIdInput) => input)
   .handler(async ({ data }) => {
-    await requireRole(['owner', 'staff'])
+    await requireRole(fleetOpsRoles)
     const { db } = await import('#/db')
     const results = await db
       .select()
@@ -94,7 +95,7 @@ export const getCarById = createServerFn({ method: 'GET' })
 export const createCar = createServerFn({ method: 'POST' })
   .inputValidator((input: CreateCarInput) => input)
   .handler(async ({ data }) => {
-    await requireRole(['owner'])
+    await requireRole(fullAdminRoles)
     const validated = validateCarFields(data)
 
     const { db } = await import('#/db')
@@ -130,7 +131,7 @@ export const createCar = createServerFn({ method: 'POST' })
 export const updateCar = createServerFn({ method: 'POST' })
   .inputValidator((input: UpdateCarInput) => input)
   .handler(async ({ data }) => {
-    await requireRole(['owner'])
+    await requireRole(fullAdminRoles)
     const validated = validateCarFields(data)
 
     const { db } = await import('#/db')
@@ -170,7 +171,7 @@ export const updateCar = createServerFn({ method: 'POST' })
 export const updateCarStatus = createServerFn({ method: 'POST' })
   .inputValidator((input: UpdateCarStatusInput) => input)
   .handler(async ({ data }) => {
-    await requireRole(['owner'])
+    await requireRole(fullAdminRoles)
 
     const { db } = await import('#/db')
     const current = await db
@@ -196,7 +197,7 @@ export const updateCarStatus = createServerFn({ method: 'POST' })
 export const retireCar = createServerFn({ method: 'POST' })
   .inputValidator((input: RetireCarInput) => input)
   .handler(async ({ data }) => {
-    await requireRole(['owner'])
+    await requireRole(fullAdminRoles)
 
     const { db } = await import('#/db')
     const activeRentals = await db
@@ -239,7 +240,7 @@ type GetCarPhotosInput = { carId: string }
 export const getCarPhotos = createServerFn({ method: 'GET' })
   .inputValidator((input: GetCarPhotosInput) => input)
   .handler(async ({ data }): Promise<CarPhotoRow[]> => {
-    await requireRole(['owner', 'staff'])
+    await requireRole(fleetOpsRoles)
     const { db } = await import('#/db')
     return db
       .select()
@@ -257,7 +258,7 @@ type GeneratePresignedUrlInput = {
 export const generatePresignedUrl = createServerFn({ method: 'POST' })
   .inputValidator((input: GeneratePresignedUrlInput) => input)
   .handler(async ({ data }) => {
-    await requireRole(['owner'])
+    await requireRole(fullAdminRoles)
     const { db } = await import('#/db')
     const [car] = await db.select({ id: cars.id }).from(cars).where(eq(cars.id, data.carId)).limit(1)
     if (!car) throw new Error('Vehicle not found.')
@@ -277,7 +278,7 @@ type SaveCarPhotoInput = {
 export const saveCarPhoto = createServerFn({ method: 'POST' })
   .inputValidator((input: SaveCarPhotoInput) => input)
   .handler(async ({ data }): Promise<CarPhotoRow> => {
-    await requireRole(['owner'])
+    await requireRole(fullAdminRoles)
     const { db } = await import('#/db')
 
     const [maxRow] = await db
@@ -311,7 +312,7 @@ type ReorderPhotosInput = {
 export const reorderPhotos = createServerFn({ method: 'POST' })
   .inputValidator((input: ReorderPhotosInput) => input)
   .handler(async ({ data }) => {
-    await requireRole(['owner'])
+    await requireRole(fullAdminRoles)
     const { db } = await import('#/db')
     await Promise.all(
       data.photoIds.map((photoId, index) =>
@@ -332,7 +333,7 @@ type SetCoverPhotoInput = {
 export const setCoverPhoto = createServerFn({ method: 'POST' })
   .inputValidator((input: SetCoverPhotoInput) => input)
   .handler(async ({ data }): Promise<CarPhotoRow> => {
-    await requireRole(['owner'])
+    await requireRole(fullAdminRoles)
     const { db } = await import('#/db')
     await db.update(carPhotos).set({ isCover: false }).where(eq(carPhotos.carId, data.carId))
     const [result] = await db
@@ -352,7 +353,7 @@ type DeleteCarPhotoInput = {
 export const deleteCarPhoto = createServerFn({ method: 'POST' })
   .inputValidator((input: DeleteCarPhotoInput) => input)
   .handler(async ({ data }) => {
-    await requireRole(['owner'])
+    await requireRole(fullAdminRoles)
     const { db } = await import('#/db')
 
     const [photo] = await db

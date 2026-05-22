@@ -4,6 +4,7 @@ import { and, desc, eq, gt, inArray, lt, ne } from 'drizzle-orm'
 import { cars, customers, payments, rentals } from '#/db/schema'
 import type { PaymentStatus, RentalStatus, RentalType } from '#/db/schema'
 import { requireRole } from '#/lib/auth-functions'
+import { fleetOpsRoles, fullAdminRoles } from '#/lib/auth-model'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -114,7 +115,7 @@ function calcTotalSen(dailyRateSen: number, startDate: Date, endDate: Date): num
 // ─── Server functions ─────────────────────────────────────────────────────────
 
 export const getRentals = createServerFn({ method: 'GET' }).handler(async () => {
-  await requireRole(['owner', 'staff'])
+  await requireRole(fleetOpsRoles)
   const { db } = await import('#/db')
   return db
     .select({
@@ -146,7 +147,7 @@ export const getRentals = createServerFn({ method: 'GET' }).handler(async () => 
 export const getRentalById = createServerFn({ method: 'GET' })
   .inputValidator((input: GetRentalByIdInput) => input)
   .handler(async ({ data }) => {
-    await requireRole(['owner', 'staff'])
+    await requireRole(fleetOpsRoles)
     const { db } = await import('#/db')
     const rows = await db
       .select({
@@ -188,7 +189,7 @@ export const getRentalById = createServerFn({ method: 'GET' })
   })
 
 export const getAvailableCars = createServerFn({ method: 'GET' }).handler(async () => {
-  await requireRole(['owner', 'staff'])
+  await requireRole(fleetOpsRoles)
   const { db } = await import('#/db')
   return db
     .select({
@@ -207,7 +208,7 @@ export const getAvailableCars = createServerFn({ method: 'GET' }).handler(async 
 export const createRental = createServerFn({ method: 'POST' })
   .inputValidator((input: CreateRentalInput) => input)
   .handler(async ({ data }) => {
-    await requireRole(['owner', 'staff'])
+    await requireRole(fleetOpsRoles)
 
     const startDate = new Date(data.startDate)
     const endDate = new Date(data.endDate)
@@ -268,7 +269,7 @@ export const createRental = createServerFn({ method: 'POST' })
 export const confirmHandover = createServerFn({ method: 'POST' })
   .inputValidator((input: ConfirmHandoverInput) => input)
   .handler(async ({ data }) => {
-    await requireRole(['owner', 'staff'])
+    await requireRole(fleetOpsRoles)
     const { db } = await import('#/db')
 
     const existing = await db
@@ -301,7 +302,7 @@ export const confirmHandover = createServerFn({ method: 'POST' })
 export const closeReturn = createServerFn({ method: 'POST' })
   .inputValidator((input: CloseReturnInput) => input)
   .handler(async ({ data }) => {
-    await requireRole(['owner', 'staff'])
+    await requireRole(fleetOpsRoles)
     const { db } = await import('#/db')
 
     const existing = await db
@@ -354,13 +355,23 @@ export const closeReturn = createServerFn({ method: 'POST' })
       })
     }
 
+    // Phase 3.6: rental closed → flip pending attribution to earned.
+    try {
+      const { flipAttributionForRentalStatus } = await import(
+        '#/lib/affiliate-functions'
+      )
+      await flipAttributionForRentalStatus(db, data.rentalId, 'closed')
+    } catch {
+      // never fail the close because of attribution
+    }
+
     return result[0]
   })
 
 export const cancelRental = createServerFn({ method: 'POST' })
   .inputValidator((input: CancelRentalInput) => input)
   .handler(async ({ data }) => {
-    await requireRole(['owner', 'staff'])
+    await requireRole(fleetOpsRoles)
     const { db } = await import('#/db')
 
     const existing = await db
@@ -384,13 +395,23 @@ export const cancelRental = createServerFn({ method: 'POST' })
       .where(eq(rentals.id, data.rentalId))
       .returning()
 
+    // Phase 3.6: rental cancelled → flip pending attribution to voided.
+    try {
+      const { flipAttributionForRentalStatus } = await import(
+        '#/lib/affiliate-functions'
+      )
+      await flipAttributionForRentalStatus(db, data.rentalId, 'cancelled')
+    } catch {
+      // never fail the cancel because of attribution
+    }
+
     return result[0]
   })
 
 export const extendRental = createServerFn({ method: 'POST' })
   .inputValidator((input: ExtendRentalInput) => input)
   .handler(async ({ data }) => {
-    await requireRole(['owner'])
+    await requireRole(fullAdminRoles)
     const { db } = await import('#/db')
 
     const existing = await db
@@ -446,7 +467,7 @@ export const extendRental = createServerFn({ method: 'POST' })
 export const deleteRental = createServerFn({ method: 'POST' })
   .inputValidator((input: DeleteRentalInput) => input)
   .handler(async ({ data }) => {
-    await requireRole(['owner'])
+    await requireRole(fullAdminRoles)
     const { db } = await import('#/db')
 
     const existing = await db

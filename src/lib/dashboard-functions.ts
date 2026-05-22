@@ -3,6 +3,7 @@ import { and, eq, gte, lt, sql } from 'drizzle-orm'
 
 import { cars, customers, rentals } from '#/db/schema'
 import { requireRole } from '#/lib/auth-functions'
+import { fleetOpsRoles, fullAdminRoles } from '#/lib/auth-model'
 import type { MaintenanceAlertRow } from '#/lib/maintenance-functions'
 import { getMaintenanceDashboardAlerts } from '#/lib/maintenance-functions'
 
@@ -56,7 +57,7 @@ function startOfUTCDay(offsetDays = 0): Date {
 
 export const getDashboardData = createServerFn({ method: 'GET' }).handler(
   async (): Promise<DashboardData> => {
-    await requireRole(['owner', 'staff'])
+    await requireRole(fleetOpsRoles)
     const { db } = await import('#/db')
 
     const todayStart = startOfUTCDay(0)
@@ -133,7 +134,7 @@ export const getDashboardData = createServerFn({ method: 'GET' }).handler(
 
 export const getOwnerStats = createServerFn({ method: 'GET' }).handler(
   async (): Promise<OwnerStats> => {
-    await requireRole(['owner'])
+    await requireRole(fullAdminRoles)
     const { db } = await import('#/db')
 
     const todayStart = startOfUTCDay(0)

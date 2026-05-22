@@ -70,7 +70,7 @@ export default function StaffDashboard({ user, data }: StaffDashboardProps) {
   }
 
   return (
-    <div className="hub-layout">
+    <div className="hub-layout cxq-light-surface">
       <header className="hub-topbar">
         <div className="hub-brand">
           <BrandLogo size={28} />

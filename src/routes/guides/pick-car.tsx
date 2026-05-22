@@ -1,14 +1,29 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { PickCarGuide } from '#/components/guides/pick-car-guide'
-import { getPublicCars, type PublicCarRow } from '#/lib/portal-functions'
+import { publicSitePath } from '#/lib/brand'
+import { socialImageMeta } from '#/lib/seo-meta'
+
+const title = 'Pick the Right Rental Car in Langkawi · Fleet Guide · Car XQ'
+const description =
+  'Compare economy, MPV, SUV, and OKU-friendly vehicles by luggage, passengers, and travel style for Langkawi roads.'
 
 export const Route = createFileRoute('/guides/pick-car')({
-  beforeLoad: async () => ({ cars: await getPublicCars() }),
   component: GuidesPickCarPage,
+  head: () => ({
+    meta: [
+      { title },
+      { name: 'description', content: description },
+      { property: 'og:title', content: title },
+      { property: 'og:description', content: description },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:url', content: publicSitePath('/guides/pick-car') },
+      ...socialImageMeta(),
+    ],
+    links: [{ rel: 'canonical', href: publicSitePath('/guides/pick-car') }],
+  }),
 })
 
 function GuidesPickCarPage() {
-  const { cars } = Route.useRouteContext() as { cars: PublicCarRow[] }
-  return <PickCarGuide cars={cars} />
+  return <PickCarGuide />
 }

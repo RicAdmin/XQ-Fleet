@@ -2,11 +2,17 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import CustomersList from '#/components/customers/CustomersList'
 import type { CustomerRow } from '#/components/customers/CustomersList'
+import { asDate } from '#/lib/as-date'
 import { getCustomers } from '#/lib/customer-functions'
 
 export const Route = createFileRoute('/admin/customers/')({
   beforeLoad: async () => {
-    const customers = await getCustomers()
+    const rows = await getCustomers()
+    const customers = rows.map((c) => ({
+      ...c,
+      createdAt: asDate(c.createdAt),
+      updatedAt: asDate(c.updatedAt),
+    }))
     return { customers }
   },
   component: AdminCustomersPage,

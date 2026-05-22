@@ -5,7 +5,9 @@ import { Eye, Plus, Trash2, X } from 'lucide-react'
 
 import { DataTable, useSortState, type Column } from '#/components/ui/DataTable'
 import { PageHeader } from '#/components/ui/PageHeader'
+import { StatusBadge } from '#/components/ui/StatusBadge'
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
+import { UI_BTN_XS, UI_BTN_XS_DANGER } from '#/lib/admin-ui-classes'
 import {
   Combobox,
   ComboboxContent,
@@ -54,49 +56,6 @@ function today(): string {
   return toDateInput(new Date())
 }
 
-// ─── Status badge ─────────────────────────────────────────────────────────────
-
-const STATUS_STYLES: Record<RentalStatus, string> = {
-  pending: 'bg-amber-50 text-amber-700 border-amber-200',
-  active: 'bg-green-50 text-green-700 border-green-200',
-  closed: 'bg-slate-100 text-slate-500 border-slate-200',
-  cancelled: 'bg-red-50 text-red-500 border-red-200',
-}
-
-const STATUS_LABEL: Record<RentalStatus, string> = {
-  pending: 'Pending',
-  active: 'Active',
-  closed: 'Closed',
-  cancelled: 'Cancelled',
-}
-
-function RentalStatusBadge({ status }: { status: RentalStatus }) {
-  return (
-    <span
-      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${STATUS_STYLES[status]}`}
-    >
-      {STATUS_LABEL[status]}
-    </span>
-  )
-}
-
-// ─── Payment badge ────────────────────────────────────────────────────────────
-
-const PAYMENT_STYLES = {
-  unpaid: 'bg-red-50 text-red-600 border-red-200',
-  partial: 'bg-orange-50 text-orange-600 border-orange-200',
-  paid: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-}
-
-function PaymentBadge({ status }: { status: string }) {
-  const style = PAYMENT_STYLES[status as keyof typeof PAYMENT_STYLES] ?? 'bg-slate-100 text-slate-500 border-slate-200'
-  return (
-    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${style}`}>
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </span>
-  )
-}
-
 // ─── Status tabs ──────────────────────────────────────────────────────────────
 
 const RENTAL_STATUS_TABS: { value: RentalStatus | 'all'; label: string }[] = [
@@ -120,12 +79,7 @@ function sortRentals(rows: RentalListRow[], key: SortKey, dir: 'asc' | 'desc'): 
   })
 }
 
-// ─── Row button ───────────────────────────────────────────────────────────────
-
-const ROW_BTN =
-  'inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] text-[var(--sea-ink)] shadow-[0_1px_3px_rgba(30,90,72,0.08)] hover:-translate-y-px transition-transform cursor-pointer disabled:cursor-not-allowed disabled:opacity-50'
-
-// ─── Form state ───────────────────────────────────────────────────────────────
+// ─── Sort ─────────────────────────────────────────────────────────────────────
 
 type RentalFormData = {
   carId: string
@@ -346,11 +300,7 @@ export default function RentalsList({
     {
       key: 'type',
       header: 'Type',
-      render: (r) => (
-        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold ${r.type === 'walk-in' ? 'border-blue-200 bg-blue-50 text-blue-700' : 'border-purple-200 bg-purple-50 text-purple-700'}`}>
-          {r.type === 'walk-in' ? 'Walk-in' : 'Booking'}
-        </span>
-      ),
+      render: (r) => <span className="category-pill">{r.type === 'walk-in' ? 'Walk-in' : 'Booking'}</span>,
     },
     {
       key: 'startDate',
@@ -369,12 +319,12 @@ export default function RentalsList({
       key: 'status',
       header: 'Status',
       sortable: true,
-      render: (r) => <RentalStatusBadge status={r.status} />,
+      render: (r) => <StatusBadge status={r.status} size="sm" />,
     },
     {
       key: 'paymentStatus',
       header: 'Payment',
-      render: (r) => <PaymentBadge status={r.paymentStatus} />,
+      render: (r) => <StatusBadge status={r.paymentStatus} size="sm" />,
     },
     {
       key: 'totalAmountSen',
@@ -390,18 +340,18 @@ export default function RentalsList({
       cellClassName: 'text-right whitespace-nowrap',
       render: (r) => (
         <>
-          <Link to={`${basePath}/$rentalId` as never} params={{ rentalId: r.id } as never} className={`${ROW_BTN} mr-1.5`}>
+          <Link to={`${basePath}/$rentalId` as never} params={{ rentalId: r.id } as never} className={`${UI_BTN_XS} mr-1.5`}>
             <Eye size={11} />
             View
           </Link>
           {r.status === 'pending' && (
-            <button type="button" className={`${ROW_BTN} mr-1.5 opacity-70 hover:opacity-100`} onClick={() => { setConfirmingCancel(r); setCancelError(null) }}>
+            <button type="button" className={`${UI_BTN_XS} mr-1.5`} onClick={() => { setConfirmingCancel(r); setCancelError(null) }}>
               <X size={11} />
               Cancel
             </button>
           )}
           {canDelete && (r.status === 'closed' || r.status === 'cancelled') && (
-            <button type="button" className={`${ROW_BTN} opacity-50 hover:opacity-100`} onClick={() => { setConfirmingDelete(r); setDeleteError(null) }}>
+            <button type="button" className={UI_BTN_XS_DANGER} onClick={() => { setConfirmingDelete(r); setDeleteError(null) }}>
               <Trash2 size={11} />
               Delete
             </button>

@@ -9,21 +9,12 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, actions, className }: PageHeaderProps) {
   return (
-    <div className={`mb-6 flex items-start justify-between gap-4 ${className ?? ''}`}>
+    <div className={['ui-page-head', className].filter(Boolean).join(' ')}>
       <div>
-        <h2
-          className="text-2xl font-semibold"
-          style={{ fontFamily: 'var(--font-display)', color: 'var(--sea-ink)' }}
-        >
-          {title}
-        </h2>
-        {description && (
-          <p className="mt-1 text-sm" style={{ color: 'var(--sea-ink-soft)' }}>
-            {description}
-          </p>
-        )}
+        <h2 className="ui-page-title">{title}</h2>
+        {description ? <p className="ui-page-desc">{description}</p> : null}
       </div>
-      {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+      {actions ? <div className="ui-page-head__actions">{actions}</div> : null}
     </div>
   )
 }

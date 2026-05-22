@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { Link, useNavigate } from '@tanstack/react-router'
 import {
   ArrowRight,
+  Anchor,
   Bell,
   Calendar,
   Check,
@@ -12,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
+  Copy,
   DoorOpen,
   Globe,
   Heart,
@@ -30,6 +32,7 @@ import {
 } from 'lucide-react'
 
 import BrandLogo from '#/components/BrandLogo'
+import { PaymentMethodIcons } from '#/components/landing/payment-method-icons'
 import { LoadingSpinner } from '#/components/ui/LoadingSpinner'
 import {
   CarDetailDialog,
@@ -55,15 +58,23 @@ import {
   ATTRACTIONS,
   ATTR_CATS,
   BLOG_TIPS,
-  CITIES,
+  RENTAL_LOCATIONS,
+  ESSENTIAL_LOCATIONS,
   FAQS,
   FAQ_CATS,
   HERO_BG,
+  FOOTER_CTA_FLEET_IMAGE,
+  FOOTER_CTA_SCENERY_IMAGE,
   HOTELS,
   PICK_TIMES,
-  REELS,
-  REVIEWS,
 } from './cxq-landing-data'
+import { REELS, type Reel } from '#/lib/reels-config'
+import {
+  TESTIMONIALS,
+  TESTIMONIAL_HEADLINE_SCORE,
+  TESTIMONIAL_SOURCE,
+  testimonialInitials,
+} from '#/lib/testimonials-config'
 
 const LOC_AIRPORT = 'Langkawi Intl Airport · Door 3'
 const LOC_JETTY = 'Langkawi Ferry Jetty (Kuah)'
@@ -125,7 +136,7 @@ export function CxqLandingPage({
   const [searchCriteria, setSearchCriteria] = useState<BookingState | null>(null)
   const [tripSearchReady, setTripSearchReady] = useState(false)
   const [openCar, setOpenCar] = useState<PublicCarRow | null>(null)
-  const [activeReel, setActiveReel] = useState<(typeof REELS)[number] | null>(null)
+  const [activeReel, setActiveReel] = useState<Reel | null>(null)
   const [searching, setSearching] = useState(false)
   const [bookingPrompt, setBookingPrompt] = useState<string | null>(null)
   const [navMenuOpen, setNavMenuOpen] = useState(false)
@@ -245,6 +256,17 @@ export function CxqLandingPage({
     [canBrowseFleet, requireBookingSearch],
   )
 
+  const bookMini = useCallback(() => {
+    const mini =
+      cars.find((c) => c.id === 'mini-convertible') ??
+      cars.find((c) => c.make.toLowerCase() === 'mini')
+    if (mini) {
+      tryOpenCar(mini)
+      return
+    }
+    scrollToAnchor('booking-dock')
+  }, [cars, tryOpenCar])
+
   useEffect(() => {
     if (!searchCriteria) return
     const samePick =
@@ -335,7 +357,7 @@ export function CxqLandingPage({
           onRequireTrip={requireBookingSearch}
           onOpenCar={tryOpenCar}
         />
-        <CitiesSection onPickCity={(c) => setBooking((b) => ({ ...b, from: `Car rental in ${c}` }))} />
+        <CitiesSection />
         <PromosSection />
         <WhyChooseUs />
         <StepByStep />
@@ -346,7 +368,7 @@ export function CxqLandingPage({
         <ReelsSection onOpenReel={setActiveReel} />
         <TestimonialsSection />
         <CruiseBanner />
-        <FooterCta onPlan={() => scrollToAnchor('booking-dock')} />
+        <FooterCta onSearch={() => scrollToAnchor('booking-dock')} onBookMini={bookMini} />
         <SiteFooter
           onScrollBooking={() => scrollToAnchor('booking-dock')}
           onScrollFleet={() => scrollToAnchor('top-picks')}
@@ -364,7 +386,14 @@ export function CxqLandingPage({
             onSelectCar={setOpenCar}
           />
         )}
-        {activeReel && <ReelLightbox reel={activeReel} onClose={() => setActiveReel(null)} />}
+        {activeReel && (
+          <ReelLightbox
+            reel={activeReel}
+            reels={REELS}
+            onClose={() => setActiveReel(null)}
+            onChange={setActiveReel}
+          />
+        )}
       </div>
     </div>
   )
@@ -557,6 +586,10 @@ export function LandingNav({
   onModelSelect?: (car: PublicCarRow) => void
 }) {
   const [localModelQuery, setLocalModelQuery] = useState('')
+  const [authUiReady, setAuthUiReady] = useState(false)
+  useEffect(() => {
+    setAuthUiReady(true)
+  }, [])
   const resolvedModelQuery = modelQuery ?? localModelQuery
   const resolvedOnModelQueryChange = onModelQueryChange ?? setLocalModelQuery
   const resolvedOnClearModelQuery =
@@ -628,7 +661,7 @@ export function LandingNav({
         <span className="flex items-center gap-2" style={{ opacity: 0.9 }}>
           <Globe size={14} /> EN · MYR
         </span>
-        {sessionPending ? (
+        {!authUiReady || sessionPending ? (
           <span className="nav-session-pending" aria-label="Loading account">
             <LoadingSpinner size={16} />
           </span>
@@ -688,17 +721,18 @@ export function LandingNav({
 function Hero() {
   return (
     <section className="hero layout-bleed" data-screen-label="Hero">
-      <div className="stage" style={{ backgroundImage: `url(${HERO_BG})` }}>
+      <div className="stage" style={{ backgroundImage: `url('${encodeURI(HERO_BG)}')` }}>
         <div className="hero-title-block">
-          <span className="eyebrow">Car XQ · est. 2015 in Langkawi</span>
+          <span className="eyebrow hero-eyebrow-full">Car XQ · est. 2015 in Langkawi, Malaysia</span>
+          <span className="eyebrow hero-eyebrow-short">Car XQ · Langkawi since 2015</span>
           <h1 className="h-display">
-            Rent a Car for
+            Rent a Car in Langkawi
             <br />
-            Every Journey.
+            for Every Adventure.
           </h1>
           <p>
-            Safe, friendly, fairly priced wheels — booked in 90&nbsp;seconds and delivered to your terminal, jetty, or
-            hotel.
+            Safe, friendly, fairly priced wheels — booked in 90&nbsp;seconds and delivered to Langkawi Airport, the
+            ferry jetty, or your hotel.
           </p>
         </div>
       </div>
@@ -1326,7 +1360,7 @@ function TopPicksSection({
               ? `Models matching “${modelQuery.trim()}”`
               : matchedSearch
                 ? 'Top picks matched your search'
-                : 'Top picks this month'}
+                : 'Top picks for your Langkawi rental this month'}
           </h2>
           <p className="h-sub">
             {modelQuery.trim()
@@ -1451,7 +1485,7 @@ function FleetCarCard({
             <Heart size={14} fill={fav ? 'currentColor' : 'none'} />
           </span>
           {car.coverPhotoUrl ? (
-            <img src={car.coverPhotoUrl} alt={`${car.make} ${car.model}`} loading="lazy" />
+            <img src={car.coverPhotoUrl} alt={`${car.make} ${car.model} – car rental Langkawi`} loading="lazy" />
           ) : (
             <div style={{ color: 'var(--muted)' }}>No photo</div>
           )}
@@ -1629,7 +1663,7 @@ function CarCategoriesSection({
                   <div className="cat3-mini">
                     {fleetCars.slice(0, 5).map((fc) => (
                       <button key={fc.id} type="button" className="cat3-mini-chip" onClick={() => openCar(fc)} title={`${fc.make} ${fc.model}`}>
-                        {fc.coverPhotoUrl ? <img src={fc.coverPhotoUrl} alt={`${fc.make} ${fc.model}`} /> : <span className="text-xs">{fc.model}</span>}
+                        {fc.coverPhotoUrl ? <img src={fc.coverPhotoUrl} alt={`${fc.make} ${fc.model} – Langkawi`} /> : <span className="text-xs">{fc.model}</span>}
                       </button>
                     ))}
                     {fleetCars.length > 5 && <span className="cat3-mini-more">+{fleetCars.length - 5}</span>}
@@ -1638,7 +1672,7 @@ function CarCategoriesSection({
               </div>
               <div className="cat3-art" role="presentation" onClick={() => openCar(sample)}>
                 {sample?.coverPhotoUrl ? (
-                  <img src={sample.coverPhotoUrl} alt={`${sample.make} ${sample.model}`} />
+                  <img src={sample.coverPhotoUrl} alt={`${sample.make} ${sample.model} – rent a car Langkawi`} />
                 ) : (
                   <div style={{ padding: 40, color: '#fff' }}>Browse fleet</div>
                 )}
@@ -1651,34 +1685,34 @@ function CarCategoriesSection({
   )
 }
 
-function CitiesSection({ onPickCity }: { onPickCity: (city: string) => void }) {
+function CitiesSection() {
   return (
     <section id="locations" className="section" data-screen-label="Locations">
       <div className="section-head">
         <div className="lead">
           <span className="eyebrow">Pickup & drop-off zones</span>
           <h2 className="h-section" style={{ marginTop: 6 }}>
-            Wherever the road takes you on the island.
+            Wherever the road takes you in Langkawi.
           </h2>
           <p className="h-sub">
-            From the white sand of Pantai Cenang to the quiet of Tanjung Rhu — we deliver across Langkawi, with clear
-            meet points.
+            From the white sand of Pantai Cenang to the quiet of Tanjung Rhu — we deliver your rental car across
+            Langkawi, with clear meet points.
           </p>
         </div>
-        <button type="button" className="btn btn-ghost">
-          View on map <MapPin size={13} />
-        </button>
       </div>
       <div className="cities">
-        {CITIES.map((c) => (
-          <button key={c} type="button" className="chip" onClick={() => onPickCity(c)}>
+        {RENTAL_LOCATIONS.map((loc) => (
+          <a
+            key={loc.name}
+            href={loc.mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="chip"
+          >
             <MapPin size={12} />
-            Car Rental in {c}
-          </button>
+            Car Rental in {loc.name}
+          </a>
         ))}
-        <button type="button" className="chip" style={{ background: 'var(--canvas-2)', borderStyle: 'dashed' }}>
-          + Custom hotel / villa pickup
-        </button>
       </div>
     </section>
   )
@@ -1687,20 +1721,22 @@ function CitiesSection({ onPickCity }: { onPickCity: (city: string) => void }) {
 function PromosSection() {
   const promos = [
     {
-      cls: 'p1',
-      tag: 'Off-peak',
-      season: '12 May – 19 Jun 2026',
-      title: 'Travel off-peak',
-      pct: 40,
-      body: 'Monsoon-season family MPVs with stays of 3+ nights — the beaches stay quiet, your wallet stays full.',
-    },
-    {
       cls: 'p2',
       tag: 'Plan ahead',
-      season: 'Book 14+ days out',
+      season: 'Book 1+ month ahead',
       title: 'Book early',
-      pct: 25,
-      body: 'Any vehicle, auto-applied. Pick the car you actually want — not what is left.',
+      pct: 10,
+      body: 'Book your car at least one month in advance and enjoy 10% off selected vehicles — secure the model you want before peak dates fill up.',
+      image: '/image/Langkawi Car Rental - Pick This Car.png',
+    },
+    {
+      cls: 'p1',
+      tag: 'Off-peak',
+      season: 'Four rental seasons',
+      title: 'Travel off-peak',
+      pct: 20,
+      body: 'Car rental rates follow four seasons across the year. Enjoy our lowest prices during low season — quieter beaches, lighter traffic, and more room to explore.',
+      image: '/image/Attractions/pantai cenang.png',
     },
     {
       cls: 'p3',
@@ -1708,7 +1744,8 @@ function PromosSection() {
       season: 'Rent 7+ days',
       title: 'Stay longer',
       pct: 30,
-      body: 'The per-day rate drops the moment your stay crosses 7 nights. Any car, weekly only.',
+      body: 'Planning a long Langkawi stay? After seven days, extended rental days qualify for up to 30% off — ideal for week-long holidays and slow island weeks.',
+      image: '/image/Attractions/Tanjung Rhu.png',
     },
   ]
   return (
@@ -1730,7 +1767,11 @@ function PromosSection() {
       </div>
       <div className="promo-grid">
         {promos.map((p) => (
-          <article key={p.cls} className={'promo ' + p.cls}>
+          <article
+            key={p.cls}
+            className={'promo ' + p.cls}
+            style={{ ['--promo-bg' as string]: `url('${encodeURI(p.image)}')` }}
+          >
             <div className="promo-body">
               <span className="promo-tag">{p.tag}</span>
               <h3>{p.title}</h3>
@@ -1753,10 +1794,9 @@ function PromosSection() {
 
 function WhyChooseUs() {
   const main = {
-    big: '11 yrs',
+    big: '11 Years',
     bigSub: 'on Langkawi roads',
-    title: 'A family-run rental — quietly excellent since 2015.',
-    body: 'Same humans answer the phone. Same team meets you at the door. Same fairness in every quote.',
+    body: 'XQ Holidays began with a simple idea — to share the very best of Pulau Langkawi with the world. Since 2015, our owned, carefully maintained fleet has helped travellers discover the island safely, freely, and on their own terms.',
     bullets: ['Freshly serviced at authorized dealers', 'Detailed between every rental', 'Upfront quotes — no hidden fees', 'OKU-friendly vehicles available'],
   }
   const perks = [
@@ -1770,7 +1810,7 @@ function WhyChooseUs() {
       <div className="why-hero">
         <div className="why-hero-left">
           <span className="eyebrow">Why Car XQ</span>
-          <h2 className="h-section">Planning a trip? Here&apos;s why we&apos;re the top choice.</h2>
+          <h2 className="h-section">Planning a Langkawi trip? Here&apos;s why we&apos;re the top choice.</h2>
           <p className="h-sub">
             Eleven years on the island, thousands of happy guests, one promise — safe, friendly, fairly priced rentals,
             every time.
@@ -1781,8 +1821,10 @@ function WhyChooseUs() {
             <span className="why-feature-num">{main.big}</span>
             <span className="why-feature-sub">{main.bigSub}</span>
           </div>
-          <h3>{main.title}</h3>
-          <p>{main.body}</p>
+          <p className="why-feature-lead">{main.body}</p>
+          <Link to="/about" className="btn btn-sm why-feature-about">
+            About us <ArrowRight size={12} />
+          </Link>
           <ul className="why-bullets">
             {main.bullets.map((b) => (
               <li key={b}>
@@ -1860,13 +1902,13 @@ function TipsSection() {
           </h2>
           <p className="h-sub">Hidden gems, driving advice, and updates from the Langkawi calendar — written by people who actually live here.</p>
         </div>
-        <Link to="/about" className="btn btn-ghost">
+        <Link to="/blog" className="btn btn-ghost">
           Visit the blog <ArrowRight size={13} />
         </Link>
       </div>
       <div className="tip-grid">
         {BLOG_TIPS.map((p) => (
-          <article key={p.id} className="tip-card" role="button" tabIndex={0} onClick={() => scrollToAnchor('booking-dock')} onKeyDown={(e) => e.key === 'Enter' && scrollToAnchor('booking-dock')}>
+          <Link key={p.id} to="/blog/$slug" params={{ slug: p.slug }} className="tip-card">
             <div className="tip-img" style={{ backgroundImage: `url(${p.img})` }}>
               <span className="tip-tag">{p.tag}</span>
             </div>
@@ -1877,7 +1919,7 @@ function TipsSection() {
                 Read article <ArrowRight size={12} />
               </span>
             </div>
-          </article>
+          </Link>
         ))}
       </div>
     </section>
@@ -1945,23 +1987,36 @@ function AttractionsSection() {
               <h3>{hero.t}</h3>
               <p>{hero.d}</p>
               <div className="attract-hero-meta">
-                <span>
+                <span title="From Langkawi Airport (LGK)">
                   <Plane size={12} />
-                  <span>{hero.airport} from airport</span>
+                  <span>{hero.airport} · airport</span>
                 </span>
-                <span>
+                <span title="From Kuah Ferry Jetty">
+                  <Anchor size={12} />
+                  <span>{hero.jetty} · jetty</span>
+                </span>
+                <span title="From Pantai Cenang">
+                  <Sun size={12} />
+                  <span>{hero.cenang} · Cenang</span>
+                </span>
+                <span title="From Kuah town">
                   <MapPin size={12} />
-                  <span>{hero.jetty} from jetty</span>
+                  <span>{hero.kuah} · Kuah</span>
                 </span>
-                <span>
+                <span title="Typical drive time from airport">
                   <Clock size={12} />
                   <span>{hero.time}</span>
                 </span>
               </div>
               <div className="flex gap-2" style={{ marginTop: 14 }}>
-                <button type="button" className="btn btn-leaf btn-sm">
+                <a
+                  href={hero.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-leaf btn-sm"
+                >
                   <MapPin size={12} /> Open in Maps
-                </button>
+                </a>
                 <button type="button" className="btn btn-ghost btn-sm" style={{ background: 'rgba(255,255,255,.92)' }}>
                   Pin to my trip <Plus size={12} />
                 </button>
@@ -1977,11 +2032,17 @@ function AttractionsSection() {
                   <h4>{a.t}</h4>
                   <div className="attract-row-meta">
                     <span>{a.c}</span>
-                    <span>
+                    <span title="From airport">
                       <Plane size={10} /> {a.airport}
                     </span>
-                    <span>
-                      <MapPin size={10} /> {a.jetty}
+                    <span title="From ferry jetty">
+                      <Anchor size={10} /> {a.jetty}
+                    </span>
+                    <span title="From Pantai Cenang">
+                      <Sun size={10} /> {a.cenang}
+                    </span>
+                    <span title="From Kuah town">
+                      <MapPin size={10} /> {a.kuah}
                     </span>
                   </div>
                 </div>
@@ -1998,12 +2059,19 @@ function AttractionsSection() {
 }
 
 function EssentialLocations() {
-  const locs = [
-    { t: 'Langkawi Intl Airport', sub: 'Door 3 · LGK', meet: 'Outside Arrivals', hours: '24/7 counter', tag: 'Pickup', accent: 'var(--brand-leaf)', bg: 'rgba(255,102,0,.08)' },
-    { t: 'Langkawi Ferry Jetty', sub: 'Kuah Terminal', meet: 'Ferry exit, taxi stand', hours: '06:00 – 22:00', tag: 'Pickup', accent: '#2563EB', bg: '#EAF1FF' },
-    { t: 'Sultanah Maliha Hospital', sub: 'Primary hospital', meet: 'Jalan Kuah–Padang Matsirat', hours: '24/7 ER', tag: 'Good to know', accent: '#DC2626', bg: '#FFEAEA', phone: '+60 4 966 3333' },
-    { t: 'Langkawi Police HQ', sub: 'IPD Langkawi', meet: 'Persiaran Mutiara, Kuah', hours: '24/7', tag: 'Good to know', accent: '#0F766E', bg: '#E0F2EC', phone: '+60 4 966 6222' },
-  ]
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null)
+
+  async function copyMapsLink(idx: number, url: string) {
+    if (typeof navigator === 'undefined' || !navigator.clipboard) return
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopiedIdx(idx)
+      window.setTimeout(() => setCopiedIdx((current) => (current === idx ? null : current)), 2000)
+    } catch {
+      /* clipboard denied — no-op */
+    }
+  }
+
   return (
     <section className="section essential-v4" data-screen-label="Essentials">
       <div className="section-head">
@@ -2014,16 +2082,29 @@ function EssentialLocations() {
           </h2>
           <p className="h-sub">Two pickup points where we meet you, plus the two numbers worth saving.</p>
         </div>
-        <button type="button" className="btn btn-ghost">
-          Save all to phone <ArrowRight size={13} />
+        <button
+          type="button"
+          className="btn btn-ghost"
+          onClick={() => {
+            const all = ESSENTIAL_LOCATIONS.map((loc) => `${loc.t}: ${loc.mapsUrl}`).join('\n')
+            void copyMapsLink(-1, all)
+          }}
+        >
+          {copiedIdx === -1 ? 'Copied all links' : 'Save all to phone'} <ArrowRight size={13} />
         </button>
       </div>
       <div className="ess4-grid">
-        {locs.map((l, i) => (
-          <article className="ess4-card" key={i}>
+        {ESSENTIAL_LOCATIONS.map((l, i) => (
+          <article className="ess4-card" key={l.t}>
             <header>
-              <span className="ess4-icon" style={{ background: l.bg, color: l.accent }}>
-                {i < 2 ? <Plane size={18} /> : <Shield size={18} />}
+              <span className="ess4-icon">
+                {l.icon === 'airport' ? (
+                  <Plane size={18} />
+                ) : l.icon === 'jetty' ? (
+                  <Anchor size={18} />
+                ) : (
+                  <Shield size={18} />
+                )}
               </span>
               <span className="ess4-tag">{l.tag}</span>
             </header>
@@ -2036,18 +2117,30 @@ function EssentialLocations() {
               <span>
                 <Clock size={11} /> {l.hours}
               </span>
-              {'phone' in l && l.phone && (
-                <span style={{ color: l.accent, fontWeight: 600 }}>
+              {'phone' in l && l.phone ? (
+                <span className="ess4-phone">
                   <Phone size={11} /> {l.phone}
                 </span>
-              )}
+              ) : null}
             </div>
             <footer>
-              <button type="button" className="ess4-link">
+              <a
+                href={l.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ess4-link"
+                aria-label={`Open ${l.t} in Google Maps`}
+              >
                 <MapPin size={12} /> Maps
-              </button>
-              <button type="button" className="ess4-link">
-                <ArrowRight size={12} /> Copy
+              </a>
+              <button
+                type="button"
+                className="ess4-link"
+                aria-label={`Copy Google Maps link for ${l.t}`}
+                onClick={() => void copyMapsLink(i, l.mapsUrl)}
+              >
+                {copiedIdx === i ? <Check size={12} /> : <Copy size={12} />}
+                {copiedIdx === i ? 'Copied' : 'Copy'}
               </button>
             </footer>
           </article>
@@ -2069,9 +2162,9 @@ function FAQSection() {
         <div className="lead">
           <span className="eyebrow">All you need to know</span>
           <h2 className="h-section" style={{ marginTop: 6 }}>
-            Car XQ rentals · FAQ.
+            Langkawi car rental · FAQ.
           </h2>
-          <p className="h-sub">From age requirements to booking policies — clear, honest answers so you can start your island adventure with confidence.</p>
+          <p className="h-sub">From age requirements to Langkawi airport pickup — clear, honest answers so you can start your island adventure with confidence.</p>
         </div>
       </div>
 
@@ -2158,7 +2251,85 @@ function FAQSection() {
   )
 }
 
-function ReelsSection({ onOpenReel }: { onOpenReel: (r: (typeof REELS)[number]) => void }) {
+function ReelCard({ reel, onOpenReel }: { reel: Reel; onOpenReel: (r: Reel) => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [previewing, setPreviewing] = useState(false)
+
+  const startPreview = () => {
+    const video = videoRef.current
+    if (!video) return
+    setPreviewing(true)
+    void video.play().catch(() => setPreviewing(false))
+  }
+
+  const stopPreview = () => {
+    const video = videoRef.current
+    if (!video) return
+    video.pause()
+    video.currentTime = 0
+    setPreviewing(false)
+  }
+
+  return (
+    <article
+      className={`reel${previewing ? ' reel--previewing' : ''}`}
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpenReel(reel)}
+      onKeyDown={(e) => e.key === 'Enter' && onOpenReel(reel)}
+      onMouseEnter={startPreview}
+      onMouseLeave={stopPreview}
+      onFocus={startPreview}
+      onBlur={stopPreview}
+    >
+      <video
+        ref={videoRef}
+        className="reel-vid"
+        src={reel.clip}
+        poster={reel.thumb}
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        controlsList="nodownload noplaybackrate"
+        disablePictureInPicture
+        disableRemotePlayback
+        onContextMenu={(e) => e.preventDefault()}
+      />
+      <div className="reel-overlay">
+        <span className="reel-play">
+          <ArrowRight size={18} style={{ transform: 'translateX(1px)' }} />
+        </span>
+        <div className="reel-meta">
+          <div className="reel-meta-top">
+            <span className="reel-avatar reel-avatar-car">
+              <img src={reel.car.image} alt="" loading="lazy" />
+            </span>
+            <div>
+              <strong>
+                {reel.car.make} {reel.car.model}
+              </strong>
+              <em>
+                {reel.car.category} · from RM {reel.car.priceLowSeason}/day
+              </em>
+            </div>
+          </div>
+          <p className="reel-caption">{reel.taglineShort}</p>
+          <div className="reel-stats">
+            <span>
+              <Users size={12} /> {reel.car.seats} seats
+            </span>
+            <span>
+              <DoorOpen size={12} /> {reel.car.transmission}
+            </span>
+          </div>
+        </div>
+      </div>
+    </article>
+  )
+}
+
+function ReelsSection({ onOpenReel }: { onOpenReel: (r: Reel) => void }) {
   const railRef = useRef<HTMLDivElement>(null)
   const scroll = (dir: number) => {
     const el = railRef.current
@@ -2189,60 +2360,82 @@ function ReelsSection({ onOpenReel }: { onOpenReel: (r: (typeof REELS)[number]) 
 
       <div className="reels-rail" ref={railRef}>
         {REELS.map((r) => (
-          <article key={r.id} className="reel" role="button" tabIndex={0} onClick={() => onOpenReel(r)} onKeyDown={(e) => e.key === 'Enter' && onOpenReel(r)}>
-            <video
-              className="reel-vid"
-              src={r.clip}
-              poster={r.thumb}
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              onMouseEnter={(e) => e.currentTarget.play().catch(() => {})}
-              onMouseLeave={(e) => {
-                e.currentTarget.pause()
-                e.currentTarget.currentTime = 0
-              }}
-            />
-            <div className="reel-overlay">
-              <span className="reel-play">
-                <ArrowRight size={18} style={{ transform: 'translateX(1px)' }} />
-              </span>
-              <div className="reel-meta">
-                <div className="reel-meta-top">
-                  <span className="reel-avatar">{r.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}</span>
-                  <div>
-                    <strong>{r.name}</strong>
-                    <em>
-                      @{r.name.toLowerCase().replace(/\s/g, '')} · {r.city}
-                    </em>
-                  </div>
-                </div>
-                <p className="reel-caption">{r.caption}</p>
-                <div className="reel-stats">
-                  <span>
-                    <Heart size={12} /> {r.likes}
-                  </span>
-                  <span>
-                    <Sparkles size={12} /> {r.views}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </article>
+          <ReelCard key={r.id} reel={r} onOpenReel={onOpenReel} />
         ))}
       </div>
     </section>
   )
 }
 
+function TestimonialStars({ rating, size = 16 }: { rating: number; size?: number }) {
+  return (
+    <span className="testi-stars" aria-label={`${rating} out of 5 stars`}>
+      {Array.from({ length: 5 }, (_, index) => {
+        const fill = Math.min(1, Math.max(0, rating - index))
+        return (
+          <span key={index} className="testi-star-slot" style={{ width: size, height: size }}>
+            <Star size={size} className="testi-star-base" aria-hidden />
+            <span className="testi-star-fill" style={{ width: `${fill * 100}%` }} aria-hidden>
+              <Star size={size} fill="var(--brand-leaf)" color="var(--brand-leaf)" />
+            </span>
+          </span>
+        )
+      })}
+    </span>
+  )
+}
+
 function TestimonialsSection() {
   const [featuredIdx, setFeaturedIdx] = useState(0)
-  const featured = REVIEWS[featuredIdx]
-  const others = REVIEWS.map((r, i) => ({ ...r, i })).filter((r) => r.i !== featuredIdx).slice(0, 4)
+  const sectionRef = useRef<HTMLElement>(null)
+  const sideListRef = useRef<HTMLDivElement>(null)
+  const cardRefs = useRef<Map<number, HTMLButtonElement>>(new Map())
+  const autoScrollPausedRef = useRef(false)
+  const sectionInViewRef = useRef(false)
+  const featured = TESTIMONIALS[featuredIdx]
+
+  useEffect(() => {
+    const section = sectionRef.current
+    if (!section) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        sectionInViewRef.current = entry.isIntersecting
+      },
+      { threshold: 0.2, rootMargin: '-40px 0px -40px 0px' },
+    )
+
+    observer.observe(section)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!sectionInViewRef.current) return
+    const card = cardRefs.current.get(featured.id)
+    card?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }, [featured.id])
+
+  useEffect(() => {
+    if (TESTIMONIALS.length <= 1) return
+
+    const intervalId = window.setInterval(() => {
+      if (autoScrollPausedRef.current || !sectionInViewRef.current) return
+      setFeaturedIdx((current) => (current + 1) % TESTIMONIALS.length)
+    }, 5000)
+
+    return () => window.clearInterval(intervalId)
+  }, [])
+
+  const pauseAutoScroll = () => {
+    autoScrollPausedRef.current = true
+  }
+
+  const resumeAutoScroll = () => {
+    autoScrollPausedRef.current = false
+  }
 
   return (
-    <section className="section testimonials-v2" data-screen-label="Reviews">
+    <section ref={sectionRef} className="section testimonials-v2" data-screen-label="Reviews">
       <div className="testi-head">
         <div className="testi-lead">
           <span className="eyebrow">Trusted by travelers since 2015</span>
@@ -2252,13 +2445,11 @@ function TestimonialsSection() {
           <p className="h-sub">Thousands of guests, one consistent story: a clean car, a clear price, and friendly local hands when you need them.</p>
         </div>
         <div className="testi-rating">
-          <div className="testi-score">4.9</div>
+          <div className="testi-score">{TESTIMONIAL_HEADLINE_SCORE.toFixed(1)}</div>
           <div className="testi-score-stars">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} size={14} style={{ color: 'var(--brand-leaf)' }} fill="var(--brand-leaf)" />
-            ))}
+            <TestimonialStars rating={TESTIMONIAL_HEADLINE_SCORE} size={14} />
             <div className="testi-score-label">
-              from <b>1,420</b> verified rentals
+              from <b>{TESTIMONIAL_SOURCE.totalReviews.toLocaleString('en-MY')}</b>
             </div>
           </div>
         </div>
@@ -2266,27 +2457,18 @@ function TestimonialsSection() {
 
       <div className="testi-stage">
         <article className="testi-feature">
-          <div className="testi-stars">
-            {Array.from({ length: featured.r }).map((_, j) => (
-              <Star key={j} size={16} style={{ color: 'var(--brand-leaf)' }} fill="var(--brand-leaf)" />
-            ))}
-          </div>
+          <TestimonialStars rating={featured.stars} size={16} />
           <div className="testi-quote-mark">&ldquo;</div>
-          <p className="testi-quote">{featured.body}</p>
+          <p className="testi-quote">{featured.text}</p>
           <div className="testi-feature-foot">
             <div className="testi-avatar" style={{ background: '#1A1F22' }}>
-              {featured.n
-                .split(' ')
-                .map((w) => w[0])
-                .slice(0, 2)
-                .join('')}
+              {testimonialInitials(featured.name)}
             </div>
             <div>
-              <div className="testi-name">{featured.n}</div>
-              <div className="testi-meta">{featured.role}</div>
+              <div className="testi-name">{featured.name}</div>
+              <div className="testi-meta">{featured.serviceLabel}</div>
             </div>
             <div className="testi-trip">
-              <Check size={11} /> {featured.trip}
               <span>{featured.date}</span>
             </div>
           </div>
@@ -2297,53 +2479,63 @@ function TestimonialsSection() {
             <span>More guest stories</span>
             <span style={{ color: 'var(--muted-2)', fontSize: 12 }}>Tap to read</span>
           </div>
-          {others.map((r) => (
-            <button key={r.i} type="button" className="testi-mini" onClick={() => setFeaturedIdx(r.i)}>
-              <div className="testi-avatar sm" style={{ background: '#1A1F22' }}>
-                {r.n
-                  .split(' ')
-                  .map((w) => w[0])
-                  .slice(0, 2)
-                  .join('')}
-              </div>
-              <div className="testi-mini-body">
-                <div className="testi-mini-top">
-                  <span className="testi-name">{r.n}</span>
-                  <span className="testi-mini-stars">
-                    {Array.from({ length: r.r }).map((_, j) => (
-                      <Star key={j} size={10} style={{ color: 'var(--brand-leaf)' }} fill="var(--brand-leaf)" />
-                    ))}
-                  </span>
+          <div
+            className="testi-side-list"
+            ref={sideListRef}
+            onMouseEnter={pauseAutoScroll}
+            onMouseLeave={resumeAutoScroll}
+          >
+            {TESTIMONIALS.map((review, index) => (
+              <button
+                key={review.id}
+                type="button"
+                ref={(element) => {
+                  if (element) cardRefs.current.set(review.id, element)
+                  else cardRefs.current.delete(review.id)
+                }}
+                className={`testi-mini${index === featuredIdx ? ' testi-mini--active' : ''}`}
+                onClick={() => setFeaturedIdx(index)}
+              >
+                <div className="testi-avatar sm" style={{ background: '#1A1F22' }}>
+                  {testimonialInitials(review.name)}
                 </div>
-                <p>{r.body.length > 96 ? `${r.body.slice(0, 96)}…` : r.body}</p>
-              </div>
-            </button>
-          ))}
+                <div className="testi-mini-body">
+                  <div className="testi-mini-top">
+                    <span className="testi-name">{review.name}</span>
+                    <span className="testi-mini-stars">
+                      <TestimonialStars rating={review.stars} size={10} />
+                    </span>
+                  </div>
+                  <p>{review.text.length > 96 ? `${review.text.slice(0, 96)}…` : review.text}</p>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       <div className="testi-footstrip">
         <div className="testi-source">
-          <span className="testi-source-logo">G</span>
+          <span className="testi-source-logo">f</span>
           <div>
-            <b>4.9 ★</b> Google reviews <span style={{ color: 'var(--muted-2)' }}>· 980 ratings</span>
+            <b>{TESTIMONIAL_SOURCE.recommendationRate} recommend</b> {TESTIMONIAL_SOURCE.pageName}{' '}
+            <span style={{ color: 'var(--muted-2)' }}>· {TESTIMONIAL_SOURCE.totalReviews.toLocaleString('en-MY')} reviews</span>
           </div>
         </div>
         <div className="testi-source">
-          <span className="testi-source-logo">T</span>
+          <span className="testi-source-logo">XQ</span>
           <div>
-            <b>4.8 ★</b> Tripadvisor <span style={{ color: 'var(--muted-2)' }}>· 312 ratings</span>
+            <b>{TESTIMONIAL_SOURCE.tradingAs}</b>{' '}
+            <span style={{ color: 'var(--muted-2)' }}>· {TESTIMONIAL_SOURCE.tourismLicense}</span>
           </div>
         </div>
         <div className="testi-source">
-          <span className="testi-source-logo">B</span>
+          <span className="testi-source-logo">M</span>
           <div>
-            <b>9.2 / 10</b> Booking.com <span style={{ color: 'var(--muted-2)' }}>· 128 ratings</span>
+            <b>MATTA {TESTIMONIAL_SOURCE.mattaMember}</b>{' '}
+            <span style={{ color: 'var(--muted-2)' }}>· licensed Langkawi operator</span>
           </div>
         </div>
-        <button type="button" className="btn btn-ghost btn-sm" style={{ marginLeft: 'auto' }}>
-          Read all reviews <ArrowRight size={12} />
-        </button>
       </div>
     </section>
   )
@@ -2354,63 +2546,52 @@ function CruiseBanner() {
     <section className="section cruise-section" data-screen-label="Cruise">
       <article className="cruise-banner">
         <div className="cruise-banner-art">
-          <div className="cruise-sun" />
-          <svg className="cruise-water" viewBox="0 0 1200 200" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M0 120 Q 150 100 300 120 T 600 120 T 900 120 T 1200 120 V 200 H 0 Z" fill="rgba(255,255,255,.18)" />
-            <path d="M0 150 Q 150 130 300 150 T 600 150 T 900 150 T 1200 150 V 200 H 0 Z" fill="rgba(255,255,255,.28)" />
-            <path d="M0 180 Q 150 160 300 180 T 600 180 T 900 180 T 1200 180 V 200 H 0 Z" fill="rgba(255,255,255,.42)" />
-          </svg>
-          <svg className="cruise-boat" viewBox="0 0 200 90" aria-hidden="true">
-            <path d="M30 70 L170 70 L150 80 L50 80 Z" fill="#1A1F22" />
-            <rect x="60" y="50" width="80" height="20" fill="#fff" />
-            <path d="M100 10 L100 50 L140 50 Z" fill="#fff" />
-            <path d="M100 20 L100 50 L70 50 Z" fill="rgba(255,255,255,.85)" />
-          </svg>
-          <span className="cruise-bird" style={{ top: '18%', left: '62%' }}>
-            ~
-          </span>
-          <span className="cruise-bird" style={{ top: '12%', left: '70%', fontSize: 14 }}>
-            ~
-          </span>
-          <span className="cruise-bird" style={{ top: '22%', left: '80%', fontSize: 18 }}>
-            ~
-          </span>
+          <img
+            src="/image/Sunset%20Cruise.png"
+            alt="XQ Sunset Cruise catamaran on turquoise waters off Langkawi"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
 
         <div className="cruise-banner-body">
           <span className="cruise-eyebrow">
-            <Sparkles size={11} /> New from Car XQ Holidays
+            <Sparkles size={11} /> From XQ Holidays · Langkawi Cruise
           </span>
-          <h2>The XQ Sunset Cruise.</h2>
-          <p>Two hours of golden hour off Pantai Kok — fresh seafood plate, free-flow drinks, and a Langkawi sunset you&apos;ll be looking at for years.</p>
+          <h2>Langkawi Sunset Dinner Cruise.</h2>
+          <p>
+            Sail the Andaman Sea at golden hour — sunset dinner cruises, party cruises and private yacht charters
+            with buffet dinner, free-flow drinks, and ocean views from trusted operators.
+          </p>
           <div className="cruise-bullets">
             <span>
-              <Check size={12} /> Departs daily · 5:30 PM
+              <Check size={12} /> Live availability · instant confirmation
             </span>
             <span>
-              <Check size={12} /> Up to 12 guests · private option
+              <Check size={12} /> Buffet dinner &amp; free-flow drinks
             </span>
             <span>
-              <Check size={12} /> Free hotel transfer for renters
+              <Check size={12} /> Licensed operators · marine insurance
             </span>
           </div>
           <div className="cruise-actions">
             <div className="cruise-price">
               <span className="cruise-price-from">From</span>
               <strong>
-                RM 220<em>/pax</em>
+                RM 180<em>/pax</em>
               </strong>
-              <span className="cruise-price-strike">RM 280</span>
             </div>
-            <button type="button" className="btn btn-leaf btn-lg">
+            <a
+              href="https://cruise.xqholidays.com.my/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-leaf btn-lg"
+            >
               Book the cruise <ArrowRight size={14} />
-            </button>
-            <button type="button" className="btn btn-ghost btn-lg" style={{ background: 'rgba(255,255,255,.92)' }}>
-              See full menu
-            </button>
+            </a>
           </div>
           <span className="cruise-foot">
-            Ask our team about cruise inclusions when you book
+            Best price guarantee · verified slots at cruise.xqholidays.com.my
           </span>
         </div>
       </article>
@@ -2418,44 +2599,53 @@ function CruiseBanner() {
   )
 }
 
-function FooterCta({ onPlan }: { onPlan: () => void }) {
+function FooterCta({ onSearch, onBookMini }: { onSearch: () => void; onBookMini: () => void }) {
   return (
     <div className="footer-cta">
       <div className="card-left">
         <div className="top">
           <div className="icon-box">
-            <Sun size={18} />
+            <MapPin size={18} />
           </div>
           <div>
-            <h3>
-              Beyond the keys —
-              <br />
-              memories of a lifetime.
-            </h3>
-            <p>Bundle a car with a ferry, an island hop, or a kelong dinner. We help you stitch a perfect day, you just drive.</p>
+            <h3>Your Safety, Our Standard</h3>
+            <p>
+              When you rent with XQ Car Rental, you are not handed an unknown car from an unknown source. The majority of our fleet is directly owned and operated by XQ Holidays. That single fact changes everything about the experience you receive.
+            </p>
           </div>
-          <button type="button" className="btn btn-sm" onClick={onPlan}>
-            Plan a trip <ArrowRight size={12} />
+          <button type="button" className="btn btn-sm" onClick={onSearch}>
+            Search available cars <ArrowRight size={12} />
           </button>
         </div>
-        <div className="bottom">
+        <div
+          className="bottom"
+          style={{ backgroundImage: `url('${encodeURI(FOOTER_CTA_FLEET_IMAGE)}')` }}
+        >
           <div>
-            <h4>Cars on this site</h4>
-            <div className="big">Live</div>
+            <h4>Rates from</h4>
+            <div className="big">RM 70/day</div>
           </div>
-          <div style={{ marginLeft: 'auto', fontSize: 12, color: 'rgba(255,255,255,.7)', textAlign: 'right' }}>
-            refreshed on load
+          <div style={{ marginLeft: 'auto', fontSize: 12, color: 'rgba(255,255,255,.82)', textAlign: 'right' }}>
+            Airport · Jetty · Hotel
             <br />
-            Langkawi fleet
+            Langkawi island only
           </div>
         </div>
       </div>
-      <div className="right-img">
-        <h3>
-          Comfortable prices,
-          <br />
-          from coastline to highland.
-        </h3>
+      <div
+        className="right-img"
+        style={{ backgroundImage: `url('${encodeURI(FOOTER_CTA_SCENERY_IMAGE)}')` }}
+      >
+        <div className="right-img-content">
+          <h3>
+            From Pantai Cenang
+            <br />
+            to Tanjung Rhu — your car, your pace.
+          </h3>
+          <button type="button" className="btn btn-sm footer-cta-mini-btn" onClick={onBookMini}>
+            Book Mini <ArrowRight size={12} />
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -2478,7 +2668,15 @@ export function SiteFooter({
               Car<span style={{ color: 'var(--brand-leaf)' }}>XQ</span>
             </span>
           </div>
-          <p className="tag">Affordable, safe car rentals in Langkawi. Family-owned since 2015 — friendly humans on WhatsApp, always.</p>
+          <div className="footer-tagline">
+            <p className="tag">
+              Founded in 2015 by a traveller who fell in love with the island and chose to stay, XQ Car Rental is the dedicated vehicle rental arm of Xiao Qiang Holidays Sdn Bhd, a licensed Malaysian tourism company (KPK/LN: 7371 | MATTA MA4659).
+            </p>
+            <p className="tag">
+              Most of our fleet is directly owned, carefully maintained, and sensitively operated — so when you collect your car, you collect peace of mind.
+            </p>
+            <p className="tag footer-tagline-signature">You Play, I Think.</p>
+          </div>
           <div className="socials">
             <a href="https://instagram.com" aria-label="Instagram">
               <Sparkles size={14} />
@@ -2512,7 +2710,7 @@ export function SiteFooter({
           <h5>Company</h5>
           <ul>
             <li>
-              <Link to="/about">About Car XQ</Link>
+              <Link to="/about">About us</Link>
             </li>
             <li>
               {onScrollFleet ? (
@@ -2530,91 +2728,225 @@ export function SiteFooter({
               )}
             </li>
             <li>
-              <Link to="/about">Journal &amp; news</Link>
+              <Link to="/blog">Journal &amp; news</Link>
             </li>
             <li>
               <Link to="/login">Customer login</Link>
             </li>
           </ul>
+          <div className="site-footer-matta">
+            <img
+              src="/images/payments/Matta%20Logo.png"
+              alt="MATTA — Malaysia Association of Tour and Travel Agents"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
         </div>
         <div>
-          <h5>Get the deals</h5>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,.55)', margin: '0 0 10px', lineHeight: 1.55 }}>
-            One short email a month, no spam. Surprise upgrades for subscribers.
-          </p>
-          <div className="subscribe">
-            <input placeholder="you@example.com" readOnly aria-label="Email" />
-            <button type="button">Subscribe</button>
-          </div>
-          <p style={{ fontSize: 12, color: 'rgba(255,255,255,.45)', margin: '12px 0 0' }}>
+          <h5>Legal</h5>
+          <ul>
+            <li>
+              <Link to="/terms">Terms &amp; Conditions</Link>
+            </li>
+            <li>
+              <Link to="/rental-agreement">Rental Contract</Link>
+            </li>
+            <li>
+              <Link to="/privacy">Privacy Policy</Link>
+            </li>
+            <li>
+              <Link to="/refund-policy">Refund Policy</Link>
+            </li>
+            <li>
+              <Link to="/pdpa">PDPA Notice</Link>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h5>Contact</h5>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,.55)', margin: 0, lineHeight: 1.55 }}>
             <Phone size={11} style={{ verticalAlign: '-2px', marginRight: 4 }} />
             24/7 roadside · +60 11 3521 5576
           </p>
         </div>
       </div>
+      <div className="site-footer-payments">
+        <span className="site-footer-payments-label">We accept</span>
+        <PaymentMethodIcons
+          className="site-footer-pay-icons"
+          chipClassName="site-footer-pay-chip"
+        />
+      </div>
       <div className="bottom">
         <span>© {new Date().getFullYear()} Car XQ Holidays · XQ Car Fleet platform</span>
         <span>
-          <Link to="/about" style={{ marginRight: 18 }}>
+          <Link to="/privacy" style={{ marginRight: 18 }}>
             Privacy
           </Link>
-          <Link to="/about">Terms of service</Link>
+          <Link to="/terms" style={{ marginRight: 18 }}>
+            Terms
+          </Link>
+          <Link to="/refund-policy" style={{ marginRight: 18 }}>
+            Refund Policy
+          </Link>
+          <Link to="/pdpa">PDPA</Link>
         </span>
       </div>
     </footer>
   )
 }
 
-function ReelLightbox({ reel, onClose }: { reel: (typeof REELS)[number]; onClose: () => void }) {
+function ReelLightbox({
+  reel,
+  reels,
+  onClose,
+  onChange,
+}: {
+  reel: Reel
+  reels: Reel[]
+  onClose: () => void
+  onChange: (reel: Reel) => void
+}) {
   const ref = useRef<HTMLVideoElement>(null)
+  const { car } = reel
+  const index = reels.findIndex((r) => r.id === reel.id)
+  const hasMultiple = reels.length > 1
+
+  const goNext = useCallback(() => {
+    if (!hasMultiple || index < 0) return
+    onChange(reels[(index + 1) % reels.length])
+  }, [hasMultiple, index, onChange, reels])
+
+  const goPrev = useCallback(() => {
+    if (!hasMultiple || index < 0) return
+    onChange(reels[(index - 1 + reels.length) % reels.length])
+  }, [hasMultiple, index, onChange, reels])
+
   useEffect(() => {
     ref.current?.play().catch(() => {})
-  }, [])
+  }, [reel.id, reel.clip])
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'ArrowRight') goNext()
+      else if (e.key === 'ArrowLeft') goPrev()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [goNext, goPrev])
+
+  function handleBook() {
+    onClose()
+    scrollToAnchor('booking-dock')
+  }
+
   return (
     <div className="reel-lightbox" role="presentation" onClick={onClose}>
       <button type="button" className="close-btn" aria-label="Close" onClick={onClose} style={{ position: 'absolute', top: 24, right: 24, zIndex: 5 }}>
         <X size={16} />
       </button>
+      {hasMultiple ? (
+        <>
+          <button
+            type="button"
+            className="reel-lightbox-nav reel-lightbox-nav--prev"
+            aria-label="Previous video"
+            onClick={(e) => {
+              e.stopPropagation()
+              goPrev()
+            }}
+          >
+            <ChevronLeft size={22} />
+          </button>
+          <button
+            type="button"
+            className="reel-lightbox-nav reel-lightbox-nav--next"
+            aria-label="Next video"
+            onClick={(e) => {
+              e.stopPropagation()
+              goNext()
+            }}
+          >
+            <ChevronRight size={22} />
+          </button>
+        </>
+      ) : null}
       <div className="reel-lightbox-inner" role="presentation" onClick={(e) => e.stopPropagation()}>
-        <video ref={ref} src={reel.clip} poster={reel.thumb} controls loop playsInline className="reel-lightbox-video" />
+        <video
+          ref={ref}
+          src={reel.clip}
+          poster={reel.thumb}
+          controls
+          loop
+          playsInline
+          controlsList="nodownload noplaybackrate"
+          disablePictureInPicture
+          disableRemotePlayback
+          onContextMenu={(e) => e.preventDefault()}
+          className="reel-lightbox-video"
+        />
         <div className="reel-lightbox-side">
-          <div className="reel-meta-top" style={{ marginBottom: 12 }}>
-            <span className="reel-avatar" style={{ background: 'var(--brand-leaf)' }}>
-              {reel.name
-                .split(' ')
-                .map((w) => w[0])
-                .slice(0, 2)
-                .join('')}
-            </span>
+          <div className="reel-car-head">
+            <img src={car.image} alt={`${car.make} ${car.model}`} className="reel-car-photo" loading="lazy" />
             <div>
-              <strong style={{ color: '#fff' }}>{reel.name}</strong>
-              <em style={{ color: 'rgba(255,255,255,.6)' }}>
-                @{reel.name.toLowerCase().replace(/\s/g, '')} · {reel.city}
-              </em>
+              <span className="reel-car-category">{car.category}</span>
+              <h3 className="reel-car-title">
+                {car.make} {car.model}
+              </h3>
+              {car.oku ? <span className="reel-car-oku">OKU friendly</span> : null}
             </div>
           </div>
-          <p style={{ color: 'rgba(255,255,255,.86)', fontSize: 15, lineHeight: 1.55, margin: 0 }}>{reel.caption}</p>
-          <div className="reel-lightbox-stats">
-            <span>
-              <Heart size={13} /> {reel.likes}
-            </span>
-            <span>
-              <Sparkles size={13} /> {reel.views}
-            </span>
+
+          <p className="reel-car-tagline">{reel.tagline}</p>
+
+          <div className="reel-car-price-block">
+            <span className="reel-car-price-label">From</span>
+            <div className="reel-car-price">
+              RM {car.priceLowSeason}
+              <span>/ day</span>
+            </div>
+            <span className="reel-car-price-note">Low-season rate · airport delivery available</span>
           </div>
-          <div className="reel-lightbox-actions">
-            <button type="button" className="btn btn-leaf btn-sm">
-              <Heart size={13} /> Like
-            </button>
-            <button type="button" className="btn btn-ghost btn-sm" style={{ borderColor: 'rgba(255,255,255,.2)', color: '#fff' }}>
-              <ArrowRight size={13} /> Share
-            </button>
-          </div>
+
+          <dl className="reel-car-specs">
+            <div>
+              <dt>Seats</dt>
+              <dd>{car.seats}</dd>
+            </div>
+            <div>
+              <dt>Doors</dt>
+              <dd>{car.doors}</dd>
+            </div>
+            <div>
+              <dt>Body</dt>
+              <dd>{car.body}</dd>
+            </div>
+            <div>
+              <dt>Gearbox</dt>
+              <dd>{car.transmission}</dd>
+            </div>
+            <div>
+              <dt>Fuel</dt>
+              <dd>{car.fuel}</dd>
+            </div>
+            <div>
+              <dt>Luggage</dt>
+              <dd>{car.luggage}</dd>
+            </div>
+          </dl>
+
+          <ul className="reel-car-highlights" aria-label="Highlights">
+            {car.highlights.map((h) => (
+              <li key={h}>{h}</li>
+            ))}
+          </ul>
+
           <div className="reel-lightbox-cta">
-            <strong>Want to drive this?</strong>
-            <span>Browse live availability and book in minutes.</span>
-            <button type="button" className="btn btn-leaf btn-sm" onClick={() => scrollToAnchor('booking-dock')}>
-              Browse cars <ArrowRight size={12} />
+            <strong>Book the {car.make} {car.model}</strong>
+            <span>Check live dates, then reserve in about 90 seconds.</span>
+            <button type="button" className="btn btn-sm" style={{ background: 'var(--ink)', color: '#fff' }} onClick={handleBook}>
+              Check availability <ArrowRight size={12} />
             </button>
           </div>
         </div>

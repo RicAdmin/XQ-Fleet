@@ -10,7 +10,12 @@ import {
 
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 
-export const userRoleEnum = pgEnum('user_role', ['owner', 'staff', 'customer'])
+export const userRoleEnum = pgEnum('user_role', [
+  'owner',
+  'staff',
+  'customer',
+  'super_admin',
+])
 
 export const users = pgTable(
   'users',

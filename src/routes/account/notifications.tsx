@@ -125,7 +125,7 @@ function AccountNotificationsPage() {
 
         <p className="cxq-profile-tos">
           By continuing you agree to our terms and acknowledge our{' '}
-          <Link to="/about" className="cxq-profile-tos-link">
+          <Link to="/privacy" className="cxq-profile-tos-link">
             Privacy Policy
           </Link>
           .

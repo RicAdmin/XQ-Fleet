@@ -47,10 +47,17 @@ function CustomerLoginPage() {
               setIsSubmitting(true)
 
               try {
-                await authClient.signIn.email({ email, password })
-                const { data: session } = await authClient.getSession()
+                const signInResult = await authClient.signIn.email({ email, password })
 
-                const role = appRoleFromSessionUser(session?.user)
+                if (signInResult.error) {
+                  throw new Error(signInResult.error.message ?? 'Sign in failed.')
+                }
+
+                let role = appRoleFromSessionUser(signInResult.data?.user)
+                if (!role) {
+                  const { data: session } = await authClient.getSession()
+                  role = appRoleFromSessionUser(session?.user)
+                }
 
                 if (role !== 'customer') {
                   await authClient.signOut()

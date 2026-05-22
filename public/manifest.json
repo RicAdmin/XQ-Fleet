@@ -1,6 +1,7 @@
 {
-  "short_name": "TanStack App",
-  "name": "Create TanStack App Sample",
+  "short_name": "Car XQ",
+  "name": "Car XQ — Car Rental Langkawi",
+  "description": "Rent a car in Langkawi from RM 70/day. Free airport delivery, family-owned since 2015.",
   "icons": [
     {
       "src": "favicon.ico",
@@ -18,8 +19,9 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#FF6600",
+  "background_color": "#F4F5F7",
+  "lang": "en-MY"
 }

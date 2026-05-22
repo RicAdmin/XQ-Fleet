@@ -52,7 +52,7 @@ export function OkuFeatureModal({ car, onClose }: { car: PublicCarRow; onClose: 
               src={embedSrc}
               title="How to use OKU features on the Honda N-Box"
               className="oku-modal-embed"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
               allowFullScreen
             />
           ) : (
@@ -63,6 +63,10 @@ export function OkuFeatureModal({ car, onClose }: { car: PublicCarRow; onClose: 
               controls
               playsInline
               preload="metadata"
+              controlsList="nodownload noplaybackrate"
+              disablePictureInPicture
+              disableRemotePlayback
+              onContextMenu={(e) => e.preventDefault()}
             >
               Your browser does not support video playback.
             </video>

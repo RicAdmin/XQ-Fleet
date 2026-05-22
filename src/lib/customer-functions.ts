@@ -3,6 +3,7 @@ import { and, desc, eq, ne } from 'drizzle-orm'
 
 import { customers } from '#/db/schema'
 import { requireRole } from '#/lib/auth-functions'
+import { fleetOpsRoles, fullAdminRoles } from '#/lib/auth-model'
 
 type CreateCustomerInput = {
   fullName: string
@@ -52,7 +53,7 @@ function validateCustomerFields(data: {
 }
 
 export const getCustomers = createServerFn({ method: 'GET' }).handler(async () => {
-  await requireRole(['owner', 'staff'])
+  await requireRole(fleetOpsRoles)
   const { db } = await import('#/db')
   return db.select().from(customers).orderBy(desc(customers.createdAt))
 })
@@ -60,7 +61,7 @@ export const getCustomers = createServerFn({ method: 'GET' }).handler(async () =
 export const getCustomerById = createServerFn({ method: 'GET' })
   .inputValidator((input: GetCustomerByIdInput) => input)
   .handler(async ({ data }) => {
-    await requireRole(['owner', 'staff'])
+    await requireRole(fleetOpsRoles)
     const { db } = await import('#/db')
     const results = await db
       .select()
@@ -73,7 +74,7 @@ export const getCustomerById = createServerFn({ method: 'GET' })
 export const createCustomer = createServerFn({ method: 'POST' })
   .inputValidator((input: CreateCustomerInput) => input)
   .handler(async ({ data }) => {
-    await requireRole(['owner', 'staff'])
+    await requireRole(fleetOpsRoles)
     const validated = validateCustomerFields(data)
 
     const { db } = await import('#/db')
@@ -105,7 +106,7 @@ export const createCustomer = createServerFn({ method: 'POST' })
 export const updateCustomer = createServerFn({ method: 'POST' })
   .inputValidator((input: UpdateCustomerInput) => input)
   .handler(async ({ data }) => {
-    await requireRole(['owner', 'staff'])
+    await requireRole(fleetOpsRoles)
     const validated = validateCustomerFields(data)
 
     const { db } = await import('#/db')
@@ -145,7 +146,7 @@ export const updateCustomer = createServerFn({ method: 'POST' })
 export const deleteCustomer = createServerFn({ method: 'POST' })
   .inputValidator((input: DeleteCustomerInput) => input)
   .handler(async ({ data }) => {
-    await requireRole(['owner'])
+    await requireRole(fullAdminRoles)
     const { db } = await import('#/db')
 
     const result = await db

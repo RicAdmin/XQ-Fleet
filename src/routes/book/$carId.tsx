@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { z } from 'zod'
 
-import PublicPageShell from '#/components/shells/PublicPageShell'
+import PublicMarketingShell from '#/components/shells/PublicMarketingShell'
 import { getRequestSession } from '#/lib/auth-functions'
 import { createPortalBooking, previewBookingPrice } from '#/lib/portal-booking-functions'
 import type { PricingPreview } from '#/lib/portal-booking-functions'
@@ -232,7 +232,7 @@ function BookingPage() {
   const hasDates = !!(startDate && endDate && preview)
 
   return (
-    <PublicPageShell className="page-wrap px-4 pb-16 pt-8">
+    <PublicMarketingShell screenLabel="Book car" mainClassName="container booking-page-main">
       <div className="booking-page">
         {/* Header */}
         <div className="booking-header">
@@ -547,6 +547,6 @@ function BookingPage() {
           </aside>
         </div>
       </div>
-    </PublicPageShell>
+    </PublicMarketingShell>
   )
 }

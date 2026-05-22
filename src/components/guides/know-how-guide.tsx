@@ -9,7 +9,6 @@ type KnowIcon = 'cab' | 'shield' | 'fuel' | 'phone'
 
 const KNOWHOW: Array<{
   id: KnowId
-  accent: string
   title: string
   intro: string
   points: Array<{ t: string; d: string }>
@@ -18,7 +17,6 @@ const KNOWHOW: Array<{
   {
     id: 'parking',
     icon: 'cab',
-    accent: 'var(--brand-leaf)',
     title: 'Street parking',
     intro: "Most of Langkawi has free parking. Where it isn't free, the rules are simple — yellow lines and coupon zones.",
     points: [
@@ -43,7 +41,6 @@ const KNOWHOW: Array<{
   {
     id: 'fines',
     icon: 'shield',
-    accent: '#DC2626',
     title: 'Speeding & fines',
     intro: 'Langkawi is patient on the road, but two highway stretches have automated speed cameras (AES). Know them and you will be fine.',
     points: [
@@ -65,7 +62,6 @@ const KNOWHOW: Array<{
   {
     id: 'fuel',
     icon: 'fuel',
-    accent: 'var(--brand-leaf)',
     title: 'Fuelling up',
     intro: 'Government-set fuel prices, so every station is the same. Three stations cover most of the island.',
     points: [
@@ -85,7 +81,6 @@ const KNOWHOW: Array<{
   {
     id: 'accident',
     icon: 'phone',
-    accent: '#0F766E',
     title: 'Accident handling',
     intro: 'Small bumps happen. Keep calm and follow these three steps — we will guide you through it.',
     points: [
@@ -128,12 +123,6 @@ function KhIcon({ kind, size }: { kind: KnowIcon; size: number }) {
   }
 }
 
-function iconWash(k: (typeof KNOWHOW)[number]) {
-  if (k.id === 'fines') return 'rgba(220,38,38,.12)'
-  if (k.id === 'accident') return 'rgba(15,118,110,.14)'
-  return 'rgba(255,102,0,.12)'
-}
-
 export function KnowHowGuide() {
   const [openId, setOpenId] = useState<KnowId>('parking')
 
@@ -145,11 +134,11 @@ export function KnowHowGuide() {
         body="Street parking, speed cameras, fuel stations, and what to do if something goes sideways. Read it once on the plane and you are set."
       />
 
-      <section className="page-section">
+      <section className="page-section know-how-page">
         <div className="kh-nav">
           {KNOWHOW.map((k) => (
             <button key={k.id} type="button" className={'kh-nav-btn' + (openId === k.id ? ' on' : '')} onClick={() => setOpenId(k.id)}>
-              <span className="kh-nav-icon" style={{ color: k.accent }}>
+              <span className="kh-nav-icon">
                 <KhIcon kind={k.icon} size={22} />
               </span>
               <span>{k.title}</span>
@@ -161,7 +150,7 @@ export function KnowHowGuide() {
           {KNOWHOW.map((k) => (
             <article key={k.id} id={k.id} className={'kh-card' + (openId === k.id ? ' focused' : '')}>
               <header>
-                <span className="kh-card-icon" style={{ color: k.accent, background: iconWash(k) }}>
+                <span className="kh-card-icon">
                   <KhIcon kind={k.icon} size={22} />
                 </span>
                 <div>
@@ -172,7 +161,7 @@ export function KnowHowGuide() {
               <ul className="kh-points">
                 {k.points.map((p) => (
                   <li key={p.t}>
-                    <span className="kh-point-bullet" style={{ background: k.accent }} />
+                    <span className="kh-point-bullet" />
                     <div>
                       <strong>{p.t}</strong>
                       <span>{p.d}</span>

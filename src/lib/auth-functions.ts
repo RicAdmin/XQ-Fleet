@@ -1,12 +1,12 @@
 import { createHash, randomBytes } from 'node:crypto'
 
 import { createServerFn } from '@tanstack/react-start'
-import { and, desc, eq, gt, isNull } from 'drizzle-orm'
+import { and, desc, eq, gt, inArray, isNull } from 'drizzle-orm'
 import type { AuthSession } from '#/lib/auth'
 import type { AppRole } from '#/lib/auth-model'
 
 import { sessions, staffInvitations, users } from '#/db/schema'
-import { isAppRole } from '#/lib/auth-model'
+import { fullAdminRoles, isAppRole } from '#/lib/auth-model'
 
 type OwnerBootstrapInput = {
   name: string
@@ -96,7 +96,7 @@ export const getRequestSession = createServerFn({ method: 'GET' }).handler(
   },
 )
 
-export async function requireRole(allowedRoles: AppRole[]) {
+export async function requireRole(allowedRoles: ReadonlyArray<AppRole>) {
   const session = await getRequestSession()
 
   if (!session) {
@@ -110,19 +110,24 @@ export async function requireRole(allowedRoles: AppRole[]) {
   return session
 }
 
+/** Shortcut for actions that require owner or super_admin (full admin privileges). */
+export async function requireAdmin() {
+  return requireRole(['owner', 'super_admin'])
+}
+
 export const getOwnerSetupState = createServerFn({ method: 'GET' }).handler(
   async () => {
     const { db } = await import('#/db')
-    const owner =
+    const existing =
       (
         await db
           .select({ id: users.id })
           .from(users)
-          .where(eq(users.role, 'owner'))
+          .where(inArray(users.role, [...fullAdminRoles]))
           .limit(1)
       )[0] ?? null
 
-    return { hasOwner: Boolean(owner) }
+    return { hasOwner: Boolean(existing) }
   },
 )
 

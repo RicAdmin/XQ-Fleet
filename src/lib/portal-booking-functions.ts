@@ -4,6 +4,7 @@ import { and, desc, eq, gt, inArray, lt, notExists } from 'drizzle-orm'
 import { cars, customers, payments, rentals, seasonCalendar, promos } from '#/db/schema'
 import type { CarCategory, RentalStatus } from '#/db/schema'
 import { getRequestSession } from '#/lib/auth-functions'
+import { recordAuditLog } from '#/lib/audit-log'
 import { parseBookingDateRange } from '#/lib/booking-datetime'
 import { HOLD_MINUTES } from '#/lib/payment-functions'
 import {
@@ -14,6 +15,7 @@ import {
   type PromoRecord,
   type SeasonRange,
 } from '#/lib/pricing-logic'
+import { findPromoByCode, redeemPromoInTx } from '#/lib/promo-functions'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -214,7 +216,9 @@ export const previewBookingPrice = createServerFn({ method: 'GET' })
     if (data.couponCode) {
       const { applyCoupon } = await import('#/lib/pricing-logic')
       const couponResult = applyCoupon(data.couponCode, result.subTotal, promoList)
-      couponError = couponResult.error
+      if (couponResult.error === 'not-found' || couponResult.error === 'expired') {
+        couponError = couponResult.error
+      }
     }
 
     return { ...result, couponError }
@@ -416,76 +420,23 @@ export const createPortalBooking = createServerFn({ method: 'POST' })
       await releaseCustomerPendingHolds(db, existingCustomerId, data.carId)
     }
 
-    // Overlap check
-    const overlap = await db
-      .select({ id: rentals.id })
-      .from(rentals)
-      .where(
-        and(
-          eq(rentals.carId, data.carId),
-          inArray(rentals.status, ['pending', 'active']),
-          lt(rentals.startDate, endDate),
-          gt(rentals.endDate, startDate),
-        ),
-      )
-      .limit(1)
-    if (overlap.length > 0)
-      throw new Error('This car is not available for the selected dates.')
-
-    // Load car with season pricing
-    const [car] = await db
-      .select({
-        id: cars.id,
-        status: cars.status,
-        availableForBooking: cars.availableForBooking,
-        dailyRateSen: cars.dailyRateSen,
-        priceLowSeasonSen: cars.priceLowSeasonSen,
-        pricePeakSeasonSen: cars.pricePeakSeasonSen,
-        priceSuperPeakSeasonSen: cars.priceSuperPeakSeasonSen,
-        extHourLowSen: cars.extHourLowSen,
-        extHourPeakAndSuperPeakSen: cars.extHourPeakAndSuperPeakSen,
-        deliveryFeeAirportSen: cars.deliveryFeeAirportSen,
-        deliveryFeeJettySen: cars.deliveryFeeJettySen,
-        deliveryFeeHotelSen: cars.deliveryFeeHotelSen,
-        minRentalDays: cars.minRentalDays,
-        maxRentalDays: cars.maxRentalDays,
-      })
-      .from(cars)
-      .where(eq(cars.id, data.carId))
-      .limit(1)
-    if (!car) throw new Error('Car not found.')
-    if (car.status !== 'available')
-      throw new Error('This car is not currently available for booking.')
-
-    // Compute season-based pricing
+    // Pre-load promo + calendar outside tx (they're read-only).
     const calendar = await loadCalendar()
     const promoList = await loadPromos(data.couponCode)
-    const addOns: BookingAddOns = { childSeat: data.childSeat, secondDriver: data.secondDriver }
+    const promoRow = data.couponCode ? await findPromoByCode(db, data.couponCode) : null
 
-    const pricing = computeFinalTotal(
-      carToPricing(car),
-      startDate,
-      data.pickUpTime,
-      endDate,
-      data.returnTime,
-      data.pickUpLocation,
-      data.returnLocation,
-      addOns,
-      calendar,
-      promoList,
-      data.couponCode,
-    )
+    // Affiliate ref from HttpOnly cookie (Phase 3). Best-effort: any failure
+    // skips attribution but never blocks the booking.
+    let affiliateRefCode: string | null = null
+    try {
+      const { readAffiliateRefCookie } = await import('#/lib/affiliate-cookie.server')
+      affiliateRefCode = await readAffiliateRefCookie()
+    } catch {
+      affiliateRefCode = null
+    }
 
-    if ('error' in pricing) throw new Error(pricing.error)
-
-    // Convert RM totals → sen for DB storage
-    const baseRentalSen = Math.round(pricing.baseRental * 100)
-    const extraChargeSen = Math.round(pricing.extraCharge * 100)
-    const addonsTotalSen = Math.round(pricing.addonsTotal * 100)
-    const deliveryFeeSen = Math.round(pricing.deliveryFee * 100)
-    const discountAmountSen = Math.round(pricing.discountAmount * 100)
-    const subTotalSen = Math.round(pricing.subTotal * 100)
-    const totalAmountSen = pricing.finalTotal * 100 // already rounded
+    const { getPaymentSettings } = await import('#/lib/settings-functions')
+    const paymentConfig = await getPaymentSettings()
 
     const customerId = await upsertPortalCustomer({
       session,
@@ -496,78 +447,211 @@ export const createPortalBooking = createServerFn({ method: 'POST' })
       address: data.address,
     })
 
-    const { getPaymentSettings } = await import('#/lib/settings-functions')
-    const paymentConfig = await getPaymentSettings()
-    const depositAmountSen =
-      paymentConfig.paymentMode === 'deposit' ? paymentConfig.depositAmountSen : 0
+    const rentalId = await db.transaction(async (tx) => {
+      // Overlap check (inside tx so we don't race with another concurrent booking).
+      const overlap = await tx
+        .select({ id: rentals.id })
+        .from(rentals)
+        .where(
+          and(
+            eq(rentals.carId, data.carId),
+            inArray(rentals.status, ['pending', 'active']),
+            lt(rentals.startDate, endDate),
+            gt(rentals.endDate, startDate),
+          ),
+        )
+        .limit(1)
+      if (overlap.length > 0)
+        throw new Error('This car is not available for the selected dates.')
 
-    const holdExpiry = new Date(Date.now() + HOLD_MINUTES * 60 * 1000)
+      // Load car with season pricing
+      const [car] = await tx
+        .select({
+          id: cars.id,
+          status: cars.status,
+          availableForBooking: cars.availableForBooking,
+          dailyRateSen: cars.dailyRateSen,
+          priceLowSeasonSen: cars.priceLowSeasonSen,
+          pricePeakSeasonSen: cars.pricePeakSeasonSen,
+          priceSuperPeakSeasonSen: cars.priceSuperPeakSeasonSen,
+          extHourLowSen: cars.extHourLowSen,
+          extHourPeakAndSuperPeakSen: cars.extHourPeakAndSuperPeakSen,
+          deliveryFeeAirportSen: cars.deliveryFeeAirportSen,
+          deliveryFeeJettySen: cars.deliveryFeeJettySen,
+          deliveryFeeHotelSen: cars.deliveryFeeHotelSen,
+          minRentalDays: cars.minRentalDays,
+          maxRentalDays: cars.maxRentalDays,
+        })
+        .from(cars)
+        .where(eq(cars.id, data.carId))
+        .limit(1)
+      if (!car) throw new Error('Car not found.')
+      if (car.status !== 'available')
+        throw new Error('This car is not currently available for booking.')
 
-    // Create rental with full pricing breakdown
-    const [rental] = await db
-      .insert(rentals)
-      .values({
-        carId: data.carId,
-        customerId,
-        type: 'booking',
-        status: 'pending',
-        paymentStatus: 'unpaid',
-        startDate,
-        endDate,
-        pickUpTime: data.pickUpTime,
-        returnTime: data.returnTime,
-        pickUpLocation: data.pickUpLocation,
-        returnLocation: data.returnLocation,
+      const addOns: BookingAddOns = {
         childSeat: data.childSeat,
         secondDriver: data.secondDriver,
-        couponCode: data.couponCode ?? null,
-        dailyRateSen: car.dailyRateSen,
-        baseRentalSen,
-        extraHoursDecimal: String(pricing.extraHours),
-        extraChargeSen,
-        extraRule: pricing.extraRule,
-        addonsTotalSen,
-        deliveryFeeSen,
-        discountPercent: String(pricing.discountPercent),
-        discountAmountSen,
-        subTotalSen,
-        totalAmountSen,
-        depositAmountSen,
-        paidAmountSen: 0,
-        paymentHoldExpiresAt: holdExpiry,
-        createdByUserId: session?.user.id ?? null,
+      }
+
+      const pricing = computeFinalTotal(
+        carToPricing(car),
+        startDate,
+        data.pickUpTime,
+        endDate,
+        data.returnTime,
+        data.pickUpLocation,
+        data.returnLocation,
+        addOns,
+        calendar,
+        promoList,
+        data.couponCode,
+      )
+
+      if ('error' in pricing) throw new Error(pricing.error)
+
+      // Convert RM totals → sen for DB storage
+      const baseRentalSen = Math.round(pricing.baseRental * 100)
+      const extraChargeSen = Math.round(pricing.extraCharge * 100)
+      const addonsTotalSen = Math.round(pricing.addonsTotal * 100)
+      const deliveryFeeSen = Math.round(pricing.deliveryFee * 100)
+      const discountAmountSen = Math.round(pricing.discountAmount * 100)
+      const subTotalSen = Math.round(pricing.subTotal * 100)
+      const totalAmountSen = pricing.finalTotal * 100 // already rounded
+
+      const depositAmountSen =
+        paymentConfig.paymentMode === 'deposit' ? paymentConfig.depositAmountSen : 0
+
+      const holdExpiry = new Date(Date.now() + HOLD_MINUTES * 60 * 1000)
+
+      // Create rental with full pricing breakdown
+      const [rental] = await tx
+        .insert(rentals)
+        .values({
+          carId: data.carId,
+          customerId,
+          type: 'booking',
+          status: 'pending',
+          paymentStatus: 'unpaid',
+          startDate,
+          endDate,
+          pickUpTime: data.pickUpTime,
+          returnTime: data.returnTime,
+          pickUpLocation: data.pickUpLocation,
+          returnLocation: data.returnLocation,
+          childSeat: data.childSeat,
+          secondDriver: data.secondDriver,
+          couponCode: data.couponCode ?? null,
+          dailyRateSen: car.dailyRateSen,
+          baseRentalSen,
+          extraHoursDecimal: String(pricing.extraHours),
+          extraChargeSen,
+          extraRule: pricing.extraRule,
+          addonsTotalSen,
+          deliveryFeeSen,
+          discountPercent: String(pricing.discountPercent),
+          discountAmountSen,
+          subTotalSen,
+          totalAmountSen,
+          depositAmountSen,
+          paidAmountSen: 0,
+          paymentHoldExpiresAt: holdExpiry,
+          affiliateRefCode,
+          createdByUserId: session?.user.id ?? null,
+        })
+        .returning({ id: rentals.id })
+
+      // Set car to payment-pending
+      await tx
+        .update(cars)
+        .set({ status: 'payment-pending', updatedAt: new Date() })
+        .where(eq(cars.id, data.carId))
+
+      // Atomic promo redemption (Phase 2).
+      if (data.couponCode && discountAmountSen > 0 && promoRow) {
+        const redemption = await redeemPromoInTx(tx, {
+          promoId: promoRow.id,
+          rentalId: rental.id,
+          customerId,
+          userId: session?.user.id ?? null,
+          customerEmail: email,
+          amountDiscountedSen: discountAmountSen,
+        })
+        if (!redemption.ok) {
+          throw new Error('Promo code is no longer available.')
+        }
+      }
+
+      // Affiliate attribution (Phase 3.5). Default plan: commission computed
+      // on `totalAmountSen` (post-discount) per the locked decision in
+      // plan §7.6. Never blocks the booking — if the affiliate is archived
+      // or missing the booking still proceeds without attribution.
+      if (affiliateRefCode) {
+        try {
+          const { attributeRentalInTx } = await import('#/lib/affiliate-functions')
+          const { attributionId } = await attributeRentalInTx(tx, {
+            refCode: affiliateRefCode,
+            rentalId: rental.id,
+            paidAmountSen: totalAmountSen,
+            userId: session?.user.id ?? null,
+            clickedAt: null,
+          })
+          if (attributionId) {
+            await tx
+              .update(rentals)
+              .set({ affiliateAttributionId: attributionId, updatedAt: new Date() })
+              .where(eq(rentals.id, rental.id))
+          }
+        } catch {
+          // Swallow — booking should not fail because of attribution.
+        }
+      }
+
+      // Always create a pending payment record so Pay Now can work even if settings change later
+      const chargeSen =
+        paymentConfig.paymentMode === 'deposit' && paymentConfig.depositAmountSen > 0
+          ? paymentConfig.depositAmountSen
+          : totalAmountSen
+      await tx.insert(payments).values({
+        rentalId: rental.id,
+        provider: 'ipay88',
+        amountSen: chargeSen,
+        currency: 'MYR',
+        status: 'pending',
       })
-      .returning({ id: rentals.id })
 
-    // Set car to payment-pending
-    await db
-      .update(cars)
-      .set({ status: 'payment-pending', updatedAt: new Date() })
-      .where(eq(cars.id, data.carId))
+      // Audit (best-effort: tx + audit roll back together if anything fails).
+      try {
+        await recordAuditLog(
+          {
+            actorUserId: session?.user.id ?? null,
+            actorRole: (session?.user as { role?: string } | undefined)?.role as
+              | 'owner'
+              | 'staff'
+              | 'customer'
+              | 'super_admin'
+              | null
+              | undefined,
+            action: 'create',
+            entityType: 'rental',
+            entityId: rental.id,
+            after: {
+              carId: data.carId,
+              customerId,
+              totalAmountSen,
+              couponCode: data.couponCode ?? null,
+            },
+          },
+          tx,
+        )
+      } catch {
+        // Don't fail booking if audit insert fails outside HTTP context.
+      }
 
-    // Atomically decrement coupon if applied
-    if (data.couponCode && pricing.discountPercent > 0 && promoList.length > 0) {
-      const normalized = data.couponCode.toUpperCase().trim()
-      await db
-        .update(promos)
-        .set({ usageLeft: promoList[0].usageLeft - 1, updatedAt: new Date() })
-        .where(and(eq(promos.title, normalized), gt(promos.usageLeft, 0)))
-    }
-
-    // Always create a pending payment record so Pay Now can work even if settings change later
-    const chargeSen =
-      paymentConfig.paymentMode === 'deposit' && paymentConfig.depositAmountSen > 0
-        ? paymentConfig.depositAmountSen
-        : totalAmountSen
-    await db.insert(payments).values({
-      rentalId: rental.id,
-      provider: 'ipay88',
-      amountSen: chargeSen,
-      currency: 'MYR',
-      status: 'pending',
+      return rental.id
     })
 
-    return { rentalId: rental.id }
+    return { rentalId }
   })
 
 // ─── Get customer bookings ────────────────────────────────────────────────────

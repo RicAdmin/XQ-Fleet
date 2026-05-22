@@ -73,7 +73,7 @@ export function DataTable<T>({
   className,
 }: DataTableProps<T>) {
   return (
-    <table className={`cars-table ${className ?? ''}`}>
+    <table className={`ui-table cars-table ${className ?? ''}`}>
       <thead>
         <tr>
           {columns.map((col) => (

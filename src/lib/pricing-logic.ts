@@ -65,9 +65,42 @@ export type PricingBreakdown = {
 }
 
 export type PromoRecord = {
+  /** Legacy alias for `code`. */
   title: string
+  /** Legacy alias for percent-equivalent discount. */
   discount: number        // percentage e.g. 10 = 10%
+  /** Legacy free-slot counter (kept for backward compat). */
   usageLeft: number
+}
+
+/** Extended promo record with full Phase-2 metadata. */
+export type FullPromoRecord = {
+  id: string
+  code: string
+  discountType: 'percent' | 'fixed'
+  /** Sen for fixed; whole percent (0-100) for percent. */
+  discountValueSen: number
+  maxRedemptions: number | null
+  redemptionsUsed: number
+  perUserLimit: number | null
+  minBookingAmountSen: number
+  applicableCarCategories: ReadonlyArray<string>
+  startsAt: Date | null
+  endsAt: Date | null
+  isActive: boolean
+  stackableWithAffiliate: boolean
+}
+
+/** Cart context the promo engine needs to evaluate eligibility. */
+export type CouponCartContext = {
+  /** Subtotal in RM (post-extra-hours, pre-discount). */
+  subTotalRm: number
+  /** Car category for category-restricted promos. */
+  carCategory?: string
+  /** Customer redemption history for per-user limit. */
+  redemptionsByThisCustomer?: number
+  /** Optional now() override for deterministic tests. */
+  now?: Date
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -219,12 +252,23 @@ export function calculateDeliveryFee(
 
 // ─── Step 6: Coupon discount ──────────────────────────────────────────────────
 
+export type CouponError =
+  | 'not-found'
+  | 'expired'
+  | 'inactive'
+  | 'scheduled'
+  | 'exhausted'
+  | 'min-amount'
+  | 'category'
+  | 'per-user-limit'
+
 export type CouponResult = {
   discountPercent: number
   discountAmount: number
-  error?: 'not-found' | 'expired'
+  error?: CouponError
 }
 
+/** Legacy applyCoupon — retained for backwards-compat (LandingCheckoutFlow). */
 export function applyCoupon(
   code: string | undefined | null,
   subTotal: number,
@@ -241,6 +285,89 @@ export function applyCoupon(
   return {
     discountPercent: promo.discount,
     discountAmount: subTotal * (promo.discount / 100),
+  }
+}
+
+/**
+ * Phase-2 promo evaluation: full discountType + min/category/schedule/per-user
+ * + max-redemptions checks. Pure / DB-free; pass DB-loaded promo + counters.
+ *
+ * Returns either a successful discount or an error code (see `CouponError`).
+ */
+export type ApplyPromoResult =
+  | {
+      ok: true
+      discountPercent: number
+      discountRm: number
+      discountSen: number
+    }
+  | { ok: false; error: CouponError }
+
+export function applyPromoV2(
+  code: string | undefined | null,
+  promo: FullPromoRecord | null,
+  ctx: CouponCartContext,
+): ApplyPromoResult {
+  if (!code) return { ok: false, error: 'not-found' }
+  if (!promo) return { ok: false, error: 'not-found' }
+
+  const now = ctx.now ?? new Date()
+
+  if (!promo.isActive) return { ok: false, error: 'inactive' }
+
+  if (promo.startsAt && now < promo.startsAt) {
+    return { ok: false, error: 'scheduled' }
+  }
+  if (promo.endsAt && now > promo.endsAt) {
+    return { ok: false, error: 'expired' }
+  }
+
+  if (
+    promo.maxRedemptions != null &&
+    promo.redemptionsUsed >= promo.maxRedemptions
+  ) {
+    return { ok: false, error: 'exhausted' }
+  }
+
+  const subTotalSen = Math.round(ctx.subTotalRm * 100)
+  if (subTotalSen < promo.minBookingAmountSen) {
+    return { ok: false, error: 'min-amount' }
+  }
+
+  if (
+    promo.applicableCarCategories.length > 0 &&
+    ctx.carCategory &&
+    !promo.applicableCarCategories.includes(ctx.carCategory)
+  ) {
+    return { ok: false, error: 'category' }
+  }
+
+  if (
+    promo.perUserLimit != null &&
+    ctx.redemptionsByThisCustomer != null &&
+    ctx.redemptionsByThisCustomer >= promo.perUserLimit
+  ) {
+    return { ok: false, error: 'per-user-limit' }
+  }
+
+  let discountRm: number
+  let discountPercent: number
+
+  if (promo.discountType === 'percent') {
+    discountPercent = Math.min(100, Math.max(0, promo.discountValueSen))
+    discountRm = (ctx.subTotalRm * discountPercent) / 100
+  } else {
+    const fixedRm = promo.discountValueSen / 100
+    discountRm = Math.min(ctx.subTotalRm, fixedRm)
+    discountPercent =
+      ctx.subTotalRm > 0 ? Math.round((discountRm / ctx.subTotalRm) * 10000) / 100 : 0
+  }
+
+  return {
+    ok: true,
+    discountPercent,
+    discountRm,
+    discountSen: Math.round(discountRm * 100),
   }
 }
 

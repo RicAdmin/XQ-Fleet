@@ -1,8 +1,29 @@
 import { Outlet, createFileRoute } from '@tanstack/react-router'
+import type { ReactNode } from 'react'
 
-import { requireInternalAccess } from '#/lib/route-guards'
+import { ErrorPanel } from '#/components/ui/ErrorPanel'
+import { useForceLightTheme } from '#/lib/theme-mode'
+import { requireAdminAccess } from '#/lib/route-guards'
+
+function AdminRoot({ children }: { children: ReactNode }) {
+  useForceLightTheme()
+  return <div className="cxq-dashboard-root">{children}</div>
+}
 
 export const Route = createFileRoute('/admin')({
-  beforeLoad: async () => requireInternalAccess(),
-  component: () => <Outlet />,
+  beforeLoad: async () => requireAdminAccess(),
+  component: () => (
+    <AdminRoot>
+      <Outlet />
+    </AdminRoot>
+  ),
+  errorComponent: ({ error, reset }) => (
+    <AdminRoot>
+      <ErrorPanel
+        title="Something went wrong in the admin area"
+        message={error instanceof Error ? error.message : 'An unexpected error occurred.'}
+        onRetry={reset}
+      />
+    </AdminRoot>
+  ),
 })

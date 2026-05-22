@@ -114,7 +114,7 @@ export function PickupReturnGuide() {
         body="Where to meet us, what to bring, and a quick walk-through for both Langkawi airport and the Kuah jetty."
       />
 
-      <section className="page-section">
+      <section className="page-section pickup-return-page">
         <div className="pkr-segmented">
           <div className="pkr-row">
             <span className="pkr-row-label">Location</span>
@@ -166,7 +166,7 @@ export function PickupReturnGuide() {
         <div className="pkr-checklists">
           <article className="pkr-check">
             <div className="pkr-check-head">
-              <span className="pkr-check-icon" style={{ background: 'rgba(255,102,0,.12)', color: 'var(--brand-leaf)' }}>
+              <span className="pkr-check-icon">
                 <Fuel size={20} />
               </span>
               <h3>Fuel check</h3>
@@ -182,7 +182,7 @@ export function PickupReturnGuide() {
           </article>
           <article className="pkr-check">
             <div className="pkr-check-head">
-              <span className="pkr-check-icon" style={{ background: 'rgba(76,123,183,.14)', color: '#4C7BB7' }}>
+              <span className="pkr-check-icon">
                 <Sparkles size={20} />
               </span>
               <h3>Before leaving the car</h3>
@@ -198,7 +198,7 @@ export function PickupReturnGuide() {
           </article>
           <article className="pkr-check">
             <div className="pkr-check-head">
-              <span className="pkr-check-icon" style={{ background: 'rgba(15,118,110,.14)', color: '#0F766E' }}>
+              <span className="pkr-check-icon">
                 <Shield size={20} />
               </span>
               <h3>Return procedure</h3>
@@ -219,11 +219,11 @@ export function PickupReturnGuide() {
             <strong>Anything unclear?</strong>
             <p>WhatsApp our pickup team — replies usually under 4 minutes, 24/7. We would rather answer one quick question than fix a confusion later.</p>
           </div>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <div className="pkr-help-actions">
             <a className="btn btn-leaf" href="https://wa.me/601135215576" target="_blank" rel="noreferrer">
               <Phone size={13} /> WhatsApp +60 11 3521 5576
             </a>
-            <a className="btn btn-ghost" href="mailto:hello@carxq.my">
+            <a className="btn btn-ghost pkr-help-email" href="mailto:hello@carxq.my">
               Email support
             </a>
           </div>

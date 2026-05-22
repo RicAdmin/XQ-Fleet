@@ -9,6 +9,7 @@ import {
   rentalDays,
 } from './email-helpers'
 import { EmailBrandMark } from './EmailBrandMark'
+import { publicSitePath } from '#/lib/brand'
 
 export type BookingConfirmationEmailProps = {
   customerFirstName: string
@@ -980,7 +981,7 @@ export function BookingConfirmationEmail(props: BookingConfirmationEmailProps) {
                         <p style={{ margin: 0, fontSize: '14px', color: DARK, lineHeight: 1.6 }}>
                           Refund amounts vary depending on how far in advance you cancel.{' '}
                           <Link
-                            href="https://carxq.com/terms"
+                            href={publicSitePath('/refund-policy')}
                             style={{ color: ORANGE, textDecoration: 'none' }}
                           >
                             View full cancellation policy
@@ -1301,7 +1302,7 @@ export function BookingConfirmationEmail(props: BookingConfirmationEmailProps) {
                         <p style={{ margin: 0, fontSize: '12px', color: FOOTER_TEXT, lineHeight: 1.6 }}>
                           By completing this booking, you have agreed to our{' '}
                           <Link
-                            href="https://carxq.com/terms"
+                            href={publicSitePath('/terms')}
                             style={{ color: DARK, textDecoration: 'underline' }}
                           >
                             Terms and Conditions

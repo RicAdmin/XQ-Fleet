@@ -4,6 +4,7 @@ import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 import { ArrowLeft, Pencil, Plus, X } from 'lucide-react'
 
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
+import { isFullAdminRole, type AppRole } from '#/lib/auth-model'
 import { CarPhotoManager } from '#/components/cars/CarPhotoManager'
 import { StatusBadge } from '#/components/ui/StatusBadge'
 import {
@@ -155,7 +156,7 @@ function CarDetailPage() {
     serviceConfig: CarServiceConfigRow | null
   }
 
-  const isOwner = session.user.role === 'owner'
+  const isOwner = isFullAdminRole(session.user.role as AppRole)
 
   const [car, setCar] = useState<CarRow>(initialCar)
   const [editOpen, setEditOpen] = useState(false)

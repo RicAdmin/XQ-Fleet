@@ -2,10 +2,13 @@
 export const BRAND_LOGO_PATH = '/image/xqCarLogo.png'
 
 function resolveSiteUrl(siteUrl?: string): string {
-  return (siteUrl ?? process.env.SITE_URL ?? process.env.BETTER_AUTH_URL ?? 'http://localhost:3000').replace(
-    /\/$/,
-    '',
-  )
+  const raw =
+    siteUrl ??
+    import.meta.env.VITE_SITE_URL ??
+    process.env.SITE_URL ??
+    process.env.BETTER_AUTH_URL ??
+    'http://localhost:3000'
+  return raw.replace(/\/$/, '')
 }
 
 /** Normalized public origin, e.g. https://car.xqholidays.com.my */

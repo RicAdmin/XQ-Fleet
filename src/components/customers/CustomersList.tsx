@@ -62,8 +62,14 @@ function rowToForm(c: CustomerRow): CustomerFormData {
 
 function sortCustomers(rows: CustomerRow[], key: SortKey, dir: 'asc' | 'desc'): CustomerRow[] {
   return [...rows].sort((a, b) => {
-    const av = key === 'createdAt' ? a.createdAt.getTime() : (a[key] ?? '')
-    const bv = key === 'createdAt' ? b.createdAt.getTime() : (b[key] ?? '')
+    const av =
+      key === 'createdAt'
+        ? (a.createdAt instanceof Date ? a.createdAt : new Date(String(a.createdAt))).getTime()
+        : (a[key] ?? '')
+    const bv =
+      key === 'createdAt'
+        ? (b.createdAt instanceof Date ? b.createdAt : new Date(String(b.createdAt))).getTime()
+        : (b[key] ?? '')
     const cmp = typeof av === 'number' && typeof bv === 'number'
       ? av - bv
       : String(av).localeCompare(String(bv))
@@ -71,16 +77,12 @@ function sortCustomers(rows: CustomerRow[], key: SortKey, dir: 'asc' | 'desc'): 
   })
 }
 
-function formatDate(d: Date) {
-  return d.toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' })
+function formatDate(d: Date | string) {
+  const date = d instanceof Date ? d : new Date(String(d))
+  return date.toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-// ─── Row button ───────────────────────────────────────────────────────────────
-
-const ROW_BTN =
-  'inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] text-[var(--sea-ink)] shadow-[0_1px_3px_rgba(30,90,72,0.08)] hover:-translate-y-px transition-transform cursor-pointer disabled:cursor-not-allowed disabled:opacity-50'
-
-// ─── Props ────────────────────────────────────────────────────────────────────
+import { UI_BTN_XS, UI_BTN_XS_DANGER } from '#/lib/admin-ui-classes'
 
 type CustomersListProps = {
   initialCustomers: CustomerRow[]
@@ -258,14 +260,14 @@ export default function CustomersList({
       cellClassName: 'text-right whitespace-nowrap',
       render: (c) => (
         <>
-          <button type="button" className={`${ROW_BTN} mr-1.5`} onClick={() => openEdit(c)}>
+          <button type="button" className={`${UI_BTN_XS} mr-1.5`} onClick={() => openEdit(c)}>
             <Pencil size={11} />
             Edit
           </button>
           {canDelete && (
             <button
               type="button"
-              className={`${ROW_BTN} opacity-60 hover:opacity-100`}
+              className={UI_BTN_XS_DANGER}
               onClick={() => {
                 setConfirmingDelete(c)
                 setDeleteError(null)

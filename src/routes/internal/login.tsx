@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { ArrowRight } from 'lucide-react'
 
 import CxqAuthMarketingAside from '#/components/auth/CxqAuthMarketingAside'
@@ -8,7 +8,7 @@ import PublicAuthShell from '#/components/shells/PublicAuthShell'
 import { cxqAuthInternalAside } from '#/lib/cxq-auth-marketing'
 import { authClient } from '#/lib/auth-client'
 import { createInitialOwner } from '#/lib/auth-functions'
-import { appRoleFromSessionUser } from '#/lib/auth-model'
+import { appRoleFromSessionUser, getHomePathForRole } from '#/lib/auth-model'
 import { loadInternalLoginState } from '#/lib/route-guards'
 
 export const Route = createFileRoute('/internal/login')({
@@ -31,16 +31,13 @@ function InternalLoginPage() {
   const title = hasOwner ? 'Sign in' : 'Create the first owner account'
 
   return (
-    <PublicAuthShell screenLabel="Car XQ Internal login">
+    <PublicAuthShell screenLabel="Car XQ Internal login" minimal>
       <div className="auth-page-card">
         <CxqAuthMarketingAside {...cxqAuthInternalAside} />
 
         <div className="auth-right">
           <span className="auth-badge">Staff</span>
           <h3>{title}</h3>
-          <p className="auth-sub">
-            Renting as a customer? <Link to="/login">Customer sign in</Link>
-          </p>
 
           {!hasOwner ? (
             <p className="auth-internal-note">
@@ -65,10 +62,17 @@ function InternalLoginPage() {
                   return
                 }
 
-                await authClient.signIn.email({ email, password })
-                const { data: session } = await authClient.getSession()
+                const signInResult = await authClient.signIn.email({ email, password })
 
-                const role = appRoleFromSessionUser(session?.user)
+                if (signInResult.error) {
+                  throw new Error(signInResult.error.message ?? 'Sign in failed.')
+                }
+
+                let role = appRoleFromSessionUser(signInResult.data?.user)
+                if (!role) {
+                  const { data: session } = await authClient.getSession()
+                  role = appRoleFromSessionUser(session?.user)
+                }
 
                 if (role === 'customer') {
                   await authClient.signOut()
@@ -81,7 +85,7 @@ function InternalLoginPage() {
                   return
                 }
 
-                await navigate({ to: role === 'owner' ? '/admin' : '/app' })
+                await navigate({ to: getHomePathForRole(role) })
               } catch (submissionError) {
                 setError(
                   submissionError instanceof Error
