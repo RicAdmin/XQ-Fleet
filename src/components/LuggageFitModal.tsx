@@ -1,9 +1,11 @@
 import { Car, Luggage, Sparkles, Users, X } from 'lucide-react'
 
+import { usePublicI18n } from '#/i18n/usePublicI18n'
 import type { PublicCarRow } from '#/lib/portal-functions'
 import { heuristicLuggageFit } from '#/lib/fleet-luggage-fit'
 
 export function LuggageFitModal({ car, onClose }: { car: PublicCarRow; onClose: () => void }) {
+  const { t } = usePublicI18n()
   const fit = heuristicLuggageFit(car.category)
   const totalLitres = fit.lg * 75 + fit.sm * 35
 
@@ -21,20 +23,17 @@ export function LuggageFitModal({ car, onClose }: { car: PublicCarRow; onClose: 
           className="close-btn"
           style={{ position: 'absolute', top: 14, right: 14 }}
           onClick={onClose}
-          aria-label="Close"
+          aria-label={t('common.close')}
         >
           <X size={16} />
         </button>
 
         <div className="luggage-head">
-          <span className="eyebrow">{car.category} · luggage fit guide</span>
+          <span className="eyebrow">{t('carDetail.luggageFitEyebrow', { category: car.category })}</span>
           <h3 id="luggage-fit-title">
-            {car.make} {car.model} fits…
+            {t('carDetail.luggageFitsTitle', { make: car.make, model: car.model })}
           </h3>
-          <p>
-            Illustrative capacity for this category. Large = 75 L check-in, small = 35 L cabin. Your exact vehicle may
-            vary — ask us on WhatsApp if you are unsure.
-          </p>
+          <p>{t('carDetail.luggageFitIntro')}</p>
         </div>
 
         <div className="luggage-stage">
@@ -42,7 +41,7 @@ export function LuggageFitModal({ car, onClose }: { car: PublicCarRow; onClose: 
             {car.coverPhotoUrl ? (
               <img src={car.coverPhotoUrl} alt={`${car.make} ${car.model}`} />
             ) : (
-              <div style={{ padding: 40 }}>No photo</div>
+              <div style={{ padding: 40 }}>{t('carDetail.noPhoto')}</div>
             )}
             <div className="luggage-stage-floor" aria-hidden="true" />
           </div>
@@ -77,8 +76,10 @@ export function LuggageFitModal({ car, onClose }: { car: PublicCarRow; onClose: 
             </span>
             <div>
               <span className="luggage-counter-num">{fit.lg}</span>
-              <span className="luggage-counter-label">Large suitcase{fit.lg !== 1 ? 's' : ''}</span>
-              <span className="luggage-counter-sub">75 × 50 × 30 cm · 75 L each</span>
+              <span className="luggage-counter-label">
+                {fit.lg !== 1 ? t('carDetail.largeSuitcases') : t('carDetail.largeSuitcase')}
+              </span>
+              <span className="luggage-counter-sub">{t('carDetail.largeDim')}</span>
             </div>
           </div>
           <div className="luggage-counter">
@@ -87,30 +88,29 @@ export function LuggageFitModal({ car, onClose }: { car: PublicCarRow; onClose: 
             </span>
             <div>
               <span className="luggage-counter-num">{fit.sm}</span>
-              <span className="luggage-counter-label">Small / carry-on{fit.sm !== 1 ? 's' : ''}</span>
-              <span className="luggage-counter-sub">55 × 40 × 23 cm · 35 L each</span>
+              <span className="luggage-counter-label">
+                {fit.sm !== 1 ? t('carDetail.smallCarryOns') : t('carDetail.smallCarryOn')}
+              </span>
+              <span className="luggage-counter-sub">{t('carDetail.smallDim')}</span>
             </div>
           </div>
         </div>
 
         <div className="luggage-meta">
           <span>
-            <Car size={12} /> Boot capacity: <b>{fit.boot}</b>
+            <Car size={12} /> {t('carDetail.bootCapacity')}: <b>{fit.boot}</b>
           </span>
           <span>
-            <Users size={12} /> Up to {fit.seats} passenger seats (typical)
+            <Users size={12} /> {t('carDetail.upToPassengers', { count: fit.seats })}
           </span>
           <span>
-            <Sparkles size={12} /> ≈ {totalLitres} L combined
+            <Sparkles size={12} /> {t('carDetail.combinedCapacity', { litres: totalLitres })}
           </span>
         </div>
 
         <div className="luggage-tip">
           <Sparkles size={14} style={{ color: 'var(--brand-leaf)', flexShrink: 0 }} />
-          <p>
-            Tip: figures assume seats are up. Folding rear seats often increases boot space — tell us your group size
-            when you book.
-          </p>
+          <p>{t('carDetail.luggageTip')}</p>
         </div>
       </div>
     </div>

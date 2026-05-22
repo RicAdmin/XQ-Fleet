@@ -1,20 +1,25 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Accessibility, X } from 'lucide-react'
 
-import {
-  OKU_NBOX_FEATURES,
-  OKU_NBOX_HEADLINE,
-  OKU_NBOX_SUMMARY,
-  OKU_NBOX_VIDEO_SRC,
-  okuVideoEmbedUrl,
-  okuVideoIsEmbed,
-} from '#/lib/fleet-oku'
+import { usePublicI18n } from '#/i18n/usePublicI18n'
+import { OKU_NBOX_VIDEO_SRC, okuVideoEmbedUrl, okuVideoIsEmbed } from '#/lib/fleet-oku'
 import type { PublicCarRow } from '#/lib/portal-functions'
 
 export function OkuFeatureModal({ car, onClose }: { car: PublicCarRow; onClose: () => void }) {
+  const { t } = usePublicI18n()
   const videoRef = useRef<HTMLVideoElement>(null)
   const useEmbed = okuVideoIsEmbed(OKU_NBOX_VIDEO_SRC)
   const embedSrc = useEmbed ? okuVideoEmbedUrl(OKU_NBOX_VIDEO_SRC) : ''
+
+  const features = useMemo(
+    () => [
+      t('carDetail.okuFeature1'),
+      t('carDetail.okuFeature2'),
+      t('carDetail.okuFeature3'),
+      t('carDetail.okuFeature4'),
+    ],
+    [t],
+  )
 
   useEffect(() => {
     if (!useEmbed) {
@@ -31,7 +36,7 @@ export function OkuFeatureModal({ car, onClose }: { car: PublicCarRow; onClose: 
         aria-labelledby="oku-feature-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <button type="button" className="close-btn oku-modal-close" onClick={onClose} aria-label="Close">
+        <button type="button" className="close-btn oku-modal-close" onClick={onClose} aria-label={t('common.close')}>
           <X size={16} />
         </button>
 
@@ -40,9 +45,9 @@ export function OkuFeatureModal({ car, onClose }: { car: PublicCarRow; onClose: 
             <Accessibility size={22} />
           </span>
           <div>
-            <span className="eyebrow">Honda N-Box only</span>
-            <h3 id="oku-feature-title">{OKU_NBOX_HEADLINE}</h3>
-            <p>{OKU_NBOX_SUMMARY}</p>
+            <span className="eyebrow">{t('carDetail.okuNboxOnly')}</span>
+            <h3 id="oku-feature-title">{t('carDetail.okuHeadline')}</h3>
+            <p>{t('carDetail.okuSummary')}</p>
           </div>
         </div>
 
@@ -50,7 +55,7 @@ export function OkuFeatureModal({ car, onClose }: { car: PublicCarRow; onClose: 
           {useEmbed ? (
             <iframe
               src={embedSrc}
-              title="How to use OKU features on the Honda N-Box"
+              title={t('carDetail.okuVideoTitle')}
               className="oku-modal-embed"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
               allowFullScreen
@@ -68,18 +73,18 @@ export function OkuFeatureModal({ car, onClose }: { car: PublicCarRow; onClose: 
               disableRemotePlayback
               onContextMenu={(e) => e.preventDefault()}
             >
-              Your browser does not support video playback.
+              {t('carDetail.okuVideoUnsupported')}
             </video>
           )}
         </div>
 
         <ul className="oku-modal-list">
-          {OKU_NBOX_FEATURES.map((item) => (
+          {features.map((item) => (
             <li key={item}>{item}</li>
           ))}
         </ul>
         <p className="oku-modal-foot">
-          {car.make} {car.model} · Ask our team on WhatsApp if you need help loading equipment at pickup.
+          {t('carDetail.okuFoot', { make: car.make, model: car.model })}
         </p>
       </div>
     </div>

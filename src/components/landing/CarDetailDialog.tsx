@@ -3,9 +3,11 @@ import { Accessibility, ArrowRight, Check, CirclePlay, Luggage, MapPin, Shield, 
 
 import { LuggageFitModal } from '#/components/LuggageFitModal'
 import { OkuFeatureModal } from '#/components/OkuFeatureModal'
+import { usePublicI18n } from '#/i18n/usePublicI18n'
+import type { Locale } from '#/i18n/locales'
 import { addCalendarDays, formatTripDuration, isAllowedPickupDate, isAllowedReturnDate } from '#/lib/booking-datetime'
 import { getCategoryAlternatives } from '#/lib/detail-car-alternatives'
-import { isHondaNBox, OKU_NBOX_FEATURES, OKU_NBOX_HEADLINE, OKU_NBOX_SUMMARY } from '#/lib/fleet-oku'
+import { isHondaNBox } from '#/lib/fleet-oku'
 import { fleetFuelType, heuristicLuggageFit } from '#/lib/fleet-luggage-fit'
 import type { PublicCarRow } from '#/lib/portal-functions'
 
@@ -85,8 +87,8 @@ export function cloneBooking(booking: BookingState): BookingState {
 }
 
 /** Pickup / return line for price box and results — matches active search criteria. */
-export function bookingLocationSummary(booking: BookingState): string {
-  const pickup = booking.from.trim() || 'Pickup location TBC'
+export function bookingLocationSummary(booking: BookingState, pickupTbc: string): string {
+  const pickup = booking.from.trim() || pickupTbc
   if (booking.tripType === 'round') {
     return pickup
   }
@@ -123,6 +125,7 @@ export function CarDetailDialog({
   onBeginCheckout: (car: PublicCarRow) => void
   onSelectCar: (car: PublicCarRow) => void
 }) {
+  const { t, locale } = usePublicI18n()
   const [showLuggage, setShowLuggage] = useState(false)
   const [showOku, setShowOku] = useState(false)
   const isOkuNBox = isHondaNBox(car)
@@ -131,11 +134,15 @@ export function CarDetailDialog({
   const subtotal = daily * n
   const discount = Math.round(subtotal * 0.15)
   const total = subtotal - discount
+  const dateLocale: Record<Locale, string> = { en: 'en-GB', ms: 'ms-MY', zh: 'zh-CN' }
   const fmt = (d: Date | null) =>
-    d ? d.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short' }) : '—'
+    d
+      ? d.toLocaleDateString(dateLocale[locale], { weekday: 'short', day: '2-digit', month: 'short' })
+      : '—'
   const lug = heuristicLuggageFit(car.category)
   const fuelType = fleetFuelType(car)
-  const pickupLoc = booking.from.trim() || 'Pickup location TBC'
+  const pickupTbc = t('carDetail.pickupTbc')
+  const pickupLoc = booking.from.trim() || pickupTbc
   const returnLoc =
     booking.tripType === 'round' ? pickupLoc : booking.retLoc.trim() || pickupLoc
   const tripDuration = formatTripDuration(
@@ -145,12 +152,24 @@ export function CarDetailDialog({
     booking.retTime,
   )
   const alternatives = useMemo(() => getCategoryAlternatives(car, fleet), [car, fleet])
-  const categoryLabel = car.category === 'other' ? 'this class' : car.category
+  const categoryLabel =
+    car.category === 'other' ? t('carDetail.thisClass') : car.category
+  const okuFeatures = useMemo(
+    () => [
+      t('carDetail.okuFeature1'),
+      t('carDetail.okuFeature2'),
+      t('carDetail.okuFeature3'),
+      t('carDetail.okuFeature4'),
+    ],
+    [t],
+  )
 
   const alternativesBlock = (placement: 'gallery' | 'tail') =>
     alternatives.length > 0 ? (
       <div className={`detail-alternatives detail-alternatives--${placement}`}>
-        <p className="detail-alternatives-title">Also consider in {categoryLabel}</p>
+        <p className="detail-alternatives-title">
+          {t('carDetail.alsoConsiderIn', { category: categoryLabel })}
+        </p>
         <ul className="detail-alternatives-list">
           {alternatives.map(({ car: alt }) => {
             const altDaily = Math.round(alt.dailyRateSen / 100)
@@ -166,7 +185,7 @@ export function CarDetailDialog({
                     {alt.coverPhotoUrl ? (
                       <img src={alt.coverPhotoUrl} alt="" />
                     ) : (
-                      <span className="detail-alt-thumb-empty">No photo</span>
+                      <span className="detail-alt-thumb-empty">{t('carDetail.noPhoto')}</span>
                     )}
                   </span>
                   <span className="detail-alt-body">
@@ -176,12 +195,16 @@ export function CarDetailDialog({
                     <span className="detail-alt-price">
                       <span className="detail-alt-price-row">
                         <span className="detail-alt-price-main">RM {altDaily}</span>
-                        <span className="detail-alt-price-per">/day</span>
+                        <span className="detail-alt-price-per">{t('carDetail.perDay')}</span>
                       </span>
                       <span className="detail-alt-price-trip">
-                        <span className="detail-alt-price-est">Est. RM {altTrip}</span>
+                        <span className="detail-alt-price-est">
+                          {t('carDetail.estRm', { amount: altTrip })}
+                        </span>
                         <span className="detail-alt-price-days">
-                          for {n} day{n > 1 ? 's' : ''}
+                          {n > 1
+                            ? t('carDetail.forDays', { count: n })
+                            : t('carDetail.forDay')}
                         </span>
                       </span>
                     </span>
@@ -201,20 +224,22 @@ export function CarDetailDialog({
           className="detail-dialog"
           role="dialog"
           aria-modal="true"
-          aria-label="Vehicle details"
+          aria-label={t('carDetail.vehicleDetails')}
           onClick={(e) => e.stopPropagation()}
         >
-          <button type="button" className="close-btn" aria-label="Close" onClick={onClose}>
+          <button type="button" className="close-btn" aria-label={t('common.close')} onClick={onClose}>
             <X size={16} />
           </button>
 
           <div className="detail-dialog-inner">
-            <section className="detail-dialog-gallery" aria-label="Vehicle photo">
+            <section className="detail-dialog-gallery" aria-label={t('carDetail.vehiclePhoto')}>
             <div className="detail-hero-meta">
               <div className="detail-hero-pills">
                 <span className="detail-category-pill">{car.category}</span>
                 {isOkuNBox ? (
-                  <span className="detail-category-pill detail-category-pill--oku">OKU friendly</span>
+                  <span className="detail-category-pill detail-category-pill--oku">
+                    {t('carDetail.okuFriendly')}
+                  </span>
                 ) : null}
               </div>
               <button
@@ -225,22 +250,22 @@ export function CarDetailDialog({
                   setShowLuggage(true)
                 }}
               >
-                <Luggage size={14} /> Luggage fit guide
+                <Luggage size={14} /> {t('carDetail.luggageFitGuide')}
               </button>
             </div>
             <div className="detail-hero">
               {car.coverPhotoUrl ? (
                 <img src={car.coverPhotoUrl} alt={`${car.make} ${car.model}`} />
               ) : (
-                <div className="detail-hero-empty">No photo</div>
+                <div className="detail-hero-empty">{t('carDetail.noPhoto')}</div>
               )}
             </div>
             <div className="detail-trust-badges">
               <span>
-                <Shield size={12} aria-hidden /> Insurance included
+                <Shield size={12} aria-hidden /> {t('carDetail.insuranceIncluded')}
               </span>
               <span>
-                <Check size={12} aria-hidden /> Cancel free 48 h before
+                <Check size={12} aria-hidden /> {t('carDetail.cancelFree48h')}
               </span>
             </div>
             {alternativesBlock('gallery')}
@@ -254,17 +279,17 @@ export function CarDetailDialog({
               </h2>
             </div>
 
-            <div className="detail-spec-grid" aria-label="Vehicle highlights">
+            <div className="detail-spec-grid" aria-label={t('carDetail.vehicleHighlights')}>
               <div className="detail-spec">
-                <span className="detail-spec-label">Passengers</span>
+                <span className="detail-spec-label">{t('carDetail.passengers')}</span>
                 <span className="detail-spec-value">{lug.seats}</span>
               </div>
               <div className="detail-spec">
-                <span className="detail-spec-label">Fuel</span>
+                <span className="detail-spec-label">{t('carDetail.fuel')}</span>
                 <span className="detail-spec-value">{fuelType}</span>
               </div>
               <div className="detail-spec">
-                <span className="detail-spec-label">Luggage</span>
+                <span className="detail-spec-label">{t('carDetail.luggage')}</span>
                 <span
                   className="detail-spec-value"
                   title={`${lug.lg} large · ${lug.sm} small`}
@@ -281,21 +306,21 @@ export function CarDetailDialog({
                     <span className="detail-oku-icon" aria-hidden>
                       <Accessibility size={18} />
                     </span>
-                    <strong>{OKU_NBOX_HEADLINE}</strong>
+                    <strong>{t('carDetail.okuHeadline')}</strong>
                   </div>
                   <button
                     type="button"
                     className="detail-oku-video-btn"
                     onClick={() => setShowOku(true)}
-                    aria-label="Watch how to use OKU features on this car"
+                    aria-label={t('carDetail.watchOkuAria')}
                   >
                     <CirclePlay size={18} strokeWidth={1.75} aria-hidden />
-                    <span>Watch guide</span>
+                    <span>{t('carDetail.watchGuide')}</span>
                   </button>
                 </div>
-                <p className="detail-oku-summary">{OKU_NBOX_SUMMARY}</p>
+                <p className="detail-oku-summary">{t('carDetail.okuSummary')}</p>
                 <ul className="detail-oku-features">
-                  {OKU_NBOX_FEATURES.map((item) => (
+                  {okuFeatures.map((item) => (
                     <li key={item}>{item}</li>
                   ))}
                 </ul>
@@ -305,7 +330,7 @@ export function CarDetailDialog({
             <div className="price-box">
               <div className="price-dates">
                 <div className="price-leg">
-                  <span className="price-leg-lbl">Pickup</span>
+                  <span className="price-leg-lbl">{t('carDetail.pickup')}</span>
                   <strong>{fmt(booking.pickDate)}</strong>
                   <em>{booking.pickTime}</em>
                   <span className="price-leg-loc">
@@ -314,12 +339,12 @@ export function CarDetailDialog({
                   </span>
                 </div>
                 <div className="price-leg-mid">
-                  <span className="price-leg-days" title={`${tripDuration} rental`}>
+                  <span className="price-leg-days" title={t('carDetail.rentalDuration', { duration: tripDuration })}>
                     {tripDuration}
                   </span>
                 </div>
                 <div className="price-leg">
-                  <span className="price-leg-lbl">Return</span>
+                  <span className="price-leg-lbl">{t('carDetail.return')}</span>
                   <strong>{fmt(booking.retDate)}</strong>
                   <em>{booking.retTime}</em>
                   <span className="price-leg-loc">
@@ -330,19 +355,17 @@ export function CarDetailDialog({
               </div>
               <div className="price-divider" />
               <div className="row">
-                <span>
-                  RM {daily} × {n} day{n > 1 ? 's' : ''}
-                </span>
+                <span>{t('carDetail.dayMultiply', { daily, count: n })}</span>
                 <span className="v">RM {subtotal}</span>
               </div>
               <div className="row">
-                <span>Early-bird discount</span>
+                <span>{t('carDetail.earlyBirdDiscount')}</span>
                 <span className="v" style={{ color: 'var(--brand-coral)' }}>
                   −RM {discount}
                 </span>
               </div>
               <div className="row total">
-                <span>Total estimate</span>
+                <span>{t('carDetail.totalEstimate')}</span>
                 <span>RM {total}</span>
               </div>
             </div>
@@ -352,10 +375,10 @@ export function CarDetailDialog({
                 type="button"
                 className="btn btn-leaf btn-lg detail-checkout-btn"
                 disabled={!checkoutReady}
-                title={checkoutReady ? undefined : 'Search again with valid pickup and return dates'}
+                title={checkoutReady ? undefined : t('carDetail.searchAgainTooltip')}
                 onClick={() => onBeginCheckout(car)}
               >
-                Continue to checkout <ArrowRight size={14} />
+                {t('carDetail.continueToCheckout')} <ArrowRight size={14} />
               </button>
             </div>
             {alternativesBlock('tail')}

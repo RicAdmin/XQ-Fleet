@@ -1,6 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useEffect } from 'react'
 
+import { usePublicI18n } from '#/i18n/usePublicI18n'
 import { getRequestSession } from '#/lib/auth-functions'
 import { initiatePayment } from '#/lib/payment-functions'
 
@@ -30,9 +31,9 @@ export const Route = createFileRoute('/$locale/pay/$rentalId')({
 
 function PaymentRedirectPage() {
   const { formParams } = Route.useLoaderData()
+  const { t } = usePublicI18n()
 
   useEffect(() => {
-    // Auto-submit the form after mount
     const form = document.getElementById('ipay88-form') as HTMLFormElement | null
     if (form) form.submit()
   }, [])
@@ -41,11 +42,10 @@ function PaymentRedirectPage() {
     <div className="payment-redirect-page">
       <div className="payment-redirect-content">
         <div className="payment-redirect-spinner" />
-        <p className="payment-redirect-text">Redirecting to payment gateway…</p>
-        <p className="payment-redirect-sub">Please do not close this page.</p>
+        <p className="payment-redirect-text">{t('payment.redirecting')}</p>
+        <p className="payment-redirect-sub">{t('payment.doNotClose')}</p>
       </div>
 
-      {/* Hidden auto-submit form */}
       <form
         id="ipay88-form"
         method="POST"
