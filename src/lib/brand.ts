@@ -11,6 +11,10 @@ function resolveSiteUrl(siteUrl?: string): string {
   return raw.replace(/\/$/, '')
 }
 
+import type { Locale } from '#/i18n/locales'
+import { DEFAULT_LOCALE } from '#/i18n/locales'
+import { localePath } from '#/i18n/link'
+
 /** Normalized public origin, e.g. https://car.xqholidays.com.my */
 export function publicSiteUrl(siteUrl?: string): string {
   return resolveSiteUrl(siteUrl)
@@ -20,6 +24,11 @@ export function publicSiteUrl(siteUrl?: string): string {
 export function publicSitePath(path: string, siteUrl?: string): string {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`
   return `${publicSiteUrl(siteUrl)}${normalizedPath}`
+}
+
+/** Locale-aware absolute URL, e.g. https://carxq.com/ms/about */
+export function publicLocalePath(path: string, locale: Locale = DEFAULT_LOCALE, siteUrl?: string): string {
+  return publicSitePath(localePath(locale, path), siteUrl)
 }
 
 /** Absolute URL for email clients and external links. */

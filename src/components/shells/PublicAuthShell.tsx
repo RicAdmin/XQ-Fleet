@@ -7,6 +7,7 @@ import { Link } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 
 import { LandingNav, SiteFooter } from '#/components/landing/CxqLandingPage'
+import { usePublicI18n } from '#/i18n/usePublicI18n'
 import { authClient } from '#/lib/auth-client'
 
 type PublicAuthShellProps = {
@@ -25,6 +26,8 @@ export default function PublicAuthShell({
   const user = session?.user
   const [navMenuOpen, setNavMenuOpen] = useState(false)
   const navMenuRef = useRef<HTMLDivElement>(null)
+  const { t, href } = usePublicI18n()
+  const homePath = href('/')
 
   useEffect(() => {
     if (minimal) return
@@ -44,9 +47,9 @@ export default function PublicAuthShell({
         <div className="auth-page auth-page--minimal" data-screen-label={screenLabel}>
           <main className="container auth-page-main auth-page-main--minimal">
             <div className="auth-page-stack">
-              <Link to="/" className="auth-page-back">
+              <Link to={homePath as '/'} className="auth-page-back">
                 <ArrowLeft size={16} strokeWidth={2} aria-hidden />
-                <span>Back to Main</span>
+                <span>{t('common.back')}</span>
               </Link>
               {children}
             </div>

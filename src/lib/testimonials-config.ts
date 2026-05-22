@@ -1,3 +1,6 @@
+import type { Locale } from '#/i18n/locales'
+import { translate } from '#/i18n/translate'
+
 import testimonialsDocument from '../../data/testimonials.json'
 
 export type TestimonialService = 'general' | 'family' | 'car_rental'
@@ -119,6 +122,30 @@ export const TESTIMONIALS: Testimonial[] = (testimonialsDocument.testimonials as
   .map(toTestimonial)
 
 export const TESTIMONIAL_HEADLINE_SCORE = 4.8
+
+export function testimonialServiceLabel(service: TestimonialService, locale: Locale = 'en'): string {
+  const key =
+    service === 'car_rental'
+      ? 'landing.carRentalGuest'
+      : service === 'family'
+        ? 'landing.familyTrip'
+        : 'landing.langkawiGuest'
+  return translate(locale, key)
+}
+
+export function testimonialsForLocale(locale: Locale): Testimonial[] {
+  const prefer =
+    locale === 'zh' ? ['zh', 'mixed', 'en'] : locale === 'ms' ? ['en', 'mixed'] : ['en', 'zh', 'mixed']
+  return TESTIMONIALS.slice()
+    .sort((a, b) => {
+      const rankA = prefer.indexOf(a.language)
+      const rankB = prefer.indexOf(b.language)
+      const langDiff = (rankA === -1 ? 99 : rankA) - (rankB === -1 ? 99 : rankB)
+      if (langDiff !== 0) return langDiff
+      if (a.highlight !== b.highlight) return a.highlight ? -1 : 1
+      return b.dateSort.localeCompare(a.dateSort)
+    })
+}
 
 export function testimonialInitials(name: string): string {
   if (name.toLowerCase() === 'anonymous') return 'G'

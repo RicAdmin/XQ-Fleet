@@ -1,26 +1,28 @@
-import { useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { useMemo } from 'react'
 
 import { LegalDocumentContent } from '#/components/legal/LegalDocumentContent'
+import { LocaleLink } from '#/components/i18n/LocaleLink'
 import PublicMarketingShell from '#/components/shells/PublicMarketingShell'
+import { useLocale, useT } from '#/i18n/context'
+import type { Locale } from '#/i18n/locales'
 import { LEGAL_COMPANY, LEGAL_PACK_INTRO } from '#/lib/legal/company'
 import { LEGAL_NAV_LINKS } from '#/lib/legal'
-import type { LegalDocument, LegalLocaleContent } from '#/lib/legal/types'
+import type { LegalDocument, LegalDocumentSlug, LegalLocaleContent } from '#/lib/legal/types'
 
 type LegalDocumentPageProps = {
   document: LegalDocument
 }
 
-const defaultLocale: LegalLocaleContent = {
-  code: 'en',
-  label: 'English',
-  title: '',
-  documentLabel: '',
-  sections: [],
+const LEGAL_NAV_LABEL: Record<LegalDocumentSlug, 'footer.terms' | 'footer.rentalContract' | 'footer.privacy' | 'footer.refund' | 'footer.pdpa'> = {
+  terms: 'footer.terms',
+  'rental-agreement': 'footer.rentalContract',
+  privacy: 'footer.privacy',
+  'refund-policy': 'footer.refund',
+  pdpa: 'footer.pdpa',
 }
 
-function resolveLocale(document: LegalDocument, code: string): LegalLocaleContent {
-  if (code === 'en') {
+function resolveLocale(document: LegalDocument, siteLocale: Locale): LegalLocaleContent {
+  if (siteLocale === 'en') {
     return {
       code: 'en',
       label: 'English',
@@ -30,27 +32,37 @@ function resolveLocale(document: LegalDocument, code: string): LegalLocaleConten
     }
   }
 
-  return document.locales?.find((locale) => locale.code === code) ?? defaultLocale
+  const localized = document.locales?.find((item) => item.code === siteLocale)
+  if (localized) return localized
+
+  return {
+    code: 'en',
+    label: 'English',
+    title: document.title,
+    documentLabel: document.documentLabel,
+    sections: document.sections,
+  }
 }
 
 export function LegalDocumentPage({ document }: LegalDocumentPageProps) {
-  const [localeCode, setLocaleCode] = useState('en')
-  const hasLocales = Boolean(document.locales?.length)
-  const locale = resolveLocale(document, localeCode)
+  const siteLocale = useLocale()
+  const t = useT()
+  const locale = useMemo(() => resolveLocale(document, siteLocale), [document, siteLocale])
   const companyIntro = locale.companyIntro ?? LEGAL_PACK_INTRO
   const footerText =
     locale.footerText ??
-    `Questions? Contact ${LEGAL_COMPANY.name} at ${LEGAL_COMPANY.address}. Website: ${LEGAL_COMPANY.website}`
+    `${t('legal.questions')} ${LEGAL_COMPANY.name} at ${LEGAL_COMPANY.address}. Website: ${LEGAL_COMPANY.website}`
 
   return (
     <PublicMarketingShell screenLabel={locale.title} mainClassName="container legal-page-main">
       <article className="legal-page">
         <header className="legal-page-header">
-          <span className="eyebrow">XQ Car Rental · Legal</span>
+          <span className="eyebrow">{t('legal.packIntro')}</span>
           <h1 className="h-section">{locale.title}</h1>
           <p className="legal-meta">
-            {locale.documentLabel} · {localeCode === 'ms' ? 'Kuat kuasa' : 'Effective'} {document.effectiveDate} ·{' '}
-            {localeCode === 'ms' ? 'Versi' : 'Version'} {document.version}
+            {locale.documentLabel} · {siteLocale === 'ms' ? t('legal.effectiveMs') : t('legal.effective')}{' '}
+            {document.effectiveDate} · {siteLocale === 'ms' ? t('legal.versionMs') : t('legal.version')}{' '}
+            {document.version}
           </p>
           <div className="legal-company-block">
             {companyIntro.map((line) => (
@@ -59,37 +71,15 @@ export function LegalDocumentPage({ document }: LegalDocumentPageProps) {
           </div>
         </header>
 
-        {hasLocales ? (
-          <nav className="legal-lang-nav" aria-label="Document language">
-            <button
-              type="button"
-              className={localeCode === 'en' ? 'legal-lang-btn is-active' : 'legal-lang-btn'}
-              onClick={() => setLocaleCode('en')}
-            >
-              English
-            </button>
-            {document.locales!.map((item) => (
-              <button
-                key={item.code}
-                type="button"
-                className={localeCode === item.code ? 'legal-lang-btn is-active' : 'legal-lang-btn'}
-                onClick={() => setLocaleCode(item.code)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </nav>
-        ) : null}
-
-        <nav className="legal-nav" aria-label="Related legal documents">
+        <nav className="legal-nav" aria-label={t('legal.relatedDocs')}>
           {LEGAL_NAV_LINKS.map((link) => (
-            <Link
+            <LocaleLink
               key={link.slug}
               to={link.path}
               className={link.slug === document.slug ? 'legal-nav-link is-active' : 'legal-nav-link'}
             >
-              {link.label}
-            </Link>
+              {t(LEGAL_NAV_LABEL[link.slug])}
+            </LocaleLink>
           ))}
         </nav>
 

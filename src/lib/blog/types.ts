@@ -20,6 +20,15 @@ export type BlogSection =
   | { type: 'p'; text: string }
   | { type: 'ul'; items: string[] }
 
+export type BlogLocaleContent = {
+  title: string
+  metaTitle: string
+  metaDescription: string
+  excerpt: string
+  lead: string
+  sections: BlogSection[]
+}
+
 export type BlogPost = {
   slug: string
   title: string
@@ -37,4 +46,6 @@ export type BlogPost = {
   sections: BlogSection[]
   featured?: boolean
   keywords: string[]
+  /** Optional translated content keyed by site locale (ms, zh). */
+  locales?: Partial<Record<'ms' | 'zh', BlogLocaleContent>>
 }

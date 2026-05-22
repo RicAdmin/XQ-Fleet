@@ -1,4 +1,6 @@
 import { LEGAL_COMPANY } from '#/lib/legal/company'
+import { termsMsLocale } from '#/lib/legal/terms-ms'
+import { termsZhLocale } from '#/lib/legal/terms-zh'
 import { h2, p, ul } from '#/lib/legal/sections'
 import type { LegalDocument } from '#/lib/legal/types'
 
@@ -12,6 +14,7 @@ export const termsDocument: LegalDocument = {
   effectiveDate: LEGAL_COMPANY.effectiveDate,
   version: LEGAL_COMPANY.version,
   documentLabel: 'Document 1: Website Terms & Conditions',
+  locales: [termsMsLocale, termsZhLocale],
   sections: [
     h2('1. Introduction'),
     p(

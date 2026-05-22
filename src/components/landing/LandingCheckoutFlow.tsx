@@ -13,6 +13,8 @@ import {
 
 import { LoadingSpinner } from '#/components/ui/LoadingSpinner'
 import { PaymentMethodIcons } from '#/components/landing/payment-method-icons'
+import { LocaleLink } from '#/components/i18n/LocaleLink'
+import { usePublicI18n } from '#/i18n/usePublicI18n'
 import { checkoutSearchFromBooking, bookingHasCompleteTrip } from '#/lib/checkout-trip'
 import { createPortalBooking } from '#/lib/portal-booking-functions'
 import { validatePromo } from '#/lib/promo-functions'
@@ -302,6 +304,7 @@ export function LandingCheckoutFlow({
   user,
   backHref,
 }: LandingCheckoutFlowProps) {
+  const { t } = usePublicI18n()
   const navigate = useNavigate()
   const nights = nightsBetween(booking.pickDate, booking.retDate)
   const daily = Math.round(car.dailyRateSen / 100)
@@ -1082,7 +1085,7 @@ export function LandingCheckoutFlow({
 
                 <section className="checkout-card">
                   <div className="checkout-card-head">
-                    <h3>Driver details</h3>
+                    <h3>{t('checkout.driverDetails')}</h3>
                     <span className="checkout-card-meta">
                       {alsoAsDriver
                         ? 'License details for pickup · * Required'
@@ -1237,7 +1240,7 @@ export function LandingCheckoutFlow({
                   <p className="h-sub" style={{ marginTop: 4 }}>
                     {guestCheckout && !user
                       ? 'Complete payment with the details you entered — no account required.'
-                      : "Secure checkout — you'll finish card or bank payment on the next screen (iPay88)."}
+                      : t('checkout.secureCheckoutNote')}
                   </p>
                 </div>
 
@@ -1254,29 +1257,26 @@ export function LandingCheckoutFlow({
                 <div className="checkout-progress-meta">
                   <span className="eyebrow">Step 2 of 2</span>
                   <h2 className="h-section" style={{ marginTop: 4 }}>
-                    Sign in to continue.
+                    {t('checkout.signInToContinue')}
                   </h2>
                   <p className="h-sub" style={{ marginTop: 4 }}>
-                    We need your account to hold the car and send your booking confirmation.
+                    {t('checkout.signInToContinueSub')}
                   </p>
                 </div>
                 <section className="checkout-card">
                   <div className="checkout-card-head">
-                    <h3>Customer account</h3>
+                    <h3>{t('checkout.customerAccount')}</h3>
                   </div>
-                  <p className="checkout-account-copy">
-                    Sign in or create an account to save bookings to your profile — or continue as guest with the
-                    details you already entered.
-                  </p>
+                  <p className="checkout-account-copy">{t('checkout.signInOrCreate')}</p>
                   <div className="checkout-account-actions">
-                    <Link to="/login" search={{ returnTo: checkoutReturnTo }} className="btn btn-leaf btn-lg">
-                      Log in
-                    </Link>
-                    <Link to="/register" search={{ returnTo: checkoutReturnTo }} className="btn btn-ghost btn-lg">
-                      Create account
-                    </Link>
+                    <LocaleLink to="/login" search={{ returnTo: checkoutReturnTo }} className="btn btn-leaf btn-lg">
+                      {t('auth.signIn')}
+                    </LocaleLink>
+                    <LocaleLink to="/register" search={{ returnTo: checkoutReturnTo }} className="btn btn-ghost btn-lg">
+                      {t('auth.createAccountBtn')}
+                    </LocaleLink>
                     <button type="button" className="btn btn-ghost btn-lg" onClick={continueAsGuest}>
-                      Continue as guest
+                      {t('checkout.continueAsGuest')}
                     </button>
                   </div>
                   <p className="checkout-account-footnote">
@@ -1378,7 +1378,7 @@ export function LandingCheckoutFlow({
                         fontSize: '0.85em',
                       }}
                     >
-                      remove
+                      {t('checkout.removePromo')}
                     </button>
                   </span>
                   <span style={{ color: 'var(--brand-coral)' }}>−RM {discount}</span>
@@ -1404,7 +1404,7 @@ export function LandingCheckoutFlow({
             {!appliedPromo ? (
               <div className="cs-promo">
                 <label htmlFor="cs-promo-input" className="cs-promo-label">
-                  Have a promo code?
+                  {t('checkout.havePromo')}
                 </label>
                 <div className="cs-promo-row">
                   <input
@@ -1426,7 +1426,7 @@ export function LandingCheckoutFlow({
                     disabled={!promoInput.trim() || promoBusy}
                     className="cs-promo-btn"
                   >
-                    {promoBusy ? <LoadingSpinner size={14} aria-hidden /> : 'Apply'}
+                    {promoBusy ? <LoadingSpinner size={14} aria-hidden /> : t('checkout.applyPromo')}
                   </button>
                 </div>
                 {promoError ? <p className="cs-promo-error">{promoError}</p> : null}
@@ -1451,7 +1451,7 @@ export function LandingCheckoutFlow({
                 <div className="cs-pay-actions">
                   <button type="button" className="btn btn-leaf btn-lg" onClick={() => void advance()} disabled={submitting}>
                     {step === 0
-                      ? 'Continue to payment'
+                      ? t('checkout.payNow')
                       : submitting
                         ? 'Redirecting to payment…'
                         : `Pay RM ${total}`}

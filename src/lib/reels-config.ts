@@ -1,5 +1,8 @@
 import reelsDocument from '../../data/reels.json'
 
+import type { Locale } from '#/i18n/locales'
+import { reelDescriptionsMs, reelDescriptionsZh } from '#/i18n/content/reel-descriptions'
+
 export type ReelCar = {
   make: string
   model: string
@@ -135,3 +138,23 @@ export const REELS: Reel[] = (reelsDocument.car_videos as CarVideoJson[])
   .slice()
   .sort((a, b) => a.order - b.order)
   .map((entry) => toReel(entry, catalogLookup))
+
+const REEL_COPY_BY_LOCALE: Partial<Record<Locale, Record<string, string>>> = {
+  ms: reelDescriptionsMs,
+  zh: reelDescriptionsZh,
+}
+
+/** Reels with locale-specific taglines (falls back to English from reels.json). */
+export function reelsForLocale(locale: Locale): Reel[] {
+  const copy = REEL_COPY_BY_LOCALE[locale]
+  if (!copy) return REELS
+  return REELS.map((reel) => {
+    const tagline = copy[reel.id]
+    if (!tagline) return reel
+    return {
+      ...reel,
+      tagline,
+      taglineShort: firstSentence(tagline),
+    }
+  })
+}

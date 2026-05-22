@@ -1,4 +1,5 @@
-import { Link } from '@tanstack/react-router'
+import { LocaleLink } from '#/components/i18n/LocaleLink'
+import { useT } from '#/i18n/context'
 import { ArrowLeft, ArrowRight, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
@@ -25,6 +26,7 @@ type BlogIndexPageProps = {
 }
 
 export function BlogIndexPage({ posts }: BlogIndexPageProps) {
+  const t = useT()
   const [category, setCategory] = useState<BlogCategory>('All')
   const [query, setQuery] = useState('')
 
@@ -48,9 +50,9 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
   return (
     <PublicMarketingShell screenLabel="Car XQ Journal" mainClassName="blog-page">
       <header className="blog-header">
-        <Link to="/" className="close-btn" aria-label="Back to home">
+        <LocaleLink to="/" className="close-btn" aria-label={t('common.back')}>
           <ArrowLeft size={16} />
-        </Link>
+        </LocaleLink>
         <div className="blog-header-text">
           <span className="eyebrow">Car XQ Journal</span>
           <h1>Langkawi car rental guides &amp; island drives.</h1>
@@ -108,7 +110,7 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
       </div>
 
       {featured && category === 'All' && !query && (
-        <Link to="/blog/$slug" params={{ slug: featured.slug }} className="blog-featured">
+        <LocaleLink to="/blog/$slug" params={{ slug: featured.slug }} className="blog-featured">
           <div
             className="blog-featured-img"
             style={{
@@ -126,7 +128,7 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
               </div>
             </div>
           </div>
-        </Link>
+        </LocaleLink>
       )}
 
       {gridPosts.length === 0 ? (
@@ -137,7 +139,7 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
       ) : (
         <div className="blog-grid">
           {gridPosts.map((post) => (
-            <Link key={post.slug} to="/blog/$slug" params={{ slug: post.slug }} className="blog-card">
+            <LocaleLink key={post.slug} to="/blog/$slug" params={{ slug: post.slug }} className="blog-card">
               <div
                 className="blog-card-img"
                 style={{ backgroundImage: `url(${post.heroImage})` }}
@@ -161,7 +163,7 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
                   </span>
                 </div>
               </div>
-            </Link>
+            </LocaleLink>
           ))}
         </div>
       )}

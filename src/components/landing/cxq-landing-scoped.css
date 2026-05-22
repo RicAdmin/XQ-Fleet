@@ -9217,4 +9217,61 @@ button.ess4-link { font: inherit; }
   .prc-row-body footer .btn { width: 100%; justify-content: center; }
 }
 
+/* Language switcher (nav) */
+.lang-switcher {
+  position: relative;
+}
+.lang-switcher-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.12);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  line-height: 1;
+}
+.nav--solid-light .lang-switcher-trigger {
+  border-color: rgba(26, 31, 34, 0.12);
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--ink);
+}
+.lang-switcher-currency {
+  opacity: 0.75;
+}
+.lang-switcher-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 50;
+  min-width: 160px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border-radius: 12px;
+  border: 1px solid rgba(26, 31, 34, 0.1);
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(14, 18, 20, 0.14);
+}
+.lang-switcher-menu button {
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.lang-switcher-menu button:hover,
+.lang-switcher-menu button.is-active {
+  background: rgba(196, 120, 10, 0.1);
+}
+
 }

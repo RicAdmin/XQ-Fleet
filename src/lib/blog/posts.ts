@@ -82,6 +82,45 @@ export const BLOG_POSTS: BlogPost[] = [
           'Booking on carxq.com takes about 90 seconds: choose dates, select a car, add pickup location (airport, jetty, or hotel), and pay online or at pickup. You deal with the same team that meets you at Door 3 — not a mainland broker who never sees the island.',
       },
     ],
+    locales: {
+      ms: {
+        title: 'Panduan Lengkap Sewa Kereta di Langkawi (2026)',
+        metaTitle: 'Panduan Sewa Kereta Langkawi 2026 | Harga & Tips · Car XQ',
+        metaDescription:
+          'Semua yang perlu anda tahu tentang sewa kereta di Langkawi — ambil di lapangan terbang, kadar dari RM 70, dokumen, insurans, dan tips memandu dari flit tempatan sejak 2015.',
+        excerpt:
+          'Penghantaran lapangan terbang, kadar harian adil, dan dokumen yang benar-benar diperlukan — panduan operator tempatan untuk sewa di pulau.',
+        lead:
+          'Sewa kereta di Langkawi adalah cara paling fleksibel untuk meneroka pulau mengikut rentak anda. Kadar bermula sekitar RM 70/hari untuk kereta ekonomi apabila tempah terus dengan Car XQ.',
+        sections: [
+          { type: 'h2', text: 'Mengapa sewa kereta di Langkawi?' },
+          { type: 'p', text: 'Taksi sesuai untuk perjalanan tunggal tetapi mahal untuk hari pelbagai hentian di seluruh pulau.' },
+          { type: 'h2', text: 'Kos sewa kereta 2026' },
+          { type: 'p', text: 'Ekonomi RM 70–120/hari; MPV RM 120–180/hari. Penghantaran percuma ke LGK Pintu 3, jeti, atau hotel.' },
+          { type: 'h2', text: 'Dokumen dan umur' },
+          { type: 'p', text: 'Lesen sah, pasport/IC, kad kredit; umur minimum 23, sekurang-kurangnya satu tahun memandu.' },
+          { type: 'h2', text: 'Tempah terus dengan Car XQ' },
+          { type: 'p', text: 'Tempahan dalam ~90 saat di carxq.com — pasukan yang sama jumpa anda di Pintu 3.' },
+        ],
+      },
+      zh: {
+        title: '兰卡威租车完整指南（2026）',
+        metaTitle: '兰卡威租车指南 2026 | 价格与技巧 · Car XQ',
+        metaDescription: '兰卡威租车须知——机场取车、RM 70 起、证件与本地车队建议。',
+        excerpt: '机场送车、透明日租、所需证件——本地运营商指南。',
+        lead: '租车是探索兰卡威最灵活的方式；直接向 Car XQ 预订经济型约 RM 70/天起。',
+        sections: [
+          { type: 'h2', text: '为什么租车？' },
+          { type: 'p', text: '多站一日游打车费用迅速累积，租车更划算。' },
+          { type: 'h2', text: '2026年费用' },
+          { type: 'p', text: '经济型 RM 70–120/天；MPV RM 120–180/天；免费送至机场3号门。' },
+          { type: 'h2', text: '证件要求' },
+          { type: 'p', text: '有效驾照、护照/身份证、信用卡；23岁起，至少一年驾龄。' },
+          { type: 'h2', text: '直接预订 Car XQ' },
+          { type: 'p', text: 'carxq.com 约90秒完成预订，同一团队在3号门接您。' },
+        ],
+      },
+    },
   }),
 
   post({
@@ -129,6 +168,44 @@ export const BLOG_POSTS: BlogPost[] = [
           'Return is the same Door 3 meeting point unless you arranged hotel drop-off. Allow 30 minutes before check-in for inspection and deposit release. Early-morning flights: we open 24/7 — no after-hours penalty.',
       },
     ],
+    locales: {
+      ms: {
+        title: 'Sewa Kereta Lapangan Terbang Langkawi: Panduan Ambil Pintu 3',
+        metaTitle: 'Sewa Kereta Lapangan Terbang Langkawi (LGK) · Pintu 3 · Car XQ',
+        metaDescription:
+          'Ambil kereta percuma di Pintu 3 Ketibaan LGK. Kongsi nombor penerbangan, jumpa dalam 5 minit, tiada surcaj lapangan terbang.',
+        excerpt: 'Langkah demi langkah: dari tuntutan bagasi ke memandu dalam 15 minit di Pintu 3 LGK.',
+        lead:
+          'Sewa kereta lapangan terbang Langkawi paling mudah apabila pembekal jumpa anda di Arrivals. Car XQ beroperasi 24/7 di Pintu 3 LGK — kongsi nombor penerbangan semasa tempahan.',
+        sections: [
+          { type: 'h2', text: 'Di mana jumpa di LGK' },
+          { type: 'p', text: 'Selepas imigresen, keluar ke Arrivals dan cari Pintu 3 di sebelah kiri. Pasukan kami memegang papan Car XQ dengan nama anda.' },
+          { type: 'h2', text: 'Apa perlu sediakan' },
+          { type: 'ul', items: ['Pengesahan tempahan', 'Pasport dan lesen', 'Kad kredit untuk deposit', 'Nombor penerbangan'] },
+          { type: 'h2', text: 'Keluar dari lapangan terbang' },
+          { type: 'p', text: 'Kami bawa anda ke kereta di parking berhampiran terminal. Ikut papan ke Pantai Cenang atau Kuah.' },
+          { type: 'h2', text: 'Pulangkan kereta di LGK' },
+          { type: 'p', text: 'Pulangan di Pintu 3 yang sama. Beri 30 minit sebelum check-in untuk pemeriksaan.' },
+        ],
+      },
+      zh: {
+        title: '兰卡威机场租车：3号门取车指南',
+        metaTitle: '兰卡威机场租车 (LGK) · 3号门取车 · Car XQ',
+        metaDescription: 'LGK到达厅3号门免费取车。提供航班号，5分钟内会合，无额外机场费。',
+        excerpt: '分步说明：从行李领取至15分钟内驶离LGK 3号门。',
+        lead: '供应商在到达厅接您最简单。Car XQ 在兰卡威国际机场3号门24/7运营——预订时提供航班号即可。',
+        sections: [
+          { type: 'h2', text: 'LGK会合地点' },
+          { type: 'p', text: '入境及取行李后，进入到达厅，左侧即为3号门。团队举 Car XQ 姓名牌。' },
+          { type: 'h2', text: '取车需准备' },
+          { type: 'ul', items: ['预订确认', '护照与驾照', '信用卡押金', '航班号'] },
+          { type: 'h2', text: '驶离机场' },
+          { type: 'p', text: '步行至航站楼旁短期停车区取车。跟随路标前往珍南海或瓜埠。' },
+          { type: 'h2', text: '机场还车' },
+          { type: 'p', text: '同一3号门会合点还车。值机前预留30分钟检查。' },
+        ],
+      },
+    },
   }),
 
   post({

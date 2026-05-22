@@ -1,5 +1,6 @@
 import { LEGAL_COMPANY } from '#/lib/legal/company'
 import { pdpaMsLocale } from '#/lib/legal/pdpa-ms'
+import { pdpaZhLocale } from '#/lib/legal/pdpa-zh'
 import { h2, h3, p, ul } from '#/lib/legal/sections'
 import type { LegalDocument } from '#/lib/legal/types'
 
@@ -13,7 +14,7 @@ export const pdpaDocument: LegalDocument = {
   effectiveDate: LEGAL_COMPANY.effectiveDate,
   version: LEGAL_COMPANY.version,
   documentLabel: 'Document 5: Personal Data Protection Act (PDPA) Notice',
-  locales: [pdpaMsLocale],
+  locales: [pdpaMsLocale, pdpaZhLocale],
   sections: [
     h2('1. Purpose of This Notice'),
     p(

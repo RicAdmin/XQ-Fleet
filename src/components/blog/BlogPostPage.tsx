@@ -1,11 +1,14 @@
 import { Link } from '@tanstack/react-router'
+import { LocaleLink } from '#/components/i18n/LocaleLink'
+import { useLocale } from '#/i18n/context'
+import { useT } from '#/i18n/context'
 import { ArrowLeft, ArrowRight, Calendar, Clock, Share2 } from 'lucide-react'
 
 import { BlogPostContent } from '#/components/blog/BlogPostContent'
 import PublicMarketingShell from '#/components/shells/PublicMarketingShell'
 import type { BlogPost } from '#/lib/blog/types'
 import { formatBlogDate, getRelatedPosts } from '#/lib/blog/utils'
-import { publicSitePath } from '#/lib/brand'
+import { publicLocalePath, publicSitePath } from '#/lib/brand'
 import { breadcrumbSchema } from '#/lib/seo-meta'
 
 function BlogAvatar({ name, size = 'sm' }: { name: string; size?: 'sm' | 'lg' }) {
@@ -28,8 +31,10 @@ type BlogPostPageProps = {
 }
 
 export function BlogPostPage({ post, allPosts }: BlogPostPageProps) {
+  const locale = useLocale()
+  const t = useT()
   const related = getRelatedPosts(allPosts, post, 3)
-  const shareUrl = publicSitePath(`/blog/${post.slug}`)
+  const shareUrl = publicLocalePath(`/blog/${post.slug}`, locale)
 
   function shareNative() {
     if (typeof navigator !== 'undefined' && navigator.share) {
@@ -48,9 +53,9 @@ export function BlogPostPage({ post, allPosts }: BlogPostPageProps) {
             backgroundImage: `linear-gradient(180deg, rgba(14,18,20,.35) 0%, rgba(14,18,20,.85) 100%), url(${post.heroImage})`,
           }}
         >
-          <Link to="/blog" className="close-btn" aria-label="Back to journal">
+          <LocaleLink to="/blog" className="close-btn" aria-label={t('blog.title')}>
             <ArrowLeft size={16} />
-          </Link>
+          </LocaleLink>
           <div className="post-hero-inner">
             <span className="post-hero-tag">{post.category}</span>
             <h1>{post.title}</h1>
@@ -113,9 +118,9 @@ export function BlogPostPage({ post, allPosts }: BlogPostPageProps) {
                   Book from RM 70/day · free airport delivery
                 </p>
               </div>
-              <Link to="/" hash="booking-dock" className="btn btn-leaf">
+              <LocaleLink to="/" hash="booking-dock" className="btn btn-leaf">
                 Search cars <ArrowRight size={14} />
-              </Link>
+              </LocaleLink>
             </div>
 
             <footer className="post-footer">
@@ -145,7 +150,7 @@ export function BlogPostPage({ post, allPosts }: BlogPostPageProps) {
           </h2>
           <div className="blog-grid" style={{ padding: 0 }}>
             {related.map((r) => (
-              <Link key={r.slug} to="/blog/$slug" params={{ slug: r.slug }} className="blog-card">
+              <LocaleLink key={r.slug} to="/blog/$slug" params={{ slug: r.slug }} className="blog-card">
                 <div
                   className="blog-card-img"
                   style={{ backgroundImage: `url(${r.heroImage})` }}
@@ -157,7 +162,7 @@ export function BlogPostPage({ post, allPosts }: BlogPostPageProps) {
                   <h3>{r.title}</h3>
                   <p>{r.excerpt}</p>
                 </div>
-              </Link>
+              </LocaleLink>
             ))}
           </div>
         </section>

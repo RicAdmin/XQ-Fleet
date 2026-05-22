@@ -1,6 +1,8 @@
 import { writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
+import { LOCALES, DEFAULT_LOCALE } from '../src/i18n/locales'
+import { localePath } from '../src/i18n/link'
 import { getBlogPosts } from '../src/lib/blog/posts'
 
 const SITE = 'https://carxq.com'
@@ -34,22 +36,36 @@ const blogPages: Entry[] = getBlogPosts().map((post) => ({
   lastmod: post.updatedAt,
 }))
 
-function urlEntry({ path, changefreq, priority, lastmod }: Entry): string {
-  const loc = `${SITE}${path === '/' ? '/' : path}`
+function hreflangAlternates(barePath: string): string {
+  return LOCALES.map((loc) => {
+    const hreflang = loc === 'zh' ? 'zh-Hans' : loc
+    const href = `${SITE}${localePath(loc, barePath)}`
+    return `\n    <xhtml:link rel="alternate" hreflang="${hreflang}" href="${href}" />`
+  }).concat(
+    `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE}${localePath(DEFAULT_LOCALE, barePath)}" />`,
+  ).join('')
+}
+
+function urlEntry({ path, changefreq, priority, lastmod }: Entry, locale: typeof LOCALES[number]): string {
+  const barePath = path
+  const loc = `${SITE}${localePath(locale, barePath)}`
   const lastmodTag = lastmod ? `\n    <lastmod>${lastmod}</lastmod>` : ''
   return `  <url>
     <loc>${loc}</loc>${lastmodTag}
     <changefreq>${changefreq}</changefreq>
-    <priority>${priority}</priority>
+    <priority>${priority}</priority>${hreflangAlternates(barePath)}
   </url>`
 }
 
+const allEntries = [...staticPages, ...blogPages]
+const urls = LOCALES.flatMap((locale) => allEntries.map((entry) => urlEntry(entry, locale)))
+
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...staticPages, ...blogPages].map(urlEntry).join('\n')}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+${urls.join('\n')}
 </urlset>
 `
 
 const outPath = resolve(process.cwd(), 'public/sitemap.xml')
 writeFileSync(outPath, xml, 'utf8')
-console.log(`Wrote ${staticPages.length + blogPages.length} URLs to ${outPath}`)
+console.log(`Wrote ${urls.length} URLs (${allEntries.length} paths × ${LOCALES.length} locales) to ${outPath}`)

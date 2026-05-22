@@ -1,4 +1,6 @@
 import { LEGAL_COMPANY } from '#/lib/legal/company'
+import { privacyMsLocale } from '#/lib/legal/privacy-ms'
+import { privacyZhLocale } from '#/lib/legal/privacy-zh'
 import { h2, h3, p, ul } from '#/lib/legal/sections'
 import type { LegalDocument } from '#/lib/legal/types'
 
@@ -12,6 +14,7 @@ export const privacyDocument: LegalDocument = {
   effectiveDate: LEGAL_COMPANY.effectiveDate,
   version: LEGAL_COMPANY.version,
   documentLabel: 'Document 3: Privacy Policy',
+  locales: [privacyMsLocale, privacyZhLocale],
   sections: [
     h2('1. About This Policy'),
     p(

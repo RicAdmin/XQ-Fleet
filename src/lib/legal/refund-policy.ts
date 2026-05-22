@@ -1,4 +1,6 @@
 import { LEGAL_COMPANY } from '#/lib/legal/company'
+import { refundPolicyMsLocale } from '#/lib/legal/refund-policy-ms'
+import { refundPolicyZhLocale } from '#/lib/legal/refund-policy-zh'
 import { h2, h3, p, table, ul } from '#/lib/legal/sections'
 import type { LegalDocument } from '#/lib/legal/types'
 
@@ -12,6 +14,7 @@ export const refundPolicyDocument: LegalDocument = {
   effectiveDate: LEGAL_COMPANY.effectiveDate,
   version: LEGAL_COMPANY.version,
   documentLabel: 'Document 4: Cancellation & Refund Policy',
+  locales: [refundPolicyMsLocale, refundPolicyZhLocale],
   sections: [
     h2('1. Application'),
     p(

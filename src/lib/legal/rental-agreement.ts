@@ -1,4 +1,6 @@
 import { LEGAL_COMPANY } from '#/lib/legal/company'
+import { rentalAgreementMsLocale } from '#/lib/legal/rental-agreement-ms'
+import { rentalAgreementZhLocale } from '#/lib/legal/rental-agreement-zh'
 import { h2, p, signature, ul } from '#/lib/legal/sections'
 import type { LegalDocument } from '#/lib/legal/types'
 
@@ -12,6 +14,7 @@ export const rentalAgreementDocument: LegalDocument = {
   effectiveDate: LEGAL_COMPANY.effectiveDate,
   version: LEGAL_COMPANY.version,
   documentLabel: 'Document 2: Vehicle Rental Contract',
+  locales: [rentalAgreementMsLocale, rentalAgreementZhLocale],
   sections: [
     h2('1. Parties and Application'),
     p(

@@ -21,11 +21,13 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as LocaleRouteRouteImport } from './routes/$locale/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
+import { Route as LocaleIndexRouteImport } from './routes/$locale/index'
 import { Route as RCodeRouteImport } from './routes/r/$code'
 import { Route as PayRentalIdRouteImport } from './routes/pay/$rentalId'
 import { Route as InternalLoginRouteImport } from './routes/internal/login'
@@ -39,6 +41,15 @@ import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 import { Route as AccountRentalsRouteImport } from './routes/account/rentals'
 import { Route as AccountProfileRouteImport } from './routes/account/profile'
 import { Route as AccountNotificationsRouteImport } from './routes/account/notifications'
+import { Route as LocaleTermsRouteImport } from './routes/$locale/terms'
+import { Route as LocaleRentalAgreementRouteImport } from './routes/$locale/rental-agreement'
+import { Route as LocaleRegisterRouteImport } from './routes/$locale/register'
+import { Route as LocaleRefundPolicyRouteImport } from './routes/$locale/refund-policy'
+import { Route as LocalePrivacyRouteImport } from './routes/$locale/privacy'
+import { Route as LocalePdpaRouteImport } from './routes/$locale/pdpa'
+import { Route as LocaleLoginRouteImport } from './routes/$locale/login'
+import { Route as LocaleForgotPasswordRouteImport } from './routes/$locale/forgot-password'
+import { Route as LocaleAboutRouteImport } from './routes/$locale/about'
 import { Route as AppRentalsIndexRouteImport } from './routes/app/rentals/index'
 import { Route as AppMaintenanceIndexRouteImport } from './routes/app/maintenance/index'
 import { Route as AppCustomersIndexRouteImport } from './routes/app/customers/index'
@@ -51,6 +62,7 @@ import { Route as AdminCustomersIndexRouteImport } from './routes/admin/customer
 import { Route as AdminCarsIndexRouteImport } from './routes/admin/cars/index'
 import { Route as AdminAffiliatesIndexRouteImport } from './routes/admin/affiliates/index'
 import { Route as AccountBookingsIndexRouteImport } from './routes/account/bookings/index'
+import { Route as LocaleBlogIndexRouteImport } from './routes/$locale/blog/index'
 import { Route as InternalInviteTokenRouteImport } from './routes/internal/invite/$token'
 import { Route as CheckoutConfirmedRentalIdRouteImport } from './routes/checkout/confirmed/$rentalId'
 import { Route as BookingConfirmedRentalIdRouteImport } from './routes/booking/confirmed/$rentalId'
@@ -65,8 +77,18 @@ import { Route as AdminCarsCarIdRouteImport } from './routes/admin/cars/$carId'
 import { Route as AdminAffiliatesPayoutsRouteImport } from './routes/admin/affiliates/payouts'
 import { Route as AdminAffiliatesAffiliateIdRouteImport } from './routes/admin/affiliates/$affiliateId'
 import { Route as AccountBookingsRentalIdRouteImport } from './routes/account/bookings/$rentalId'
+import { Route as LocalePayRentalIdRouteImport } from './routes/$locale/pay/$rentalId'
+import { Route as LocaleGuidesPlanDriveRouteImport } from './routes/$locale/guides/plan-drive'
+import { Route as LocaleGuidesPickupReturnRouteImport } from './routes/$locale/guides/pickup-return'
+import { Route as LocaleGuidesPickCarRouteImport } from './routes/$locale/guides/pick-car'
+import { Route as LocaleGuidesKnowHowRouteImport } from './routes/$locale/guides/know-how'
+import { Route as LocaleCheckoutCarIdRouteImport } from './routes/$locale/checkout/$carId'
+import { Route as LocaleBookCarIdRouteImport } from './routes/$locale/book/$carId'
+import { Route as LocaleBlogSlugRouteImport } from './routes/$locale/blog/$slug'
 import { Route as ApiDocumentsInvoiceRentalIdRouteImport } from './routes/api/documents/invoice/$rentalId'
 import { Route as ApiDocumentsAgreementRentalIdRouteImport } from './routes/api/documents/agreement/$rentalId'
+import { Route as LocaleCheckoutConfirmedRentalIdRouteImport } from './routes/$locale/checkout/confirmed/$rentalId'
+import { Route as LocaleBookingConfirmedRentalIdRouteImport } from './routes/$locale/booking/confirmed/$rentalId'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -128,6 +150,11 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LocaleRouteRoute = LocaleRouteRouteImport.update({
+  id: '/$locale',
+  path: '/$locale',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -152,6 +179,11 @@ const AccountIndexRoute = AccountIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AccountRoute,
+} as any)
+const LocaleIndexRoute = LocaleIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LocaleRouteRoute,
 } as any)
 const RCodeRoute = RCodeRouteImport.update({
   id: '/r/$code',
@@ -218,6 +250,51 @@ const AccountNotificationsRoute = AccountNotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => AccountRoute,
 } as any)
+const LocaleTermsRoute = LocaleTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
+const LocaleRentalAgreementRoute = LocaleRentalAgreementRouteImport.update({
+  id: '/rental-agreement',
+  path: '/rental-agreement',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
+const LocaleRegisterRoute = LocaleRegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
+const LocaleRefundPolicyRoute = LocaleRefundPolicyRouteImport.update({
+  id: '/refund-policy',
+  path: '/refund-policy',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
+const LocalePrivacyRoute = LocalePrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
+const LocalePdpaRoute = LocalePdpaRouteImport.update({
+  id: '/pdpa',
+  path: '/pdpa',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
+const LocaleLoginRoute = LocaleLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
+const LocaleForgotPasswordRoute = LocaleForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
+const LocaleAboutRoute = LocaleAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
 const AppRentalsIndexRoute = AppRentalsIndexRouteImport.update({
   id: '/rentals/',
   path: '/rentals/',
@@ -277,6 +354,11 @@ const AccountBookingsIndexRoute = AccountBookingsIndexRouteImport.update({
   id: '/bookings/',
   path: '/bookings/',
   getParentRoute: () => AccountRoute,
+} as any)
+const LocaleBlogIndexRoute = LocaleBlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => LocaleRouteRoute,
 } as any)
 const InternalInviteTokenRoute = InternalInviteTokenRouteImport.update({
   id: '/internal/invite/$token',
@@ -352,6 +434,47 @@ const AccountBookingsRentalIdRoute = AccountBookingsRentalIdRouteImport.update({
   path: '/bookings/$rentalId',
   getParentRoute: () => AccountRoute,
 } as any)
+const LocalePayRentalIdRoute = LocalePayRentalIdRouteImport.update({
+  id: '/pay/$rentalId',
+  path: '/pay/$rentalId',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
+const LocaleGuidesPlanDriveRoute = LocaleGuidesPlanDriveRouteImport.update({
+  id: '/guides/plan-drive',
+  path: '/guides/plan-drive',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
+const LocaleGuidesPickupReturnRoute =
+  LocaleGuidesPickupReturnRouteImport.update({
+    id: '/guides/pickup-return',
+    path: '/guides/pickup-return',
+    getParentRoute: () => LocaleRouteRoute,
+  } as any)
+const LocaleGuidesPickCarRoute = LocaleGuidesPickCarRouteImport.update({
+  id: '/guides/pick-car',
+  path: '/guides/pick-car',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
+const LocaleGuidesKnowHowRoute = LocaleGuidesKnowHowRouteImport.update({
+  id: '/guides/know-how',
+  path: '/guides/know-how',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
+const LocaleCheckoutCarIdRoute = LocaleCheckoutCarIdRouteImport.update({
+  id: '/checkout/$carId',
+  path: '/checkout/$carId',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
+const LocaleBookCarIdRoute = LocaleBookCarIdRouteImport.update({
+  id: '/book/$carId',
+  path: '/book/$carId',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
+const LocaleBlogSlugRoute = LocaleBlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
 const ApiDocumentsInvoiceRentalIdRoute =
   ApiDocumentsInvoiceRentalIdRouteImport.update({
     id: '/api/documents/invoice/$rentalId',
@@ -364,9 +487,22 @@ const ApiDocumentsAgreementRentalIdRoute =
     path: '/api/documents/agreement/$rentalId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const LocaleCheckoutConfirmedRentalIdRoute =
+  LocaleCheckoutConfirmedRentalIdRouteImport.update({
+    id: '/checkout/confirmed/$rentalId',
+    path: '/checkout/confirmed/$rentalId',
+    getParentRoute: () => LocaleRouteRoute,
+  } as any)
+const LocaleBookingConfirmedRentalIdRoute =
+  LocaleBookingConfirmedRentalIdRouteImport.update({
+    id: '/booking/confirmed/$rentalId',
+    path: '/booking/confirmed/$rentalId',
+    getParentRoute: () => LocaleRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$locale': typeof LocaleRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/account': typeof AccountRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
@@ -379,6 +515,15 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/rental-agreement': typeof RentalAgreementRoute
   '/terms': typeof TermsRoute
+  '/$locale/about': typeof LocaleAboutRoute
+  '/$locale/forgot-password': typeof LocaleForgotPasswordRoute
+  '/$locale/login': typeof LocaleLoginRoute
+  '/$locale/pdpa': typeof LocalePdpaRoute
+  '/$locale/privacy': typeof LocalePrivacyRoute
+  '/$locale/refund-policy': typeof LocaleRefundPolicyRoute
+  '/$locale/register': typeof LocaleRegisterRoute
+  '/$locale/rental-agreement': typeof LocaleRentalAgreementRoute
+  '/$locale/terms': typeof LocaleTermsRoute
   '/account/notifications': typeof AccountNotificationsRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/rentals': typeof AccountRentalsRoute
@@ -392,10 +537,19 @@ export interface FileRoutesByFullPath {
   '/internal/login': typeof InternalLoginRoute
   '/pay/$rentalId': typeof PayRentalIdRoute
   '/r/$code': typeof RCodeRoute
+  '/$locale/': typeof LocaleIndexRoute
   '/account/': typeof AccountIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/blog/': typeof BlogIndexRoute
+  '/$locale/blog/$slug': typeof LocaleBlogSlugRoute
+  '/$locale/book/$carId': typeof LocaleBookCarIdRoute
+  '/$locale/checkout/$carId': typeof LocaleCheckoutCarIdRoute
+  '/$locale/guides/know-how': typeof LocaleGuidesKnowHowRoute
+  '/$locale/guides/pick-car': typeof LocaleGuidesPickCarRoute
+  '/$locale/guides/pickup-return': typeof LocaleGuidesPickupReturnRoute
+  '/$locale/guides/plan-drive': typeof LocaleGuidesPlanDriveRoute
+  '/$locale/pay/$rentalId': typeof LocalePayRentalIdRoute
   '/account/bookings/$rentalId': typeof AccountBookingsRentalIdRoute
   '/admin/affiliates/$affiliateId': typeof AdminAffiliatesAffiliateIdRoute
   '/admin/affiliates/payouts': typeof AdminAffiliatesPayoutsRoute
@@ -410,6 +564,7 @@ export interface FileRoutesByFullPath {
   '/booking/confirmed/$rentalId': typeof BookingConfirmedRentalIdRoute
   '/checkout/confirmed/$rentalId': typeof CheckoutConfirmedRentalIdRoute
   '/internal/invite/$token': typeof InternalInviteTokenRoute
+  '/$locale/blog/': typeof LocaleBlogIndexRoute
   '/account/bookings/': typeof AccountBookingsIndexRoute
   '/admin/affiliates/': typeof AdminAffiliatesIndexRoute
   '/admin/cars/': typeof AdminCarsIndexRoute
@@ -422,6 +577,8 @@ export interface FileRoutesByFullPath {
   '/app/customers/': typeof AppCustomersIndexRoute
   '/app/maintenance/': typeof AppMaintenanceIndexRoute
   '/app/rentals/': typeof AppRentalsIndexRoute
+  '/$locale/booking/confirmed/$rentalId': typeof LocaleBookingConfirmedRentalIdRoute
+  '/$locale/checkout/confirmed/$rentalId': typeof LocaleCheckoutConfirmedRentalIdRoute
   '/api/documents/agreement/$rentalId': typeof ApiDocumentsAgreementRentalIdRoute
   '/api/documents/invoice/$rentalId': typeof ApiDocumentsInvoiceRentalIdRoute
 }
@@ -436,6 +593,15 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/rental-agreement': typeof RentalAgreementRoute
   '/terms': typeof TermsRoute
+  '/$locale/about': typeof LocaleAboutRoute
+  '/$locale/forgot-password': typeof LocaleForgotPasswordRoute
+  '/$locale/login': typeof LocaleLoginRoute
+  '/$locale/pdpa': typeof LocalePdpaRoute
+  '/$locale/privacy': typeof LocalePrivacyRoute
+  '/$locale/refund-policy': typeof LocaleRefundPolicyRoute
+  '/$locale/register': typeof LocaleRegisterRoute
+  '/$locale/rental-agreement': typeof LocaleRentalAgreementRoute
+  '/$locale/terms': typeof LocaleTermsRoute
   '/account/notifications': typeof AccountNotificationsRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/rentals': typeof AccountRentalsRoute
@@ -449,10 +615,19 @@ export interface FileRoutesByTo {
   '/internal/login': typeof InternalLoginRoute
   '/pay/$rentalId': typeof PayRentalIdRoute
   '/r/$code': typeof RCodeRoute
+  '/$locale': typeof LocaleIndexRoute
   '/account': typeof AccountIndexRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/blog': typeof BlogIndexRoute
+  '/$locale/blog/$slug': typeof LocaleBlogSlugRoute
+  '/$locale/book/$carId': typeof LocaleBookCarIdRoute
+  '/$locale/checkout/$carId': typeof LocaleCheckoutCarIdRoute
+  '/$locale/guides/know-how': typeof LocaleGuidesKnowHowRoute
+  '/$locale/guides/pick-car': typeof LocaleGuidesPickCarRoute
+  '/$locale/guides/pickup-return': typeof LocaleGuidesPickupReturnRoute
+  '/$locale/guides/plan-drive': typeof LocaleGuidesPlanDriveRoute
+  '/$locale/pay/$rentalId': typeof LocalePayRentalIdRoute
   '/account/bookings/$rentalId': typeof AccountBookingsRentalIdRoute
   '/admin/affiliates/$affiliateId': typeof AdminAffiliatesAffiliateIdRoute
   '/admin/affiliates/payouts': typeof AdminAffiliatesPayoutsRoute
@@ -467,6 +642,7 @@ export interface FileRoutesByTo {
   '/booking/confirmed/$rentalId': typeof BookingConfirmedRentalIdRoute
   '/checkout/confirmed/$rentalId': typeof CheckoutConfirmedRentalIdRoute
   '/internal/invite/$token': typeof InternalInviteTokenRoute
+  '/$locale/blog': typeof LocaleBlogIndexRoute
   '/account/bookings': typeof AccountBookingsIndexRoute
   '/admin/affiliates': typeof AdminAffiliatesIndexRoute
   '/admin/cars': typeof AdminCarsIndexRoute
@@ -479,12 +655,15 @@ export interface FileRoutesByTo {
   '/app/customers': typeof AppCustomersIndexRoute
   '/app/maintenance': typeof AppMaintenanceIndexRoute
   '/app/rentals': typeof AppRentalsIndexRoute
+  '/$locale/booking/confirmed/$rentalId': typeof LocaleBookingConfirmedRentalIdRoute
+  '/$locale/checkout/confirmed/$rentalId': typeof LocaleCheckoutConfirmedRentalIdRoute
   '/api/documents/agreement/$rentalId': typeof ApiDocumentsAgreementRentalIdRoute
   '/api/documents/invoice/$rentalId': typeof ApiDocumentsInvoiceRentalIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$locale': typeof LocaleRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/account': typeof AccountRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
@@ -497,6 +676,15 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/rental-agreement': typeof RentalAgreementRoute
   '/terms': typeof TermsRoute
+  '/$locale/about': typeof LocaleAboutRoute
+  '/$locale/forgot-password': typeof LocaleForgotPasswordRoute
+  '/$locale/login': typeof LocaleLoginRoute
+  '/$locale/pdpa': typeof LocalePdpaRoute
+  '/$locale/privacy': typeof LocalePrivacyRoute
+  '/$locale/refund-policy': typeof LocaleRefundPolicyRoute
+  '/$locale/register': typeof LocaleRegisterRoute
+  '/$locale/rental-agreement': typeof LocaleRentalAgreementRoute
+  '/$locale/terms': typeof LocaleTermsRoute
   '/account/notifications': typeof AccountNotificationsRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/rentals': typeof AccountRentalsRoute
@@ -510,10 +698,19 @@ export interface FileRoutesById {
   '/internal/login': typeof InternalLoginRoute
   '/pay/$rentalId': typeof PayRentalIdRoute
   '/r/$code': typeof RCodeRoute
+  '/$locale/': typeof LocaleIndexRoute
   '/account/': typeof AccountIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/blog/': typeof BlogIndexRoute
+  '/$locale/blog/$slug': typeof LocaleBlogSlugRoute
+  '/$locale/book/$carId': typeof LocaleBookCarIdRoute
+  '/$locale/checkout/$carId': typeof LocaleCheckoutCarIdRoute
+  '/$locale/guides/know-how': typeof LocaleGuidesKnowHowRoute
+  '/$locale/guides/pick-car': typeof LocaleGuidesPickCarRoute
+  '/$locale/guides/pickup-return': typeof LocaleGuidesPickupReturnRoute
+  '/$locale/guides/plan-drive': typeof LocaleGuidesPlanDriveRoute
+  '/$locale/pay/$rentalId': typeof LocalePayRentalIdRoute
   '/account/bookings/$rentalId': typeof AccountBookingsRentalIdRoute
   '/admin/affiliates/$affiliateId': typeof AdminAffiliatesAffiliateIdRoute
   '/admin/affiliates/payouts': typeof AdminAffiliatesPayoutsRoute
@@ -528,6 +725,7 @@ export interface FileRoutesById {
   '/booking/confirmed/$rentalId': typeof BookingConfirmedRentalIdRoute
   '/checkout/confirmed/$rentalId': typeof CheckoutConfirmedRentalIdRoute
   '/internal/invite/$token': typeof InternalInviteTokenRoute
+  '/$locale/blog/': typeof LocaleBlogIndexRoute
   '/account/bookings/': typeof AccountBookingsIndexRoute
   '/admin/affiliates/': typeof AdminAffiliatesIndexRoute
   '/admin/cars/': typeof AdminCarsIndexRoute
@@ -540,6 +738,8 @@ export interface FileRoutesById {
   '/app/customers/': typeof AppCustomersIndexRoute
   '/app/maintenance/': typeof AppMaintenanceIndexRoute
   '/app/rentals/': typeof AppRentalsIndexRoute
+  '/$locale/booking/confirmed/$rentalId': typeof LocaleBookingConfirmedRentalIdRoute
+  '/$locale/checkout/confirmed/$rentalId': typeof LocaleCheckoutConfirmedRentalIdRoute
   '/api/documents/agreement/$rentalId': typeof ApiDocumentsAgreementRentalIdRoute
   '/api/documents/invoice/$rentalId': typeof ApiDocumentsInvoiceRentalIdRoute
 }
@@ -547,6 +747,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$locale'
     | '/about'
     | '/account'
     | '/admin'
@@ -559,6 +760,15 @@ export interface FileRouteTypes {
     | '/register'
     | '/rental-agreement'
     | '/terms'
+    | '/$locale/about'
+    | '/$locale/forgot-password'
+    | '/$locale/login'
+    | '/$locale/pdpa'
+    | '/$locale/privacy'
+    | '/$locale/refund-policy'
+    | '/$locale/register'
+    | '/$locale/rental-agreement'
+    | '/$locale/terms'
     | '/account/notifications'
     | '/account/profile'
     | '/account/rentals'
@@ -572,10 +782,19 @@ export interface FileRouteTypes {
     | '/internal/login'
     | '/pay/$rentalId'
     | '/r/$code'
+    | '/$locale/'
     | '/account/'
     | '/admin/'
     | '/app/'
     | '/blog/'
+    | '/$locale/blog/$slug'
+    | '/$locale/book/$carId'
+    | '/$locale/checkout/$carId'
+    | '/$locale/guides/know-how'
+    | '/$locale/guides/pick-car'
+    | '/$locale/guides/pickup-return'
+    | '/$locale/guides/plan-drive'
+    | '/$locale/pay/$rentalId'
     | '/account/bookings/$rentalId'
     | '/admin/affiliates/$affiliateId'
     | '/admin/affiliates/payouts'
@@ -590,6 +809,7 @@ export interface FileRouteTypes {
     | '/booking/confirmed/$rentalId'
     | '/checkout/confirmed/$rentalId'
     | '/internal/invite/$token'
+    | '/$locale/blog/'
     | '/account/bookings/'
     | '/admin/affiliates/'
     | '/admin/cars/'
@@ -602,6 +822,8 @@ export interface FileRouteTypes {
     | '/app/customers/'
     | '/app/maintenance/'
     | '/app/rentals/'
+    | '/$locale/booking/confirmed/$rentalId'
+    | '/$locale/checkout/confirmed/$rentalId'
     | '/api/documents/agreement/$rentalId'
     | '/api/documents/invoice/$rentalId'
   fileRoutesByTo: FileRoutesByTo
@@ -616,6 +838,15 @@ export interface FileRouteTypes {
     | '/register'
     | '/rental-agreement'
     | '/terms'
+    | '/$locale/about'
+    | '/$locale/forgot-password'
+    | '/$locale/login'
+    | '/$locale/pdpa'
+    | '/$locale/privacy'
+    | '/$locale/refund-policy'
+    | '/$locale/register'
+    | '/$locale/rental-agreement'
+    | '/$locale/terms'
     | '/account/notifications'
     | '/account/profile'
     | '/account/rentals'
@@ -629,10 +860,19 @@ export interface FileRouteTypes {
     | '/internal/login'
     | '/pay/$rentalId'
     | '/r/$code'
+    | '/$locale'
     | '/account'
     | '/admin'
     | '/app'
     | '/blog'
+    | '/$locale/blog/$slug'
+    | '/$locale/book/$carId'
+    | '/$locale/checkout/$carId'
+    | '/$locale/guides/know-how'
+    | '/$locale/guides/pick-car'
+    | '/$locale/guides/pickup-return'
+    | '/$locale/guides/plan-drive'
+    | '/$locale/pay/$rentalId'
     | '/account/bookings/$rentalId'
     | '/admin/affiliates/$affiliateId'
     | '/admin/affiliates/payouts'
@@ -647,6 +887,7 @@ export interface FileRouteTypes {
     | '/booking/confirmed/$rentalId'
     | '/checkout/confirmed/$rentalId'
     | '/internal/invite/$token'
+    | '/$locale/blog'
     | '/account/bookings'
     | '/admin/affiliates'
     | '/admin/cars'
@@ -659,11 +900,14 @@ export interface FileRouteTypes {
     | '/app/customers'
     | '/app/maintenance'
     | '/app/rentals'
+    | '/$locale/booking/confirmed/$rentalId'
+    | '/$locale/checkout/confirmed/$rentalId'
     | '/api/documents/agreement/$rentalId'
     | '/api/documents/invoice/$rentalId'
   id:
     | '__root__'
     | '/'
+    | '/$locale'
     | '/about'
     | '/account'
     | '/admin'
@@ -676,6 +920,15 @@ export interface FileRouteTypes {
     | '/register'
     | '/rental-agreement'
     | '/terms'
+    | '/$locale/about'
+    | '/$locale/forgot-password'
+    | '/$locale/login'
+    | '/$locale/pdpa'
+    | '/$locale/privacy'
+    | '/$locale/refund-policy'
+    | '/$locale/register'
+    | '/$locale/rental-agreement'
+    | '/$locale/terms'
     | '/account/notifications'
     | '/account/profile'
     | '/account/rentals'
@@ -689,10 +942,19 @@ export interface FileRouteTypes {
     | '/internal/login'
     | '/pay/$rentalId'
     | '/r/$code'
+    | '/$locale/'
     | '/account/'
     | '/admin/'
     | '/app/'
     | '/blog/'
+    | '/$locale/blog/$slug'
+    | '/$locale/book/$carId'
+    | '/$locale/checkout/$carId'
+    | '/$locale/guides/know-how'
+    | '/$locale/guides/pick-car'
+    | '/$locale/guides/pickup-return'
+    | '/$locale/guides/plan-drive'
+    | '/$locale/pay/$rentalId'
     | '/account/bookings/$rentalId'
     | '/admin/affiliates/$affiliateId'
     | '/admin/affiliates/payouts'
@@ -707,6 +969,7 @@ export interface FileRouteTypes {
     | '/booking/confirmed/$rentalId'
     | '/checkout/confirmed/$rentalId'
     | '/internal/invite/$token'
+    | '/$locale/blog/'
     | '/account/bookings/'
     | '/admin/affiliates/'
     | '/admin/cars/'
@@ -719,12 +982,15 @@ export interface FileRouteTypes {
     | '/app/customers/'
     | '/app/maintenance/'
     | '/app/rentals/'
+    | '/$locale/booking/confirmed/$rentalId'
+    | '/$locale/checkout/confirmed/$rentalId'
     | '/api/documents/agreement/$rentalId'
     | '/api/documents/invoice/$rentalId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LocaleRouteRoute: typeof LocaleRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   AccountRoute: typeof AccountRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
@@ -843,6 +1109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$locale': {
+      id: '/$locale'
+      path: '/$locale'
+      fullPath: '/$locale'
+      preLoaderRoute: typeof LocaleRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -877,6 +1150,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/account/'
       preLoaderRoute: typeof AccountIndexRouteImport
       parentRoute: typeof AccountRoute
+    }
+    '/$locale/': {
+      id: '/$locale/'
+      path: '/'
+      fullPath: '/$locale/'
+      preLoaderRoute: typeof LocaleIndexRouteImport
+      parentRoute: typeof LocaleRouteRoute
     }
     '/r/$code': {
       id: '/r/$code'
@@ -969,6 +1249,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountNotificationsRouteImport
       parentRoute: typeof AccountRoute
     }
+    '/$locale/terms': {
+      id: '/$locale/terms'
+      path: '/terms'
+      fullPath: '/$locale/terms'
+      preLoaderRoute: typeof LocaleTermsRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/rental-agreement': {
+      id: '/$locale/rental-agreement'
+      path: '/rental-agreement'
+      fullPath: '/$locale/rental-agreement'
+      preLoaderRoute: typeof LocaleRentalAgreementRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/register': {
+      id: '/$locale/register'
+      path: '/register'
+      fullPath: '/$locale/register'
+      preLoaderRoute: typeof LocaleRegisterRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/refund-policy': {
+      id: '/$locale/refund-policy'
+      path: '/refund-policy'
+      fullPath: '/$locale/refund-policy'
+      preLoaderRoute: typeof LocaleRefundPolicyRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/privacy': {
+      id: '/$locale/privacy'
+      path: '/privacy'
+      fullPath: '/$locale/privacy'
+      preLoaderRoute: typeof LocalePrivacyRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/pdpa': {
+      id: '/$locale/pdpa'
+      path: '/pdpa'
+      fullPath: '/$locale/pdpa'
+      preLoaderRoute: typeof LocalePdpaRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/login': {
+      id: '/$locale/login'
+      path: '/login'
+      fullPath: '/$locale/login'
+      preLoaderRoute: typeof LocaleLoginRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/forgot-password': {
+      id: '/$locale/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/$locale/forgot-password'
+      preLoaderRoute: typeof LocaleForgotPasswordRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/about': {
+      id: '/$locale/about'
+      path: '/about'
+      fullPath: '/$locale/about'
+      preLoaderRoute: typeof LocaleAboutRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
     '/app/rentals/': {
       id: '/app/rentals/'
       path: '/rentals'
@@ -1052,6 +1395,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/account/bookings/'
       preLoaderRoute: typeof AccountBookingsIndexRouteImport
       parentRoute: typeof AccountRoute
+    }
+    '/$locale/blog/': {
+      id: '/$locale/blog/'
+      path: '/blog'
+      fullPath: '/$locale/blog/'
+      preLoaderRoute: typeof LocaleBlogIndexRouteImport
+      parentRoute: typeof LocaleRouteRoute
     }
     '/internal/invite/$token': {
       id: '/internal/invite/$token'
@@ -1151,6 +1501,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountBookingsRentalIdRouteImport
       parentRoute: typeof AccountRoute
     }
+    '/$locale/pay/$rentalId': {
+      id: '/$locale/pay/$rentalId'
+      path: '/pay/$rentalId'
+      fullPath: '/$locale/pay/$rentalId'
+      preLoaderRoute: typeof LocalePayRentalIdRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/guides/plan-drive': {
+      id: '/$locale/guides/plan-drive'
+      path: '/guides/plan-drive'
+      fullPath: '/$locale/guides/plan-drive'
+      preLoaderRoute: typeof LocaleGuidesPlanDriveRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/guides/pickup-return': {
+      id: '/$locale/guides/pickup-return'
+      path: '/guides/pickup-return'
+      fullPath: '/$locale/guides/pickup-return'
+      preLoaderRoute: typeof LocaleGuidesPickupReturnRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/guides/pick-car': {
+      id: '/$locale/guides/pick-car'
+      path: '/guides/pick-car'
+      fullPath: '/$locale/guides/pick-car'
+      preLoaderRoute: typeof LocaleGuidesPickCarRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/guides/know-how': {
+      id: '/$locale/guides/know-how'
+      path: '/guides/know-how'
+      fullPath: '/$locale/guides/know-how'
+      preLoaderRoute: typeof LocaleGuidesKnowHowRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/checkout/$carId': {
+      id: '/$locale/checkout/$carId'
+      path: '/checkout/$carId'
+      fullPath: '/$locale/checkout/$carId'
+      preLoaderRoute: typeof LocaleCheckoutCarIdRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/book/$carId': {
+      id: '/$locale/book/$carId'
+      path: '/book/$carId'
+      fullPath: '/$locale/book/$carId'
+      preLoaderRoute: typeof LocaleBookCarIdRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/blog/$slug': {
+      id: '/$locale/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/$locale/blog/$slug'
+      preLoaderRoute: typeof LocaleBlogSlugRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
     '/api/documents/invoice/$rentalId': {
       id: '/api/documents/invoice/$rentalId'
       path: '/api/documents/invoice/$rentalId'
@@ -1165,8 +1571,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDocumentsAgreementRentalIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$locale/checkout/confirmed/$rentalId': {
+      id: '/$locale/checkout/confirmed/$rentalId'
+      path: '/checkout/confirmed/$rentalId'
+      fullPath: '/$locale/checkout/confirmed/$rentalId'
+      preLoaderRoute: typeof LocaleCheckoutConfirmedRentalIdRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/booking/confirmed/$rentalId': {
+      id: '/$locale/booking/confirmed/$rentalId'
+      path: '/booking/confirmed/$rentalId'
+      fullPath: '/$locale/booking/confirmed/$rentalId'
+      preLoaderRoute: typeof LocaleBookingConfirmedRentalIdRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
   }
 }
+
+interface LocaleRouteRouteChildren {
+  LocaleAboutRoute: typeof LocaleAboutRoute
+  LocaleForgotPasswordRoute: typeof LocaleForgotPasswordRoute
+  LocaleLoginRoute: typeof LocaleLoginRoute
+  LocalePdpaRoute: typeof LocalePdpaRoute
+  LocalePrivacyRoute: typeof LocalePrivacyRoute
+  LocaleRefundPolicyRoute: typeof LocaleRefundPolicyRoute
+  LocaleRegisterRoute: typeof LocaleRegisterRoute
+  LocaleRentalAgreementRoute: typeof LocaleRentalAgreementRoute
+  LocaleTermsRoute: typeof LocaleTermsRoute
+  LocaleIndexRoute: typeof LocaleIndexRoute
+  LocaleBlogSlugRoute: typeof LocaleBlogSlugRoute
+  LocaleBookCarIdRoute: typeof LocaleBookCarIdRoute
+  LocaleCheckoutCarIdRoute: typeof LocaleCheckoutCarIdRoute
+  LocaleGuidesKnowHowRoute: typeof LocaleGuidesKnowHowRoute
+  LocaleGuidesPickCarRoute: typeof LocaleGuidesPickCarRoute
+  LocaleGuidesPickupReturnRoute: typeof LocaleGuidesPickupReturnRoute
+  LocaleGuidesPlanDriveRoute: typeof LocaleGuidesPlanDriveRoute
+  LocalePayRentalIdRoute: typeof LocalePayRentalIdRoute
+  LocaleBlogIndexRoute: typeof LocaleBlogIndexRoute
+  LocaleBookingConfirmedRentalIdRoute: typeof LocaleBookingConfirmedRentalIdRoute
+  LocaleCheckoutConfirmedRentalIdRoute: typeof LocaleCheckoutConfirmedRentalIdRoute
+}
+
+const LocaleRouteRouteChildren: LocaleRouteRouteChildren = {
+  LocaleAboutRoute: LocaleAboutRoute,
+  LocaleForgotPasswordRoute: LocaleForgotPasswordRoute,
+  LocaleLoginRoute: LocaleLoginRoute,
+  LocalePdpaRoute: LocalePdpaRoute,
+  LocalePrivacyRoute: LocalePrivacyRoute,
+  LocaleRefundPolicyRoute: LocaleRefundPolicyRoute,
+  LocaleRegisterRoute: LocaleRegisterRoute,
+  LocaleRentalAgreementRoute: LocaleRentalAgreementRoute,
+  LocaleTermsRoute: LocaleTermsRoute,
+  LocaleIndexRoute: LocaleIndexRoute,
+  LocaleBlogSlugRoute: LocaleBlogSlugRoute,
+  LocaleBookCarIdRoute: LocaleBookCarIdRoute,
+  LocaleCheckoutCarIdRoute: LocaleCheckoutCarIdRoute,
+  LocaleGuidesKnowHowRoute: LocaleGuidesKnowHowRoute,
+  LocaleGuidesPickCarRoute: LocaleGuidesPickCarRoute,
+  LocaleGuidesPickupReturnRoute: LocaleGuidesPickupReturnRoute,
+  LocaleGuidesPlanDriveRoute: LocaleGuidesPlanDriveRoute,
+  LocalePayRentalIdRoute: LocalePayRentalIdRoute,
+  LocaleBlogIndexRoute: LocaleBlogIndexRoute,
+  LocaleBookingConfirmedRentalIdRoute: LocaleBookingConfirmedRentalIdRoute,
+  LocaleCheckoutConfirmedRentalIdRoute: LocaleCheckoutConfirmedRentalIdRoute,
+}
+
+const LocaleRouteRouteWithChildren = LocaleRouteRoute._addFileChildren(
+  LocaleRouteRouteChildren,
+)
 
 interface AccountRouteChildren {
   AccountNotificationsRoute: typeof AccountNotificationsRoute
@@ -1249,6 +1721,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LocaleRouteRoute: LocaleRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   AccountRoute: AccountRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,

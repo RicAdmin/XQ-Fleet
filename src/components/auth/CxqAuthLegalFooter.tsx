@@ -1,17 +1,17 @@
-import { Link } from '@tanstack/react-router'
+import { LocaleLink } from '#/components/i18n/LocaleLink'
+import { useT } from '#/i18n/context'
 
 export default function CxqAuthLegalFooter() {
+  const t = useT()
   return (
-    <p className="auth-tos">
-      By continuing you agree to our{' '}
-      <Link to="/terms" className="auth-link">
-        Terms &amp; Conditions
-      </Link>{' '}
-      and acknowledge our{' '}
-      <Link to="/privacy" className="auth-link">
-        Privacy Policy
-      </Link>
-      .
+    <p className="auth-legal">
+      <LocaleLink to="/terms" className="auth-link">
+        {t('footer.terms')}
+      </LocaleLink>
+      {' · '}
+      <LocaleLink to="/privacy" className="auth-link">
+        {t('footer.privacy')}
+      </LocaleLink>
     </p>
   )
 }

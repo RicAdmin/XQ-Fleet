@@ -1,10 +1,12 @@
-import { FAQS } from '#/components/landing/cxq-landing-data'
+import type { Locale } from '#/i18n/locales'
+import { HTML_LANG } from '#/i18n/locales'
+import { getLandingContent } from '#/i18n/content'
 import { LEGAL_COMPANY } from '#/lib/legal/company'
 import { brandLogoUrl, publicSitePath, publicSiteUrl } from '#/lib/brand'
 import { SEO_OG_IMAGE } from '#/lib/seo-meta'
 
 /** JSON-LD for homepage — AutoRental + FAQPage. */
-export function buildHomeStructuredData() {
+export function buildHomeStructuredData(locale: Locale = 'en') {
   const siteUrl = publicSiteUrl()
   const logoUrl = brandLogoUrl(siteUrl)
   const heroImageUrl = publicSitePath(SEO_OG_IMAGE, siteUrl)
@@ -92,13 +94,13 @@ export function buildHomeStructuredData() {
     url: siteUrl,
     name: 'Car XQ — Car Rental Langkawi',
     publisher: { '@id': `${siteUrl}/#organization` },
-    inLanguage: 'en-MY',
+    inLanguage: HTML_LANG[locale],
   }
 
   const faqPage = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: FAQS.map((faq) => ({
+    mainEntity: getLandingContent(locale).faqs.map((faq) => ({
       '@type': 'Question',
       name: faq.q,
       acceptedAnswer: {
@@ -111,8 +113,8 @@ export function buildHomeStructuredData() {
   return { autoRental, webSite, faqPage }
 }
 
-export function homeStructuredDataScripts() {
-  const { autoRental, webSite, faqPage } = buildHomeStructuredData()
+export function homeStructuredDataScripts(locale: Locale = 'en') {
+  const { autoRental, webSite, faqPage } = buildHomeStructuredData(locale)
   return [
     { id: 'auto-rental', json: JSON.stringify(autoRental) },
     { id: 'website', json: JSON.stringify(webSite) },
