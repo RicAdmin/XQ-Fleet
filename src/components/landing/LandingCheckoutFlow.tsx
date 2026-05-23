@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useId, useRef, useState, type AnimationEvent, type ReactNode } from 'react'
 
+import { authClient } from '#/lib/auth-client'
+import { toCheckoutCustomer } from '#/lib/checkout-session'
+
 import { Link, useNavigate } from '@tanstack/react-router'
 import {
   ArrowLeft,
@@ -304,6 +307,15 @@ export function LandingCheckoutFlow({
   const { t, href, locale } = usePublicI18n()
   const navigate = useNavigate()
   const autoPayAttempted = useRef(false)
+  const draftStepRestored = useRef(false)
+
+  const { data: clientSession, isPending: clientSessionPending } = authClient.useSession()
+  const resolvedUser = useMemo(
+    () => toCheckoutCustomer(clientSession?.user) ?? toCheckoutCustomer(user),
+    [clientSession?.user, user],
+  )
+  const resolvedSessionPending =
+    sessionPending || (clientSessionPending && !resolvedUser)
 
   const initialDraft = useMemo(() => loadCheckoutDraft(car.id), [car.id])
 
@@ -336,7 +348,7 @@ export function LandingCheckoutFlow({
   const nights = nightsBetween(booking.pickDate, booking.retDate)
   const daily = Math.round(car.dailyRateSen / 100)
   const subtotal = daily * nights
-  const [step, setStep] = useState(() => (initialDraft?.awaitingPayment ? 1 : 0))
+  const [step, setStep] = useState(0)
   const [guestCheckout, setGuestCheckout] = useState(() => initialDraft?.guestCheckout ?? false)
   const [accountAuthMode, setAccountAuthMode] = useState<'sign-in' | 'register' | null>(null)
   const [addons, setAddons] = useState<Record<AddonKey, boolean>>(() => initialDraft?.addons ?? {
@@ -386,18 +398,25 @@ export function LandingCheckoutFlow({
   const discount = appliedPromo ? Math.round(appliedPromo.discountSen / 100) : 0
 
   useEffect(() => {
-    if (initialDraft?.awaitingPayment) return
-    if (user) setGuestCheckout(false)
-  }, [user, initialDraft?.awaitingPayment])
+    if (resolvedSessionPending || draftStepRestored.current) return
+    draftStepRestored.current = true
+    if (resolvedUser) return
+    if (initialDraft?.awaitingPayment) setStep(1)
+  }, [resolvedSessionPending, resolvedUser, initialDraft?.awaitingPayment])
 
   useEffect(() => {
-    if (initialDraft?.awaitingPayment) return
+    if (initialDraft?.awaitingPayment && !resolvedUser) return
+    if (resolvedUser) setGuestCheckout(false)
+  }, [resolvedUser, initialDraft?.awaitingPayment])
+
+  useEffect(() => {
+    if (initialDraft?.awaitingPayment && !resolvedUser) return
     setBuyer((b) => ({
       ...b,
-      name: user?.name ?? b.name,
-      email: user?.email ?? b.email,
+      name: resolvedUser?.name ?? b.name,
+      email: resolvedUser?.email ?? b.email,
     }))
-  }, [user?.name, user?.email, initialDraft?.awaitingPayment])
+  }, [resolvedUser?.name, resolvedUser?.email, initialDraft?.awaitingPayment, resolvedUser])
 
   useEffect(() => {
     if (!alsoAsDriver) return
@@ -701,21 +720,24 @@ export function LandingCheckoutFlow({
   )
 
   useEffect(() => {
-    if (sessionPending || autoPayAttempted.current) return
-    if (!user) return
+    if (resolvedSessionPending || autoPayAttempted.current) return
+    if (!resolvedUser || guestCheckout) return
     const draft = loadCheckoutDraft(car.id)
-    if (!draft?.awaitingPayment || draft.guestCheckout) return
+    const resumeAfterAuth =
+      Boolean(draft?.awaitingPayment && !draft.guestCheckout) ||
+      (step === 1 && !guestCheckout)
+    if (!resumeAfterAuth) return
     autoPayAttempted.current = true
     clearCheckoutDraft()
     void createBooking()
-  }, [sessionPending, user, car.id, createBooking])
+  }, [resolvedSessionPending, resolvedUser, guestCheckout, step, car.id, createBooking])
 
   const advance = useCallback(async () => {
     setFlowError(null)
     if (step === 0) {
       if (!validateReview()) return
-      if (sessionPending) return
-      if (user) {
+      if (resolvedSessionPending) return
+      if (resolvedUser) {
         await createBooking()
         return
       }
@@ -725,19 +747,27 @@ export function LandingCheckoutFlow({
       return
     }
     if (step === 1) {
-      if (sessionPending) return
-      if (!user && !guestCheckout) return
+      if (resolvedSessionPending) return
+      if (!resolvedUser && !guestCheckout) return
       await createBooking()
     }
   }, [
     step,
     validateReview,
-    user,
+    resolvedUser,
     guestCheckout,
     createBooking,
-    sessionPending,
+    resolvedSessionPending,
     persistDraft,
   ])
+
+  const handleInlineAuthSuccess = useCallback(async () => {
+    setAccountAuthMode(null)
+    autoPayAttempted.current = false
+    await authClient.getSession()
+    clearCheckoutDraft()
+    await createBooking()
+  }, [createBooking])
 
   const continueAsGuest = useCallback(() => {
     setFlowError(null)
@@ -1320,7 +1350,7 @@ export function LandingCheckoutFlow({
               </div>
             ) : null}
 
-            {step === 1 && (user || guestCheckout) ? (
+            {step === 1 && (resolvedUser || guestCheckout) ? (
               <div className="checkout-section">
                 <div className="checkout-progress-meta">
                   <span className="eyebrow">{t('checkout.step2of2')}</span>
@@ -1328,7 +1358,7 @@ export function LandingCheckoutFlow({
                     {t('checkout.paymentTitle')}
                   </h2>
                   <p className="h-sub" style={{ marginTop: 4 }}>
-                    {guestCheckout && !user
+                    {guestCheckout && !resolvedUser
                       ? t('checkout.guestPaymentSub')
                       : t('checkout.secureCheckoutNote')}
                   </p>
@@ -1342,7 +1372,7 @@ export function LandingCheckoutFlow({
               </div>
             ) : null}
 
-            {step === 1 && !user && !guestCheckout && sessionPending ? (
+            {step === 1 && !resolvedUser && !guestCheckout && resolvedSessionPending ? (
               <div className="checkout-section">
                 <div className="checkout-progress-meta">
                   <span className="eyebrow">{t('checkout.step2of2')}</span>
@@ -1357,7 +1387,7 @@ export function LandingCheckoutFlow({
               </div>
             ) : null}
 
-            {step === 1 && !user && !guestCheckout && !sessionPending ? (
+            {step === 1 && !resolvedUser && !guestCheckout && !resolvedSessionPending ? (
               <div className="checkout-section">
                 <div className="checkout-progress-meta">
                   <span className="eyebrow">{t('checkout.step2of2')}</span>
@@ -1398,7 +1428,7 @@ export function LandingCheckoutFlow({
                       locale={locale}
                       returnTo={checkoutReturnTo}
                       defaultEmail={buyer.email}
-                      onSuccess={() => setAccountAuthMode(null)}
+                      onSuccess={() => void handleInlineAuthSuccess()}
                       onSwitchMode={setAccountAuthMode}
                       onCancel={() => setAccountAuthMode(null)}
                     />
@@ -1563,15 +1593,15 @@ export function LandingCheckoutFlow({
               </span>
             </div>
 
-            {step === 1 && !user && !guestCheckout && !sessionPending ? (
+            {step === 1 && !resolvedUser && !guestCheckout && !resolvedSessionPending ? (
                 <button type="button" className="btn btn-ghost btn-lg" onClick={() => setStep(0)}>
                   {t('checkout.backToReview')}
                 </button>
               ) : (
                 <div className="cs-pay-actions">
-                  <button type="button" className="btn btn-leaf btn-lg" onClick={() => void advance()} disabled={submitting || sessionPending || (step === 1 && !user && !guestCheckout)}>
+                  <button type="button" className="btn btn-leaf btn-lg" onClick={() => void advance()} disabled={submitting || resolvedSessionPending || (step === 1 && !resolvedUser && !guestCheckout)}>
                     {step === 0
-                      ? user
+                      ? resolvedUser
                         ? t('checkout.payAmount', { total })
                         : t('checkout.payNow')
                       : submitting

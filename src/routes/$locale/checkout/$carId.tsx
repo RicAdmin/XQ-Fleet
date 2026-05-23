@@ -17,6 +17,7 @@ import {
 } from '#/lib/checkout-trip'
 import { authClient } from '#/lib/auth-client'
 import { getRequestSession } from '#/lib/auth-functions'
+import { toCheckoutCustomer } from '#/lib/checkout-session'
 import { saveTripSearch } from '#/lib/trip-search-storage'
 import { getPublicCarDetail, type PublicCarDetail, type PublicCarRow } from '#/lib/portal-functions'
 
@@ -44,10 +45,7 @@ export const Route = createFileRoute('/$locale/checkout/$carId')({
       getRequestSession(),
     ])
     if (!car) throw redirect({ to: '/' })
-    const authUser =
-      session?.user.role === 'customer'
-        ? { name: session.user.name, email: session.user.email }
-        : null
+    const authUser = toCheckoutCustomer(session?.user) ?? null
     return { carRow: detailToRow(car), authUser }
   },
   pendingComponent: CheckoutRoutePending,
@@ -71,10 +69,10 @@ function CheckoutPage() {
   const { carRow, authUser } = Route.useLoaderData()
   const { data: session, isPending: clientSessionPending } = authClient.useSession()
 
-  const checkoutUser =
-    session?.user != null
-      ? { name: session.user.name, email: session.user.email }
-      : (authUser ?? undefined)
+  const checkoutUser = useMemo(
+    () => toCheckoutCustomer(session?.user) ?? authUser ?? undefined,
+    [session?.user, authUser],
+  )
   /** Wait for client session fetch before showing the login gate (server session may already be set). */
   const sessionPending = clientSessionPending && !checkoutUser
 
