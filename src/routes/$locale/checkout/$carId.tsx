@@ -4,7 +4,6 @@ import '#/components/landing/cxq-landing-overrides.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
-import { z } from 'zod'
 
 import { LandingNav, SiteFooter } from '#/components/landing/CxqLandingPage'
 import { LandingCheckoutFlow, type BookingState } from '#/components/landing/LandingCheckoutFlow'
@@ -12,24 +11,14 @@ import { LoadingSpinner } from '#/components/ui/LoadingSpinner'
 import { toLocalYmd } from '#/lib/booking-datetime'
 import {
   bookingHasCompleteTrip,
+  parseCheckoutSearch,
   resolveCheckoutBooking,
   type CheckoutTripSearch,
 } from '#/lib/checkout-trip'
 import { authClient } from '#/lib/auth-client'
+import { getRequestSession } from '#/lib/auth-functions'
 import { saveTripSearch } from '#/lib/trip-search-storage'
 import { getPublicCarDetail, type PublicCarDetail, type PublicCarRow } from '#/lib/portal-functions'
-
-const checkoutSearchSchema = z.object({
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  from: z.string().optional(),
-  retLoc: z.string().optional(),
-  tripType: z.enum(['round', 'oneway']).optional(),
-  pickTime: z.string().optional(),
-  retTime: z.string().optional(),
-  adults: z.string().optional(),
-  children: z.string().optional(),
-})
 
 function detailToRow(car: PublicCarDetail): PublicCarRow {
   const cover = car.photos.find((p) => p.isCover)?.url ?? car.photos[0]?.url ?? null
@@ -48,11 +37,18 @@ function detailToRow(car: PublicCarDetail): PublicCarRow {
 }
 
 export const Route = createFileRoute('/$locale/checkout/$carId')({
-  validateSearch: checkoutSearchSchema,
+  validateSearch: parseCheckoutSearch,
   loader: async ({ params }) => {
-    const car = await getPublicCarDetail({ data: { carId: params.carId } })
+    const [car, session] = await Promise.all([
+      getPublicCarDetail({ data: { carId: params.carId } }),
+      getRequestSession(),
+    ])
     if (!car) throw redirect({ to: '/' })
-    return { carRow: detailToRow(car) }
+    const authUser =
+      session?.user.role === 'customer'
+        ? { name: session.user.name, email: session.user.email }
+        : null
+    return { carRow: detailToRow(car), authUser }
   },
   pendingComponent: CheckoutRoutePending,
   component: CheckoutPage,
@@ -72,9 +68,15 @@ function CheckoutRoutePending() {
 function CheckoutPage() {
   const navigate = useNavigate()
   const search = Route.useSearch() as CheckoutTripSearch
-  const { carRow } = Route.useLoaderData()
-  const { data: session, isPending: sessionPending } = authClient.useSession()
-  const user = session?.user
+  const { carRow, authUser } = Route.useLoaderData()
+  const { data: session, isPending: clientSessionPending } = authClient.useSession()
+
+  const checkoutUser =
+    session?.user != null
+      ? { name: session.user.name, email: session.user.email }
+      : (authUser ?? undefined)
+  /** Wait for client session fetch before showing the login gate (server session may already be set). */
+  const sessionPending = clientSessionPending && !checkoutUser
 
   const [navMenuOpen, setNavMenuOpen] = useState(false)
   const navMenuRef = useRef<HTMLDivElement>(null)
@@ -85,6 +87,10 @@ function CheckoutPage() {
     }
     document.addEventListener('mousedown', onDoc)
     return () => document.removeEventListener('mousedown', onDoc)
+  }, [])
+
+  useEffect(() => {
+    void authClient.getSession()
   }, [])
 
   const booking = useMemo(() => resolveCheckoutBooking(search), [search])
@@ -104,7 +110,7 @@ function CheckoutPage() {
             appearance="solid-light"
             sectionLinks="home"
             sessionPending={sessionPending}
-            user={user}
+            user={checkoutUser}
             navMenuOpen={navMenuOpen}
             setNavMenuOpen={setNavMenuOpen}
             navMenuRef={navMenuRef}
@@ -117,7 +123,7 @@ function CheckoutPage() {
             booking={booking}
             startYmd={startYmd}
             endYmd={endYmd}
-            user={user ? { name: user.name, email: user.email } : undefined}
+            user={checkoutUser}
             sessionPending={sessionPending}
             backHref="/"
           />

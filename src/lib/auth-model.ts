@@ -38,7 +38,7 @@ export function getHomePathForRole(role: AppRole) {
     case 'staff':
       return '/app' as const
     case 'customer':
-      return '/account' as const
+      return '/' as const
   }
 }
 

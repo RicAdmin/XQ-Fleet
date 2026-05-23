@@ -12,8 +12,8 @@ import {
 } from 'lucide-react'
 
 import { LoadingSpinner } from '#/components/ui/LoadingSpinner'
+import { CheckoutInlineAuth } from '#/components/landing/CheckoutInlineAuth'
 import { PaymentMethodIcons } from '#/components/landing/payment-method-icons'
-import { LocaleLink } from '#/components/i18n/LocaleLink'
 import type { TranslateFn } from '#/i18n/translate'
 import { usePublicI18n } from '#/i18n/usePublicI18n'
 import { checkoutSearchFromBooking, bookingHasCompleteTrip } from '#/lib/checkout-trip'
@@ -301,7 +301,7 @@ export function LandingCheckoutFlow({
   sessionPending = false,
   backHref,
 }: LandingCheckoutFlowProps) {
-  const { t, href } = usePublicI18n()
+  const { t, href, locale } = usePublicI18n()
   const navigate = useNavigate()
   const autoPayAttempted = useRef(false)
 
@@ -338,6 +338,7 @@ export function LandingCheckoutFlow({
   const subtotal = daily * nights
   const [step, setStep] = useState(() => (initialDraft?.awaitingPayment ? 1 : 0))
   const [guestCheckout, setGuestCheckout] = useState(() => initialDraft?.guestCheckout ?? false)
+  const [accountAuthMode, setAccountAuthMode] = useState<'sign-in' | 'register' | null>(null)
   const [addons, setAddons] = useState<Record<AddonKey, boolean>>(() => initialDraft?.addons ?? {
     child: false,
     second: false,
@@ -740,10 +741,25 @@ export function LandingCheckoutFlow({
 
   const continueAsGuest = useCallback(() => {
     setFlowError(null)
+    setAccountAuthMode(null)
     persistDraft({ guestCheckout: true, awaitingPayment: true })
     setGuestCheckout(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [persistDraft])
+
+  const openAccountAuth = useCallback(
+    (mode: 'sign-in' | 'register') => {
+      persistDraft({ guestCheckout: false, awaitingPayment: true })
+      setAccountAuthMode(mode)
+      requestAnimationFrame(() => {
+        document.querySelector('.checkout-inline-auth')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+        })
+      })
+    },
+    [persistDraft],
+  )
 
   return (
     <div className="checkout">
@@ -1358,26 +1374,35 @@ export function LandingCheckoutFlow({
                   </div>
                   <p className="checkout-account-copy">{t('checkout.signInOrCreate')}</p>
                   <div className="checkout-account-actions">
-                    <LocaleLink
-                      to="/login"
-                      search={{ returnTo: checkoutReturnTo }}
-                      className="btn btn-leaf btn-lg"
-                      onClick={() => persistDraft({ guestCheckout: false, awaitingPayment: true })}
+                    <button
+                      type="button"
+                      className={'btn btn-lg' + (accountAuthMode === 'sign-in' ? ' btn-leaf' : ' btn-ghost')}
+                      onClick={() => openAccountAuth('sign-in')}
                     >
                       {t('auth.signIn')}
-                    </LocaleLink>
-                    <LocaleLink
-                      to="/register"
-                      search={{ returnTo: checkoutReturnTo }}
-                      className="btn btn-ghost btn-lg"
-                      onClick={() => persistDraft({ guestCheckout: false, awaitingPayment: true })}
+                    </button>
+                    <button
+                      type="button"
+                      className={'btn btn-lg' + (accountAuthMode === 'register' ? ' btn-leaf' : ' btn-ghost')}
+                      onClick={() => openAccountAuth('register')}
                     >
                       {t('auth.createAccountBtn')}
-                    </LocaleLink>
+                    </button>
                     <button type="button" className="btn btn-ghost btn-lg" onClick={continueAsGuest}>
                       {t('checkout.continueAsGuest')}
                     </button>
                   </div>
+                  {accountAuthMode ? (
+                    <CheckoutInlineAuth
+                      mode={accountAuthMode}
+                      locale={locale}
+                      returnTo={checkoutReturnTo}
+                      defaultEmail={buyer.email}
+                      onSuccess={() => setAccountAuthMode(null)}
+                      onSwitchMode={setAccountAuthMode}
+                      onCancel={() => setAccountAuthMode(null)}
+                    />
+                  ) : null}
                   <p className="checkout-account-footnote">{t('checkout.accountFootnote')}</p>
                   <Link
                     to="/book/$carId"

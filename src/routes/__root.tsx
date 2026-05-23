@@ -7,7 +7,7 @@ import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
 
-const RootDevtools = import.meta.env.DEV ? lazy(() => import('./RootDevtools')) : null
+const RootDevtools = import.meta.env.DEV ? lazy(() => import('./-RootDevtools')) : null
 
 interface MyRouterContext {
   queryClient: QueryClient

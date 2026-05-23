@@ -49,7 +49,7 @@ export const msMessages: EnMessages = {
     contact: 'Hubungi',
     roadside: 'Bantuan jalan raya 24/7 · +60 11 3521 5576',
     weAccept: 'Kami terima',
-    copyright: '© {year} XQ Car Holidays · Platform XQ Car Fleet',
+    copyright: '© {year} XQ Car Holidays · Platform XQ Car Fleet - V1.1',
     instagram: 'Instagram',
     twitter: 'Twitter',
     facebook: 'Facebook',

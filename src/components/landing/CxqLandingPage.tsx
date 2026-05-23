@@ -235,19 +235,20 @@ export function CxqLandingPage({
     scrollToAnchor('booking-dock')
   }, [booking, t])
 
-  const runSearch = useCallback(async () => {
-    if (!hasTripDates(booking)) {
+  const runSearch = useCallback(async (bookingOverride?: BookingState) => {
+    const trip = bookingOverride ?? booking
+    if (!hasTripDates(trip)) {
       requireBookingSearch()
       return
     }
     setBookingPrompt(null)
-    const committed = cloneBooking(booking)
+    const committed = cloneBooking(trip)
     setSearchCriteria(committed)
-    saveTripSearch(booking, committed)
+    saveTripSearch(trip, committed)
     setSearching(true)
     try {
-      const start = toLocalYmd(booking.pickDate)
-      const end = toLocalYmd(booking.retDate)
+      const start = toLocalYmd(trip.pickDate)
+      const end = toLocalYmd(trip.retDate)
       const results = await filterPublicCars({
         data: {
           startDate: start,
@@ -821,7 +822,7 @@ function BookingDock({
 }: {
   booking: BookingState
   setBooking: React.Dispatch<React.SetStateAction<BookingState>>
-  onSearch: () => void
+  onSearch: (bookingOverride?: BookingState) => void
   searching: boolean
   datesReady: boolean
   prompt?: string | null
@@ -1047,7 +1048,14 @@ function BookingDock({
                       u.retTime = ''
                     }
                     if (t !== undefined) u.retTime = t
-                    return { ...b, ...u }
+                    const next = { ...b, ...u }
+                    if (t !== undefined && hasTripDates(next)) {
+                      queueMicrotask(() => {
+                        onClearPrompt?.()
+                        onSearch(next)
+                      })
+                    }
+                    return next
                   })
                 }}
                 onDone={() => window.requestAnimationFrame(() => setOpen(null))}

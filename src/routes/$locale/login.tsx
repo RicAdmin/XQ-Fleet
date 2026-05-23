@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { createFileRoute } from '@tanstack/react-router'
 import { ArrowRight } from 'lucide-react'
@@ -9,7 +9,7 @@ import CxqAuthMarketingAside from '#/components/auth/CxqAuthMarketingAside'
 import { LocaleLink } from '#/components/i18n/LocaleLink'
 import PublicAuthShell from '#/components/shells/PublicAuthShell'
 import { useLocale, useT } from '#/i18n/context'
-import { authReturnPath, authVerifyCallbackPath, redirectAfterAuth } from '#/lib/auth-redirect'
+import { authReturnPath, authVerifyCallbackPath, DEFAULT_CUSTOMER_AUTH_DEST, redirectAfterAuth } from '#/lib/auth-redirect'
 import { authClient } from '#/lib/auth-client'
 import { appRoleFromSessionUser } from '#/lib/auth-model'
 import { redirectAuthenticatedUser } from '#/lib/route-guards'
@@ -41,6 +41,15 @@ function CustomerLoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const { data: session, isPending: clientSessionPending } = authClient.useSession()
+
+  useEffect(() => {
+    if (clientSessionPending) return
+    const role = appRoleFromSessionUser(session?.user)
+    if (role !== 'customer') return
+    redirectAfterAuth(authReturnPath(locale, returnTo ?? DEFAULT_CUSTOMER_AUTH_DEST))
+  }, [clientSessionPending, session?.user, locale, returnTo])
+
   return (
     <PublicAuthShell screenLabel={t('auth.screenSignIn')} minimal>
       <div className="auth-page-card">
@@ -69,11 +78,11 @@ function CustomerLoginPage() {
               setIsSubmitting(true)
 
               try {
-                const destination = authReturnPath(locale, returnTo ?? '/account')
+                const destination = authReturnPath(locale, returnTo ?? DEFAULT_CUSTOMER_AUTH_DEST)
                 const signInResult = await authClient.signIn.email({
                   email: email.trim(),
                   password,
-                  callbackURL: authVerifyCallbackPath(locale, returnTo ?? '/account'),
+                  callbackURL: authVerifyCallbackPath(locale, returnTo ?? DEFAULT_CUSTOMER_AUTH_DEST),
                 })
 
                 if (signInResult.error) {

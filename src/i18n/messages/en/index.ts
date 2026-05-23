@@ -44,7 +44,7 @@ export const enFooter = {
   contact: 'Contact',
   roadside: '24/7 roadside · +60 11 3521 5576',
   weAccept: 'We accept',
-  copyright: '© {year} XQ Car Holidays · XQ Car Fleet platform',
+  copyright: '© {year} XQ Car Holidays · XQ Car Fleet platform - V1.1',
   instagram: 'Instagram',
   twitter: 'Twitter',
   facebook: 'Facebook',

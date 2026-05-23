@@ -6198,6 +6198,62 @@ input[type=range] { width: 100%; accent-color: var(--brand-leaf); }
   font-size: 13px;
   color: var(--muted);
 }
+.checkout-inline-auth {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.checkout-inline-auth-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.checkout-inline-auth-head h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -.02em;
+}
+.checkout-inline-auth-cancel {
+  border: 0;
+  background: none;
+  padding: 0;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.checkout-inline-auth-cancel:hover {
+  color: var(--ink);
+}
+.checkout-inline-auth-sub {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.checkout-inline-auth-link {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: var(--brand-leaf);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.checkout-inline-auth-link:hover {
+  color: var(--ink);
+}
+.checkout-inline-auth .auth-fields {
+  gap: 14px;
+}
+.checkout-inline-auth .auth-form-submit {
+  width: 100%;
+  margin-top: 8px;
+}
 
 .cancel-card {
   display: flex; gap: 16px;

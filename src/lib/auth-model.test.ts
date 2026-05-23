@@ -11,7 +11,7 @@ describe('auth-model helpers', () => {
   it('maps each role to the correct home path', () => {
     expect(getHomePathForRole('owner')).toBe('/admin')
     expect(getHomePathForRole('staff')).toBe('/app')
-    expect(getHomePathForRole('customer')).toBe('/account')
+    expect(getHomePathForRole('customer')).toBe('/')
   })
 
   it('knows which roles can reach each protected surface', () => {

@@ -20,6 +20,27 @@ export type CheckoutTripSearch = {
   children?: string
 }
 
+function optionalSearchString(value: unknown): string | undefined {
+  if (value == null || value === '') return undefined
+  return String(value)
+}
+
+/** TanStack Router may parse ?adults=2 as a number — coerce before use. */
+export function parseCheckoutSearch(search: Record<string, unknown>): CheckoutTripSearch {
+  const tripType = search.tripType
+  return {
+    startDate: typeof search.startDate === 'string' ? search.startDate : undefined,
+    endDate: typeof search.endDate === 'string' ? search.endDate : undefined,
+    from: typeof search.from === 'string' ? search.from : undefined,
+    retLoc: typeof search.retLoc === 'string' ? search.retLoc : undefined,
+    tripType: tripType === 'round' || tripType === 'oneway' ? tripType : undefined,
+    pickTime: typeof search.pickTime === 'string' ? search.pickTime : undefined,
+    retTime: typeof search.retTime === 'string' ? search.retTime : undefined,
+    adults: optionalSearchString(search.adults),
+    children: optionalSearchString(search.children),
+  }
+}
+
 export function checkoutSearchFromBooking(booking: BookingState): CheckoutTripSearch {
   return {
     startDate: toLocalYmd(booking.pickDate),

@@ -3,6 +3,11 @@ import { describe, expect, it } from 'vitest'
 import { authReturnPath, authVerifyCallbackPath } from '#/lib/auth-redirect'
 
 describe('authReturnPath', () => {
+  it('defaults to locale homepage', () => {
+    expect(authReturnPath('en')).toBe('/en')
+    expect(authReturnPath('ms')).toBe('/ms')
+  })
+
   it('keeps /account without locale prefix', () => {
     expect(authReturnPath('en', '/account')).toBe('/account')
     expect(authReturnPath('ms', '/account')).toBe('/account')
