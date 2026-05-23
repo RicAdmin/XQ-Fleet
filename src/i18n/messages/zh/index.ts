@@ -48,7 +48,7 @@ export const zhMessages: EnMessages = {
     contact: '联系',
     roadside: '24/7 道路救援 · +60 11 3521 5576',
     weAccept: '我们接受',
-    copyright: '© {year} XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - V1.5',
+    copyright: '© {year} XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - V2.0',
     instagram: 'Instagram',
     twitter: 'Twitter',
     facebook: 'Facebook',
@@ -313,7 +313,7 @@ export const zhMessages: EnMessages = {
   seo: {
     homeTitle: '兰卡威租车 | 在线预订 · XQ Car',
     homeDescription:
-      '兰卡威租车低至 RM 70/天。免费送达兰卡威机场、渡轮码头或酒店。家族经营自2015年 · 4.9★ · 90秒完成预订。',
+      '兰卡威租车低至 RM 70/天。免费送达兰卡威机场、渡轮码头或酒店。自2015年 · 4.9★ · 90秒完成预订。',
     aboutTitle: '关于我们 — XQ Car 兰卡威 | 自2015年值得信赖',
     aboutDescription:
       'XQ Car 是小强假期的租车品牌——2015年起在兰卡威家族经营。自有车队、OKU 友好选项、机场免费送车，RM 70/天起。',

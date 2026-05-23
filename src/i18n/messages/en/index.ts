@@ -44,7 +44,7 @@ export const enFooter = {
   contact: 'Contact',
   roadside: '24/7 roadside · +60 11 3521 5576',
   weAccept: 'We accept',
-  copyright: '© {year} XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - V1.5',
+  copyright: '© {year} XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - V2.0',
   instagram: 'Instagram',
   twitter: 'Twitter',
   facebook: 'Facebook',
@@ -331,7 +331,7 @@ export const enLanding = {
 export const enSeo = {
   homeTitle: 'Car Rental in Langkawi | Book Online · XQ Car',
   homeDescription:
-    'Rent a car in Langkawi from RM 70/day. Free delivery to Langkawi Airport, the ferry jetty, or your hotel. Family-owned since 2015 · 4.9★ rated · book in 90 seconds.',
+    'Rent a car in Langkawi from RM 70/day. Free delivery to Langkawi Airport, the ferry jetty, or your hotel. Est. 2015 · 4.9★ rated · book in 90 seconds.',
   aboutTitle: 'About Us — XQ Car Langkawi | Trusted Since 2015',
   aboutDescription:
     'XQ Car is the vehicle rental arm of Xiao Qiang Holidays — family-owned in Langkawi since 2015. Owned fleet, OKU-friendly options, free airport delivery from RM 70/day.',

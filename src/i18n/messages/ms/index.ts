@@ -49,7 +49,7 @@ export const msMessages: EnMessages = {
     contact: 'Hubungi',
     roadside: 'Bantuan jalan raya 24/7 · +60 11 3521 5576',
     weAccept: 'Kami terima',
-    copyright: '© {year} XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - V1.5',
+    copyright: '© {year} XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - V2.0',
     instagram: 'Instagram',
     twitter: 'Twitter',
     facebook: 'Facebook',
@@ -330,7 +330,7 @@ export const msMessages: EnMessages = {
   seo: {
     homeTitle: 'Sewa Kereta Langkawi | Tempah Online · XQ Car',
     homeDescription:
-      'Sewa kereta di Langkawi dari RM 70/hari. Penghantaran percuma ke Lapangan Terbang Langkawi, jeti feri, atau hotel. Milik keluarga sejak 2015 · 4.9★ · tempah dalam 90 saat.',
+      'Sewa kereta di Langkawi dari RM 70/hari. Penghantaran percuma ke Lapangan Terbang Langkawi, jeti feri, atau hotel. Sejak 2015 · 4.9★ · tempah dalam 90 saat.',
     aboutTitle: 'Tentang Kami — XQ Car Langkawi | Dipercayai Sejak 2015',
     aboutDescription:
       'XQ Car adalah bahagian sewa kenderaan Xiao Qiang Holidays — milik keluarga di Langkawi sejak 2015. Flit sendiri, mesra OKU, penghantaran lapangan terbang percuma dari RM 70/hari.',
