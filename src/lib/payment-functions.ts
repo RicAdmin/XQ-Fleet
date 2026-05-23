@@ -2,6 +2,8 @@ import crypto from 'node:crypto'
 
 import { createServerFn } from '@tanstack/react-start'
 
+import type { Locale } from '#/i18n/locales'
+import { DEFAULT_LOCALE, isLocale } from '#/i18n/locales'
 import { getRequestSession } from '#/lib/auth-functions'
 import { paymentCallbackPath } from '#/lib/brand'
 import type { PaymentSettingsRow } from '#/lib/settings-functions'
@@ -29,11 +31,13 @@ export type Ipay88FormParams = {
   Signature: string
   ResponseURL: string
   BackendURL: string
+  Xfield1: string
   gatewayUrl: string
 }
 
 type InitiatePaymentInput = {
   rentalId: string
+  locale?: Locale
 }
 
 export type InitiatePaymentResult = {
@@ -256,11 +260,18 @@ export const initiatePayment = createServerFn({ method: 'POST' })
     const refNo = payment.id.replace(/-/g, '')
     const amountRM = formatAmountRM(chargeSen)
     const currency = 'MYR'
-    const responsePath = session
-      ? paymentCallbackPath(`/account/bookings/${data.rentalId}?payment=response`)
-      : paymentCallbackPath(`/checkout/confirmed/${data.rentalId}?payment=response`)
+    const localeTag =
+      data.locale && isLocale(data.locale) ? data.locale : DEFAULT_LOCALE
+    const responsePath = paymentCallbackPath('/api/payment/response')
 
-    const signature = buildRequestSignature(merchantKey, merchantCode, refNo, amountRM, currency)
+    const signature = buildRequestSignature(
+      merchantKey,
+      merchantCode,
+      refNo,
+      amountRM,
+      currency,
+      localeTag,
+    )
 
     const formParams: Ipay88FormParams = {
       MerchantCode: merchantCode,
@@ -278,6 +289,7 @@ export const initiatePayment = createServerFn({ method: 'POST' })
       Signature: signature,
       ResponseURL: responsePath,
       BackendURL: paymentCallbackPath('/api/webhooks/ipay88'),
+      Xfield1: localeTag,
       gatewayUrl: IPAY88_GATEWAY_URL,
     }
 

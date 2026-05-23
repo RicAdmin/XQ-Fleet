@@ -1,8 +1,9 @@
 import '#/components/landing/cxq-landing-scoped.css'
 import '#/components/landing/cxq-landing-overrides.css'
 
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { ArrowRight, Check, Loader2, RefreshCw, XCircle } from 'lucide-react'
+import { useEffect } from 'react'
 import { z } from 'zod'
 
 import { LocaleLink } from '#/components/i18n/LocaleLink'
@@ -130,6 +131,7 @@ function GuestBookingConfirmedPage() {
   const { booking, rentalId } = Route.useLoaderData()
   const { payment } = Route.useSearch()
   const navigate = useNavigate()
+  const router = useRouter()
   const { t, locale } = usePublicI18n()
 
   const showPaymentSuccess = Boolean(booking && payment === 'response' && booking.customerStatus === 'Confirmed')
@@ -138,6 +140,14 @@ function GuestBookingConfirmedPage() {
   )
   const showPaymentFail = payment === 'error'
   const showAwaitingPayment = Boolean(booking && !showPaymentSuccess && !showPaymentPending && !showPaymentFail)
+
+  useEffect(() => {
+    if (!showPaymentPending) return
+    const timer = window.setInterval(() => {
+      void router.invalidate()
+    }, 5000)
+    return () => window.clearInterval(timer)
+  }, [showPaymentPending, router])
 
   let variant: ConfirmationVariant = 'notFound'
   if (booking) {
@@ -255,13 +265,22 @@ function GuestBookingConfirmedPage() {
                 ) : null}
 
                 {variant === 'pending' ? (
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-lg"
-                    onClick={() => window.location.reload()}
-                  >
-                    <RefreshCw size={14} /> {t('payment.refreshPage')}
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      className="btn btn-leaf btn-lg"
+                      onClick={() => void navigate({ to: '/pay/$rentalId', params: { rentalId: booking!.id } })}
+                    >
+                      {t('payment.tryAgain')} <ArrowRight size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-lg"
+                      onClick={() => window.location.reload()}
+                    >
+                      <RefreshCw size={14} /> {t('payment.refreshPage')}
+                    </button>
+                  </>
                 ) : null}
 
                 {variant === 'success' || variant === 'notFound' ? (

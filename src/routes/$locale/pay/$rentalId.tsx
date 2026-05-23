@@ -1,14 +1,18 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useEffect } from 'react'
 
+import type { Locale } from '#/i18n/locales'
 import { usePublicI18n } from '#/i18n/usePublicI18n'
 import { getRequestSession } from '#/lib/auth-functions'
 import { initiatePayment } from '#/lib/payment-functions'
 
 export const Route = createFileRoute('/$locale/pay/$rentalId')({
   loader: async ({ params }) => {
+    const locale = params.locale as Locale
     try {
-      const result = await initiatePayment({ data: { rentalId: params.rentalId } })
+      const result = await initiatePayment({
+        data: { rentalId: params.rentalId, locale },
+      })
       return { formParams: result.formParams, error: null }
     } catch (err) {
       const session = await getRequestSession()
@@ -35,8 +39,9 @@ function PaymentRedirectPage() {
 
   useEffect(() => {
     const form = document.getElementById('ipay88-form') as HTMLFormElement | null
-    if (form) form.submit()
-  }, [])
+    if (!form) return
+    form.requestSubmit()
+  }, [formParams])
 
   return (
     <div className="payment-redirect-page">
@@ -67,6 +72,7 @@ function PaymentRedirectPage() {
         <input type="hidden" name="Signature" value={formParams.Signature} />
         <input type="hidden" name="ResponseURL" value={formParams.ResponseURL} />
         <input type="hidden" name="BackendURL" value={formParams.BackendURL} />
+        <input type="hidden" name="Xfield1" value={formParams.Xfield1} />
       </form>
     </div>
   )

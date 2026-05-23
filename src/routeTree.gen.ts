@@ -72,6 +72,7 @@ import { Route as BookingConfirmedRentalIdRouteImport } from './routes/booking/c
 import { Route as AppRentalsRentalIdRouteImport } from './routes/app/rentals/$rentalId'
 import { Route as AppCustomersCustomerIdRouteImport } from './routes/app/customers/$customerId'
 import { Route as ApiWebhooksIpay88RouteImport } from './routes/api/webhooks/ipay88'
+import { Route as ApiPaymentResponseRouteImport } from './routes/api/payment/response'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AdminRentalsRentalIdRouteImport } from './routes/admin/rentals/$rentalId'
 import { Route as AdminPromosPromoIdRouteImport } from './routes/admin/promos/$promoId'
@@ -410,6 +411,11 @@ const ApiWebhooksIpay88Route = ApiWebhooksIpay88RouteImport.update({
   path: '/api/webhooks/ipay88',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPaymentResponseRoute = ApiPaymentResponseRouteImport.update({
+  id: '/api/payment/response',
+  path: '/api/payment/response',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -579,6 +585,7 @@ export interface FileRoutesByFullPath {
   '/admin/promos/$promoId': typeof AdminPromosPromoIdRoute
   '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/payment/response': typeof ApiPaymentResponseRoute
   '/api/webhooks/ipay88': typeof ApiWebhooksIpay88Route
   '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
   '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
@@ -660,6 +667,7 @@ export interface FileRoutesByTo {
   '/admin/promos/$promoId': typeof AdminPromosPromoIdRoute
   '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/payment/response': typeof ApiPaymentResponseRoute
   '/api/webhooks/ipay88': typeof ApiWebhooksIpay88Route
   '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
   '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
@@ -746,6 +754,7 @@ export interface FileRoutesById {
   '/admin/promos/$promoId': typeof AdminPromosPromoIdRoute
   '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/payment/response': typeof ApiPaymentResponseRoute
   '/api/webhooks/ipay88': typeof ApiWebhooksIpay88Route
   '/app/customers/$customerId': typeof AppCustomersCustomerIdRoute
   '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
@@ -833,6 +842,7 @@ export interface FileRouteTypes {
     | '/admin/promos/$promoId'
     | '/admin/rentals/$rentalId'
     | '/api/auth/$'
+    | '/api/payment/response'
     | '/api/webhooks/ipay88'
     | '/app/customers/$customerId'
     | '/app/rentals/$rentalId'
@@ -914,6 +924,7 @@ export interface FileRouteTypes {
     | '/admin/promos/$promoId'
     | '/admin/rentals/$rentalId'
     | '/api/auth/$'
+    | '/api/payment/response'
     | '/api/webhooks/ipay88'
     | '/app/customers/$customerId'
     | '/app/rentals/$rentalId'
@@ -999,6 +1010,7 @@ export interface FileRouteTypes {
     | '/admin/promos/$promoId'
     | '/admin/rentals/$rentalId'
     | '/api/auth/$'
+    | '/api/payment/response'
     | '/api/webhooks/ipay88'
     | '/app/customers/$customerId'
     | '/app/rentals/$rentalId'
@@ -1052,6 +1064,7 @@ export interface RootRouteChildren {
   RCodeRoute: typeof RCodeRoute
   BlogIndexRoute: typeof BlogIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiPaymentResponseRoute: typeof ApiPaymentResponseRoute
   ApiWebhooksIpay88Route: typeof ApiWebhooksIpay88Route
   BookingConfirmedRentalIdRoute: typeof BookingConfirmedRentalIdRoute
   CheckoutConfirmedRentalIdRoute: typeof CheckoutConfirmedRentalIdRoute
@@ -1503,6 +1516,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWebhooksIpay88RouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/payment/response': {
+      id: '/api/payment/response'
+      path: '/api/payment/response'
+      fullPath: '/api/payment/response'
+      preLoaderRoute: typeof ApiPaymentResponseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -1809,6 +1829,7 @@ const rootRouteChildren: RootRouteChildren = {
   RCodeRoute: RCodeRoute,
   BlogIndexRoute: BlogIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiPaymentResponseRoute: ApiPaymentResponseRoute,
   ApiWebhooksIpay88Route: ApiWebhooksIpay88Route,
   BookingConfirmedRentalIdRoute: BookingConfirmedRentalIdRoute,
   CheckoutConfirmedRentalIdRoute: CheckoutConfirmedRentalIdRoute,
