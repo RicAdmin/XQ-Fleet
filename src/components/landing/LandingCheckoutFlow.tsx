@@ -421,8 +421,7 @@ export function LandingCheckoutFlow({
   )
   const extraHoursCharge = estimateExtraHoursCharge(extraHours, car.extHourLowSen, car.dailyRateSen)
 
-  const tax = Math.round((subtotal - discount + addonCost + extraHoursCharge) * 0.06)
-  const total = subtotal - discount + addonCost + extraHoursCharge + tax
+  const total = subtotal - discount + addonCost + extraHoursCharge
 
   const lug = heuristicLuggageFit(car.category)
 
@@ -1416,10 +1415,6 @@ export function LandingCheckoutFlow({
                   <span>RM {a.price}</span>
                 </div>
               ))}
-              <div className="cs-row">
-                <span>{t('checkout.serviceTax')}</span>
-                <span>RM {tax}</span>
-              </div>
             </div>
             {!appliedPromo ? (
               <div className="cs-promo">

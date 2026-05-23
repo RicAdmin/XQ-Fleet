@@ -33,6 +33,13 @@ export function LanguageSwitcher({ className = '' }: { className?: string }) {
     } catch {
       /* ignore */
     }
+
+    const onLocalePrefixedRoute = /^\/(en|ms|zh)(\/|$)/.test(pathname)
+    if (!onLocalePrefixedRoute) {
+      window.location.reload()
+      return
+    }
+
     const bare = stripLocalePrefix(pathname)
     const target = bare === '/' ? `/${next}` : `/${next}${bare}`
     void navigate({ to: target as never })
