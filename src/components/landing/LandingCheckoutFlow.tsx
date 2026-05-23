@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useId, useState, type AnimationEvent, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useId, useRef, useState, type AnimationEvent, type ReactNode } from 'react'
 
 import { Link, useNavigate } from '@tanstack/react-router'
 import {
@@ -17,6 +17,11 @@ import { LocaleLink } from '#/components/i18n/LocaleLink'
 import type { TranslateFn } from '#/i18n/translate'
 import { usePublicI18n } from '#/i18n/usePublicI18n'
 import { checkoutSearchFromBooking, bookingHasCompleteTrip } from '#/lib/checkout-trip'
+import {
+  clearCheckoutDraft,
+  loadCheckoutDraft,
+  saveCheckoutDraft,
+} from '#/lib/checkout-draft-storage'
 import { createPortalBooking } from '#/lib/portal-booking-functions'
 import { validatePromo } from '#/lib/promo-functions'
 import {
@@ -283,6 +288,7 @@ type LandingCheckoutFlowProps = {
   startYmd?: string
   endYmd?: string
   user?: SessionUserLite
+  sessionPending?: boolean
   backHref: string
 }
 
@@ -292,10 +298,14 @@ export function LandingCheckoutFlow({
   startYmd,
   endYmd,
   user,
+  sessionPending = false,
   backHref,
 }: LandingCheckoutFlowProps) {
   const { t, href } = usePublicI18n()
   const navigate = useNavigate()
+  const autoPayAttempted = useRef(false)
+
+  const initialDraft = useMemo(() => loadCheckoutDraft(car.id), [car.id])
 
   const ADDONS = useMemo(
     () =>
@@ -326,31 +336,31 @@ export function LandingCheckoutFlow({
   const nights = nightsBetween(booking.pickDate, booking.retDate)
   const daily = Math.round(car.dailyRateSen / 100)
   const subtotal = daily * nights
-  const [step, setStep] = useState(0)
-  const [guestCheckout, setGuestCheckout] = useState(false)
-  const [addons, setAddons] = useState<Record<AddonKey, boolean>>({
+  const [step, setStep] = useState(() => (initialDraft?.awaitingPayment ? 1 : 0))
+  const [guestCheckout, setGuestCheckout] = useState(() => initialDraft?.guestCheckout ?? false)
+  const [addons, setAddons] = useState<Record<AddonKey, boolean>>(() => initialDraft?.addons ?? {
     child: false,
     second: false,
   })
-  const [buyer, setBuyer] = useState<CheckoutBuyer>({
-    name: user?.name ?? '',
-    email: user?.email ?? '',
-    phone: '',
-    addressLine1: '',
-    addressLine2: '',
-    city: '',
-    stateProvince: '',
-    postalCode: '',
-    country: DEFAULT_COUNTRY_CODE,
-  })
-  const [driver, setDriver] = useState<CheckoutDriver>({
-    name: user?.name ?? '',
-    email: user?.email ?? '',
-    phone: '',
-    license: '',
-    country: DEFAULT_COUNTRY_CODE,
-  })
-  const [alsoAsDriver, setAlsoAsDriver] = useState(true)
+  const [buyer, setBuyer] = useState<CheckoutBuyer>(() => ({
+    name: initialDraft?.buyer.name ?? user?.name ?? '',
+    email: initialDraft?.buyer.email ?? user?.email ?? '',
+    phone: initialDraft?.buyer.phone ?? '',
+    addressLine1: initialDraft?.buyer.addressLine1 ?? '',
+    addressLine2: initialDraft?.buyer.addressLine2 ?? '',
+    city: initialDraft?.buyer.city ?? '',
+    stateProvince: initialDraft?.buyer.stateProvince ?? '',
+    postalCode: initialDraft?.buyer.postalCode ?? '',
+    country: initialDraft?.buyer.country ?? DEFAULT_COUNTRY_CODE,
+  }))
+  const [driver, setDriver] = useState<CheckoutDriver>(() => ({
+    name: initialDraft?.driver.name ?? user?.name ?? '',
+    email: initialDraft?.driver.email ?? user?.email ?? '',
+    phone: initialDraft?.driver.phone ?? '',
+    license: initialDraft?.driver.license ?? '',
+    country: initialDraft?.driver.country ?? DEFAULT_COUNTRY_CODE,
+  }))
+  const [alsoAsDriver, setAlsoAsDriver] = useState(() => initialDraft?.alsoAsDriver ?? true)
   const [errs, setErrs] = useState<Record<string, string>>({})
   const [showFieldErrors, setShowFieldErrors] = useState(false)
   const [touched, setTouched] = useState<{
@@ -367,7 +377,7 @@ export function LandingCheckoutFlow({
   const [appliedPromo, setAppliedPromo] = useState<{
     code: string
     discountSen: number
-  } | null>(null)
+  } | null>(() => initialDraft?.appliedPromo ?? null)
   const [promoError, setPromoError] = useState<string | null>(null)
   const [promoBusy, setPromoBusy] = useState(false)
 
@@ -375,16 +385,18 @@ export function LandingCheckoutFlow({
   const discount = appliedPromo ? Math.round(appliedPromo.discountSen / 100) : 0
 
   useEffect(() => {
+    if (initialDraft?.awaitingPayment) return
     if (user) setGuestCheckout(false)
-  }, [user])
+  }, [user, initialDraft?.awaitingPayment])
 
   useEffect(() => {
+    if (initialDraft?.awaitingPayment) return
     setBuyer((b) => ({
       ...b,
       name: user?.name ?? b.name,
       email: user?.email ?? b.email,
     }))
-  }, [user?.name, user?.email])
+  }, [user?.name, user?.email, initialDraft?.awaitingPayment])
 
   useEffect(() => {
     if (!alsoAsDriver) return
@@ -561,6 +573,7 @@ export function LandingCheckoutFlow({
         },
       })
       await navigate({ to: '/pay/$rentalId', params: { rentalId: id } })
+      clearCheckoutDraft()
     } catch (err) {
       setFlowError(err instanceof Error ? err.message : t('checkout.errCreateBooking'))
     } finally {
@@ -670,25 +683,67 @@ export function LandingCheckoutFlow({
     return href(`/checkout/${car.id}${q ? `?${q}` : ''}`)
   }, [car.id, tripSearch, href])
 
+  const persistDraft = useCallback(
+    (overrides: { guestCheckout: boolean; awaitingPayment: boolean }) => {
+      saveCheckoutDraft({
+        carId: car.id,
+        buyer,
+        driver,
+        alsoAsDriver,
+        addons,
+        appliedPromo,
+        guestCheckout: overrides.guestCheckout,
+        awaitingPayment: overrides.awaitingPayment,
+      })
+    },
+    [car.id, buyer, driver, alsoAsDriver, addons, appliedPromo],
+  )
+
+  useEffect(() => {
+    if (sessionPending || autoPayAttempted.current) return
+    if (!user) return
+    const draft = loadCheckoutDraft(car.id)
+    if (!draft?.awaitingPayment || draft.guestCheckout) return
+    autoPayAttempted.current = true
+    clearCheckoutDraft()
+    void createBooking()
+  }, [sessionPending, user, car.id, createBooking])
+
   const advance = useCallback(async () => {
     setFlowError(null)
     if (step === 0) {
       if (!validateReview()) return
+      if (sessionPending) return
+      if (user) {
+        await createBooking()
+        return
+      }
+      persistDraft({ guestCheckout: false, awaitingPayment: true })
       setStep(1)
       window.scrollTo({ top: 0, behavior: 'instant' })
       return
     }
     if (step === 1) {
+      if (sessionPending) return
       if (!user && !guestCheckout) return
       await createBooking()
     }
-  }, [step, validateReview, user, guestCheckout, createBooking])
+  }, [
+    step,
+    validateReview,
+    user,
+    guestCheckout,
+    createBooking,
+    sessionPending,
+    persistDraft,
+  ])
 
   const continueAsGuest = useCallback(() => {
     setFlowError(null)
+    persistDraft({ guestCheckout: true, awaitingPayment: true })
     setGuestCheckout(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [])
+  }, [persistDraft])
 
   return (
     <div className="checkout">
@@ -1271,7 +1326,22 @@ export function LandingCheckoutFlow({
               </div>
             ) : null}
 
-            {step === 1 && !user && !guestCheckout ? (
+            {step === 1 && !user && !guestCheckout && sessionPending ? (
+              <div className="checkout-section">
+                <div className="checkout-progress-meta">
+                  <span className="eyebrow">{t('checkout.step2of2')}</span>
+                  <h2 className="h-section" style={{ marginTop: 4 }}>
+                    {t('checkout.paymentTitle')}
+                  </h2>
+                  <p className="h-sub" style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <LoadingSpinner size={16} aria-hidden />
+                    {t('nav.loadingAccount')}
+                  </p>
+                </div>
+              </div>
+            ) : null}
+
+            {step === 1 && !user && !guestCheckout && !sessionPending ? (
               <div className="checkout-section">
                 <div className="checkout-progress-meta">
                   <span className="eyebrow">{t('checkout.step2of2')}</span>
@@ -1288,10 +1358,20 @@ export function LandingCheckoutFlow({
                   </div>
                   <p className="checkout-account-copy">{t('checkout.signInOrCreate')}</p>
                   <div className="checkout-account-actions">
-                    <LocaleLink to="/login" search={{ returnTo: checkoutReturnTo }} className="btn btn-leaf btn-lg">
+                    <LocaleLink
+                      to="/login"
+                      search={{ returnTo: checkoutReturnTo }}
+                      className="btn btn-leaf btn-lg"
+                      onClick={() => persistDraft({ guestCheckout: false, awaitingPayment: true })}
+                    >
                       {t('auth.signIn')}
                     </LocaleLink>
-                    <LocaleLink to="/register" search={{ returnTo: checkoutReturnTo }} className="btn btn-ghost btn-lg">
+                    <LocaleLink
+                      to="/register"
+                      search={{ returnTo: checkoutReturnTo }}
+                      className="btn btn-ghost btn-lg"
+                      onClick={() => persistDraft({ guestCheckout: false, awaitingPayment: true })}
+                    >
                       {t('auth.createAccountBtn')}
                     </LocaleLink>
                     <button type="button" className="btn btn-ghost btn-lg" onClick={continueAsGuest}>
@@ -1458,15 +1538,17 @@ export function LandingCheckoutFlow({
               </span>
             </div>
 
-            {step === 1 && !user && !guestCheckout ? (
+            {step === 1 && !user && !guestCheckout && !sessionPending ? (
                 <button type="button" className="btn btn-ghost btn-lg" onClick={() => setStep(0)}>
                   {t('checkout.backToReview')}
                 </button>
               ) : (
                 <div className="cs-pay-actions">
-                  <button type="button" className="btn btn-leaf btn-lg" onClick={() => void advance()} disabled={submitting}>
+                  <button type="button" className="btn btn-leaf btn-lg" onClick={() => void advance()} disabled={submitting || sessionPending || (step === 1 && !user && !guestCheckout)}>
                     {step === 0
-                      ? t('checkout.payNow')
+                      ? user
+                        ? t('checkout.payAmount', { total })
+                        : t('checkout.payNow')
                       : submitting
                         ? t('checkout.redirectingPayment')
                         : t('checkout.payAmount', { total })}

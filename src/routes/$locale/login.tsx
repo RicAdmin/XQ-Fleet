@@ -19,8 +19,8 @@ export const Route = createFileRoute('/$locale/login')({
     returnTo: z.string().optional(),
     error: z.string().optional(),
   }),
-  beforeLoad: async () => {
-    await redirectAuthenticatedUser()
+  beforeLoad: async ({ search }) => {
+    await redirectAuthenticatedUser({ returnTo: search.returnTo })
   },
   component: CustomerLoginPage,
 })
@@ -69,11 +69,11 @@ function CustomerLoginPage() {
               setIsSubmitting(true)
 
               try {
-                const callbackURL = authVerifyCallbackPath(locale, returnTo ?? '/account')
+                const destination = authReturnPath(locale, returnTo ?? '/account')
                 const signInResult = await authClient.signIn.email({
                   email: email.trim(),
                   password,
-                  callbackURL,
+                  callbackURL: authVerifyCallbackPath(locale, returnTo ?? '/account'),
                 })
 
                 if (signInResult.error) {
@@ -96,7 +96,7 @@ function CustomerLoginPage() {
                   return
                 }
 
-                redirectAfterAuth(callbackURL)
+                redirectAfterAuth(destination)
               } catch (submissionError) {
                 setError(
                   submissionError instanceof Error

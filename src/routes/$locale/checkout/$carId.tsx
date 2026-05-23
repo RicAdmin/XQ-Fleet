@@ -118,6 +118,7 @@ function CheckoutPage() {
             startYmd={startYmd}
             endYmd={endYmd}
             user={user ? { name: user.name, email: user.email } : undefined}
+            sessionPending={sessionPending}
             backHref="/"
           />
         </div>

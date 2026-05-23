@@ -3,7 +3,7 @@ import crypto from 'node:crypto'
 import { createServerFn } from '@tanstack/react-start'
 
 import { getRequestSession } from '#/lib/auth-functions'
-import { publicSitePath } from '#/lib/brand'
+import { paymentCallbackPath } from '#/lib/brand'
 import type { PaymentSettingsRow } from '#/lib/settings-functions'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -257,8 +257,8 @@ export const initiatePayment = createServerFn({ method: 'POST' })
     const amountRM = formatAmountRM(chargeSen)
     const currency = 'MYR'
     const responsePath = session
-      ? publicSitePath(`/account/bookings/${data.rentalId}?payment=response`)
-      : publicSitePath(`/checkout/confirmed/${data.rentalId}?payment=response`)
+      ? paymentCallbackPath(`/account/bookings/${data.rentalId}?payment=response`)
+      : paymentCallbackPath(`/checkout/confirmed/${data.rentalId}?payment=response`)
 
     const signature = buildRequestSignature(merchantKey, merchantCode, refNo, amountRM, currency)
 
@@ -277,7 +277,7 @@ export const initiatePayment = createServerFn({ method: 'POST' })
       SignatureType: 'HMACSHA512',
       Signature: signature,
       ResponseURL: responsePath,
-      BackendURL: publicSitePath('/api/webhooks/ipay88'),
+      BackendURL: paymentCallbackPath('/api/webhooks/ipay88'),
       gatewayUrl: IPAY88_GATEWAY_URL,
     }
 

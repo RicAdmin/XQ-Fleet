@@ -10,10 +10,14 @@ import {
 } from '#/lib/auth-model'
 import { getRequestSession, getOwnerSetupState } from '#/lib/auth-functions'
 
-export async function redirectAuthenticatedUser() {
+export async function redirectAuthenticatedUser(opts?: { returnTo?: string }) {
   const session = await getRequestSession()
 
   if (session) {
+    const returnTo = opts?.returnTo?.trim()
+    if (returnTo && session.user.role === 'customer') {
+      throw redirect({ href: returnTo })
+    }
     throw redirect({ to: getHomePathForRole(session.user.role) })
   }
 

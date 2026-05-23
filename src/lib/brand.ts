@@ -22,6 +22,24 @@ export function publicSiteUrl(siteUrl?: string): string {
   return resolveSiteUrl(siteUrl)
 }
 
+/**
+ * Origin used for iPay88 ResponseURL / BackendURL.
+ * In local dev, set DEV_TUNNEL_URL to your ngrok HTTPS URL — iPay88 does not accept localhost.
+ */
+export function paymentCallbackSiteUrl(siteUrl?: string): string {
+  const tunnel = process.env.DEV_TUNNEL_URL?.trim().replace(/\/$/, '')
+  if (tunnel && process.env.NODE_ENV !== 'production') {
+    return tunnel
+  }
+  return publicSiteUrl(siteUrl)
+}
+
+/** Absolute public URL for payment gateway callbacks. */
+export function paymentCallbackPath(path: string, siteUrl?: string): string {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`
+  return `${paymentCallbackSiteUrl(siteUrl)}${normalizedPath}`
+}
+
 /** Absolute public URL for a site path — avoids double slashes when env vars trail with `/`. */
 export function publicSitePath(path: string, siteUrl?: string): string {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`

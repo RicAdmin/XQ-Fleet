@@ -15,8 +15,8 @@ import { redirectAuthenticatedUser } from '#/lib/route-guards'
 
 export const Route = createFileRoute('/$locale/register')({
   validateSearch: z.object({ returnTo: z.string().optional() }),
-  beforeLoad: async () => {
-    await redirectAuthenticatedUser()
+  beforeLoad: async ({ search }) => {
+    await redirectAuthenticatedUser({ returnTo: search.returnTo })
   },
   component: CustomerRegisterPage,
 })

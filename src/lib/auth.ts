@@ -41,7 +41,7 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification: process.env.AUTH_SKIP_EMAIL_VERIFICATION !== 'true',
     sendResetPassword: async ({ user, url }) => {
       const { sendPasswordResetEmail } = await import('#/lib/email-functions')
       await sendPasswordResetEmail({
