@@ -39,7 +39,7 @@ export const zhLandingContent: LandingContent = {
       id: 'book-rental-step-by-step',
       slug: 'book-car-rental-langkawi-online',
       tag: '指南',
-      title: '如何一步步在线预订 Car XQ 租车',
+      title: '如何一步步在线预订 XQ Car 租车',
       excerpt: '用可视化流程带您走过每个界面，第一次下单也能像老手一样顺滑。',
       img: '/image/Attractions/pantai%20cenang.png',
     },

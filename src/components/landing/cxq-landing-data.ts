@@ -1,6 +1,8 @@
-/** Static marketing content ported from xq-car-web (Car XQ landing). */
+/** Static marketing content ported from xq-car-web (XQ Car landing). */
 
 export const HERO_BG = '/image/Rent a Car in Langkawi for Every Adventure.png'
+
+export const AUTH_ASIDE_BG = '/image/Login form.JPG'
 
 export const FOOTER_CTA_FLEET_IMAGE = '/image/Langkawi Car Rental - Pick This Car.JPG'
 export const FOOTER_CTA_SCENERY_IMAGE = '/image/Langkawi Car Rental - Pick This Car.png'
@@ -135,7 +137,7 @@ export const BLOG_TIPS = [
     id: 'book-rental-step-by-step',
     slug: 'book-car-rental-langkawi-online',
     tag: 'Guides',
-    title: 'How to book your Car XQ rental online — step by step',
+    title: 'How to book your XQ Car rental online — step by step',
     excerpt: 'A quick visual walkthrough of every screen, so your first rental feels like your tenth.',
     img: '/image/Attractions/pantai%20cenang.png',
   },

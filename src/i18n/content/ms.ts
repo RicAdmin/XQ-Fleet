@@ -40,7 +40,7 @@ export const msLandingContent: LandingContent = {
       id: 'book-rental-step-by-step',
       slug: 'book-car-rental-langkawi-online',
       tag: 'Panduan',
-      title: 'Cara tempah sewa kereta Car XQ atas talian — langkah demi langkah',
+      title: 'Cara tempah sewa kereta XQ Car atas talian — langkah demi langkah',
       excerpt:
         'Ringkasan panduan visual bagi setiap skrin supaya pertama kali anda tempah rasanya sama lancar seperti kali kesepuluh.',
       img: '/image/Attractions/pantai%20cenang.png',

@@ -4,7 +4,7 @@ import { PickCarGuide } from '#/components/guides/pick-car-guide'
 import { publicSitePath } from '#/lib/brand'
 import { socialImageMeta } from '#/lib/seo-meta'
 
-const title = 'Pick the Right Rental Car in Langkawi · Fleet Guide · Car XQ'
+const title = 'Pick the Right Rental Car in Langkawi · Fleet Guide · XQ Car'
 const description =
   'Compare economy, MPV, SUV, and OKU-friendly vehicles by luggage, passengers, and travel style for Langkawi roads.'
 

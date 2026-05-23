@@ -4,7 +4,7 @@ import { KnowHowGuide } from '#/components/guides/know-how-guide'
 import { publicSitePath } from '#/lib/brand'
 import { socialImageMeta } from '#/lib/seo-meta'
 
-const title = 'Driving Know-How in Langkawi · Parking, Fines & Fuel · Car XQ'
+const title = 'Driving Know-How in Langkawi · Parking, Fines & Fuel · XQ Car'
 const description =
   'Langkawi parking rules, AES speed cameras, fuel stations, and what to do after an accident. Local know-how for first-time renters.'
 

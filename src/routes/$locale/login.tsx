@@ -4,18 +4,21 @@ import { createFileRoute } from '@tanstack/react-router'
 import { ArrowRight } from 'lucide-react'
 import { z } from 'zod'
 
-import CxqAuthLegalFooter from '#/components/auth/CxqAuthLegalFooter'
+import { AuthPasswordInput } from '#/components/auth/AuthPasswordInput'
 import CxqAuthMarketingAside from '#/components/auth/CxqAuthMarketingAside'
 import { LocaleLink } from '#/components/i18n/LocaleLink'
 import PublicAuthShell from '#/components/shells/PublicAuthShell'
-import { useT } from '#/i18n/context'
-import { cxqAuthSignInAside } from '#/lib/cxq-auth-marketing'
+import { useLocale, useT } from '#/i18n/context'
+import { authReturnPath, redirectAfterAuth } from '#/lib/auth-redirect'
 import { authClient } from '#/lib/auth-client'
 import { appRoleFromSessionUser } from '#/lib/auth-model'
 import { redirectAuthenticatedUser } from '#/lib/route-guards'
 
 export const Route = createFileRoute('/$locale/login')({
-  validateSearch: z.object({ returnTo: z.string().optional() }),
+  validateSearch: z.object({
+    returnTo: z.string().optional(),
+    error: z.string().optional(),
+  }),
   beforeLoad: async () => {
     await redirectAuthenticatedUser()
   },
@@ -24,8 +27,15 @@ export const Route = createFileRoute('/$locale/login')({
 
 function CustomerLoginPage() {
   const t = useT()
-  const navigate = Route.useNavigate()
-  const { returnTo } = Route.useSearch()
+  const locale = useLocale()
+  const { returnTo, error: verifyError } = Route.useSearch()
+  const loginSearch = returnTo ? { returnTo } : undefined
+  const verifyErrorMessage =
+    verifyError === 'TOKEN_EXPIRED'
+      ? t('auth.verificationLinkExpired')
+      : verifyError === 'INVALID_TOKEN'
+        ? t('auth.verificationLinkInvalid')
+        : null
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -34,15 +44,23 @@ function CustomerLoginPage() {
   return (
     <PublicAuthShell screenLabel={t('auth.screenSignIn')} minimal>
       <div className="auth-page-card">
-        <CxqAuthMarketingAside {...cxqAuthSignInAside} />
+        <CxqAuthMarketingAside slogan={t('auth.asideSloganSignIn')} />
 
         <div className="auth-right">
           <span className="auth-badge">{t('auth.customerAccess')}</span>
           <h3>{t('auth.signInTitle')}</h3>
           <p className="auth-sub">
             {t('auth.newToCarXq')}{' '}
-            <LocaleLink to="/register">{t('auth.createAccount')}</LocaleLink>
+            <LocaleLink to="/register" search={loginSearch}>
+              {t('auth.createAccount')}
+            </LocaleLink>
           </p>
+
+          {verifyErrorMessage ? (
+            <div className="auth-error-banner" role="alert">
+              {verifyErrorMessage}
+            </div>
+          ) : null}
 
           <form
             onSubmit={async (event) => {
@@ -51,9 +69,18 @@ function CustomerLoginPage() {
               setIsSubmitting(true)
 
               try {
-                const signInResult = await authClient.signIn.email({ email, password })
+                const callbackURL = authReturnPath(locale, returnTo ?? '/account')
+                const signInResult = await authClient.signIn.email({
+                  email: email.trim(),
+                  password,
+                  callbackURL,
+                })
 
                 if (signInResult.error) {
+                  if (signInResult.error.code === 'EMAIL_NOT_VERIFIED') {
+                    setError(t('auth.emailNotVerified'))
+                    return
+                  }
                   throw new Error(signInResult.error.message ?? t('auth.signInFailed'))
                 }
 
@@ -69,7 +96,7 @@ function CustomerLoginPage() {
                   return
                 }
 
-                await navigate({ to: (returnTo as never) ?? '/account' })
+                redirectAfterAuth(callbackURL)
               } catch (submissionError) {
                 setError(
                   submissionError instanceof Error
@@ -95,18 +122,16 @@ function CustomerLoginPage() {
                 />
               </div>
 
-              <div className="auth-field">
-                <label htmlFor="customer-password">{t('auth.password')}</label>
-                <input
-                  id="customer-password"
-                  type="password"
-                  autoComplete="current-password"
-                  placeholder={t('auth.passwordPlaceholder')}
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  required
-                />
-              </div>
+              <AuthPasswordInput
+                id="customer-password"
+                label={t('auth.password')}
+                value={password}
+                onChange={setPassword}
+                autoComplete="current-password"
+                placeholder={t('auth.passwordPlaceholder')}
+                showLabel={t('auth.showPassword')}
+                hideLabel={t('auth.hidePassword')}
+              />
 
               <div className="auth-row-between">
                 <LocaleLink to="/forgot-password" className="auth-link">
@@ -125,8 +150,6 @@ function CustomerLoginPage() {
               {isSubmitting ? t('auth.signingIn') : t('auth.signIn')}
               {!isSubmitting ? <ArrowRight size={14} strokeWidth={2.5} aria-hidden /> : null}
             </button>
-
-            <CxqAuthLegalFooter />
           </form>
         </div>
       </div>

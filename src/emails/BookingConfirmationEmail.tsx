@@ -1079,7 +1079,7 @@ export function BookingConfirmationEmail(props: BookingConfirmationEmailProps) {
                                           display: 'inline-block',
                                         }}
                                       >
-                                        + New from Car XQ Holidays
+                                        + New from XQ Car Holidays
                                       </td>
                                     </tr>
                                   </tbody>

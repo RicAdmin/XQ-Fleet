@@ -154,7 +154,7 @@ export function AdminBookingNotificationEmail(props: AdminBookingNotificationEma
                           <tbody>
                             <tr>
                               <td style={{ verticalAlign: 'middle' }}>
-                                <EmailBrandMark size={28} label="Car XQ Admin" labelSize="15px" />
+                                <EmailBrandMark size={28} label="XQ Car Admin" labelSize="15px" />
                               </td>
                               <td
                                 style={{
@@ -316,7 +316,7 @@ export function AdminBookingNotificationEmail(props: AdminBookingNotificationEma
                             lineHeight: 1.55,
                           }}
                         >
-                          Car XQ internal notification · Booking {bookingRef} · Do not forward this
+                          XQ Car internal notification · Booking {bookingRef} · Do not forward this
                           email.
                         </p>
                       </td>

@@ -36,7 +36,7 @@ export const enFooter = {
   customerLogin: 'Customer login',
   mattaAlt: 'MATTA — Malaysia Association of Tour and Travel Agents',
   legal: 'Legal',
-  terms: 'Terms & Conditions',
+  terms: 'Terms and Conditions',
   rentalContract: 'Rental Contract',
   privacy: 'Privacy Policy',
   refund: 'Refund Policy',
@@ -44,15 +44,15 @@ export const enFooter = {
   contact: 'Contact',
   roadside: '24/7 roadside · +60 11 3521 5576',
   weAccept: 'We accept',
-  copyright: '© {year} Car XQ Holidays · XQ Car Fleet platform',
+  copyright: '© {year} XQ Car Holidays · XQ Car Fleet platform',
   instagram: 'Instagram',
   twitter: 'Twitter',
   facebook: 'Facebook',
 } as const
 
 export const enHero = {
-  eyebrowFull: 'Car XQ · est. 2015 in Langkawi, Malaysia',
-  eyebrowShort: 'Car XQ · Langkawi since 2015',
+  eyebrowFull: 'XQ Car · est. 2015 in Langkawi, Malaysia',
+  eyebrowShort: 'XQ Car · Langkawi since 2015',
   titleLine1: 'Rent a Car in Langkawi',
   titleLine2: 'for Every Adventure.',
   subtitle:
@@ -96,7 +96,7 @@ export const enAuth = {
   signInTitle: 'Sign in',
   signUpTitle: 'Create account',
   customerAccess: 'Customer access',
-  newToCarXq: 'New to Car XQ?',
+  newToCarXq: 'New to XQ Car?',
   createAccount: 'Create an account',
   haveAccount: 'Already have an account?',
   signInLink: 'Sign in',
@@ -113,12 +113,39 @@ export const enAuth = {
   staffMustUseInternal: 'Owner and staff accounts must use the internal login page.',
   unableSignIn: 'Unable to sign in right now.',
   fullName: 'Full name',
+  name: 'Name',
+  namePlaceholder: 'Your name',
   confirmPassword: 'Confirm password',
   resetPassword: 'Reset password',
   sendResetLink: 'Send reset link',
+  sendingResetLink: 'Sending reset link…',
   agreePrefix: 'I agree to the',
-  screenSignIn: 'Car XQ Sign in',
-  screenSignUp: 'Car XQ Sign up',
+  screenSignIn: 'XQ Car Sign in',
+  screenSignUp: 'XQ Car Sign up',
+  asideSloganSignIn: 'Your expectation is our standards',
+  asideSloganSignUp: 'Your expectation is our standards',
+  asideSloganInternal: 'Secure access to your workspace.',
+  passwordMismatch: 'Passwords do not match.',
+  verifyEmailTitle: 'Check your email',
+  verifyEmailBody: 'We sent a verification link to {email}. Open it to activate your account, then sign in.',
+  showPassword: 'Show password',
+  hidePassword: 'Hide password',
+  forgotPasswordSubtitle: 'Enter your email and we’ll send a reset link.',
+  resetLinkSentTitle: 'Check your email',
+  resetLinkSentBody: 'If {email} is registered with us, we sent a password reset link.',
+  unableSendResetLink: 'Unable to send reset link right now.',
+  newPassword: 'New password',
+  confirmNewPassword: 'Confirm new password',
+  resetPasswordBtn: 'Update password',
+  resettingPassword: 'Updating password…',
+  passwordResetSuccess: 'Password updated. You can sign in now.',
+  passwordResetInvalid: 'This reset link is invalid or expired. Request a new one.',
+  emailNotVerified: 'Please verify your email before signing in. We sent a new verification link to your inbox.',
+  backToSignIn: 'Back to sign in',
+  resendVerification: 'Resend verification email',
+  resendVerificationSent: 'Verification email sent again.',
+  verificationLinkExpired: 'That verification link expired. Sign in to receive a new one.',
+  verificationLinkInvalid: 'That verification link is invalid. Sign in to receive a new one.',
 } as const
 
 export const enCheckout = {
@@ -264,7 +291,7 @@ export const enLanding = {
   promosSub:
     'Three small habits that quietly shave hundreds of ringgit off your rental — auto-applied at checkout, no codes to memorize.',
   stepsEyebrow: 'Step by step',
-  stepsTitle: 'Renting with Car XQ is simple and smooth.',
+  stepsTitle: 'Renting with XQ Car is simple and smooth.',
   stepsSub:
     "Five clear steps, dedicated humans behind every one. From booking to return, we've got the wheel.",
   tipsEyebrow: 'Explore like a local',
@@ -280,10 +307,10 @@ export const enLanding = {
   essentialSub: 'Two pickup points where we meet you, plus the two numbers worth saving.',
   faqSectionEyebrow: 'All you need to know',
   faqSectionTitle: 'Langkawi car rental · FAQ.',
-  reelsEyebrow: 'From our guests · #CarXQTrips',
+  reelsEyebrow: 'From our guests · #XQCarTrips',
   reelsTitle: 'Real trips, real wheels.',
   reelsSub:
-    "Clips and stories travelers share with us each week — tag #CarXQTrips on Instagram or WhatsApp and we'll feature you.",
+    "Clips and stories travelers share with us each week — tag #XQCarTrips on Instagram or WhatsApp and we'll feature you.",
   faqEyebrow: 'Good to know before you go',
   faqTitle: 'Questions, answered.',
   faqSub:
@@ -302,13 +329,13 @@ export const enLanding = {
 } as const
 
 export const enSeo = {
-  homeTitle: 'Car Rental in Langkawi | Book Online · Car XQ',
+  homeTitle: 'Car Rental in Langkawi | Book Online · XQ Car',
   homeDescription:
     'Rent a car in Langkawi from RM 70/day. Free delivery to Langkawi Airport, the ferry jetty, or your hotel. Family-owned since 2015 · 4.9★ rated · book in 90 seconds.',
-  aboutTitle: 'About Us — Car XQ Langkawi | Trusted Since 2015',
+  aboutTitle: 'About Us — XQ Car Langkawi | Trusted Since 2015',
   aboutDescription:
-    'Car XQ is the vehicle rental arm of Xiao Qiang Holidays — family-owned in Langkawi since 2015. Owned fleet, OKU-friendly options, free airport delivery from RM 70/day.',
-  blogTitle: 'Langkawi Car Rental Blog · Guides & Driving Tips · Car XQ',
+    'XQ Car is the vehicle rental arm of Xiao Qiang Holidays — family-owned in Langkawi since 2015. Owned fleet, OKU-friendly options, free airport delivery from RM 70/day.',
+  blogTitle: 'Langkawi Car Rental Blog · Guides & Driving Tips · XQ Car',
   blogDescription:
     'Expert guides on car rental in Langkawi — airport pickup, cheap rates, driving tips, itineraries, and family travel. Written by a local fleet since 2015.',
 } as const

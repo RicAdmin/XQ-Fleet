@@ -187,7 +187,7 @@ export function BlogArticleStructuredData({ post }: { post: BlogPost }) {
     },
     publisher: {
       '@type': 'Organization',
-      name: 'Car XQ',
+      name: 'XQCar',
       logo: {
         '@type': 'ImageObject',
         url: publicSitePath('/image/xqCarLogo.png'),

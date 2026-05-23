@@ -44,7 +44,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Car XQ — Car Rental Langkawi',
+        title: 'XQCar — Car Rental Langkawi',
       },
     ],
     links: [

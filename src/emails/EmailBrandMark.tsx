@@ -11,7 +11,7 @@ type EmailBrandMarkProps = {
 
 export function EmailBrandMark({
   size = 30,
-  label = 'Car XQ',
+  label = 'XQCar',
   labelColor = '#FFFFFF',
   labelSize = '17px',
 }: EmailBrandMarkProps) {

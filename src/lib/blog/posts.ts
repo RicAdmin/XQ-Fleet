@@ -22,7 +22,7 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'car-rental-langkawi-complete-guide',
     title: 'Complete Guide to Car Rental in Langkawi (2026)',
-    metaTitle: 'Car Rental Langkawi Guide 2026 | Prices, Pickup & Tips · Car XQ',
+    metaTitle: 'Car Rental Langkawi Guide 2026 | Prices, Pickup & Tips · XQ Car',
     metaDescription:
       'Everything you need to know about car rental in Langkawi — airport pickup, daily rates from RM 70, documents, insurance, and local driving tips from a family-run fleet since 2015.',
     category: 'Guides',
@@ -35,7 +35,7 @@ export const BLOG_POSTS: BlogPost[] = [
     excerpt:
       'Airport delivery, fair daily rates, and the documents you actually need — a local operator’s guide to renting on the island.',
     lead:
-      'Car rental in Langkawi is the most flexible way to explore 478 km² of beaches, viewpoints, and mangrove parks at your own pace. Most visitors pick up at Langkawi International Airport (LGK) or Kuah Ferry Jetty; rates start around RM 70/day for economy cars when booked direct with a local fleet like Car XQ.',
+      'Car rental in Langkawi is the most flexible way to explore 478 km² of beaches, viewpoints, and mangrove parks at your own pace. Most visitors pick up at Langkawi International Airport (LGK) or Kuah Ferry Jetty; rates start around RM 70/day for economy cars when booked direct with a local fleet like XQ Car.',
     sections: [
       {
         type: 'h2',
@@ -53,7 +53,7 @@ export const BLOG_POSTS: BlogPost[] = [
       {
         type: 'p',
         text:
-          'Economy sedans and hatchbacks typically run RM 70–120/day. MPVs for families (Perodua Alza, Toyota Innova) sit around RM 120–180/day. Weekly and monthly discounts apply when you book 7+ nights. Car XQ includes free delivery to LGK Door 3, the ferry jetty, or your hotel — no separate transfer fee.',
+          'Economy sedans and hatchbacks typically run RM 70–120/day. MPVs for families (Perodua Alza, Toyota Innova) sit around RM 120–180/day. Weekly and monthly discounts apply when you book 7+ nights. XQ Car includes free delivery to LGK Door 3, the ferry jetty, or your hotel — no separate transfer fee.',
       },
       {
         type: 'ul',
@@ -85,13 +85,13 @@ export const BLOG_POSTS: BlogPost[] = [
     locales: {
       ms: {
         title: 'Panduan Lengkap Sewa Kereta di Langkawi (2026)',
-        metaTitle: 'Panduan Sewa Kereta Langkawi 2026 | Harga & Tips · Car XQ',
+        metaTitle: 'Panduan Sewa Kereta Langkawi 2026 | Harga & Tips · XQ Car',
         metaDescription:
           'Semua yang perlu anda tahu tentang sewa kereta di Langkawi — ambil di lapangan terbang, kadar dari RM 70, dokumen, insurans, dan tips memandu dari flit tempatan sejak 2015.',
         excerpt:
           'Penghantaran lapangan terbang, kadar harian adil, dan dokumen yang benar-benar diperlukan — panduan operator tempatan untuk sewa di pulau.',
         lead:
-          'Sewa kereta di Langkawi adalah cara paling fleksibel untuk meneroka pulau mengikut rentak anda. Kadar bermula sekitar RM 70/hari untuk kereta ekonomi apabila tempah terus dengan Car XQ.',
+          'Sewa kereta di Langkawi adalah cara paling fleksibel untuk meneroka pulau mengikut rentak anda. Kadar bermula sekitar RM 70/hari untuk kereta ekonomi apabila tempah terus dengan XQ Car.',
         sections: [
           { type: 'h2', text: 'Mengapa sewa kereta di Langkawi?' },
           { type: 'p', text: 'Taksi sesuai untuk perjalanan tunggal tetapi mahal untuk hari pelbagai hentian di seluruh pulau.' },
@@ -99,16 +99,16 @@ export const BLOG_POSTS: BlogPost[] = [
           { type: 'p', text: 'Ekonomi RM 70–120/hari; MPV RM 120–180/hari. Penghantaran percuma ke LGK Pintu 3, jeti, atau hotel.' },
           { type: 'h2', text: 'Dokumen dan umur' },
           { type: 'p', text: 'Lesen sah, pasport/IC, kad kredit; umur minimum 23, sekurang-kurangnya satu tahun memandu.' },
-          { type: 'h2', text: 'Tempah terus dengan Car XQ' },
+          { type: 'h2', text: 'Tempah terus dengan XQ Car' },
           { type: 'p', text: 'Tempahan dalam ~90 saat di carxq.com — pasukan yang sama jumpa anda di Pintu 3.' },
         ],
       },
       zh: {
         title: '兰卡威租车完整指南（2026）',
-        metaTitle: '兰卡威租车指南 2026 | 价格与技巧 · Car XQ',
+        metaTitle: '兰卡威租车指南 2026 | 价格与技巧 · XQ Car',
         metaDescription: '兰卡威租车须知——机场取车、RM 70 起、证件与本地车队建议。',
         excerpt: '机场送车、透明日租、所需证件——本地运营商指南。',
-        lead: '租车是探索兰卡威最灵活的方式；直接向 Car XQ 预订经济型约 RM 70/天起。',
+        lead: '租车是探索兰卡威最灵活的方式；直接向 XQ Car 预订经济型约 RM 70/天起。',
         sections: [
           { type: 'h2', text: '为什么租车？' },
           { type: 'p', text: '多站一日游打车费用迅速累积，租车更划算。' },
@@ -116,7 +116,7 @@ export const BLOG_POSTS: BlogPost[] = [
           { type: 'p', text: '经济型 RM 70–120/天；MPV RM 120–180/天；免费送至机场3号门。' },
           { type: 'h2', text: '证件要求' },
           { type: 'p', text: '有效驾照、护照/身份证、信用卡；23岁起，至少一年驾龄。' },
-          { type: 'h2', text: '直接预订 Car XQ' },
+          { type: 'h2', text: '直接预订 XQ Car' },
           { type: 'p', text: 'carxq.com 约90秒完成预订，同一团队在3号门接您。' },
         ],
       },
@@ -126,7 +126,7 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'langkawi-airport-car-rental-pickup',
     title: 'Langkawi Airport Car Rental: Door 3 Pickup Guide',
-    metaTitle: 'Langkawi Airport Car Rental (LGK) · Door 3 Pickup · Car XQ',
+    metaTitle: 'Langkawi Airport Car Rental (LGK) · Door 3 Pickup · XQ Car',
     metaDescription:
       'Langkawi airport car rental with free Door 3 Arrivals pickup at LGK. Share your flight number, meet in 5 minutes, no extra airport surcharge. 24/7 counter.',
     category: 'Airport & Pickup',
@@ -137,13 +137,13 @@ export const BLOG_POSTS: BlogPost[] = [
     keywords: ['langkawi airport car rental', 'lgk car rental', 'langkawi international airport car hire'],
     excerpt: 'Step-by-step: from baggage claim to driving off in under 15 minutes at LGK Door 3.',
     lead:
-      'Langkawi airport car rental is simplest when your supplier meets you inside Arrivals. Car XQ operates a 24/7 counter at Door 3 of Langkawi International Airport (LGK) — share your flight number when booking and we track delays at no extra charge.',
+      'Langkawi airport car rental is simplest when your supplier meets you inside Arrivals. XQ Car operates a 24/7 counter at Door 3 of Langkawi International Airport (LGK) — share your flight number when booking and we track delays at no extra charge.',
     sections: [
       { type: 'h2', text: 'Where to meet at LGK' },
       {
         type: 'p',
         text:
-          'After immigration and baggage claim, exit into the Arrivals hall and look for Door 3 on your left. Our team holds a Car XQ sign with your name. The walk from the domestic belt to Door 3 is under three minutes; international arrivals add five to ten minutes depending on queue.',
+          'After immigration and baggage claim, exit into the Arrivals hall and look for Door 3 on your left. Our team holds a XQ Car sign with your name. The walk from the domestic belt to Door 3 is under three minutes; international arrivals add five to ten minutes depending on queue.',
       },
       { type: 'h2', text: 'What to have ready at airport pickup' },
       {
@@ -171,15 +171,15 @@ export const BLOG_POSTS: BlogPost[] = [
     locales: {
       ms: {
         title: 'Sewa Kereta Lapangan Terbang Langkawi: Panduan Ambil Pintu 3',
-        metaTitle: 'Sewa Kereta Lapangan Terbang Langkawi (LGK) · Pintu 3 · Car XQ',
+        metaTitle: 'Sewa Kereta Lapangan Terbang Langkawi (LGK) · Pintu 3 · XQ Car',
         metaDescription:
           'Ambil kereta percuma di Pintu 3 Ketibaan LGK. Kongsi nombor penerbangan, jumpa dalam 5 minit, tiada surcaj lapangan terbang.',
         excerpt: 'Langkah demi langkah: dari tuntutan bagasi ke memandu dalam 15 minit di Pintu 3 LGK.',
         lead:
-          'Sewa kereta lapangan terbang Langkawi paling mudah apabila pembekal jumpa anda di Arrivals. Car XQ beroperasi 24/7 di Pintu 3 LGK — kongsi nombor penerbangan semasa tempahan.',
+          'Sewa kereta lapangan terbang Langkawi paling mudah apabila pembekal jumpa anda di Arrivals. XQ Car beroperasi 24/7 di Pintu 3 LGK — kongsi nombor penerbangan semasa tempahan.',
         sections: [
           { type: 'h2', text: 'Di mana jumpa di LGK' },
-          { type: 'p', text: 'Selepas imigresen, keluar ke Arrivals dan cari Pintu 3 di sebelah kiri. Pasukan kami memegang papan Car XQ dengan nama anda.' },
+          { type: 'p', text: 'Selepas imigresen, keluar ke Arrivals dan cari Pintu 3 di sebelah kiri. Pasukan kami memegang papan XQ Car dengan nama anda.' },
           { type: 'h2', text: 'Apa perlu sediakan' },
           { type: 'ul', items: ['Pengesahan tempahan', 'Pasport dan lesen', 'Kad kredit untuk deposit', 'Nombor penerbangan'] },
           { type: 'h2', text: 'Keluar dari lapangan terbang' },
@@ -190,13 +190,13 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       zh: {
         title: '兰卡威机场租车：3号门取车指南',
-        metaTitle: '兰卡威机场租车 (LGK) · 3号门取车 · Car XQ',
+        metaTitle: '兰卡威机场租车 (LGK) · 3号门取车 · XQ Car',
         metaDescription: 'LGK到达厅3号门免费取车。提供航班号，5分钟内会合，无额外机场费。',
         excerpt: '分步说明：从行李领取至15分钟内驶离LGK 3号门。',
-        lead: '供应商在到达厅接您最简单。Car XQ 在兰卡威国际机场3号门24/7运营——预订时提供航班号即可。',
+        lead: '供应商在到达厅接您最简单。XQ Car 在兰卡威国际机场3号门24/7运营——预订时提供航班号即可。',
         sections: [
           { type: 'h2', text: 'LGK会合地点' },
-          { type: 'p', text: '入境及取行李后，进入到达厅，左侧即为3号门。团队举 Car XQ 姓名牌。' },
+          { type: 'p', text: '入境及取行李后，进入到达厅，左侧即为3号门。团队举 XQ Car 姓名牌。' },
           { type: 'h2', text: '取车需准备' },
           { type: 'ul', items: ['预订确认', '护照与驾照', '信用卡押金', '航班号'] },
           { type: 'h2', text: '驶离机场' },
@@ -211,7 +211,7 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'cheap-car-rental-langkawi-tips',
     title: 'Cheap Car Rental in Langkawi: 7 Ways to Save',
-    metaTitle: 'Cheap Car Rental Langkawi · 7 Money-Saving Tips · Car XQ',
+    metaTitle: 'Cheap Car Rental Langkawi · 7 Money-Saving Tips · XQ Car',
     metaDescription:
       'Cheap car rental Langkawi from RM 70/day. Book early, stay 7+ nights, choose economy, and avoid broker markups — seven practical ways to pay less.',
     category: 'Pricing',
@@ -228,7 +228,7 @@ export const BLOG_POSTS: BlogPost[] = [
       {
         type: 'p',
         text:
-          'Comparison sites add broker margin and push insurance upsells you may not need. Car XQ prices on this site are the same rates our counter staff quote — no middleman.',
+          'Comparison sites add broker margin and push insurance upsells you may not need. XQ Car prices on this site are the same rates our counter staff quote — no middleman.',
       },
       { type: 'h2', text: '2. Rent 7+ nights for automatic discounts' },
       {
@@ -263,7 +263,7 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'rent-a-car-langkawi-requirements',
     title: 'How to Rent a Car in Langkawi: Requirements & Documents',
-    metaTitle: 'Rent a Car Langkawi · Documents & Requirements · Car XQ',
+    metaTitle: 'Rent a Car Langkawi · Documents & Requirements · XQ Car',
     metaDescription:
       'Rent a car in Langkawi with a valid licence, ID, and credit card. Age 23+, 1 year experience. Malaysian or IDP accepted. Step-by-step for tourists.',
     category: 'Guides',
@@ -300,7 +300,7 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'langkawi-ferry-jetty-car-rental',
     title: 'Kuah Ferry Jetty Car Rental & Pickup Guide',
-    metaTitle: 'Langkawi Ferry Jetty Car Rental · Kuah Pickup · Car XQ',
+    metaTitle: 'Langkawi Ferry Jetty Car Rental · Kuah Pickup · XQ Car',
     metaDescription:
       'Rent a car at Langkawi Ferry Jetty (Kuah). Meet at the taxi stand exit, 06:00–22:00 daily. Ideal for Penang–Langkawi ferry arrivals.',
     category: 'Airport & Pickup',
@@ -311,13 +311,13 @@ export const BLOG_POSTS: BlogPost[] = [
     keywords: ['langkawi ferry car rental', 'kuah jetty car rental', 'langkawi ferry jetty rent car'],
     excerpt: 'Arriving by ferry from Penang or Kuala Kedah? Pick up your car steps from the terminal.',
     lead:
-      'Langkawi ferry jetty car rental suits travellers who arrive by boat at Kuah Terminal. Car XQ meets you at the ferry exit near the taxi stand — no need to cross town to an office. Counter hours follow ferry peaks: roughly 06:00–22:00 daily.',
+      'Langkawi ferry jetty car rental suits travellers who arrive by boat at Kuah Terminal. XQ Car meets you at the ferry exit near the taxi stand — no need to cross town to an office. Counter hours follow ferry peaks: roughly 06:00–22:00 daily.',
     sections: [
       { type: 'h2', text: 'Penang and mainland ferry arrivals' },
       {
         type: 'p',
         text:
-          'Disembark, clear the terminal, and look for Car XQ signage at the main exit. WhatsApp us when you see land — we pull the car to the forecourt. Typical wait under ten minutes during scheduled arrivals.',
+          'Disembark, clear the terminal, and look for XQ Car signage at the main exit. WhatsApp us when you see land — we pull the car to the forecourt. Typical wait under ten minutes during scheduled arrivals.',
       },
       { type: 'h2', text: 'Combine jetty pickup with Kuah errands' },
       {
@@ -331,7 +331,7 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'best-car-langkawi-family-trip',
     title: 'Best Cars for a Langkawi Family Trip',
-    metaTitle: 'Best Family Car Rental Langkawi · MPV Guide · Car XQ',
+    metaTitle: 'Best Family Car Rental Langkawi · MPV Guide · XQ Car',
     metaDescription:
       'Best car for Langkawi family trip: MPV vs sedan, luggage space, child seats, and AC comfort for island drives. Perodua Alza, Innova & more.',
     category: 'Planning',
@@ -371,7 +371,7 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'driving-langkawi-first-time',
     title: 'Driving in Langkawi for the First Time: 10 Tips',
-    metaTitle: 'Driving in Langkawi · 10 Tips for Tourists · Car XQ',
+    metaTitle: 'Driving in Langkawi · 10 Tips for Tourists · XQ Car',
     metaDescription:
       'First time driving in Langkawi? Left-hand traffic, roundabouts, fuel, parking, and speed limits — ten practical tips from local renters since 2015.',
     category: 'Driving',
@@ -411,7 +411,7 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'langkawi-3-day-itinerary-by-car',
     title: 'Langkawi 3-Day Itinerary by Car',
-    metaTitle: 'Langkawi 3-Day Itinerary by Car · Beach & Sky Bridge · Car XQ',
+    metaTitle: 'Langkawi 3-Day Itinerary by Car · Beach & Sky Bridge · XQ Car',
     metaDescription:
       'Langkawi 3-day driving itinerary: Pantai Cenang, Sky Bridge, Kilim Geoforest, Tanjung Rhu, and Kuah — distances and timing from a local fleet.',
     category: 'Planning',
@@ -448,7 +448,7 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'langkawi-monsoon-season-car-rental',
     title: 'Renting a Car in Langkawi During Monsoon Season',
-    metaTitle: 'Langkawi Monsoon Car Rental · May–June Guide · Car XQ',
+    metaTitle: 'Langkawi Monsoon Car Rental · May–June Guide · XQ Car',
     metaDescription:
       'Langkawi monsoon season car rental: quieter roads, lower rates, rain driving tips, and what to expect May–June and September–October.',
     category: 'Planning',
@@ -479,7 +479,7 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'langkawi-car-rental-vs-taxi-grab',
     title: 'Car Rental vs Taxi vs Grab in Langkawi',
-    metaTitle: 'Car Rental vs Grab Langkawi · Cost Comparison · Car XQ',
+    metaTitle: 'Car Rental vs Grab Langkawi · Cost Comparison · XQ Car',
     metaDescription:
       'Car rental vs taxi vs Grab in Langkawi: break-even analysis for 2–7 day trips, airport transfers, and multi-stop sightseeing.',
     category: 'Pricing',
@@ -519,7 +519,7 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'langkawi-car-rental-insurance',
     title: 'Car Rental Insurance in Langkawi Explained',
-    metaTitle: 'Langkawi Car Rental Insurance · What\'s Covered · Car XQ',
+    metaTitle: 'Langkawi Car Rental Insurance · What\'s Covered · XQ Car',
     metaDescription:
       'Langkawi car rental insurance: collision damage, third party, excess, and what to ask before you sign. Plain-language guide for tourists.',
     category: 'Guides',
@@ -553,7 +553,7 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'pantai-cenang-car-rental-guide',
     title: 'Pantai Cenang Car Rental & Parking Guide',
-    metaTitle: 'Pantai Cenang Car Rental · Parking & Hotels · Car XQ',
+    metaTitle: 'Pantai Cenang Car Rental · Parking & Hotels · XQ Car',
     metaDescription:
       'Rent a car in Pantai Cenang with hotel delivery. Parking tips, one-way streets, and best pickup points along the main beach strip.',
     category: 'Planning',
@@ -564,7 +564,7 @@ export const BLOG_POSTS: BlogPost[] = [
     keywords: ['pantai cenang car rental', 'cenang beach car hire', 'langkawi cenang parking'],
     excerpt: 'Hotel delivery, beach parking, and avoiding Cenang’s evening traffic pinch points.',
     lead:
-      'Pantai Cenang car rental is popular because the strip is the island’s tourist hub — but parking fills after 17:00. Car XQ delivers free to Cenang hotels and homestays; specify your property name and we meet at the lobby or main road access.',
+      'Pantai Cenang car rental is popular because the strip is the island’s tourist hub — but parking fills after 17:00. XQ Car delivers free to Cenang hotels and homestays; specify your property name and we meet at the lobby or main road access.',
     sections: [
       { type: 'h2', text: 'Parking along the strip' },
       {
@@ -584,7 +584,7 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'kuah-town-langkawi-car-rental',
     title: 'Kuah Town Car Rental: Jetty, Shopping & Day Trips',
-    metaTitle: 'Kuah Langkawi Car Rental · Town & Jetty Guide · Car XQ',
+    metaTitle: 'Kuah Langkawi Car Rental · Town & Jetty Guide · XQ Car',
     metaDescription:
       'Kuah town car rental for ferry arrivals, Eagle Square, duty-free shopping, and east-coast day trips. Free jetty and hotel pickup.',
     category: 'Planning',
@@ -615,7 +615,7 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'langkawi-sky-bridge-by-car',
     title: 'How to Drive to Langkawi Sky Bridge & SkyCab',
-    metaTitle: 'Drive to Langkawi Sky Bridge · Parking & Tips · Car XQ',
+    metaTitle: 'Drive to Langkawi Sky Bridge · Parking & Tips · XQ Car',
     metaDescription:
       'Driving to Langkawi Sky Bridge and SkyCab: parking at Oriental Village, timing, tickets, and road conditions from Cenang and Kuah.',
     category: 'Driving',
@@ -646,7 +646,7 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'kilim-geoforest-park-road-trip',
     title: 'Kilim Geoforest Park by Car: Mangrove Road Trip',
-    metaTitle: 'Kilim Geoforest Park by Car · Driving Guide · Car XQ',
+    metaTitle: 'Kilim Geoforest Park by Car · Driving Guide · XQ Car',
     metaDescription:
       'Drive to Kilim Karst Geoforest Park from Kuah or Cenang. Parking, boat tours, eagles, and mangrove timing tips.',
     category: 'Driving',
@@ -677,7 +677,7 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'tanjung-rhu-beach-drive-langkawi',
     title: 'Tanjung Rhu Beach Drive: North Langkawi Escape',
-    metaTitle: 'Tanjung Rhu Drive · North Langkawi Beach · Car XQ',
+    metaTitle: 'Tanjung Rhu Drive · North Langkawi Beach · XQ Car',
     metaDescription:
       'Scenic drive to Tanjung Rhu Beach Langkawi. Route from Kuah, parking, resorts, and combining with Kilim Geoforest.',
     category: 'Driving',
@@ -708,9 +708,9 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'langkawi-hotel-car-delivery',
     title: 'Free Hotel Car Delivery in Langkawi',
-    metaTitle: 'Free Hotel Car Delivery Langkawi · How It Works · Car XQ',
+    metaTitle: 'Free Hotel Car Delivery Langkawi · How It Works · XQ Car',
     metaDescription:
-      'Free car delivery to Langkawi hotels, resorts, and homestays. Pantai Cenang, Kuah, Datai, and The Andaman — no extra fee at Car XQ.',
+      'Free car delivery to Langkawi hotels, resorts, and homestays. Pantai Cenang, Kuah, Datai, and The Andaman — no extra fee at XQ Car.',
     category: 'Airport & Pickup',
     tag: 'Delivery',
     publishedAt: '2026-04-25',
@@ -719,7 +719,7 @@ export const BLOG_POSTS: BlogPost[] = [
     keywords: ['langkawi hotel car delivery', 'car rental delivered to hotel langkawi'],
     excerpt: 'Skip the taxi from LGK — we bring the car to your lobby.',
     lead:
-      'Hotel car delivery in Langkawi is included free with Car XQ bookings. Select your hotel at checkout or message us the property name — we meet you at reception or the security gate with the vehicle ready.',
+      'Hotel car delivery in Langkawi is included free with XQ Car bookings. Select your hotel at checkout or message us the property name — we meet you at reception or the security gate with the vehicle ready.',
     sections: [
       { type: 'h2', text: 'Resorts we deliver to daily' },
       {
@@ -743,7 +743,7 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'langkawi-weekly-monthly-car-rental',
     title: 'Weekly & Monthly Car Rental Langkawi',
-    metaTitle: 'Weekly & Monthly Car Rental Langkawi · Long-Stay Rates · Car XQ',
+    metaTitle: 'Weekly & Monthly Car Rental Langkawi · Long-Stay Rates · XQ Car',
     metaDescription:
       'Weekly and monthly car rental Langkawi with discounted rates for 7+ and 30+ days. Ideal for remote workers, MM2H, and long holidays.',
     category: 'Pricing',
@@ -774,7 +774,7 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'langkawi-car-rental-child-seat',
     title: 'Langkawi Car Rental with Child Seat',
-    metaTitle: 'Langkawi Car Rental Child Seat · Family Extras · Car XQ',
+    metaTitle: 'Langkawi Car Rental Child Seat · Family Extras · XQ Car',
     metaDescription:
       'Add a child seat to your Langkawi car rental. Rear-facing and booster options, installed before pickup at airport or hotel.',
     category: 'Planning',
@@ -808,9 +808,9 @@ export const BLOG_POSTS: BlogPost[] = [
   post({
     slug: 'book-car-rental-langkawi-online',
     title: 'How to Book Car Rental in Langkawi Online in 90 Seconds',
-    metaTitle: 'Book Car Rental Langkawi Online · 90-Second Checkout · Car XQ',
+    metaTitle: 'Book Car Rental Langkawi Online · 90-Second Checkout · XQ Car',
     metaDescription:
-      'Book Langkawi car rental online: pick dates, choose car, set airport or hotel pickup, pay securely. Confirmation instant. Car XQ since 2015.',
+      'Book Langkawi car rental online: pick dates, choose car, set airport or hotel pickup, pay securely. Confirmation instant. XQ Car since 2015.',
     category: 'Guides',
     tag: 'Booking',
     publishedAt: '2026-05-10',

@@ -7,7 +7,7 @@ const FLOWS = {
   'airport-pickup': [
     {
       t: 'Land and collect your bags',
-      d: "After clearing immigration, head out through Door 3 — that's the southern arrivals exit. Look for our orange Car XQ sign.",
+      d: "After clearing immigration, head out through Door 3 — that's the southern arrivals exit. Look for our orange XQ Car sign.",
     },
     {
       t: 'Show your booking + license',
@@ -29,7 +29,7 @@ const FLOWS = {
     },
     {
       t: 'Park in our drop-off bay',
-      d: "Look for the same orange Car XQ sign at Door 3. Pull into bay 4 or 5 — they're marked for rentals.",
+      d: "Look for the same orange XQ Car sign at Door 3. Pull into bay 4 or 5 — they're marked for rentals.",
     },
     {
       t: 'Quick walk-around with our team',

@@ -1,15 +1,15 @@
-# Car XQ — Langkawi Car Rental
+# XQCar — Langkawi Car Rental
 
 > Family-owned car rental in Langkawi, Malaysia since 2015. Book online from RM 70/day with free delivery to Langkawi International Airport (LGK) Door 3, Kuah Ferry Jetty, or your hotel.
 
 ## Book & fleet
 
 - [Home — car rental Langkawi](https://carxq.com/): Search dates, browse fleet, book in ~90 seconds
-- [About Car XQ](https://carxq.com/about): Licensed operator since 2015, owned fleet, OKU-friendly vehicles, island-wide delivery
+- [About XQ Car](https://carxq.com/about): Licensed operator since 2015, owned fleet, OKU-friendly vehicles, island-wide delivery
 
 ## Blog — Langkawi car rental guides
 
-- [Car XQ Journal](https://carxq.com/blog): 20+ guides on renting and driving in Langkawi
+- [XQ Car Journal](https://carxq.com/blog): 20+ guides on renting and driving in Langkawi
 - [Complete car rental guide](https://carxq.com/blog/car-rental-langkawi-complete-guide): Pillar guide — prices, pickup, documents, tips
 - [Airport car rental pickup](https://carxq.com/blog/langkawi-airport-car-rental-pickup): LGK Door 3 meet point
 - [Cheap car rental tips](https://carxq.com/blog/cheap-car-rental-langkawi-tips): Save on daily rates

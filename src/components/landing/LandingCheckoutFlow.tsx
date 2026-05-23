@@ -294,7 +294,7 @@ export function LandingCheckoutFlow({
   user,
   backHref,
 }: LandingCheckoutFlowProps) {
-  const { t } = usePublicI18n()
+  const { t, href } = usePublicI18n()
   const navigate = useNavigate()
 
   const ADDONS = useMemo(
@@ -668,8 +668,8 @@ export function LandingCheckoutFlow({
     if (tripSearch.adults) params.set('adults', tripSearch.adults)
     if (tripSearch.children) params.set('children', tripSearch.children)
     const q = params.toString()
-    return `/checkout/${car.id}${q ? `?${q}` : ''}`
-  }, [car.id, tripSearch])
+    return href(`/checkout/${car.id}${q ? `?${q}` : ''}`)
+  }, [car.id, tripSearch, href])
 
   const advance = useCallback(async () => {
     setFlowError(null)

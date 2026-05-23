@@ -188,7 +188,7 @@ function GuestBookingConfirmedPage() {
 
   return (
     <div className="cxq-landing-page">
-      <div className="page page--checkout" data-screen-label="Car XQ Guest Booking">
+      <div className="page page--checkout" data-screen-label="XQ Car Guest Booking">
         <div className="checkout-page-frame">
             <div className="checkout checkout--confirmed">
             <div className="checkout-section confirmation-page">

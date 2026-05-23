@@ -41,6 +41,28 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
+    sendResetPassword: async ({ user, url }) => {
+      const { sendPasswordResetEmail } = await import('#/lib/email-functions')
+      await sendPasswordResetEmail({
+        to: user.email,
+        name: user.name,
+        url,
+      })
+    },
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    sendOnSignIn: true,
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      const { sendEmailVerification } = await import('#/lib/email-functions')
+      await sendEmailVerification({
+        to: user.email,
+        name: user.name,
+        url,
+      })
+    },
   },
   socialProviders: {
     google: {

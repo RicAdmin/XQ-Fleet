@@ -61,7 +61,7 @@ export const Route = createFileRoute('/$locale/checkout/$carId')({
 function CheckoutRoutePending() {
   return (
     <div className="cxq-landing-page">
-      <div className="page page--checkout cxq-route-loading" data-screen-label="Car XQ Checkout">
+      <div className="page page--checkout cxq-route-loading" data-screen-label="XQ Car Checkout">
         <LoadingSpinner size={32} label="Loading checkout" />
         <p className="cxq-route-loading-text">Loading checkout…</p>
       </div>
@@ -98,7 +98,7 @@ function CheckoutPage() {
 
   return (
     <div className="cxq-landing-page">
-      <div className="page page--checkout" data-screen-label="Car XQ Checkout">
+      <div className="page page--checkout" data-screen-label="XQ Car Checkout">
         <div className="layout-bleed cxq-checkout-nav-strip">
           <LandingNav
             appearance="solid-light"

@@ -1,34 +1,23 @@
-import { Check } from 'lucide-react'
+import { AUTH_ASIDE_BG } from '#/components/landing/cxq-landing-data'
 
 type CxqAuthMarketingAsideProps = {
-  eyebrow: string
-  headline: string
-  body: string
-  perks: readonly string[]
+  slogan: string
+  backgroundImage?: string
 }
 
 export default function CxqAuthMarketingAside({
-  eyebrow,
-  headline,
-  body,
-  perks,
+  slogan,
+  backgroundImage = AUTH_ASIDE_BG,
 }: CxqAuthMarketingAsideProps) {
+  const bgUrl = backgroundImage.includes(' ') ? encodeURI(backgroundImage) : backgroundImage
   return (
-    <div className="auth-left">
+    <div
+      className="auth-left auth-left--photo"
+      style={{ '--auth-left-bg': `url("${bgUrl}")` } as React.CSSProperties}
+    >
       <div className="auth-left-inner">
-        <span className="eyebrow">{eyebrow}</span>
-        <h2>{headline}</h2>
-        <p>{body}</p>
-        <ul className="auth-perks">
-          {perks.map((perk) => (
-            <li key={perk}>
-              <Check size={14} strokeWidth={2.5} />
-              {perk}
-            </li>
-          ))}
-        </ul>
+        <p className="auth-left-slogan">{slogan}</p>
       </div>
     </div>
   )
 }
-

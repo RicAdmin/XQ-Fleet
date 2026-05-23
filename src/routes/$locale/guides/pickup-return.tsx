@@ -4,7 +4,7 @@ import { PickupReturnGuide } from '#/components/guides/pickup-return-guide'
 import { publicSitePath } from '#/lib/brand'
 import { socialImageMeta } from '#/lib/seo-meta'
 
-const title = 'Car Pickup & Return Guide · Langkawi Airport & Jetty · Car XQ'
+const title = 'Car Pickup & Return Guide · Langkawi Airport & Jetty · XQ Car'
 const description =
   'Step-by-step pickup at LGK Door 3 or Kuah Ferry Jetty. What to bring, walk-through process, and fuel return rules for Langkawi car rental.'
 

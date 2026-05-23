@@ -47,7 +47,7 @@ export const zhBooking: EnBooking = {
   fromRmDay: 'RM {amount}/天起',
   off: '折',
   seeAllSavings: '查看全部优惠',
-  whyEyebrow: '为什么选择 Car XQ',
+  whyEyebrow: '为什么选择 XQ Car',
   whyTitle: '计划兰卡威之旅？我们是首选。',
   whySub: '在岛十一年，数千满意客人，一个承诺 — 安全、友好、价格公道。',
   readArticle: '阅读文章',

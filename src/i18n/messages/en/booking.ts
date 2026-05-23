@@ -45,7 +45,7 @@ export const enBooking = {
   fromRmDay: 'from RM {amount}/day',
   off: 'off',
   seeAllSavings: 'See all savings',
-  whyEyebrow: 'Why Car XQ',
+  whyEyebrow: 'Why XQ Car',
   whyTitle: "Planning a Langkawi trip? Here's why we're the top choice.",
   whySub:
     'Eleven years on the island, thousands of happy guests, one promise — safe, friendly, fairly priced rentals, every time.',

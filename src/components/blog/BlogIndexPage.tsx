@@ -48,13 +48,13 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
   const gridPosts = filtered.filter((p) => p.slug !== featured?.slug || category !== 'All' || query)
 
   return (
-    <PublicMarketingShell screenLabel="Car XQ Journal" mainClassName="blog-page">
+    <PublicMarketingShell screenLabel="XQ Car Journal" mainClassName="blog-page">
       <header className="blog-header">
         <LocaleLink to="/" className="close-btn" aria-label={t('common.back')}>
           <ArrowLeft size={16} />
         </LocaleLink>
         <div className="blog-header-text">
-          <span className="eyebrow">Car XQ Journal</span>
+          <span className="eyebrow">XQ Car Journal</span>
           <h1>Langkawi car rental guides &amp; island drives.</h1>
           <p>
             Practical advice on renting, driving, and planning — written by the team that meets you at

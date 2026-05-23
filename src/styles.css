@@ -12,7 +12,7 @@
 }
 
 :root {
-  /* ── Car XQ brand tokens (aligned with cxq-landing-scoped.css) ── */
+  /* ── XQ Car brand tokens (aligned with cxq-landing-scoped.css) ── */
   --sea-ink: #14181a;
   --sea-ink-soft: #566067;
   --sea-border: #e4e6ea;
@@ -3369,7 +3369,7 @@ select.field-input {
   opacity: 0.85;
 }
 
-/* ─── Payment result hero (Car XQ / xq-car-web confirmation-hero pattern) ───
+/* ─── Payment result hero (XQ Car / xq-car-web confirmation-hero pattern) ───
    Mirrors project/styles.css .confirmation-hero + .confirmation-tick + actions
    from xq-car-web flows.jsx CheckoutConfirmation — used on booking detail after iPay88. */
 
@@ -4201,7 +4201,7 @@ select.field-input {
 
 /* ── Customer portal profile — mirrors xq-car-web `profile-page-v2` (flows.jsx + styles.css) ── */
 .cxq-profile-page {
-  /* Scoped Car XQ marketing tokens (do not change global :root) */
+  /* Scoped XQ Car marketing tokens (do not change global :root) */
   --profile-ink: #14181a;
   --profile-ink-soft: #2a2f33;
   --profile-muted: #6b7378;
@@ -4854,7 +4854,7 @@ select.field-input {
   padding: 8px 14px;
 }
 
-/* ─── Booking detail (My rentals → view) — Car XQ profile + rental-row pattern ─ */
+/* ─── Booking detail (My rentals → view) — XQ Car profile + rental-row pattern ─ */
 
 .cxq-booking-detail-top {
   margin-bottom: 0.35rem;

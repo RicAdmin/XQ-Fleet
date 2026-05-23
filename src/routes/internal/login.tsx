@@ -5,7 +5,6 @@ import { ArrowRight } from 'lucide-react'
 
 import CxqAuthMarketingAside from '#/components/auth/CxqAuthMarketingAside'
 import PublicAuthShell from '#/components/shells/PublicAuthShell'
-import { cxqAuthInternalAside } from '#/lib/cxq-auth-marketing'
 import { authClient } from '#/lib/auth-client'
 import { createInitialOwner } from '#/lib/auth-functions'
 import { appRoleFromSessionUser, getHomePathForRole } from '#/lib/auth-model'
@@ -31,9 +30,9 @@ function InternalLoginPage() {
   const title = hasOwner ? 'Sign in' : 'Create the first owner account'
 
   return (
-    <PublicAuthShell screenLabel="Car XQ Internal login" minimal>
+    <PublicAuthShell screenLabel="XQ Car Internal login" minimal>
       <div className="auth-page-card">
-        <CxqAuthMarketingAside {...cxqAuthInternalAside} />
+        <CxqAuthMarketingAside slogan="Secure access to your workspace." />
 
         <div className="auth-right">
           <span className="auth-badge">Staff</span>

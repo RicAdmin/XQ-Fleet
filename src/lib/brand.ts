@@ -1,4 +1,6 @@
 /** Public path to the XQ Car brand logo (served from `public/image/`). */
+export const BRAND_NAME = 'XQCar'
+export const BRAND_NAME_PROSE = 'XQ Car'
 export const BRAND_LOGO_PATH = '/image/xqCarLogo.png'
 
 function resolveSiteUrl(siteUrl?: string): string {

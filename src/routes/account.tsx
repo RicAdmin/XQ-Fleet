@@ -39,7 +39,7 @@ function CustomerAccountOutlet() {
 
   return (
     <div className="cxq-landing-page">
-      <div className="page" data-screen-label="Car XQ Account">
+      <div className="page" data-screen-label="XQ Car Account">
         <div className="layout-bleed cxq-checkout-nav-strip">
           <LandingNav
             appearance="solid-light"

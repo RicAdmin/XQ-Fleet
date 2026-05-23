@@ -28,12 +28,12 @@ export function PlanDriveGuide() {
   const exportText = useMemo(() => {
     if (!pickedList.length) return ''
     const lines = [
-      `My Langkawi drive — Car XQ (${day === 'anyday' ? 'to plan' : day})`,
+      `My Langkawi drive — XQ Car (${day === 'anyday' ? 'to plan' : day})`,
       `Total stops: ${pickedList.length}`,
       '',
       ...pickedList.map((s, i) => `${String(i + 1).padStart(2, '0')}. ${s.t}\n    ${s.cat} · ${s.drive}\n    ${s.desc}`),
       '',
-      'Planned with Car XQ · XQ Car Fleet',
+      'Planned with XQ Car · XQ Car Fleet',
     ]
     return lines.join('\n')
   }, [pickedList, day])

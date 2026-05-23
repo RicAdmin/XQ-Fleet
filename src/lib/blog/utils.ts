@@ -39,7 +39,7 @@ export function getRelatedPosts(posts: BlogPost[], current: BlogPost, limit = 3)
 }
 
 export const DEFAULT_AUTHOR = {
-  name: 'Car XQ Team',
+  name: 'XQCar Team',
   role: 'Langkawi car rental · since 2015',
   bio: 'Family-run car rental on Langkawi Island. We write from daily pickup experience at the airport, jetty, and hotels — not from a mainland desk.',
   url: '/about',

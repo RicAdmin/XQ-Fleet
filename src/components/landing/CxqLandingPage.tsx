@@ -32,6 +32,7 @@ import {
 } from 'lucide-react'
 
 import BrandLogo from '#/components/BrandLogo'
+import { BrandName } from '#/components/BrandName'
 import { LanguageSwitcher } from '#/components/i18n/LanguageSwitcher'
 import { LocaleLink } from '#/components/i18n/LocaleLink'
 import { PaymentMethodIcons } from '#/components/landing/payment-method-icons'
@@ -321,7 +322,7 @@ export function CxqLandingPage({
 
   return (
     <div className="cxq-landing-page">
-      <div className="page" data-screen-label="Car XQ Landing">
+      <div className="page" data-screen-label="XQ Car Landing">
         <div style={{ position: 'relative' }}>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 5 }}>
             <LandingNav
@@ -624,10 +625,8 @@ export function LandingNav({
     <nav className={'nav' + (onHero ? '' : ' nav--solid-light')}>
       <Link to={homePath as '/'}>
         <div className="brand" style={{ color: onHero ? '#fff' : 'var(--ink)' }}>
-          <BrandLogo size={36} />
-          <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, letterSpacing: '-.01em' }}>
-            Car<span style={{ color: 'var(--brand-leaf)' }}>XQ</span>
-          </span>
+          <BrandLogo size={48} />
+          <BrandName />
         </div>
       </Link>
       <div className="nav-links">
@@ -2615,10 +2614,8 @@ export function SiteFooter({
       <div className="cols">
         <div>
           <div className="brand" style={{ color: '#fff' }}>
-            <BrandLogo size={36} />
-            <span style={{ fontWeight: 700 }}>
-              Car<span style={{ color: 'var(--brand-leaf)' }}>XQ</span>
-            </span>
+            <BrandLogo size={56} />
+            <BrandName />
           </div>
           <div className="footer-tagline">
             <p className="tag">{t('footer.tagline1')}</p>

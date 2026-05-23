@@ -2,7 +2,7 @@ import type { Locale } from '#/i18n/locales'
 import { HTML_LANG } from '#/i18n/locales'
 import { getLandingContent } from '#/i18n/content'
 import { LEGAL_COMPANY } from '#/lib/legal/company'
-import { brandLogoUrl, publicSitePath, publicSiteUrl } from '#/lib/brand'
+import { BRAND_NAME, BRAND_NAME_PROSE, brandLogoUrl, publicSitePath, publicSiteUrl } from '#/lib/brand'
 import { SEO_OG_IMAGE } from '#/lib/seo-meta'
 
 /** JSON-LD for homepage — AutoRental + FAQPage. */
@@ -15,8 +15,8 @@ export function buildHomeStructuredData(locale: Locale = 'en') {
     '@context': 'https://schema.org',
     '@type': 'AutoRental',
     '@id': `${siteUrl}/#organization`,
-    name: 'Car XQ',
-    alternateName: 'Car XQ Langkawi',
+    name: BRAND_NAME,
+    alternateName: `${BRAND_NAME_PROSE} Langkawi`,
     url: siteUrl,
     logo: logoUrl,
     image: heroImageUrl,
@@ -92,7 +92,7 @@ export function buildHomeStructuredData(locale: Locale = 'en') {
     '@type': 'WebSite',
     '@id': `${siteUrl}/#website`,
     url: siteUrl,
-    name: 'Car XQ — Car Rental Langkawi',
+    name: `${BRAND_NAME} — Car Rental Langkawi`,
     publisher: { '@id': `${siteUrl}/#organization` },
     inLanguage: HTML_LANG[locale],
   }

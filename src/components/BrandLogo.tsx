@@ -9,7 +9,7 @@ type BrandLogoProps = {
 export default function BrandLogo({
   size = 32,
   className,
-  alt = 'XQ Car',
+  alt = 'XQCar',
 }: BrandLogoProps) {
   return (
     <img

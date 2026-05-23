@@ -15,7 +15,7 @@ type PublicMarketingShellProps = {
 /** Public pages that share the main landing nav, typography, and footer. */
 export default function PublicMarketingShell({
   children,
-  screenLabel = 'Car XQ',
+  screenLabel = 'XQ Car',
   mainClassName = 'container',
 }: PublicMarketingShellProps) {
   const { data: session, isPending: sessionPending } = authClient.useSession()

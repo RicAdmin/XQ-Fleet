@@ -174,7 +174,7 @@ export default function AdminSidebarShell({
           <span className="sidebar-logo">
             <BrandLogo size={32} />
           </span>
-          {!collapsed && <span className="sidebar-brand-name">Car XQ</span>}
+          {!collapsed && <span className="sidebar-brand-name">XQCar</span>}
           <button
             type="button"
             className="sidebar-collapse-btn"

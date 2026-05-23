@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RentalAgreementRouteImport } from './routes/rental-agreement'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
@@ -42,6 +43,7 @@ import { Route as AccountRentalsRouteImport } from './routes/account/rentals'
 import { Route as AccountProfileRouteImport } from './routes/account/profile'
 import { Route as AccountNotificationsRouteImport } from './routes/account/notifications'
 import { Route as LocaleTermsRouteImport } from './routes/$locale/terms'
+import { Route as LocaleResetPasswordRouteImport } from './routes/$locale/reset-password'
 import { Route as LocaleRentalAgreementRouteImport } from './routes/$locale/rental-agreement'
 import { Route as LocaleRegisterRouteImport } from './routes/$locale/register'
 import { Route as LocaleRefundPolicyRouteImport } from './routes/$locale/refund-policy'
@@ -93,6 +95,11 @@ import { Route as LocaleBookingConfirmedRentalIdRouteImport } from './routes/$lo
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RentalAgreementRoute = RentalAgreementRouteImport.update({
@@ -253,6 +260,11 @@ const AccountNotificationsRoute = AccountNotificationsRouteImport.update({
 const LocaleTermsRoute = LocaleTermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
+const LocaleResetPasswordRoute = LocaleResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => LocaleRouteRoute,
 } as any)
 const LocaleRentalAgreementRoute = LocaleRentalAgreementRouteImport.update({
@@ -514,6 +526,7 @@ export interface FileRoutesByFullPath {
   '/refund-policy': typeof RefundPolicyRoute
   '/register': typeof RegisterRoute
   '/rental-agreement': typeof RentalAgreementRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
   '/$locale/about': typeof LocaleAboutRoute
   '/$locale/forgot-password': typeof LocaleForgotPasswordRoute
@@ -523,6 +536,7 @@ export interface FileRoutesByFullPath {
   '/$locale/refund-policy': typeof LocaleRefundPolicyRoute
   '/$locale/register': typeof LocaleRegisterRoute
   '/$locale/rental-agreement': typeof LocaleRentalAgreementRoute
+  '/$locale/reset-password': typeof LocaleResetPasswordRoute
   '/$locale/terms': typeof LocaleTermsRoute
   '/account/notifications': typeof AccountNotificationsRoute
   '/account/profile': typeof AccountProfileRoute
@@ -592,6 +606,7 @@ export interface FileRoutesByTo {
   '/refund-policy': typeof RefundPolicyRoute
   '/register': typeof RegisterRoute
   '/rental-agreement': typeof RentalAgreementRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
   '/$locale/about': typeof LocaleAboutRoute
   '/$locale/forgot-password': typeof LocaleForgotPasswordRoute
@@ -601,6 +616,7 @@ export interface FileRoutesByTo {
   '/$locale/refund-policy': typeof LocaleRefundPolicyRoute
   '/$locale/register': typeof LocaleRegisterRoute
   '/$locale/rental-agreement': typeof LocaleRentalAgreementRoute
+  '/$locale/reset-password': typeof LocaleResetPasswordRoute
   '/$locale/terms': typeof LocaleTermsRoute
   '/account/notifications': typeof AccountNotificationsRoute
   '/account/profile': typeof AccountProfileRoute
@@ -675,6 +691,7 @@ export interface FileRoutesById {
   '/refund-policy': typeof RefundPolicyRoute
   '/register': typeof RegisterRoute
   '/rental-agreement': typeof RentalAgreementRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
   '/$locale/about': typeof LocaleAboutRoute
   '/$locale/forgot-password': typeof LocaleForgotPasswordRoute
@@ -684,6 +701,7 @@ export interface FileRoutesById {
   '/$locale/refund-policy': typeof LocaleRefundPolicyRoute
   '/$locale/register': typeof LocaleRegisterRoute
   '/$locale/rental-agreement': typeof LocaleRentalAgreementRoute
+  '/$locale/reset-password': typeof LocaleResetPasswordRoute
   '/$locale/terms': typeof LocaleTermsRoute
   '/account/notifications': typeof AccountNotificationsRoute
   '/account/profile': typeof AccountProfileRoute
@@ -759,6 +777,7 @@ export interface FileRouteTypes {
     | '/refund-policy'
     | '/register'
     | '/rental-agreement'
+    | '/reset-password'
     | '/terms'
     | '/$locale/about'
     | '/$locale/forgot-password'
@@ -768,6 +787,7 @@ export interface FileRouteTypes {
     | '/$locale/refund-policy'
     | '/$locale/register'
     | '/$locale/rental-agreement'
+    | '/$locale/reset-password'
     | '/$locale/terms'
     | '/account/notifications'
     | '/account/profile'
@@ -837,6 +857,7 @@ export interface FileRouteTypes {
     | '/refund-policy'
     | '/register'
     | '/rental-agreement'
+    | '/reset-password'
     | '/terms'
     | '/$locale/about'
     | '/$locale/forgot-password'
@@ -846,6 +867,7 @@ export interface FileRouteTypes {
     | '/$locale/refund-policy'
     | '/$locale/register'
     | '/$locale/rental-agreement'
+    | '/$locale/reset-password'
     | '/$locale/terms'
     | '/account/notifications'
     | '/account/profile'
@@ -919,6 +941,7 @@ export interface FileRouteTypes {
     | '/refund-policy'
     | '/register'
     | '/rental-agreement'
+    | '/reset-password'
     | '/terms'
     | '/$locale/about'
     | '/$locale/forgot-password'
@@ -928,6 +951,7 @@ export interface FileRouteTypes {
     | '/$locale/refund-policy'
     | '/$locale/register'
     | '/$locale/rental-agreement'
+    | '/$locale/reset-password'
     | '/$locale/terms'
     | '/account/notifications'
     | '/account/profile'
@@ -1002,6 +1026,7 @@ export interface RootRouteChildren {
   RefundPolicyRoute: typeof RefundPolicyRoute
   RegisterRoute: typeof RegisterRoute
   RentalAgreementRoute: typeof RentalAgreementRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   TermsRoute: typeof TermsRoute
   BlogSlugRoute: typeof BlogSlugRoute
   BookCarIdRoute: typeof BookCarIdRoute
@@ -1030,6 +1055,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rental-agreement': {
@@ -1254,6 +1286,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/$locale/terms'
       preLoaderRoute: typeof LocaleTermsRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
+    '/$locale/reset-password': {
+      id: '/$locale/reset-password'
+      path: '/reset-password'
+      fullPath: '/$locale/reset-password'
+      preLoaderRoute: typeof LocaleResetPasswordRouteImport
       parentRoute: typeof LocaleRouteRoute
     }
     '/$locale/rental-agreement': {
@@ -1597,6 +1636,7 @@ interface LocaleRouteRouteChildren {
   LocaleRefundPolicyRoute: typeof LocaleRefundPolicyRoute
   LocaleRegisterRoute: typeof LocaleRegisterRoute
   LocaleRentalAgreementRoute: typeof LocaleRentalAgreementRoute
+  LocaleResetPasswordRoute: typeof LocaleResetPasswordRoute
   LocaleTermsRoute: typeof LocaleTermsRoute
   LocaleIndexRoute: typeof LocaleIndexRoute
   LocaleBlogSlugRoute: typeof LocaleBlogSlugRoute
@@ -1621,6 +1661,7 @@ const LocaleRouteRouteChildren: LocaleRouteRouteChildren = {
   LocaleRefundPolicyRoute: LocaleRefundPolicyRoute,
   LocaleRegisterRoute: LocaleRegisterRoute,
   LocaleRentalAgreementRoute: LocaleRentalAgreementRoute,
+  LocaleResetPasswordRoute: LocaleResetPasswordRoute,
   LocaleTermsRoute: LocaleTermsRoute,
   LocaleIndexRoute: LocaleIndexRoute,
   LocaleBlogSlugRoute: LocaleBlogSlugRoute,
@@ -1733,6 +1774,7 @@ const rootRouteChildren: RootRouteChildren = {
   RefundPolicyRoute: RefundPolicyRoute,
   RegisterRoute: RegisterRoute,
   RentalAgreementRoute: RentalAgreementRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   TermsRoute: TermsRoute,
   BlogSlugRoute: BlogSlugRoute,
   BookCarIdRoute: BookCarIdRoute,

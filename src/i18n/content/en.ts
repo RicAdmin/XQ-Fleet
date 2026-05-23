@@ -50,7 +50,7 @@ export const enLandingContent: LandingContent = {
       id: 'book-rental-step-by-step',
       slug: 'book-car-rental-langkawi-online',
       tag: 'Guides',
-      title: 'How to book your Car XQ rental online — step by step',
+      title: 'How to book your XQ Car rental online — step by step',
       excerpt: 'A quick visual walkthrough of every screen, so your first rental feels like your tenth.',
       img: '/image/Attractions/pantai%20cenang.png',
     },

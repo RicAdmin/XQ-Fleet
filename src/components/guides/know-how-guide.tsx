@@ -187,7 +187,7 @@ export function KnowHowGuide() {
                 <b>+60 4 966 3333</b> · Sultanah Maliha Hospital (Langkawi)
               </span>
               <span>
-                <b>+60 11 3521 5576</b> · Car XQ 24/7 roadside
+                <b>+60 11 3521 5576</b> · XQ Car 24/7 roadside
               </span>
             </div>
           </div>

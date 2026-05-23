@@ -19,7 +19,7 @@ type PublicAuthShellProps = {
 
 export default function PublicAuthShell({
   children,
-  screenLabel = 'Car XQ Auth',
+  screenLabel = 'XQ Car Auth',
   minimal = false,
 }: PublicAuthShellProps) {
   const { data: session, isPending: sessionPending } = authClient.useSession()

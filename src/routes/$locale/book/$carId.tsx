@@ -4,6 +4,8 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import { z } from 'zod'
 
 import PublicMarketingShell from '#/components/shells/PublicMarketingShell'
+import { localePath } from '#/i18n/link'
+import { DEFAULT_LOCALE, isLocale } from '#/i18n/locales'
 import { getRequestSession } from '#/lib/auth-functions'
 import { createPortalBooking, previewBookingPrice } from '#/lib/portal-booking-functions'
 import type { PricingPreview } from '#/lib/portal-booking-functions'
@@ -17,11 +19,19 @@ export const Route = createFileRoute('/$locale/book/$carId')({
   beforeLoad: async ({ params, search }) => {
     const session = await getRequestSession()
     if (!session) {
+      const locale = isLocale(params.locale) ? params.locale : DEFAULT_LOCALE
+      const query = new URLSearchParams()
+      if (search.startDate) query.set('startDate', search.startDate)
+      if (search.endDate) query.set('endDate', search.endDate)
+      const qs = query.toString()
+      const returnTo = localePath(
+        locale,
+        `/book/${params.carId}${qs ? `?${qs}` : ''}`,
+      )
       throw redirect({
-        to: '/login',
-        search: {
-          returnTo: `/book/${params.carId}?startDate=${search.startDate ?? ''}&endDate=${search.endDate ?? ''}`,
-        },
+        to: '/$locale/login',
+        params: { locale },
+        search: { returnTo },
       })
     }
     return { sessionEmail: session.user.email }

@@ -47,7 +47,7 @@ export const msBooking: EnBooking = {
   fromRmDay: 'dari RM {amount}/hari',
   off: 'off',
   seeAllSavings: 'Lihat semua penjimatan',
-  whyEyebrow: 'Mengapa Car XQ',
+  whyEyebrow: 'Mengapa XQ Car',
   whyTitle: 'Merancang perjalanan Langkawi? Inilah sebab kami pilihan utama.',
   whySub:
     'Sebelas tahun di pulau, ribuan tetamu gembira, satu janji — sewaan selamat, mesra, harga adil, setiap masa.',

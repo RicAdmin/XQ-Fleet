@@ -4,7 +4,7 @@ import { PlanDriveGuide } from '#/components/guides/plan-drive-guide'
 import { publicSitePath } from '#/lib/brand'
 import { socialImageMeta } from '#/lib/seo-meta'
 
-const title = 'Plan Your Langkawi Drive · Attractions & Routes · Car XQ'
+const title = 'Plan Your Langkawi Drive · Attractions & Routes · XQ Car'
 const description =
   'Build your Langkawi itinerary by car: distances, drive times, and attraction combos for every day of your rental.'
 
