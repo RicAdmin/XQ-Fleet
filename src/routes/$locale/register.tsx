@@ -9,7 +9,7 @@ import CxqAuthMarketingAside from '#/components/auth/CxqAuthMarketingAside'
 import { LocaleLink } from '#/components/i18n/LocaleLink'
 import PublicAuthShell from '#/components/shells/PublicAuthShell'
 import { useLocale, useT } from '#/i18n/context'
-import { authReturnPath } from '#/lib/auth-redirect'
+import { authReturnPath, authVerifyCallbackPath } from '#/lib/auth-redirect'
 import { authClient } from '#/lib/auth-client'
 import { redirectAuthenticatedUser } from '#/lib/route-guards'
 
@@ -67,7 +67,7 @@ function CustomerRegisterPage() {
                   try {
                     const result = await authClient.sendVerificationEmail({
                       email: pendingVerificationEmail,
-                      callbackURL: authReturnPath(locale, returnTo ?? '/account'),
+                      callbackURL: authVerifyCallbackPath(locale, returnTo ?? '/account'),
                     })
                     if (result.error) {
                       throw new Error(result.error.message ?? t('checkout.unableCreateAccount'))
@@ -111,7 +111,7 @@ function CustomerRegisterPage() {
                   name: name.trim(),
                   email: email.trim(),
                   password,
-                  callbackURL: authReturnPath(locale, returnTo ?? '/account'),
+                  callbackURL: authVerifyCallbackPath(locale, returnTo ?? '/account'),
                 })
 
                 if (signUpResult.error) {

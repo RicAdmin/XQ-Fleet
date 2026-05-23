@@ -3,6 +3,19 @@ export function formatRM(sen: number): string {
   return `RM ${(sen / 100).toFixed(2)}`
 }
 
+/** Shown in every outbound email footer. */
+export const EMAIL_SPAM_FOLDER_NOTICE =
+  "If you don't see this email in your inbox, please check your junk or spam folder."
+
+/** Appends the spam-folder notice before the closing body tag. */
+export function appendSpamFolderNotice(html: string): string {
+  const notice = `<p style="margin:16px 0 0;font-size:13px;color:#6b7378;line-height:1.55">${EMAIL_SPAM_FOLDER_NOTICE}</p>`
+  if (html.includes('</body>')) {
+    return html.replace('</body>', `${notice}</body>`)
+  }
+  return `${html}${notice}`
+}
+
 /** Formats a Date to "Tue, 19 May 2026" using Malaysia timezone. */
 export function formatBookingDate(date: Date): string {
   return date.toLocaleDateString('en-MY', {

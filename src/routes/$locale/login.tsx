@@ -9,7 +9,7 @@ import CxqAuthMarketingAside from '#/components/auth/CxqAuthMarketingAside'
 import { LocaleLink } from '#/components/i18n/LocaleLink'
 import PublicAuthShell from '#/components/shells/PublicAuthShell'
 import { useLocale, useT } from '#/i18n/context'
-import { authReturnPath, redirectAfterAuth } from '#/lib/auth-redirect'
+import { authReturnPath, authVerifyCallbackPath, redirectAfterAuth } from '#/lib/auth-redirect'
 import { authClient } from '#/lib/auth-client'
 import { appRoleFromSessionUser } from '#/lib/auth-model'
 import { redirectAuthenticatedUser } from '#/lib/route-guards'
@@ -69,7 +69,7 @@ function CustomerLoginPage() {
               setIsSubmitting(true)
 
               try {
-                const callbackURL = authReturnPath(locale, returnTo ?? '/account')
+                const callbackURL = authVerifyCallbackPath(locale, returnTo ?? '/account')
                 const signInResult = await authClient.signIn.email({
                   email: email.trim(),
                   password,

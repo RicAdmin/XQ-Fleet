@@ -1,11 +1,42 @@
-import { localeHref } from '#/i18n/link'
+import { localeHref, stripLocalePrefix } from '#/i18n/link'
 import type { Locale } from '#/i18n/locales'
 
-/** Locale-prefixed in-app path for post-auth redirects. */
-export function authReturnPath(locale: Locale, path = '/account'): string {
+/** Routes that live outside the /$locale public tree. */
+const NON_LOCALE_PREFIXED = /^\/(account|app|admin|internal)(\/|$)/
+
+function normalizePath(path: string): string {
   const trimmed = path.trim()
-  if (!trimmed) return localeHref(locale, '/account')
-  return localeHref(locale, trimmed.startsWith('/') ? trimmed : `/${trimmed}`)
+  if (!trimmed) return '/account'
+  return trimmed.startsWith('/') ? trimmed : `/${trimmed}`
+}
+
+/** Post-auth destination path (relative). */
+export function authReturnPath(locale: Locale, path = '/account'): string {
+  const normalized = normalizePath(path)
+
+  if (NON_LOCALE_PREFIXED.test(normalized)) {
+    return normalized
+  }
+
+  if (/^\/(en|ms|zh)(\/|$)/.test(normalized)) {
+    const stripped = stripLocalePrefix(normalized)
+    if (NON_LOCALE_PREFIXED.test(stripped)) {
+      return stripped
+    }
+    return normalized
+  }
+
+  return localeHref(locale, normalized)
+}
+
+/**
+ * Better Auth verification callback — lands on locale login so errors render there,
+ * while successful verification still reaches /account via redirectAuthenticatedUser.
+ */
+export function authVerifyCallbackPath(locale: Locale, returnTo = '/account'): string {
+  const destination = authReturnPath(locale, returnTo)
+  const loginPath = localeHref(locale, '/login')
+  return `${loginPath}?${new URLSearchParams({ returnTo: destination })}`
 }
 
 /** Absolute URL for Better Auth `redirectTo` fields. */

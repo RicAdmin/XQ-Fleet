@@ -51,6 +51,7 @@ import { Route as LocalePrivacyRouteImport } from './routes/$locale/privacy'
 import { Route as LocalePdpaRouteImport } from './routes/$locale/pdpa'
 import { Route as LocaleLoginRouteImport } from './routes/$locale/login'
 import { Route as LocaleForgotPasswordRouteImport } from './routes/$locale/forgot-password'
+import { Route as LocaleAccountRouteImport } from './routes/$locale/account'
 import { Route as LocaleAboutRouteImport } from './routes/$locale/about'
 import { Route as AppRentalsIndexRouteImport } from './routes/app/rentals/index'
 import { Route as AppMaintenanceIndexRouteImport } from './routes/app/maintenance/index'
@@ -302,6 +303,11 @@ const LocaleForgotPasswordRoute = LocaleForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => LocaleRouteRoute,
 } as any)
+const LocaleAccountRoute = LocaleAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => LocaleRouteRoute,
+} as any)
 const LocaleAboutRoute = LocaleAboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -529,6 +535,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
   '/$locale/about': typeof LocaleAboutRoute
+  '/$locale/account': typeof LocaleAccountRoute
   '/$locale/forgot-password': typeof LocaleForgotPasswordRoute
   '/$locale/login': typeof LocaleLoginRoute
   '/$locale/pdpa': typeof LocalePdpaRoute
@@ -609,6 +616,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
   '/$locale/about': typeof LocaleAboutRoute
+  '/$locale/account': typeof LocaleAccountRoute
   '/$locale/forgot-password': typeof LocaleForgotPasswordRoute
   '/$locale/login': typeof LocaleLoginRoute
   '/$locale/pdpa': typeof LocalePdpaRoute
@@ -694,6 +702,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
   '/$locale/about': typeof LocaleAboutRoute
+  '/$locale/account': typeof LocaleAccountRoute
   '/$locale/forgot-password': typeof LocaleForgotPasswordRoute
   '/$locale/login': typeof LocaleLoginRoute
   '/$locale/pdpa': typeof LocalePdpaRoute
@@ -780,6 +789,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/terms'
     | '/$locale/about'
+    | '/$locale/account'
     | '/$locale/forgot-password'
     | '/$locale/login'
     | '/$locale/pdpa'
@@ -860,6 +870,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/terms'
     | '/$locale/about'
+    | '/$locale/account'
     | '/$locale/forgot-password'
     | '/$locale/login'
     | '/$locale/pdpa'
@@ -944,6 +955,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/terms'
     | '/$locale/about'
+    | '/$locale/account'
     | '/$locale/forgot-password'
     | '/$locale/login'
     | '/$locale/pdpa'
@@ -1344,6 +1356,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LocaleForgotPasswordRouteImport
       parentRoute: typeof LocaleRouteRoute
     }
+    '/$locale/account': {
+      id: '/$locale/account'
+      path: '/account'
+      fullPath: '/$locale/account'
+      preLoaderRoute: typeof LocaleAccountRouteImport
+      parentRoute: typeof LocaleRouteRoute
+    }
     '/$locale/about': {
       id: '/$locale/about'
       path: '/about'
@@ -1629,6 +1648,7 @@ declare module '@tanstack/react-router' {
 
 interface LocaleRouteRouteChildren {
   LocaleAboutRoute: typeof LocaleAboutRoute
+  LocaleAccountRoute: typeof LocaleAccountRoute
   LocaleForgotPasswordRoute: typeof LocaleForgotPasswordRoute
   LocaleLoginRoute: typeof LocaleLoginRoute
   LocalePdpaRoute: typeof LocalePdpaRoute
@@ -1654,6 +1674,7 @@ interface LocaleRouteRouteChildren {
 
 const LocaleRouteRouteChildren: LocaleRouteRouteChildren = {
   LocaleAboutRoute: LocaleAboutRoute,
+  LocaleAccountRoute: LocaleAccountRoute,
   LocaleForgotPasswordRoute: LocaleForgotPasswordRoute,
   LocaleLoginRoute: LocaleLoginRoute,
   LocalePdpaRoute: LocalePdpaRoute,

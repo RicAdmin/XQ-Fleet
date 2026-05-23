@@ -10,6 +10,7 @@ import {
   type BookingConfirmationEmailProps,
 } from '#/emails/BookingConfirmationEmail'
 import { PaymentFailedEmail, type PaymentFailedEmailProps } from '#/emails/PaymentFailedEmail'
+import { appendSpamFolderNotice } from '#/emails/email-helpers'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -48,7 +49,7 @@ async function sendEmail(params: {
       From: from,
       To: params.to,
       Subject: params.subject,
-      HtmlBody: params.html,
+      HtmlBody: appendSpamFolderNotice(params.html),
       TextBody: '',
       MessageStream: 'outbound',
       Tag: params.tag,
