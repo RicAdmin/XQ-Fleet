@@ -8,7 +8,8 @@ import type { Locale } from '#/i18n/locales'
 import { addCalendarDays, formatTripDuration, isAllowedPickupDate, isAllowedReturnDate } from '#/lib/booking-datetime'
 import { getCategoryAlternatives } from '#/lib/detail-car-alternatives'
 import { isHondaNBox } from '#/lib/fleet-oku'
-import { fleetFuelType, heuristicLuggageFit } from '#/lib/fleet-luggage-fit'
+import { catalogFitInput } from '#/lib/car-catalog'
+import { carLuggageFit, fleetFuelType } from '#/lib/fleet-luggage-fit'
 import type { PublicCarRow } from '#/lib/portal-functions'
 
 export type TripType = 'round' | 'oneway'
@@ -139,8 +140,8 @@ export function CarDetailDialog({
     d
       ? d.toLocaleDateString(dateLocale[locale], { weekday: 'short', day: '2-digit', month: 'short' })
       : '—'
-  const lug = heuristicLuggageFit(car.category)
-  const fuelType = fleetFuelType(car)
+  const lug = carLuggageFit(catalogFitInput(car))
+  const fuelType = fleetFuelType({ ...catalogFitInput(car), make: car.make, model: car.model, notes: car.notes })
   const pickupTbc = t('carDetail.pickupTbc')
   const pickupLoc = booking.from.trim() || pickupTbc
   const returnLoc =

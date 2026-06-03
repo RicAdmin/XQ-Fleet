@@ -230,6 +230,7 @@ export type CarPhotoRow = {
   id: string
   carId: string
   url: string
+  altText: string | null
   sortOrder: number
   isCover: boolean
   createdAt: Date

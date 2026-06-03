@@ -33,7 +33,8 @@ import {
   formatTripDuration,
   tripExtraHours,
 } from '#/lib/booking-datetime'
-import { heuristicLuggageFit } from '#/lib/fleet-luggage-fit'
+import { catalogFitInput } from '#/lib/car-catalog'
+import { carLuggageFit } from '#/lib/fleet-luggage-fit'
 import {
   COUNTRY_OPTIONS,
   DEFAULT_COUNTRY_CODE,
@@ -455,7 +456,7 @@ export function LandingCheckoutFlow({
 
   const total = subtotal - discount + addonCost + extraHoursCharge
 
-  const lug = heuristicLuggageFit(car.category)
+  const lug = carLuggageFit(catalogFitInput(car))
 
   const shouldShowError = useCallback(
     (key: string) => showFieldErrors || Boolean(touched[key as keyof typeof touched]),

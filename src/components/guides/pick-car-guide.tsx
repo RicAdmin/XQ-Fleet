@@ -3,7 +3,8 @@ import { useNavigate } from '@tanstack/react-router'
 import { ArrowRight, Car, DoorOpen, Luggage, Sparkles, Users } from 'lucide-react'
 
 import type { CarCategory } from '#/db/schema'
-import { heuristicLuggageFit } from '#/lib/fleet-luggage-fit'
+import { catalogFitInput } from '#/lib/car-catalog'
+import { carLuggageFit } from '#/lib/fleet-luggage-fit'
 import type { PublicCarRow } from '#/lib/portal-functions'
 
 import { LuggageFitModal } from '#/components/LuggageFitModal'
@@ -23,8 +24,8 @@ function toYmd(d: Date | null) {
 const GROUP_TABS = ['all', 'Small', 'Comfort', 'Adventure'] as const
 type GroupTab = (typeof GROUP_TABS)[number]
 
-function heuristicFit(category: CarCategory) {
-  return heuristicLuggageFit(category)
+function luggageFit(car: PublicCarRow) {
+  return carLuggageFit(catalogFitInput(car))
 }
 
 function carMatchesTab(car: PublicCarRow, tab: GroupTab) {
@@ -50,17 +51,8 @@ function bestForLine(car: PublicCarRow) {
   }
 }
 
-function paxChip(category: CarCategory) {
-  switch (category) {
-    case 'economy':
-      return '1–4 adults typical'
-    case 'mpv':
-      return '4–7 adults typical'
-    case 'suv':
-      return '2–5 adults typical'
-    default:
-      return '2–5 adults typical'
-  }
+function paxChip(car: PublicCarRow) {
+  return `Up to ${car.passengers} passengers`
 }
 
 function suitedChips(category: CarCategory): string[] {
@@ -93,7 +85,7 @@ export function PickCarGuide({ cars }: { cars: PublicCarRow[] }) {
   const filtered = useMemo(() => {
     return cars.filter((c) => {
       if (!carMatchesTab(c, tab)) return false
-      const fit = heuristicFit(c.category)
+      const fit = luggageFit(c)
       if (pax && fit.seats < pax) return false
       if (bags && fit.lg + fit.sm < bags) return false
       if (size === 'small' && fit.seats > 5) return false
@@ -203,7 +195,7 @@ export function PickCarGuide({ cars }: { cars: PublicCarRow[] }) {
 
         <div className="prc-list">
           {filtered.map((c, idx) => {
-            const fit = heuristicFit(c.category)
+            const fit = luggageFit(c)
             const score = Math.min(5, Math.round((fit.seats + fit.lg + fit.sm) / 4))
             const displayTag = c.category.charAt(0).toUpperCase() + c.category.slice(1)
             return (
@@ -253,7 +245,7 @@ export function PickCarGuide({ cars }: { cars: PublicCarRow[] }) {
                     <span className="eyebrow">Best for</span>
                     <p>{bestForLine(c)}</p>
                     <div className="prc-use-tags">
-                      <span className="chip">{paxChip(c.category)}</span>
+                      <span className="chip">{paxChip(c)}</span>
                       {suitedChips(c.category).map((s) => (
                         <span key={s} className="chip">
                           {s}

@@ -2,12 +2,13 @@ import { Car, Luggage, Sparkles, Users, X } from 'lucide-react'
 
 import { usePublicI18n } from '#/i18n/usePublicI18n'
 import type { PublicCarRow } from '#/lib/portal-functions'
-import { heuristicLuggageFit } from '#/lib/fleet-luggage-fit'
+import { catalogFitInput } from '#/lib/car-catalog'
+import { carLuggageFit, catalogCombinedLitres } from '#/lib/fleet-luggage-fit'
 
 export function LuggageFitModal({ car, onClose }: { car: PublicCarRow; onClose: () => void }) {
   const { t } = usePublicI18n()
-  const fit = heuristicLuggageFit(car.category)
-  const totalLitres = fit.lg * 75 + fit.sm * 35
+  const fit = carLuggageFit(catalogFitInput(car))
+  const totalLitres = catalogCombinedLitres(catalogFitInput(car), fit)
 
   return (
     <div className="luggage-overlay" role="presentation" onClick={onClose}>

@@ -15,7 +15,7 @@ import { inArray, like } from 'drizzle-orm'
 import pg from 'pg'
 
 import * as schema from '../src/db/schema.ts'
-import { carPhotos, cars, rentals, payments, type CarCategory } from '../src/db/schema/fleet.ts'
+import { carPhotos, cars, payments, rentals, type CarCategory } from '../src/db/schema/fleet.ts'
 
 config({ path: ['.env.local', '.env'] })
 
@@ -63,6 +63,31 @@ function rmToSen(rm: string): number {
   const n = Number.parseFloat(rm.trim())
   if (!Number.isFinite(n)) return 0
   return Math.round(n * 100)
+}
+
+function parseBool(raw: string | undefined, defaultValue = false): boolean {
+  const v = (raw ?? '').trim().toLowerCase()
+  if (!v) return defaultValue
+  return v === 'true' || v === 'yes' || v === '1'
+}
+
+function parseIntOrNull(raw: string | undefined): number | null {
+  const n = Number.parseInt((raw ?? '').trim(), 10)
+  return Number.isFinite(n) ? n : null
+}
+
+function parseHighlights(raw: string | undefined): string[] | null {
+  const t = (raw ?? '').trim()
+  if (!t) return null
+  const parts = t.split('|').map((s) => s.trim()).filter(Boolean)
+  return parts.length > 0 ? parts : null
+}
+
+function parseIsoDate(raw: string | undefined): Date | null {
+  const t = (raw ?? '').trim()
+  if (!t) return null
+  const d = new Date(t)
+  return Number.isNaN(d.getTime()) ? null : d
 }
 
 function scoreImageMatch(requested: string, fileName: string): number {
@@ -142,23 +167,55 @@ async function main() {
   const iSlug = col('Slug')
   const iStatus = col('Status')
   const iAvailableForBooking = col('Available_For_Booking')
-  const iBody = col('Body_Type')
+  const iFeatured = col('Featured')
   const iImage = col('Image')
+  const iImageAlt = col('Image_Alt_Text')
+  const iMetaTitle = col('Meta_Title')
+  const iMetaDesc = col('Meta_Description')
   const iShort = col('Short_Description')
+  const iLong = col('Long_Description')
+  const iHighlights = col('Highlights')
+  const iBody = col('Body_Type')
+  const iPassengers = col('Passengers')
+  const iDoors = col('Doors')
+  const iTransmission = col('Transmission')
+  const iFuelType = col('Fuel_Type')
+  const iAppleCarPlay = col('Apple_CarPlay')
+  const iAndroidAuto = col('Android_Auto')
+  const iBootL = col('Boot_Capacity_L')
+  const iBootLabel = col('Boot_Capacity_Label')
+  const iLargeBags = col('Large_Suitcases_Count')
+  const iSmallBags = col('Small_Carryons_Count')
+  const iCombinedL = col('Combined_Capacity_L')
+  const iCombinedLabel = col('Combined_Capacity_Label')
+  const iTagAdventure = col('Tag_Fun_Adventure')
+  const iTagFamily = col('Tag_Family_Comfort')
+  const iTagOku = col('Tag_Small_OKU')
+  const iOwnership = col('Ownership')
+  const iVendor = col('Vendor_Name')
+  const iUnits = col('Number_Of_Units')
+  const iPromoPrice = col('Promotional_Price')
   const iPrice = col('Price_Low_Season')
   const iPricePeak = col('Price_Peak_Season')
   const iPriceSuperPeak = col('Price_Super_Peak_Season')
   const iExtHourLow = col('Ext_Hour_Low')
   const iExtHourPeak = col('Ext_Hour_Peak_And_Super_Peak')
+  const iLateReturn = col('Late_Return_Hourly_Fee')
   const iDeliveryAirport = col('Delivery_Fee_Airport')
   const iDeliveryHotel = col('Delivery_Fee_Hotel')
+  const iFuelPolicy = col('Fuel_Policy')
   const iMinDays = col('Min_Rental_Days')
   const iMaxDays = col('Max_Rental_Days')
+  const iCarLocations = col('Car_Locations')
+  const iRegistration = col('Registration_Number')
+  const iLastService = col('Last_Service_Date')
+  const iNextServiceKm = col('Next_Service_Due_KM')
+  const iNotesInternal = col('Notes_Internal')
+  const iJoined = col('Joined_Date')
 
   const pool = new pg.Pool({ connectionString: url })
   const db = drizzle(pool, { schema })
 
-  // Find DEMO* cars first
   const demoCars = await db
     .select({ id: cars.id })
     .from(cars)
@@ -167,7 +224,6 @@ async function main() {
   if (demoCars.length > 0) {
     const demoCarIds = demoCars.map((c) => c.id)
 
-    // Delete child payments before rentals, then rentals before cars (FK RESTRICT)
     const demoRentals = await db
       .select({ id: rentals.id })
       .from(rentals)
@@ -203,7 +259,10 @@ async function main() {
       continue
     }
 
-    const category = bodyTypeToCategory(cells[iBody] ?? 'other')
+    const bodyType = (cells[iBody] ?? '').trim() || null
+    const category = bodyTypeToCategory(bodyType ?? 'other')
+    const passengers = parseIntOrNull(cells[iPassengers]) ?? 5
+    const doors = parseIntOrNull(cells[iDoors]) ?? 4
     const dailyRateSen = rmToSen(cells[iPrice] ?? '0')
     const priceLowSeasonSen = rmToSen(cells[iPrice] ?? '0')
     const pricePeakSeasonSen = rmToSen(cells[iPricePeak] ?? '0')
@@ -212,16 +271,20 @@ async function main() {
     const extHourPeakAndSuperPeakSen = rmToSen(cells[iExtHourPeak] ?? '0')
     const deliveryFeeAirportSen = rmToSen(cells[iDeliveryAirport] ?? '0')
     const deliveryFeeHotelSen = rmToSen(cells[iDeliveryHotel] ?? '0')
+    const lateReturnHourlyFeeSen = rmToSen(cells[iLateReturn] ?? '0')
+    const promotionalRaw = (cells[iPromoPrice] ?? '').trim()
+    const promotionalPriceSen = promotionalRaw ? rmToSen(promotionalRaw) : null
     const minRentalDays = Number.parseInt(cells[iMinDays]?.trim() ?? '1', 10) || 1
     const maxRentalDays = Number.parseInt(cells[iMaxDays]?.trim() ?? '30', 10) || 30
-    const availableForBooking = (cells[iAvailableForBooking]?.trim() ?? 'True').toLowerCase() === 'true'
+    const numberOfUnits = parseIntOrNull(cells[iUnits]) ?? 1
+    const availableForBooking = parseBool(cells[iAvailableForBooking], true)
     const notes = (cells[iShort] ?? '').trim() || null
     const requestedImage = (cells[iImage] ?? '').trim()
-    const resolvedFile = requestedImage
-      ? resolveImageFile(requestedImage, imageFiles)
-      : null
+    const imageAlt = (cells[iImageAlt] ?? '').trim() || null
+    const resolvedFile = requestedImage ? resolveImageFile(requestedImage, imageFiles) : null
+    const registration = (cells[iRegistration] ?? '').trim() || null
 
-    const plateNumber = `DEMO${String(inserted + 1).padStart(3, '0')}`
+    const plateNumber = registration || `DEMO${String(inserted + 1).padStart(3, '0')}`
 
     const [row] = await db
       .insert(cars)
@@ -242,11 +305,45 @@ async function main() {
         deliveryFeeAirportSen,
         deliveryFeeJettySen: deliveryFeeAirportSen,
         deliveryFeeHotelSen,
+        lateReturnHourlyFeeSen,
+        promotionalPriceSen,
         minRentalDays,
         maxRentalDays,
         availableForBooking,
         notes,
         currentMileage: null,
+        slug,
+        featured: parseBool(cells[iFeatured]),
+        metaTitle: (cells[iMetaTitle] ?? '').trim() || null,
+        metaDescription: (cells[iMetaDesc] ?? '').trim() || null,
+        longDescription: (cells[iLong] ?? '').trim() || null,
+        highlights: parseHighlights(cells[iHighlights]),
+        bodyType,
+        passengers,
+        doors,
+        transmission: (cells[iTransmission] ?? '').trim() || null,
+        fuelType: (cells[iFuelType] ?? '').trim() || null,
+        appleCarPlay: parseBool(cells[iAppleCarPlay]),
+        androidAuto: parseBool(cells[iAndroidAuto]),
+        bootCapacityL: parseIntOrNull(cells[iBootL]),
+        bootCapacityLabel: (cells[iBootLabel] ?? '').trim() || null,
+        largeSuitcasesCount: parseIntOrNull(cells[iLargeBags]),
+        smallCarryonsCount: parseIntOrNull(cells[iSmallBags]),
+        combinedCapacityL: parseIntOrNull(cells[iCombinedL]),
+        combinedCapacityLabel: (cells[iCombinedLabel] ?? '').trim() || null,
+        tagFunAdventure: parseBool(cells[iTagAdventure]),
+        tagFamilyComfort: parseBool(cells[iTagFamily]),
+        tagSmallOku: parseBool(cells[iTagOku]),
+        ownedByFleet: parseBool(cells[iOwnership], true),
+        vendorName: (cells[iVendor] ?? '').trim() || null,
+        numberOfUnits,
+        fuelPolicy: (cells[iFuelPolicy] ?? '').trim() || null,
+        carLocations: (cells[iCarLocations] ?? '').trim() || null,
+        registrationNumber: registration,
+        lastServiceDate: parseIsoDate(cells[iLastService]),
+        nextServiceDueKm: parseIntOrNull(cells[iNextServiceKm]),
+        notesInternal: (cells[iNotesInternal] ?? '').trim() || null,
+        joinedDate: parseIsoDate(cells[iJoined]),
       })
       .returning({ id: cars.id })
 
@@ -256,10 +353,11 @@ async function main() {
       await db.insert(carPhotos).values({
         carId: row.id,
         url: publicPhotoUrl(resolvedFile),
+        altText: imageAlt,
         sortOrder: 0,
         isCover: true,
       })
-      console.log(`+ ${plateNumber} ${make} ${model} → ${publicPhotoUrl(resolvedFile)}`)
+      console.log(`+ ${plateNumber} ${make} ${model} (${passengers} pax) → ${publicPhotoUrl(resolvedFile)}`)
     } else {
       console.warn(
         `+ ${plateNumber} ${make} ${model} — no image match for "${requestedImage}" (add file under public/image/car_model/)`,

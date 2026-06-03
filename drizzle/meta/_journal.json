@@ -64,6 +64,13 @@
       "when": 1779456120000,
       "tag": "0008_admin_phase3_affiliates",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1779456180000,
+      "tag": "0009_car_catalog_details",
+      "breakpoints": true
     }
   ]
 }

@@ -52,7 +52,8 @@ import { authClient } from '#/lib/auth-client'
 import { addCalendarDays, earliestPickupDate, formatTripDuration, isAllowedReturnDate, startOfLocalDay, toLocalYmd } from '#/lib/booking-datetime'
 import { checkoutSearchFromBooking } from '#/lib/checkout-trip'
 import { loadTripSearch, saveTripSearch } from '#/lib/trip-search-storage'
-import { heuristicLuggageFit } from '#/lib/fleet-luggage-fit'
+import { catalogFitInput } from '#/lib/car-catalog'
+import { carLuggageFit } from '#/lib/fleet-luggage-fit'
 import { isHondaNBox } from '#/lib/fleet-oku'
 import { filterPublicCars } from '#/lib/portal-functions'
 import type { PublicCarRow } from '#/lib/portal-functions'
@@ -1493,7 +1494,7 @@ function FleetCarCard({
   const { t } = usePublicI18n()
   const [fav, setFav] = useState(false)
   const [showLuggage, setShowLuggage] = useState(false)
-  const fit = heuristicLuggageFit(car.category)
+  const fit = carLuggageFit(catalogFitInput(car))
   const totalBags = fit.lg + fit.sm
 
   const handleOpen = () => {

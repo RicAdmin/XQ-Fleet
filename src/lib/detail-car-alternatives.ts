@@ -1,4 +1,5 @@
-import { heuristicLuggageFit } from '#/lib/fleet-luggage-fit'
+import { catalogFitInput } from '#/lib/car-catalog'
+import { carLuggageFit } from '#/lib/fleet-luggage-fit'
 import type { PublicCarRow } from '#/lib/portal-functions'
 
 export type CategoryAlternative = {
@@ -57,8 +58,8 @@ function differentiator(
     return 'More recent model year'
   }
 
-  const refFit = heuristicLuggageFit(reference.category)
-  const candFit = heuristicLuggageFit(candidate.category)
+  const refFit = carLuggageFit(catalogFitInput(reference))
+  const candFit = carLuggageFit(catalogFitInput(candidate))
   if (candFit.lg + candFit.sm > refFit.lg + refFit.sm) {
     return 'Fits more luggage'
   }

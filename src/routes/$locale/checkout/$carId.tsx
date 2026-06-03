@@ -19,23 +19,7 @@ import { authClient } from '#/lib/auth-client'
 import { getRequestSession } from '#/lib/auth-functions'
 import { toCheckoutCustomer } from '#/lib/checkout-session'
 import { saveTripSearch } from '#/lib/trip-search-storage'
-import { getPublicCarDetail, type PublicCarDetail, type PublicCarRow } from '#/lib/portal-functions'
-
-function detailToRow(car: PublicCarDetail): PublicCarRow {
-  const cover = car.photos.find((p) => p.isCover)?.url ?? car.photos[0]?.url ?? null
-  return {
-    id: car.id,
-    make: car.make,
-    model: car.model,
-    year: car.year,
-    category: car.category,
-    dailyRateSen: car.dailyRateSen,
-    extHourLowSen: car.extHourLowSen,
-    extHourPeakAndSuperPeakSen: car.extHourPeakAndSuperPeakSen,
-    coverPhotoUrl: cover,
-    notes: car.notes,
-  }
-}
+import { getPublicCarDetail, publicCarDetailToRow } from '#/lib/portal-functions'
 
 export const Route = createFileRoute('/$locale/checkout/$carId')({
   validateSearch: parseCheckoutSearch,
@@ -46,7 +30,7 @@ export const Route = createFileRoute('/$locale/checkout/$carId')({
     ])
     if (!car) throw redirect({ to: '/' })
     const authUser = toCheckoutCustomer(session?.user) ?? null
-    return { carRow: detailToRow(car), authUser }
+    return { carRow: publicCarDetailToRow(car), authUser }
   },
   pendingComponent: CheckoutRoutePending,
   component: CheckoutPage,

@@ -3,7 +3,10 @@ import { and, eq, gt, inArray, lt, notInArray } from 'drizzle-orm'
 
 import { carPhotos, cars, rentals } from '#/db/schema'
 import type { CarCategory } from '#/db/schema'
+import { publicCarCatalogSelect, type PublicCarCatalogFields } from '#/lib/car-catalog'
 import { parseLocalYmd } from '#/lib/booking-datetime'
+
+export type { PublicCarCatalogFields } from '#/lib/car-catalog'
 
 export type PublicCarRow = {
   id: string
@@ -15,8 +18,9 @@ export type PublicCarRow = {
   extHourLowSen?: number
   extHourPeakAndSuperPeakSen?: number
   coverPhotoUrl: string | null
+  coverPhotoAlt: string | null
   notes: string | null
-}
+} & PublicCarCatalogFields
 
 export type PublicCarDetail = {
   id: string
@@ -37,12 +41,65 @@ export type PublicCarDetail = {
   maxRentalDays: number
   availableForBooking: boolean
   notes: string | null
+  ownedByFleet: boolean
+  vendorName: string | null
+  numberOfUnits: number
+  lateReturnHourlyFeeSen: number
+  notesInternal: string | null
+  registrationNumber: string | null
+  lastServiceDate: Date | null
+  nextServiceDueKm: number | null
+  joinedDate: Date | null
   photos: Array<{
     id: string
     url: string
+    altText: string | null
     sortOrder: number
     isCover: boolean
   }>
+} & PublicCarCatalogFields
+
+/** Map full detail payload to listing row shape (e.g. checkout). */
+export function publicCarDetailToRow(car: PublicCarDetail): PublicCarRow {
+  const coverPhoto = car.photos.find((p) => p.isCover) ?? car.photos[0]
+  return {
+    id: car.id,
+    make: car.make,
+    model: car.model,
+    year: car.year,
+    category: car.category,
+    dailyRateSen: car.dailyRateSen,
+    extHourLowSen: car.extHourLowSen,
+    extHourPeakAndSuperPeakSen: car.extHourPeakAndSuperPeakSen,
+    coverPhotoUrl: coverPhoto?.url ?? null,
+    coverPhotoAlt: coverPhoto?.altText ?? null,
+    notes: car.notes,
+    slug: car.slug,
+    featured: car.featured,
+    passengers: car.passengers,
+    doors: car.doors,
+    bodyType: car.bodyType,
+    transmission: car.transmission,
+    fuelType: car.fuelType,
+    appleCarPlay: car.appleCarPlay,
+    androidAuto: car.androidAuto,
+    bootCapacityL: car.bootCapacityL,
+    bootCapacityLabel: car.bootCapacityLabel,
+    largeSuitcasesCount: car.largeSuitcasesCount,
+    smallCarryonsCount: car.smallCarryonsCount,
+    combinedCapacityL: car.combinedCapacityL,
+    combinedCapacityLabel: car.combinedCapacityLabel,
+    tagFunAdventure: car.tagFunAdventure,
+    tagFamilyComfort: car.tagFamilyComfort,
+    tagSmallOku: car.tagSmallOku,
+    fuelPolicy: car.fuelPolicy,
+    carLocations: car.carLocations,
+    longDescription: car.longDescription,
+    highlights: car.highlights,
+    metaTitle: car.metaTitle,
+    metaDescription: car.metaDescription,
+    promotionalPriceSen: car.promotionalPriceSen,
+  }
 }
 
 // ─── Public listing ───────────────────────────────────────────────────────────
@@ -59,16 +116,16 @@ export const getPublicCars = createServerFn({ method: 'GET' }).handler(async ():
       category: cars.category,
       dailyRateSen: cars.dailyRateSen,
       coverPhotoUrl: carPhotos.url,
+      coverPhotoAlt: carPhotos.altText,
       notes: cars.notes,
+      ...publicCarCatalogSelect,
     })
     .from(cars)
     .leftJoin(
       carPhotos,
       and(eq(carPhotos.carId, cars.id), eq(carPhotos.isCover, true)),
     )
-    .where(and(
-      eq(cars.status, 'available'),
-    ))
+    .where(and(eq(cars.status, 'available')))
     .orderBy(cars.make, cars.model)
 
   return rows
@@ -125,7 +182,9 @@ export const filterPublicCars = createServerFn({ method: 'GET' })
         category: cars.category,
         dailyRateSen: cars.dailyRateSen,
         coverPhotoUrl: carPhotos.url,
+        coverPhotoAlt: carPhotos.altText,
         notes: cars.notes,
+        ...publicCarCatalogSelect,
       })
       .from(cars)
       .leftJoin(
@@ -167,6 +226,16 @@ export const getPublicCarDetail = createServerFn({ method: 'GET' })
         maxRentalDays: cars.maxRentalDays,
         availableForBooking: cars.availableForBooking,
         notes: cars.notes,
+        ownedByFleet: cars.ownedByFleet,
+        vendorName: cars.vendorName,
+        numberOfUnits: cars.numberOfUnits,
+        lateReturnHourlyFeeSen: cars.lateReturnHourlyFeeSen,
+        notesInternal: cars.notesInternal,
+        registrationNumber: cars.registrationNumber,
+        lastServiceDate: cars.lastServiceDate,
+        nextServiceDueKm: cars.nextServiceDueKm,
+        joinedDate: cars.joinedDate,
+        ...publicCarCatalogSelect,
       })
       .from(cars)
       .where(and(eq(cars.id, data.carId), eq(cars.status, 'available')))
@@ -178,6 +247,7 @@ export const getPublicCarDetail = createServerFn({ method: 'GET' })
       .select({
         id: carPhotos.id,
         url: carPhotos.url,
+        altText: carPhotos.altText,
         sortOrder: carPhotos.sortOrder,
         isCover: carPhotos.isCover,
       })
