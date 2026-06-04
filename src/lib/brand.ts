@@ -56,6 +56,21 @@ export function brandLogoUrl(siteUrl?: string): string {
   return publicSitePath(BRAND_LOGO_PATH, siteUrl)
 }
 
+/**
+ * Email clients require fully qualified image URLs.
+ * DB values may be absolute (R2) or site-relative (/image/...).
+ */
+export function absolutePublicUrl(
+  url: string | null | undefined,
+  siteUrl?: string,
+): string | null {
+  const trimmed = url?.trim()
+  if (!trimmed) return null
+  if (/^https?:\/\//i.test(trimmed)) return trimmed
+  const path = trimmed.startsWith('/') ? trimmed : `/${trimmed}`
+  return publicSitePath(path, siteUrl)
+}
+
 /** Filesystem path for server-side PDF generation. */
 export function brandLogoPathFromCwd(): string {
   return `${process.cwd()}/public/image/xqCarLogo.png`

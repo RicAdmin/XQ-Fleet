@@ -9,7 +9,7 @@ import {
   rentalDays,
 } from './email-helpers'
 import { EmailBrandMark } from './EmailBrandMark'
-import { publicSitePath } from '#/lib/brand'
+import { absolutePublicUrl, publicSitePath } from '#/lib/brand'
 
 export type BookingConfirmationEmailProps = {
   customerFirstName: string
@@ -61,7 +61,6 @@ export function BookingConfirmationEmail(props: BookingConfirmationEmailProps) {
     carMake,
     carModel,
     carYear,
-    carPlateNumber,
     carCategory,
     carPhotoUrl,
     pickupDate,
@@ -85,7 +84,7 @@ export function BookingConfirmationEmail(props: BookingConfirmationEmailProps) {
   const hasDiscount = discountAmountSen > 0
   const catLabel = categoryDisplayName(carCategory)
   const carFullName = `${carMake} ${carModel}`
-  const specLine = [catLabel, String(carYear), `Plate ${carPlateNumber}`].filter(Boolean).join(' · ')
+  const specLine = [catLabel, String(carYear)].filter(Boolean).join(' · ')
 
   const discountLabel = hasDiscount
     ? couponCode
@@ -94,6 +93,8 @@ export function BookingConfirmationEmail(props: BookingConfirmationEmailProps) {
     : ''
 
   const previewText = `Booking ${bookingRef} confirmed. Pickup ${formatShortDate(pickupDate)}, ${formatBookingTime(pickupTime)} at ${pickupLocation ?? 'pickup point'}. Here's everything you need.`
+
+  const carPhotoSrc = absolutePublicUrl(carPhotoUrl)
 
   return (
     <Html lang="en">
@@ -270,16 +271,18 @@ export function BookingConfirmationEmail(props: BookingConfirmationEmailProps) {
                     </tr>
 
                     {/* ── Car image ───────────────────────────────────────── */}
-                    {carPhotoUrl ? (
+                    {carPhotoSrc ? (
                       <tr>
                         <td style={{ padding: '0 36px', lineHeight: 0 }}>
                           <Img
-                            src={carPhotoUrl}
+                            src={carPhotoSrc}
                             alt={carFullName}
-                            width="608"
+                            width={608}
+                            height={342}
                             style={{
                               width: '100%',
                               maxWidth: '608px',
+                              height: 'auto',
                               borderRadius: '16px',
                               display: 'block',
                               background: DARK,
@@ -290,20 +293,32 @@ export function BookingConfirmationEmail(props: BookingConfirmationEmailProps) {
                     ) : (
                       <tr>
                         <td style={{ padding: '0 36px', lineHeight: 0 }}>
-                          <div
+                          <table
+                            role="presentation"
+                            width="100%"
+                            cellPadding={0}
+                            cellSpacing={0}
                             style={{
                               background: DARK,
                               borderRadius: '16px',
-                              height: '200px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
+                              width: '100%',
                             }}
                           >
-                            <p style={{ color: MUTED, fontSize: '13px', margin: 0, textAlign: 'center', padding: '80px 0' }}>
-                              {carFullName}
-                            </p>
-                          </div>
+                            <tbody>
+                              <tr>
+                                <td
+                                  align="center"
+                                  style={{
+                                    padding: '80px 24px',
+                                    color: MUTED,
+                                    fontSize: '13px',
+                                  }}
+                                >
+                                  {carFullName}
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
                         </td>
                       </tr>
                     )}

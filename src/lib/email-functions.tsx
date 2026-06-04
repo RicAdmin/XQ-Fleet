@@ -11,6 +11,7 @@ import {
 } from '#/emails/BookingConfirmationEmail'
 import { PaymentFailedEmail, type PaymentFailedEmailProps } from '#/emails/PaymentFailedEmail'
 import { appendSpamFolderNotice } from '#/emails/email-helpers'
+import { absolutePublicUrl } from '#/lib/brand'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -131,7 +132,12 @@ export async function sendBookingConfirmation(
     console.warn('[email] skipping booking confirmation — no customer email', props.bookingRef)
     return { ok: false, error: 'no customer email' }
   }
-  const html = await render(BookingConfirmationEmail(props))
+  const html = await render(
+    BookingConfirmationEmail({
+      ...props,
+      carPhotoUrl: absolutePublicUrl(props.carPhotoUrl),
+    }),
+  )
   return sendEmail({
     to: props.customerEmail,
     subject: `Booking confirmed · ${props.carMake} ${props.carModel} · ${props.bookingRef}`,
