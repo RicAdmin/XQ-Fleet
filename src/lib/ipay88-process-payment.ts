@@ -1,6 +1,7 @@
 import type { Locale } from '#/i18n/locales'
 import { DEFAULT_LOCALE, isLocale } from '#/i18n/locales'
 import { publicLocalePath } from '#/lib/brand'
+import { logIpay88, sanitizeIpay88Fields } from '#/lib/ipay88-log'
 import { formatAmountRM, verifyResponseSignature } from '#/lib/payment-functions'
 
 export type Ipay88CallbackSource = 'callback' | 'response'
@@ -57,9 +58,32 @@ export async function processIpay88Payment(
   const configuredMerchantCode = process.env.IPAY88_MERCHANT_CODE ?? ''
   const merchantKey = process.env.IPAY88_MERCHANT_KEY ?? ''
   const locale = resolveLocale(input.localeHint)
+  const errDesc = input.rawResponse.ErrDesc ?? input.rawResponse.errDesc ?? ''
+
+  logIpay88('info', `${input.source} processing`, {
+    refNo: input.refNo,
+    status: input.status,
+    amount: input.amount,
+    currency: input.currency,
+    paymentId: input.paymentId,
+    transId: input.transId,
+    errDesc: errDesc || undefined,
+    fields: sanitizeIpay88Fields(input.rawResponse),
+  })
 
   if (input.merchantCode !== configuredMerchantCode) {
+    logIpay88('error', 'merchant code mismatch', {
+      source: input.source,
+      refNo: input.refNo,
+      received: input.merchantCode,
+      configured: configuredMerchantCode || '(not set)',
+    })
     return { ok: false, reason: 'invalid_merchant', locale, guestCheckout: true }
+  }
+
+  if (!merchantKey) {
+    logIpay88('error', 'merchant key not configured', { source: input.source, refNo: input.refNo })
+    return { ok: false, reason: 'invalid_signature', locale, guestCheckout: true }
   }
 
   const valid = verifyResponseSignature(
@@ -73,6 +97,14 @@ export async function processIpay88Payment(
     input.receivedSignature,
   )
   if (!valid) {
+    logIpay88('error', 'response signature invalid', {
+      source: input.source,
+      refNo: input.refNo,
+      status: input.status,
+      amount: input.amount,
+      paymentId: input.paymentId,
+      signaturePresent: Boolean(input.receivedSignature),
+    })
     return { ok: false, reason: 'invalid_signature', locale, guestCheckout: true }
   }
 
@@ -94,6 +126,11 @@ export async function processIpay88Payment(
     .limit(1)
 
   if (!payment) {
+    logIpay88('error', 'payment record not found', {
+      source: input.source,
+      refNo: input.refNo,
+      paymentUuid,
+    })
     return { ok: false, reason: 'payment_not_found', locale, guestCheckout: true }
   }
 
@@ -107,6 +144,12 @@ export async function processIpay88Payment(
   const guestCheckout = !customerLink?.authUserId
 
   if (payment.status === 'successful') {
+    logIpay88('info', 'duplicate callback ignored (already successful)', {
+      source: input.source,
+      refNo: input.refNo,
+      rentalId: payment.rentalId,
+      paymentId: payment.id,
+    })
     return {
       ok: true,
       rentalId: payment.rentalId,
@@ -117,12 +160,27 @@ export async function processIpay88Payment(
   }
 
   if (payment.status === 'voided') {
+    logIpay88('warn', 'payment attempt is voided', {
+      source: input.source,
+      refNo: input.refNo,
+      rentalId: payment.rentalId,
+      paymentId: payment.id,
+    })
     return { ok: false, reason: 'payment_not_found', locale, guestCheckout, rentalId: payment.rentalId }
   }
 
   const expectedAmount = normalizeAmountForCompare(formatAmountRM(payment.amountSen))
   const receivedAmount = normalizeAmountForCompare(input.amount)
   if (expectedAmount !== receivedAmount) {
+    logIpay88('error', 'amount mismatch', {
+      source: input.source,
+      refNo: input.refNo,
+      rentalId: payment.rentalId,
+      expectedAmount,
+      receivedAmount,
+      expectedRM: formatAmountRM(payment.amountSen),
+      receivedRM: input.amount,
+    })
     return {
       ok: false,
       reason: 'amount_mismatch',
@@ -268,6 +326,14 @@ export async function processIpay88Payment(
       })
     }
 
+    logIpay88('info', 'payment successful', {
+      source: input.source,
+      refNo: input.refNo,
+      rentalId: payment.rentalId,
+      transId: input.transId,
+      authCode: input.authCode || undefined,
+    })
+
     return {
       ok: true,
       rentalId: payment.rentalId,
@@ -276,6 +342,15 @@ export async function processIpay88Payment(
       outcome: 'success',
     }
   }
+
+  logIpay88('warn', 'payment declined by gateway', {
+    source: input.source,
+    refNo: input.refNo,
+    rentalId: payment.rentalId,
+    status: input.status,
+    errDesc: errDesc || undefined,
+    transId: input.transId || undefined,
+  })
 
   await db
     .update(payments)

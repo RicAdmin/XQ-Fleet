@@ -6,6 +6,7 @@ import type { Locale } from '#/i18n/locales'
 import { DEFAULT_LOCALE, isLocale } from '#/i18n/locales'
 import { getRequestSession } from '#/lib/auth-functions'
 import { paymentCallbackPath } from '#/lib/brand'
+import { logIpay88 } from '#/lib/ipay88-log'
 import type { PaymentSettingsRow } from '#/lib/settings-functions'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -273,6 +274,8 @@ export const initiatePayment = createServerFn({ method: 'POST' })
       localeTag,
     )
 
+    const backendURL = paymentCallbackPath('/api/webhooks/ipay88')
+
     const formParams: Ipay88FormParams = {
       MerchantCode: merchantCode,
       PaymentId: '0',
@@ -288,10 +291,21 @@ export const initiatePayment = createServerFn({ method: 'POST' })
       SignatureType: 'HMACSHA512',
       Signature: signature,
       ResponseURL: responsePath,
-      BackendURL: paymentCallbackPath('/api/webhooks/ipay88'),
+      BackendURL: backendURL,
       Xfield1: localeTag,
       gatewayUrl: IPAY88_GATEWAY_URL,
     }
+
+    logIpay88('info', 'payment initiated', {
+      rentalId: rental.id,
+      paymentId: payment.id,
+      refNo,
+      refNoLength: refNo.length,
+      amountRM,
+      chargeSen,
+      responseURL: responsePath,
+      backendURL,
+    })
 
     return { formParams, paymentId: payment.id }
   })

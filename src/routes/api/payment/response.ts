@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-import { DEFAULT_LOCALE } from '#/i18n/locales'
 import { publicSitePath } from '#/lib/brand'
+import { logIpay88Error } from '#/lib/ipay88-log'
 import {
   ipay88ParamsFromBody,
   ipay88PaymentReturnUrl,
@@ -30,18 +30,17 @@ async function handleIpay88BrowserReturn(request: Request): Promise<Response> {
     })
 
     if (!result.ok) {
-      if (result.rentalId) {
-        return Response.redirect(
-          ipay88PaymentReturnUrl({
-            rentalId: result.rentalId,
-            locale: result.locale,
-            guestCheckout: result.guestCheckout,
-            payment: 'error',
-          }),
-          302,
-        )
-      }
-      return Response.redirect(publicSitePath('/en'), 302)
+      return Response.redirect(
+        result.rentalId
+          ? ipay88PaymentReturnUrl({
+              rentalId: result.rentalId,
+              locale: result.locale,
+              guestCheckout: result.guestCheckout,
+              payment: 'error',
+            })
+          : publicSitePath('/en'),
+        302,
+      )
     }
 
     const paymentFlag = result.outcome === 'failed' ? 'error' : 'response'
@@ -56,7 +55,7 @@ async function handleIpay88BrowserReturn(request: Request): Promise<Response> {
       302,
     )
   } catch (err) {
-    console.error('[iPay88 response]', err)
+    logIpay88Error('browser return handler threw', err)
     return Response.redirect(publicSitePath('/en'), 302)
   }
 }

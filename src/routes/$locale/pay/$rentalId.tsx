@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import type { Locale } from '#/i18n/locales'
 import { usePublicI18n } from '#/i18n/usePublicI18n'
 import { getRequestSession } from '#/lib/auth-functions'
+import { logIpay88Error } from '#/lib/ipay88-log'
 import { initiatePayment } from '#/lib/payment-functions'
 
 export const Route = createFileRoute('/$locale/pay/$rentalId')({
@@ -15,6 +16,10 @@ export const Route = createFileRoute('/$locale/pay/$rentalId')({
       })
       return { formParams: result.formParams, error: null }
     } catch (err) {
+      logIpay88Error('initiate payment failed before redirect to gateway', err, {
+        rentalId: params.rentalId,
+        locale,
+      })
       const session = await getRequestSession()
       if (session) {
         throw redirect({

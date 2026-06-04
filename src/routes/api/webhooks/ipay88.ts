@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 
+import { logIpay88, logIpay88Error } from '#/lib/ipay88-log'
 import {
   ipay88ParamsFromBody,
   processIpay88Payment,
@@ -30,6 +31,10 @@ export const Route = createFileRoute('/api/webhooks/ipay88')({
           })
 
           if (!result.ok) {
+            logIpay88('error', `backend callback rejected: ${result.reason}`, {
+              refNo: params.get('RefNo') ?? '',
+              rentalId: result.rentalId,
+            })
             if (result.reason === 'payment_not_found') {
               return new Response('Payment not found', { status: 404 })
             }
@@ -42,9 +47,15 @@ export const Route = createFileRoute('/api/webhooks/ipay88')({
             )
           }
 
+          logIpay88('info', 'backend callback acknowledged', {
+            refNo: params.get('RefNo') ?? '',
+            rentalId: result.rentalId,
+            outcome: result.outcome,
+          })
+
           return new Response('RECEIVEOK', { status: 200 })
         } catch (err) {
-          console.error('[iPay88 webhook]', err)
+          logIpay88Error('backend callback handler threw', err)
           return new Response('Internal error', { status: 500 })
         }
       },
