@@ -12,6 +12,8 @@ import type { PaymentSettingsRow } from '#/lib/settings-functions'
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 export const IPAY88_GATEWAY_URL = 'https://payment.ipay88.com.my/epayment/entry.asp'
+/** Empty = let the customer pick any method enabled on the merchant account (iPay88 spec §2.4). */
+export const IPAY88_PAYMENT_ID_ALL = ''
 export const HOLD_MINUTES = 15
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -278,7 +280,7 @@ export const initiatePayment = createServerFn({ method: 'POST' })
 
     const formParams: Ipay88FormParams = {
       MerchantCode: merchantCode,
-      PaymentId: '0',
+      PaymentId: IPAY88_PAYMENT_ID_ALL,
       RefNo: refNo,
       Amount: amountRM,
       Currency: currency,
