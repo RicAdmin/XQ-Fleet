@@ -15,19 +15,20 @@ export function sanitizeIpay88Fields(
 export function logIpay88(
   level: 'info' | 'warn' | 'error',
   message: string,
-  context?: Record<string, unknown>,
+  data?: Record<string, unknown>,
 ): void {
-  const line = `[iPay88] ${message}`
-  if (context && Object.keys(context).length > 0) {
-    console[level](line, context)
-  } else {
-    console[level](line)
-  }
+  console.log(
+    JSON.stringify({
+      level,
+      message: `[iPay88] ${message}`,
+      data: data ?? {},
+    }),
+  )
 }
 
-export function logIpay88Error(message: string, err: unknown, context?: Record<string, unknown>): void {
+export function logIpay88Error(message: string, err: unknown, data?: Record<string, unknown>): void {
   logIpay88('error', message, {
-    ...context,
+    ...data,
     error: err instanceof Error ? err.message : String(err),
     stack: err instanceof Error ? err.stack : undefined,
   })
