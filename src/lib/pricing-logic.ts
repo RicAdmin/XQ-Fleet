@@ -228,26 +228,50 @@ export function calculateAddons(addOns: BookingAddOns): number {
 
 // ─── Step 5: Delivery fee ─────────────────────────────────────────────────────
 
+/** Preset location codes from the legacy booking form — never charged a delivery fee. */
+const PRESET_PRICING_LOCATIONS = new Set(['Office', 'Airport', 'Jetty', 'Hotel'])
+
+/** Hotel names picked from the autocomplete list (not free-typed). */
+const HOTEL_LIST_SUFFIXES = [' · hotel delivery', ' · penghantaran hotel', ' · 酒店配送'] as const
+
+/**
+ * True when the customer typed a custom pickup/return place (e.g. villa, homestay).
+ * Preset airport/jetty meet points and hotel-list picks are free.
+ */
+export function isCustomDeliveryLocation(label: string): boolean {
+  const trimmed = label.trim()
+  if (!trimmed) return false
+  if (PRESET_PRICING_LOCATIONS.has(trimmed)) return false
+
+  const lower = trimmed.toLowerCase()
+  if (
+    lower.includes('intl airport') ||
+    lower.includes('international airport') ||
+    lower.includes('lapangan terbang') ||
+    lower.includes('国际机场') ||
+    lower.includes('door 3') ||
+    lower.includes('pintu 3') ||
+    lower.includes('3号门') ||
+    (lower.includes('ferry') && lower.includes('jetty')) ||
+    lower.includes('jeti feri') ||
+    lower.includes('渡轮码头')
+  ) {
+    return false
+  }
+
+  if (HOTEL_LIST_SUFFIXES.some((suffix) => trimmed.includes(suffix))) return false
+
+  return true
+}
+
+/** Delivery fee applies only when pickup is a custom typed location. */
 export function calculateDeliveryFee(
   pickUpLocation: string,
-  returnLocation: string,
+  _returnLocation: string,
   car: CarPricing,
 ): number {
-  const feeSen = (loc: string): number => {
-    switch (loc) {
-      case 'Airport':
-        return car.deliveryFeeAirportSen
-      case 'Hotel':
-        return car.deliveryFeeHotelSen
-      case 'Jetty':
-        return car.deliveryFeeJettySen
-      case 'Office':
-        return 0
-      default:
-        return 0
-    }
-  }
-  return (feeSen(pickUpLocation) + feeSen(returnLocation)) / 100
+  if (!isCustomDeliveryLocation(pickUpLocation)) return 0
+  return car.deliveryFeeHotelSen / 100
 }
 
 // ─── Step 6: Coupon discount ──────────────────────────────────────────────────

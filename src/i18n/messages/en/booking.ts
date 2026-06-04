@@ -39,6 +39,7 @@ export const enBooking = {
   noPhoto: 'No photo',
   fleetVehicle: 'Fleet vehicle',
   startFrom: 'Start from',
+  avgPerDay: 'Avg per day',
   rent: 'Rent',
   browseFleet: 'Browse fleet',
   seeCategoryCars: 'See {category} cars',

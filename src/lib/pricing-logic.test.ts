@@ -8,6 +8,7 @@ import {
   calculateExtraHours,
   computeFinalTotal,
   getRentalDays,
+  isCustomDeliveryLocation,
   validateBooking,
 } from './pricing-logic'
 import type { CarPricing, PromoRecord, SeasonRange } from './pricing-logic'
@@ -340,9 +341,23 @@ describe('add-ons and delivery', () => {
     expect(calculateAddons({ childSeat: true, secondDriver: true })).toBe(50)
   })
 
-  // Test 28: Airport pickup + Hotel return → RM 30 + RM 50 = RM 80
-  it('28. Airport pickup + Hotel return → RM 80', () => {
-    expect(calculateDeliveryFee('Airport', 'Hotel', innova)).toBe(80)
+  // Test 28: preset airport + hotel list → no delivery fee
+  it('28. preset airport pickup + hotel list return → RM 0 delivery', () => {
+    expect(calculateDeliveryFee('Airport', 'Hotel', innova)).toBe(0)
+    expect(
+      calculateDeliveryFee(
+        'Langkawi Intl Airport · Door 3',
+        'Adya Hotel Langkawi · hotel delivery',
+        innova,
+      ),
+    ).toBe(0)
+  })
+
+  // Test 28b: custom typed pickup → hotel delivery fee
+  it('28b. custom typed pickup → hotel delivery fee', () => {
+    expect(calculateDeliveryFee('Sunset Villa (hotel)', 'Airport', innova)).toBe(50)
+    expect(isCustomDeliveryLocation('Sunset Villa (hotel)')).toBe(true)
+    expect(isCustomDeliveryLocation('Adya Hotel Langkawi · hotel delivery')).toBe(false)
   })
 
   // Test 29: Office + Office → RM 0
@@ -417,11 +432,11 @@ describe('integration examples', () => {
     expect(result.days).toBe(3)
     expect(result.baseRental).toBe(570)   // 190 × 3
     expect(result.addonsTotal).toBe(30)   // child seat
-    expect(result.deliveryFee).toBe(80)   // 30 + 50
-    expect(result.subTotal).toBe(680)
+    expect(result.deliveryFee).toBe(0)
+    expect(result.subTotal).toBe(600)
     expect(result.discountPercent).toBe(10)
-    expect(result.discountAmount).toBeCloseTo(68)
-    expect(result.finalTotal).toBe(612)
-    expect(result.amountSen).toBe(61200)
+    expect(result.discountAmount).toBeCloseTo(60)
+    expect(result.finalTotal).toBe(540)
+    expect(result.amountSen).toBe(54000)
   })
 })

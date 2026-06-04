@@ -41,6 +41,7 @@ export const zhBooking: EnBooking = {
   noPhoto: '暂无图片',
   fleetVehicle: '车队车辆',
   startFrom: '起价',
+  avgPerDay: '日均',
   rent: '租车',
   browseFleet: '浏览车队',
   seeCategoryCars: '查看{category}车型',

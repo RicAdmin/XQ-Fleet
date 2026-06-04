@@ -6,11 +6,13 @@ import { OkuFeatureModal } from '#/components/OkuFeatureModal'
 import { usePublicI18n } from '#/i18n/usePublicI18n'
 import type { Locale } from '#/i18n/locales'
 import { addCalendarDays, formatTripDuration, isAllowedPickupDate, isAllowedReturnDate } from '#/lib/booking-datetime'
+import { displayDailyRateSen, tripBaseRentalSen } from '#/lib/car-display-price'
 import { getCategoryAlternatives } from '#/lib/detail-car-alternatives'
 import { isHondaNBox } from '#/lib/fleet-oku'
 import { catalogFitInput } from '#/lib/car-catalog'
 import { carLuggageFit, fleetFuelType } from '#/lib/fleet-luggage-fit'
 import type { PublicCarRow } from '#/lib/portal-functions'
+import type { SeasonRange } from '#/lib/pricing-logic'
 
 export type TripType = 'round' | 'oneway'
 
@@ -100,11 +102,11 @@ export function bookingLocationSummary(booking: BookingState, pickupTbc: string)
   return pickup
 }
 
-function estimateTripTotal(dailyRateSen: number, tripDays: number) {
-  const daily = Math.round(dailyRateSen / 100)
-  const subtotal = daily * tripDays
-  const discount = Math.round(subtotal * 0.15)
-  return subtotal - discount
+/** Set true to show the 15% early-bird line in the detail price box. Logic stays either way. */
+const SHOW_EARLY_BIRD_DISCOUNT = false
+
+function earlyBirdTotal(subtotalRm: number) {
+  return subtotalRm - Math.round(subtotalRm * 0.15)
 }
 
 export function CarDetailDialog({
@@ -113,6 +115,7 @@ export function CarDetailDialog({
   booking,
   nights,
   checkoutReady = true,
+  seasonCalendar = [],
   onClose,
   onBeginCheckout,
   onSelectCar,
@@ -122,6 +125,7 @@ export function CarDetailDialog({
   booking: BookingState
   nights: number
   checkoutReady?: boolean
+  seasonCalendar?: SeasonRange[]
   onClose: () => void
   onBeginCheckout: (car: PublicCarRow) => void
   onSelectCar: (car: PublicCarRow) => void
@@ -131,10 +135,21 @@ export function CarDetailDialog({
   const [showOku, setShowOku] = useState(false)
   const isOkuNBox = isHondaNBox(car)
   const n = nights || 1
-  const daily = Math.round(car.dailyRateSen / 100)
-  const subtotal = daily * n
+  const tripDatesSelected = hasTripDates(booking)
+  const dailySen = displayDailyRateSen(
+    car,
+    tripDatesSelected ? booking.pickDate : null,
+    tripDatesSelected ? booking.retDate : null,
+    seasonCalendar,
+  )
+  const daily = Math.round(dailySen / 100)
+  const subtotal =
+    tripDatesSelected && booking.pickDate && booking.retDate && seasonCalendar.length > 0
+      ? Math.round(tripBaseRentalSen(car, booking.pickDate, booking.retDate, seasonCalendar) / 100)
+      : daily * n
   const discount = Math.round(subtotal * 0.15)
   const total = subtotal - discount
+  const displayTotal = SHOW_EARLY_BIRD_DISCOUNT ? total : subtotal
   const dateLocale: Record<Locale, string> = { en: 'en-GB', ms: 'ms-MY', zh: 'zh-CN' }
   const fmt = (d: Date | null) =>
     d
@@ -173,8 +188,22 @@ export function CarDetailDialog({
         </p>
         <ul className="detail-alternatives-list">
           {alternatives.map(({ car: alt }) => {
-            const altDaily = Math.round(alt.dailyRateSen / 100)
-            const altTrip = estimateTripTotal(alt.dailyRateSen, n)
+            const altDailySen = displayDailyRateSen(
+              alt,
+              tripDatesSelected ? booking.pickDate : null,
+              tripDatesSelected ? booking.retDate : null,
+              seasonCalendar,
+            )
+            const altDaily = Math.round(altDailySen / 100)
+            const altSubtotal =
+              tripDatesSelected && booking.pickDate && booking.retDate && seasonCalendar.length > 0
+                ? Math.round(
+                    tripBaseRentalSen(alt, booking.pickDate, booking.retDate, seasonCalendar) / 100,
+                  )
+                : Math.round(altDailySen / 100) * n
+            const altTrip = SHOW_EARLY_BIRD_DISCOUNT
+              ? earlyBirdTotal(altSubtotal)
+              : altSubtotal
             return (
               <li key={alt.id}>
                 <button
@@ -359,15 +388,17 @@ export function CarDetailDialog({
                 <span>{t('carDetail.dayMultiply', { daily, count: n })}</span>
                 <span className="v">RM {subtotal}</span>
               </div>
-              <div className="row">
-                <span>{t('carDetail.earlyBirdDiscount')}</span>
-                <span className="v" style={{ color: 'var(--brand-coral)' }}>
-                  −RM {discount}
-                </span>
-              </div>
+              {SHOW_EARLY_BIRD_DISCOUNT ? (
+                <div className="row">
+                  <span>{t('carDetail.earlyBirdDiscount')}</span>
+                  <span className="v" style={{ color: 'var(--brand-coral)' }}>
+                    −RM {discount}
+                  </span>
+                </div>
+              ) : null}
               <div className="row total">
                 <span>{t('carDetail.totalEstimate')}</span>
-                <span>RM {total}</span>
+                <span>RM {displayTotal}</span>
               </div>
             </div>
 

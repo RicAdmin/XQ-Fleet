@@ -1,10 +1,11 @@
 import { createServerFn } from '@tanstack/react-start'
 import { and, eq, gt, inArray, lt, notInArray } from 'drizzle-orm'
 
-import { carPhotos, cars, rentals } from '#/db/schema'
+import { carPhotos, cars, rentals, seasonCalendar } from '#/db/schema'
 import type { CarCategory } from '#/db/schema'
 import { publicCarCatalogSelect, type PublicCarCatalogFields } from '#/lib/car-catalog'
 import { parseLocalYmd } from '#/lib/booking-datetime'
+import type { SeasonRange } from '#/lib/pricing-logic'
 
 export type { PublicCarCatalogFields } from '#/lib/car-catalog'
 
@@ -15,6 +16,9 @@ export type PublicCarRow = {
   year: number
   category: CarCategory
   dailyRateSen: number
+  priceLowSeasonSen: number
+  pricePeakSeasonSen: number
+  priceSuperPeakSeasonSen: number
   extHourLowSen?: number
   extHourPeakAndSuperPeakSen?: number
   coverPhotoUrl: string | null
@@ -69,6 +73,9 @@ export function publicCarDetailToRow(car: PublicCarDetail): PublicCarRow {
     year: car.year,
     category: car.category,
     dailyRateSen: car.dailyRateSen,
+    priceLowSeasonSen: car.priceLowSeasonSen,
+    pricePeakSeasonSen: car.pricePeakSeasonSen,
+    priceSuperPeakSeasonSen: car.priceSuperPeakSeasonSen,
     extHourLowSen: car.extHourLowSen,
     extHourPeakAndSuperPeakSen: car.extHourPeakAndSuperPeakSen,
     coverPhotoUrl: coverPhoto?.url ?? null,
@@ -102,24 +109,45 @@ export function publicCarDetailToRow(car: PublicCarDetail): PublicCarRow {
   }
 }
 
+const publicCarListSelect = {
+  id: cars.id,
+  make: cars.make,
+  model: cars.model,
+  year: cars.year,
+  category: cars.category,
+  dailyRateSen: cars.dailyRateSen,
+  priceLowSeasonSen: cars.priceLowSeasonSen,
+  pricePeakSeasonSen: cars.pricePeakSeasonSen,
+  priceSuperPeakSeasonSen: cars.priceSuperPeakSeasonSen,
+  extHourLowSen: cars.extHourLowSen,
+  extHourPeakAndSuperPeakSen: cars.extHourPeakAndSuperPeakSen,
+  coverPhotoUrl: carPhotos.url,
+  coverPhotoAlt: carPhotos.altText,
+  notes: cars.notes,
+  ...publicCarCatalogSelect,
+} as const
+
+// ─── Season calendar (public) ─────────────────────────────────────────────────
+
+export const getPublicSeasonCalendar = createServerFn({ method: 'GET' }).handler(
+  async (): Promise<SeasonRange[]> => {
+    const { db } = await import('#/db')
+    const rows = await db.select().from(seasonCalendar)
+    return rows.map((r) => ({
+      fromDate: r.fromDate,
+      toDate: r.toDate,
+      seasonType: r.seasonType,
+    }))
+  },
+)
+
 // ─── Public listing ───────────────────────────────────────────────────────────
 
 export const getPublicCars = createServerFn({ method: 'GET' }).handler(async (): Promise<PublicCarRow[]> => {
   const { db } = await import('#/db')
 
   const rows = await db
-    .select({
-      id: cars.id,
-      make: cars.make,
-      model: cars.model,
-      year: cars.year,
-      category: cars.category,
-      dailyRateSen: cars.dailyRateSen,
-      coverPhotoUrl: carPhotos.url,
-      coverPhotoAlt: carPhotos.altText,
-      notes: cars.notes,
-      ...publicCarCatalogSelect,
-    })
+    .select(publicCarListSelect)
     .from(cars)
     .leftJoin(
       carPhotos,
@@ -174,18 +202,7 @@ export const filterPublicCars = createServerFn({ method: 'GET' })
     }
 
     const rows = await db
-      .select({
-        id: cars.id,
-        make: cars.make,
-        model: cars.model,
-        year: cars.year,
-        category: cars.category,
-        dailyRateSen: cars.dailyRateSen,
-        coverPhotoUrl: carPhotos.url,
-        coverPhotoAlt: carPhotos.altText,
-        notes: cars.notes,
-        ...publicCarCatalogSelect,
-      })
+      .select(publicCarListSelect)
       .from(cars)
       .leftJoin(
         carPhotos,

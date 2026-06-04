@@ -6777,6 +6777,10 @@ input[type=range] { width: 100%; accent-color: var(--brand-leaf); }
 .cs-divider { height: 1px; background: var(--line); }
 .cs-rows { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--ink-soft); }
 .cs-row { display: flex; justify-content: space-between; }
+.cs-row--season { align-items: flex-start; gap: 16px; }
+.cs-row-season-main { font-weight: 500; color: var(--ink); }
+.cs-row--season > span:last-child { flex-shrink: 0; font-weight: 500; color: var(--ink); }
+.cs-row-sub { padding-left: 0; margin-top: 2px; font-size: 12px; color: var(--ink-muted, var(--ink-soft)); }
 .cs-total {
   display: flex; justify-content: space-between;
   font-size: 18px; font-weight: 600; letter-spacing: -.015em;

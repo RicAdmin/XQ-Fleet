@@ -41,6 +41,7 @@ export const msBooking: EnBooking = {
   noPhoto: 'Tiada foto',
   fleetVehicle: 'Kenderaan flit',
   startFrom: 'Dari',
+  avgPerDay: 'Purata sehari',
   rent: 'Sewa',
   browseFleet: 'Layari flit',
   seeCategoryCars: 'Lihat kereta {category}',

@@ -20,7 +20,11 @@ export default defineConfig(({ mode }) => {
       tailwindcss(),
       tanstackStart(),
       viteReact(),
-      netlify(),
+      netlify({
+        dev: {
+          edgeFunctions: { enabled: false },
+        },
+      }),
     ],
     define: {
       'import.meta.env.VITE_SITE_URL': JSON.stringify(siteUrl),

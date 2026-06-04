@@ -50,6 +50,7 @@ import {
 import { LuggageFitModal } from '#/components/LuggageFitModal'
 import { authClient } from '#/lib/auth-client'
 import { addCalendarDays, earliestPickupDate, formatTripDuration, isAllowedReturnDate, startOfLocalDay, toLocalYmd } from '#/lib/booking-datetime'
+import { displayDailyRateSen, usesSeasonDisplayPricing } from '#/lib/car-display-price'
 import { checkoutSearchFromBooking } from '#/lib/checkout-trip'
 import { loadTripSearch, saveTripSearch } from '#/lib/trip-search-storage'
 import { catalogFitInput } from '#/lib/car-catalog'
@@ -57,6 +58,7 @@ import { carLuggageFit } from '#/lib/fleet-luggage-fit'
 import { isHondaNBox } from '#/lib/fleet-oku'
 import { filterPublicCars } from '#/lib/portal-functions'
 import type { PublicCarRow } from '#/lib/portal-functions'
+import type { SeasonRange } from '#/lib/pricing-logic'
 
 import {
   HERO_BG,
@@ -132,9 +134,11 @@ function pickCar(cars: PublicCarRow[], cat: CarCategoryKey): PublicCarRow | null
 export function CxqLandingPage({
   initialCars,
   initialModelQuery = '',
+  initialSeasonCalendar = [],
 }: {
   initialCars: PublicCarRow[]
   initialModelQuery?: string
+  initialSeasonCalendar?: SeasonRange[]
 }) {
   const navigate = useNavigate()
   const [cars, setCars] = useState<PublicCarRow[]>(initialCars)
@@ -303,6 +307,7 @@ export function CxqLandingPage({
   const trip = searchCriteria ?? booking
   const startYmd = toLocalYmd(trip.pickDate)
   const endYmd = toLocalYmd(trip.retDate)
+  const tripDatesSelected = hasTripDates(trip)
 
   const goToCheckout = useCallback(
     (car: PublicCarRow) => {
@@ -370,6 +375,9 @@ export function CxqLandingPage({
           fleetLocked={!canBrowseFleet}
           onRequireTrip={requireBookingSearch}
           onOpenCar={tryOpenCar}
+          pickDate={tripDatesSelected ? trip.pickDate : null}
+          retDate={tripDatesSelected ? trip.retDate : null}
+          seasonCalendar={initialSeasonCalendar}
         />
         <CarCategoriesSection
           cars={cars}
@@ -401,6 +409,7 @@ export function CxqLandingPage({
             booking={trip}
             nights={nightsBetween(trip.pickDate, trip.retDate)}
             checkoutReady={canBrowseFleet}
+            seasonCalendar={initialSeasonCalendar}
             onClose={() => setOpenCar(null)}
             onBeginCheckout={goToCheckout}
             onSelectCar={setOpenCar}
@@ -1368,6 +1377,9 @@ function TopPicksSection({
   fleetLocked,
   onRequireTrip,
   onOpenCar,
+  pickDate,
+  retDate,
+  seasonCalendar,
 }: {
   cars: PublicCarRow[]
   modelQuery: string
@@ -1376,6 +1388,9 @@ function TopPicksSection({
   fleetLocked: boolean
   onRequireTrip: () => void
   onOpenCar: (c: PublicCarRow) => void
+  pickDate: Date | null
+  retDate: Date | null
+  seasonCalendar: SeasonRange[]
 }) {
   const { t } = usePublicI18n()
   const [filter, setFilter] = useState<(typeof TOP_TAGS)[number]>('All')
@@ -1451,6 +1466,9 @@ function TopPicksSection({
             needsSearch={fleetLocked}
             onRequireTrip={onRequireTrip}
             onOpen={() => onOpenCar(c)}
+            pickDate={pickDate}
+            retDate={retDate}
+            seasonCalendar={seasonCalendar}
           />
         ))}
       </div>
@@ -1485,17 +1503,25 @@ function FleetCarCard({
   needsSearch,
   onRequireTrip,
   onOpen,
+  pickDate,
+  retDate,
+  seasonCalendar,
 }: {
   car: PublicCarRow
   needsSearch?: boolean
   onRequireTrip?: () => void
   onOpen: () => void
+  pickDate: Date | null
+  retDate: Date | null
+  seasonCalendar: SeasonRange[]
 }) {
   const { t } = usePublicI18n()
   const [fav, setFav] = useState(false)
   const [showLuggage, setShowLuggage] = useState(false)
   const fit = carLuggageFit(catalogFitInput(car))
   const totalBags = fit.lg + fit.sm
+  const listedDailyRateSen = displayDailyRateSen(car, pickDate, retDate, seasonCalendar)
+  const showSeasonPrice = usesSeasonDisplayPricing(pickDate, retDate, seasonCalendar)
 
   const handleOpen = () => {
     if (needsSearch) {
@@ -1568,9 +1594,11 @@ function FleetCarCard({
           </div>
           <div className="row">
             <div>
-              <div className="price-bit">{t('booking.startFrom')}</div>
+              <div className="price-bit">
+                {showSeasonPrice ? t('booking.avgPerDay') : t('booking.startFrom')}
+              </div>
               <div className="price">
-                {formatMYR(car.dailyRateSen)}
+                {formatMYR(listedDailyRateSen)}
                 <span className="per"> {t('common.perDay')}</span>
               </div>
             </div>

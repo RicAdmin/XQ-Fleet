@@ -25,13 +25,12 @@ import {
   loadCheckoutDraft,
   saveCheckoutDraft,
 } from '#/lib/checkout-draft-storage'
-import { createPortalBooking } from '#/lib/portal-booking-functions'
+import { createPortalBooking, previewBookingPrice } from '#/lib/portal-booking-functions'
+import type { PricingPreview } from '#/lib/portal-booking-functions'
 import { validatePromo } from '#/lib/promo-functions'
 import {
-  estimateExtraHoursCharge,
   formatExtraHours,
   formatTripDuration,
-  tripExtraHours,
 } from '#/lib/booking-datetime'
 import { catalogFitInput } from '#/lib/car-catalog'
 import { carLuggageFit } from '#/lib/fleet-luggage-fit'
@@ -43,14 +42,8 @@ import {
   normalizeCountryCode,
 } from '#/lib/countries'
 import type { PublicCarRow } from '#/lib/portal-functions'
-
-function toPricingLocation(label: string): string {
-  const l = label.toLowerCase()
-  if (l.includes('airport')) return 'Airport'
-  if (l.includes('jetty') || l.includes('ferry')) return 'Jetty'
-  if (l.includes('hotel')) return 'Hotel'
-  return 'Office'
-}
+import { buildSeasonRentalLines } from '#/lib/season-rental-breakdown'
+import type { SeasonType } from '#/lib/pricing-logic'
 
 function toTimeHms(hhmm: string): string {
   if (!hhmm) return '08:00:00'
@@ -248,6 +241,21 @@ function CheckoutPaymentIcons() {
   return <PaymentMethodIcons className="cs-pay-icons" chipClassName="cs-pay-chip" />
 }
 
+const PREVIEW_DEBOUNCE_MS = 600
+
+const DATE_LOCALE: Record<string, string> = { en: 'en-GB', ms: 'ms-MY', zh: 'zh-CN' }
+
+function checkoutSeasonLabel(season: SeasonType, t: TranslateFn): string {
+  switch (season) {
+    case 'Low':
+      return t('checkout.seasonLow')
+    case 'Peak':
+      return t('checkout.seasonPeak')
+    case 'Super Peak':
+      return t('checkout.seasonSuperPeak')
+  }
+}
+
 function nightsBetween(a: Date | null, b: Date | null) {
   if (!a || !b) return 1
   const ms = b.getTime() - a.getTime()
@@ -346,9 +354,6 @@ export function LandingCheckoutFlow({
     [t],
   )
 
-  const nights = nightsBetween(booking.pickDate, booking.retDate)
-  const daily = Math.round(car.dailyRateSen / 100)
-  const subtotal = daily * nights
   const [step, setStep] = useState(0)
   const [guestCheckout, setGuestCheckout] = useState(() => initialDraft?.guestCheckout ?? false)
   const [accountAuthMode, setAccountAuthMode] = useState<'sign-in' | 'register' | null>(null)
@@ -395,8 +400,81 @@ export function LandingCheckoutFlow({
   const [promoError, setPromoError] = useState<string | null>(null)
   const [promoBusy, setPromoBusy] = useState(false)
 
-  // Promo discount is the only source of truth for the discount line item.
-  const discount = appliedPromo ? Math.round(appliedPromo.discountSen / 100) : 0
+  const [preview, setPreview] = useState<PricingPreview | null>(null)
+  const [previewError, setPreviewError] = useState<string | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
+  const previewDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const fetchPreview = useCallback(async () => {
+    if (!bookingHasCompleteTrip(booking) || !startYmd || !endYmd) {
+      setPreview(null)
+      setPreviewError(null)
+      return
+    }
+    setPreviewLoading(true)
+    setPreviewError(null)
+    try {
+      const result = await previewBookingPrice({
+        data: {
+          carId: car.id,
+          startDate: startYmd,
+          endDate: endYmd,
+          pickUpTime: toTimeHms(booking.pickTime),
+          returnTime: toTimeHms(booking.retTime),
+          pickUpLocation: booking.from.trim(),
+          returnLocation:
+            booking.tripType === 'round' ? booking.from.trim() : (booking.retLoc || booking.from).trim(),
+          childSeat: addons.child,
+          secondDriver: addons.second,
+          couponCode: appliedPromo?.code ?? null,
+        },
+      })
+      if ('error' in result) {
+        setPreviewError(result.error)
+        setPreview(null)
+      } else {
+        setPreview(result)
+        setPreviewError(null)
+      }
+    } catch {
+      setPreviewError(t('checkout.errPricePreview'))
+      setPreview(null)
+    } finally {
+      setPreviewLoading(false)
+    }
+  }, [
+    car.id,
+    startYmd,
+    endYmd,
+    booking,
+    addons.child,
+    addons.second,
+    appliedPromo?.code,
+    t,
+  ])
+
+  useEffect(() => {
+    if (previewDebounceRef.current) clearTimeout(previewDebounceRef.current)
+    previewDebounceRef.current = setTimeout(() => void fetchPreview(), PREVIEW_DEBOUNCE_MS)
+    return () => {
+      if (previewDebounceRef.current) clearTimeout(previewDebounceRef.current)
+    }
+  }, [fetchPreview])
+
+  const nights = preview?.days ?? nightsBetween(booking.pickDate, booking.retDate)
+  const previewSubtotalSen = preview ? Math.round(preview.subTotal * 100) : 0
+  const baseRentalRm = preview ? Math.round(preview.baseRental) : 0
+  const extraHoursCharge = preview ? Math.round(preview.extraCharge) : 0
+  const deliveryFeeRm = preview ? Math.round(preview.deliveryFee) : 0
+  const discount = preview ? Math.round(preview.discountAmount) : 0
+  const total = preview ? Math.round(preview.finalTotal) : 0
+  const extraHours = preview?.extraHours ?? 0
+
+  const dateLocale = DATE_LOCALE[locale] ?? 'en-GB'
+  const seasonLines = useMemo(() => {
+    if (!preview?.breakdown?.length) return []
+    return buildSeasonRentalLines(preview.breakdown, car, dateLocale)
+  }, [preview?.breakdown, car, dateLocale])
 
   useEffect(() => {
     if (resolvedSessionPending || draftStepRestored.current) return
@@ -429,13 +507,6 @@ export function LandingCheckoutFlow({
     }))
   }, [alsoAsDriver, buyer.name, buyer.email, buyer.phone])
 
-  const addonCost = useMemo(() => {
-    let sum = 0
-    if (addons.child) sum += 30
-    if (addons.second) sum += 20
-    return sum
-  }, [addons])
-
   const pickupLoc = booking.from.trim() || t('checkout.pickupTbc')
   const returnLoc =
     booking.tripType === 'round' ? pickupLoc : booking.retLoc.trim() || pickupLoc
@@ -445,16 +516,6 @@ export function LandingCheckoutFlow({
     booking.retDate,
     booking.retTime,
   )
-  const extraHours = tripExtraHours(
-    booking.pickDate,
-    booking.pickTime,
-    booking.retDate,
-    booking.retTime,
-    nights,
-  )
-  const extraHoursCharge = estimateExtraHoursCharge(extraHours, car.extHourLowSen, car.dailyRateSen)
-
-  const total = subtotal - discount + addonCost + extraHoursCharge
 
   const lug = carLuggageFit(catalogFitInput(car))
 
@@ -570,6 +631,10 @@ export function LandingCheckoutFlow({
       setFlowError(t('checkout.errPickValidDates'))
       return
     }
+    if (!preview || previewError) {
+      setFlowError(previewError ?? t('checkout.errPricePreview'))
+      return
+    }
     setFlowError(null)
     setSubmitting(true)
     try {
@@ -581,8 +646,8 @@ export function LandingCheckoutFlow({
           endDate: endYmd,
           pickUpTime: toTimeHms(booking.pickTime),
           returnTime: toTimeHms(booking.retTime),
-          pickUpLocation: toPricingLocation(booking.from),
-          returnLocation: toPricingLocation(returnLoc),
+          pickUpLocation: booking.from.trim(),
+          returnLocation: returnLoc.trim(),
           childSeat: addons.child,
           secondDriver: addons.second,
           couponCode: appliedPromo?.code ?? null,
@@ -611,6 +676,8 @@ export function LandingCheckoutFlow({
     addons,
     navigate,
     appliedPromo,
+    preview,
+    previewError,
     t,
   ])
 
@@ -626,7 +693,7 @@ export function LandingCheckoutFlow({
           cartContext: {
             carId: car.id,
             carCategory: car.category,
-            subTotalSen: subtotal * 100,
+            subTotalSen: previewSubtotalSen,
             customerEmail: buyer.email.trim() || undefined,
           },
         },
@@ -642,7 +709,7 @@ export function LandingCheckoutFlow({
     } finally {
       setPromoBusy(false)
     }
-  }, [promoInput, car.id, car.category, subtotal, buyer.email, t])
+  }, [promoInput, car.id, car.category, previewSubtotalSen, buyer.email, t])
 
   const removePromoCode = useCallback(() => {
     setAppliedPromo(null)
@@ -664,7 +731,7 @@ export function LandingCheckoutFlow({
             cartContext: {
               carId: car.id,
               carCategory: car.category,
-              subTotalSen: subtotal * 100,
+              subTotalSen: previewSubtotalSen,
               customerEmail: buyer.email.trim() || undefined,
             },
           },
@@ -686,7 +753,7 @@ export function LandingCheckoutFlow({
     // Intentionally not depending on buyer.email — only re-validate on cart
     // size changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subtotal, car.id, car.category])
+  }, [previewSubtotalSen, car.id, car.category])
 
   const tripSearch = useMemo(() => checkoutSearchFromBooking(booking), [booking])
   const checkoutReturnTo = useMemo(() => {
@@ -1511,12 +1578,76 @@ export function LandingCheckoutFlow({
             </div>
 
             <div className="cs-divider" />
-            <div className="cs-rows">
-              <div className="cs-row">
-                <span>{t('checkout.dailyRateDays', { nights })}</span>
-                <span>RM {subtotal}</span>
+            {previewLoading ? (
+              <p className="cs-row" style={{ justifyContent: 'center', gap: 8 }}>
+                <LoadingSpinner size={14} aria-hidden />
+                {t('checkout.priceCalculating')}
+              </p>
+            ) : previewError ? (
+              <p className="cs-promo-error">{previewError}</p>
+            ) : preview ? (
+              <div className="cs-rows">
+                {seasonLines.length > 0 ? (
+                  seasonLines.map((line) => {
+                    const season = checkoutSeasonLabel(line.seasonType, t)
+                    const title =
+                      line.days === 1
+                        ? t('checkout.seasonLineOne', { season })
+                        : t('checkout.seasonLineMany', { season, count: line.days })
+                    return (
+                      <div
+                        key={`${line.seasonType}-${line.dateLabel}`}
+                        className="cs-row cs-row--season"
+                      >
+                        <div>
+                          <div className="cs-row-season-main">{title}</div>
+                          <div className="cs-row-sub">
+                            {t('checkout.seasonLineDetail', {
+                              dates: line.dateLabel,
+                              rate: Math.round(line.dailyRateRm),
+                            })}
+                          </div>
+                        </div>
+                        <span>RM {Math.round(line.subtotalRm)}</span>
+                      </div>
+                    )
+                  })
+                ) : (
+                  <div className="cs-row">
+                    <span>{t('checkout.rentalDays', { days: preview.days })}</span>
+                    <span>RM {baseRentalRm}</span>
+                  </div>
+                )}
+                {extraHoursCharge > 0 ? (
+                  <div className="cs-row">
+                    <span>
+                      {preview.extraRule === 'full-day-cap'
+                        ? t('checkout.extraFullDay')
+                        : t('checkout.extraHours', { time: formatExtraHours(extraHours) })}
+                    </span>
+                    <span>RM {extraHoursCharge}</span>
+                  </div>
+                ) : null}
+                {preview.addonsTotal > 0 ? (
+                  <>
+                    {ADDONS.filter((a) => addons[a.key]).map((a) => (
+                      <div key={a.key} className="cs-row">
+                        <span>{a.title}</span>
+                        <span>RM {a.price}</span>
+                      </div>
+                    ))}
+                  </>
+                ) : null}
+                {deliveryFeeRm > 0 ? (
+                  <div className="cs-row">
+                    <span>{t('checkout.deliveryFee')}</span>
+                    <span>RM {deliveryFeeRm}</span>
+                  </div>
+                ) : null}
               </div>
-              {appliedPromo ? (
+            ) : null}
+            <div className="cs-rows">
+              {appliedPromo && discount > 0 ? (
                 <div className="cs-row">
                   <span>
                     {t('checkout.promoApplied')}{' '}
@@ -1539,18 +1670,6 @@ export function LandingCheckoutFlow({
                   <span style={{ color: 'var(--brand-coral)' }}>−RM {discount}</span>
                 </div>
               ) : null}
-              {extraHours > 0 ? (
-                <div className="cs-row">
-                  <span>{t('checkout.extraHours', { time: formatExtraHours(extraHours) })}</span>
-                  <span>RM {extraHoursCharge}</span>
-                </div>
-              ) : null}
-              {ADDONS.filter((a) => addons[a.key]).map((a) => (
-                <div key={a.key} className="cs-row">
-                  <span>{a.title}</span>
-                  <span>RM {a.price}</span>
-                </div>
-              ))}
             </div>
             {!appliedPromo ? (
               <div className="cs-promo">
@@ -1600,7 +1719,7 @@ export function LandingCheckoutFlow({
                 </button>
               ) : (
                 <div className="cs-pay-actions">
-                  <button type="button" className="btn btn-leaf btn-lg" onClick={() => void advance()} disabled={submitting || resolvedSessionPending || (step === 1 && !resolvedUser && !guestCheckout)}>
+                  <button type="button" className="btn btn-leaf btn-lg" onClick={() => void advance()} disabled={submitting || resolvedSessionPending || previewLoading || !preview || Boolean(previewError) || (step === 1 && !resolvedUser && !guestCheckout)}>
                     {step === 0
                       ? resolvedUser
                         ? t('checkout.payAmount', { total })
