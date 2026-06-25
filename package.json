@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "vite dev --port 3000",
-    "build": "vite build",
+    "build": "tsx scripts/generate-well-known-static.ts && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "lint": "eslint",

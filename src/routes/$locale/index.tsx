@@ -9,6 +9,7 @@ import {
   acceptsMarkdown,
   agentDiscoveryLinkHeader,
   buildHomepageMarkdown,
+  deferWithAgentDiscoveryLinkHeader,
   markdownNegotiationResponse,
 } from '#/lib/agent-discovery'
 import type { Locale } from '#/i18n/locales'
@@ -30,7 +31,7 @@ export const Route = createFileRoute('/$locale/')({
             Link: agentDiscoveryLinkHeader(),
           })
         }
-        return next()
+        return deferWithAgentDiscoveryLinkHeader(next)
       },
     },
   },

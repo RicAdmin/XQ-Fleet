@@ -19,6 +19,9 @@ export function agentDiscoveryLinkHeader(siteUrl?: string): string {
     `</.well-known/openid-configuration>; rel="openid-configuration"`,
     `</.well-known/oauth-protected-resource>; rel="oauth-protected-resource"`,
     `</.well-known/mcp/server-card.json>; rel="describedby"`,
+    `</.well-known/acp.json>; rel="describedby"`,
+    `</.well-known/ucp>; rel="describedby"`,
+    `</openapi.json>; rel="service-desc"`,
     `</llms.txt>; rel="describedby"`,
     `</auth.md>; rel="service-doc"`,
     `<${origin}/.well-known/agent-skills/index.json>; rel="describedby"`,
@@ -74,15 +77,29 @@ export function buildApiCatalog(siteUrl?: string) {
       },
       {
         anchor: `${base}/`,
+        'service-desc': [
+          {
+            href: publicSitePath('/openapi/auth.json', siteUrl),
+            type: 'application/openapi+json',
+          },
+          {
+            href: publicSitePath('/.well-known/mcp/server-card.json', siteUrl),
+            type: 'application/json',
+          },
+        ],
         'service-doc': [
           {
             href: publicSitePath('/llms.txt', siteUrl),
             type: 'text/plain',
           },
-        ],
-        'service-desc': [
           {
-            href: publicSitePath('/.well-known/mcp/server-card.json', siteUrl),
+            href: publicSitePath('/auth.md', siteUrl),
+            type: 'text/markdown',
+          },
+        ],
+        status: [
+          {
+            href: publicSitePath('/api/health', siteUrl),
             type: 'application/json',
           },
         ],
@@ -118,6 +135,7 @@ export function buildOAuthAuthorizationServer(siteUrl?: string) {
       skill: AUTH_MD_SKILL,
       register_uri: publicSitePath('/auth.md', siteUrl),
       identity_types_supported: ['anonymous', 'verified_email'],
+      revocation_uri: `${issuer}/sign-out`,
       anonymous: {
         credential_types_supported: ['session_cookie'],
         claim_uri: publicSitePath('/privacy', siteUrl),
@@ -131,18 +149,88 @@ export function buildOAuthAuthorizationServer(siteUrl?: string) {
   }
 }
 
+export function buildAuthMd(siteUrl?: string): string {
+  const base = publicSiteUrl(siteUrl)
+  const resource = `${base}/`
+  const issuer = authIssuer(siteUrl)
+
+  return `# auth.md
+
+Agent authentication and registration for **XQCar** (Langkawi car rental).
+
+## Audience
+
+This document is for AI agents and automated clients that need to discover how to authenticate with XQCar customer and staff APIs.
+
+## Resource server
+
+- **Resource identifier:** \`${resource}\`
+- **Protected resource metadata:** [/.well-known/oauth-protected-resource](${base}/.well-known/oauth-protected-resource)
+
+## Authorization server
+
+- **Issuer:** \`${issuer}\`
+- **OAuth metadata:** [/.well-known/oauth-authorization-server](${base}/.well-known/oauth-authorization-server)
+- **OpenID Connect:** [/.well-known/openid-configuration](${base}/.well-known/openid-configuration)
+- **Registration:** \`${base}/auth.md\` (this document)
+
+## Registration
+
+XQCar uses session-based authentication for the public booking site. Agents should:
+
+1. Read [llms.txt](${base}/llms.txt) for site structure and booking flows.
+2. Use [/.well-known/api-catalog](${base}/.well-known/api-catalog) for machine-readable API discovery.
+3. For customer accounts, direct users to [login](${base}/login) or [register](${base}/register) — agents must not create accounts without explicit user consent.
+4. For programmatic access requests, contact **hello@carxq.my** with use case, expected volume, and OAuth client details.
+
+## Supported identity types
+
+| Type | Method | Notes |
+|------|--------|-------|
+| Anonymous | Session cookie | Browse fleet and public content only |
+| Verified email | Email/password or Google OAuth | Required for bookings and account management |
+
+## Scopes
+
+- \`openid\` — OpenID Connect identity
+- \`profile\` — Name and profile fields
+- \`email\` — Email address
+- \`offline_access\` — Refresh token (when OAuth client access is provisioned)
+
+## Bearer methods
+
+- \`Authorization: Bearer <token>\` (when API tokens are provisioned)
+- Session cookies for browser-based flows via \`/api/auth\`
+
+## Revocation
+
+Session revocation: \`POST ${issuer}/sign-out\`
+
+For API token revocation, contact hello@carxq.my.
+
+## Related discovery
+
+- [MCP server card](${base}/.well-known/mcp/server-card.json)
+- [Agent skills index](${base}/.well-known/agent-skills/index.json)
+- [Privacy policy](${base}/privacy)
+`
+}
+
 export function buildOpenIdConfiguration(siteUrl?: string) {
   const oauth = buildOAuthAuthorizationServer(siteUrl)
+  const issuer = authIssuer(siteUrl)
   return {
     ...oauth,
-    userinfo_endpoint: `${authIssuer(siteUrl)}/userinfo`,
+    issuer,
+    userinfo_endpoint: `${issuer}/userinfo`,
     subject_types_supported: ['public'],
     id_token_signing_alg_values_supported: ['RS256', 'EdDSA'],
+    response_modes_supported: ['query', 'fragment'],
   }
 }
 
 export function buildOAuthProtectedResource(siteUrl?: string) {
-  const resource = publicSiteUrl(siteUrl)
+  const resource = `${publicSiteUrl(siteUrl)}/`
   const issuer = authIssuer(siteUrl)
   return {
     resource,
@@ -150,6 +238,7 @@ export function buildOAuthProtectedResource(siteUrl?: string) {
     jwks_uri: `${issuer}/jwks`,
     scopes_supported: ['openid', 'profile', 'email'],
     bearer_methods_supported: ['header'],
+    resource_documentation: publicSitePath('/auth.md', siteUrl),
   }
 }
 
@@ -251,6 +340,9 @@ export function buildHomepageMarkdown(siteUrl?: string): string {
 ## Agent discovery
 
 - [API catalog](${base}/.well-known/api-catalog)
+- [OpenAPI commerce (MPP)](${base}/openapi.json)
+- [UCP profile](${base}/.well-known/ucp)
+- [ACP discovery](${base}/.well-known/acp.json)
 - [LLMs index](${base}/llms.txt)
 - [Auth.md](${base}/auth.md)
 - [Agent skills](${base}/.well-known/agent-skills/index.json)
@@ -285,6 +377,40 @@ export function markdownNegotiationResponse(
 export function acceptsMarkdown(request: Request): boolean {
   const accept = request.headers.get('Accept') ?? ''
   return accept.includes('text/markdown')
+}
+
+export function withAgentDiscoveryLinkHeader(
+  response: Response,
+  siteUrl?: string,
+): Response {
+  const headers = new Headers(response.headers)
+  headers.set('Link', agentDiscoveryLinkHeader(siteUrl))
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  })
+}
+
+/** Attach RFC 8288 Link headers after deferring to TanStack SSR (`next()`). */
+export async function deferWithAgentDiscoveryLinkHeader(
+  next: () => Promise<unknown>,
+  siteUrl?: string,
+): Promise<unknown> {
+  const ctx = await next()
+  if (!ctx || typeof ctx !== 'object' || !('response' in ctx)) {
+    return ctx
+  }
+
+  const response = (ctx as { response?: unknown }).response
+  if (!(response instanceof Response)) {
+    return ctx
+  }
+
+  return {
+    ...ctx,
+    response: withAgentDiscoveryLinkHeader(response, siteUrl),
+  }
 }
 
 export function oauthAuthorizationServerResponse(siteUrl?: string): Response {

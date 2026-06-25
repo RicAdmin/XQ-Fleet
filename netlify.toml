@@ -12,6 +12,19 @@
   status = 200
   force = true
 
+# x402 scanner probes GET /api without trailing slash
+[[redirects]]
+  from = "/api"
+  to = "/api/"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/v1"
+  to = "/api/v1/"
+  status = 200
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]
@@ -32,16 +45,82 @@
     Cache-Control = "public, max-age=604800"
 
 [[headers]]
+  for = "/.well-known/api-catalog"
+  [headers.values]
+    Content-Type = "application/linkset+json; profile=\"https://www.rfc-editor.org/info/rfc9727\""
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/.well-known/openid-configuration"
+  [headers.values]
+    Content-Type = "application/json; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/.well-known/oauth-authorization-server"
+  [headers.values]
+    Content-Type = "application/json; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/auth.md"
+  [headers.values]
+    Content-Type = "text/markdown; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/.well-known/oauth-protected-resource"
+  [headers.values]
+    Content-Type = "application/json; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/.well-known/mcp/server-card.json"
+  [headers.values]
+    Content-Type = "application/json; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/.well-known/agent-skills/index.json"
+  [headers.values]
+    Content-Type = "application/json; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/.well-known/agent-skills/*"
+  [headers.values]
+    Content-Type = "text/markdown; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/.well-known/acp.json"
+  [headers.values]
+    Content-Type = "application/json; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/.well-known/ucp"
+  [headers.values]
+    Content-Type = "application/json; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/openapi.json"
+  [headers.values]
+    Content-Type = "application/json; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
   for = "/"
   [headers.values]
-    Link = "</.well-known/api-catalog>; rel=\"api-catalog\", </.well-known/openid-configuration>; rel=\"openid-configuration\", </.well-known/oauth-protected-resource>; rel=\"oauth-protected-resource\", </llms.txt>; rel=\"describedby\", </auth.md>; rel=\"service-doc\""
+    Link = "</.well-known/api-catalog>; rel=\"api-catalog\", </.well-known/openid-configuration>; rel=\"openid-configuration\", </.well-known/oauth-protected-resource>; rel=\"oauth-protected-resource\", </.well-known/acp.json>; rel=\"describedby\", </.well-known/ucp>; rel=\"describedby\", </openapi.json>; rel=\"service-desc\", </llms.txt>; rel=\"describedby\", </auth.md>; rel=\"service-doc\""
 
 [[headers]]
   for = "/en"
   [headers.values]
-    Link = "</.well-known/api-catalog>; rel=\"api-catalog\", </.well-known/openid-configuration>; rel=\"openid-configuration\", </.well-known/oauth-protected-resource>; rel=\"oauth-protected-resource\", </llms.txt>; rel=\"describedby\", </auth.md>; rel=\"service-doc\""
+    Link = "</.well-known/api-catalog>; rel=\"api-catalog\", </.well-known/openid-configuration>; rel=\"openid-configuration\", </.well-known/oauth-protected-resource>; rel=\"oauth-protected-resource\", </.well-known/acp.json>; rel=\"describedby\", </.well-known/ucp>; rel=\"describedby\", </openapi.json>; rel=\"service-desc\", </llms.txt>; rel=\"describedby\", </auth.md>; rel=\"service-doc\""
 
 [[headers]]
   for = "/en/"
   [headers.values]
-    Link = "</.well-known/api-catalog>; rel=\"api-catalog\", </.well-known/openid-configuration>; rel=\"openid-configuration\", </.well-known/oauth-protected-resource>; rel=\"oauth-protected-resource\", </llms.txt>; rel=\"describedby\", </auth.md>; rel=\"service-doc\""
+    Link = "</.well-known/api-catalog>; rel=\"api-catalog\", </.well-known/openid-configuration>; rel=\"openid-configuration\", </.well-known/oauth-protected-resource>; rel=\"oauth-protected-resource\", </.well-known/acp.json>; rel=\"describedby\", </.well-known/ucp>; rel=\"describedby\", </openapi.json>; rel=\"service-desc\", </llms.txt>; rel=\"describedby\", </auth.md>; rel=\"service-doc\""

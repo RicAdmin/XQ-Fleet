@@ -1,0 +1,63 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://carxq.com/api/auth",
+      "service-desc": [
+        {
+          "href": "https://carxq.com/openapi/auth.json",
+          "type": "application/openapi+json"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://carxq.com/auth.md",
+          "type": "text/markdown"
+        }
+      ],
+      "status": [
+        {
+          "href": "https://carxq.com/api/health",
+          "type": "application/json"
+        }
+      ]
+    },
+    {
+      "anchor": "https://carxq.com/api/webhooks/ipay88",
+      "service-doc": [
+        {
+          "href": "https://carxq.com/llms.txt",
+          "type": "text/plain"
+        }
+      ]
+    },
+    {
+      "anchor": "https://carxq.com/",
+      "service-desc": [
+        {
+          "href": "https://carxq.com/openapi/auth.json",
+          "type": "application/openapi+json"
+        },
+        {
+          "href": "https://carxq.com/.well-known/mcp/server-card.json",
+          "type": "application/json"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://carxq.com/llms.txt",
+          "type": "text/plain"
+        },
+        {
+          "href": "https://carxq.com/auth.md",
+          "type": "text/markdown"
+        }
+      ],
+      "status": [
+        {
+          "href": "https://carxq.com/api/health",
+          "type": "application/json"
+        }
+      ]
+    }
+  ]
+}

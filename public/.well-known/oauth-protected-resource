@@ -1,0 +1,16 @@
+{
+  "resource": "https://carxq.com/",
+  "authorization_servers": [
+    "https://carxq.com/api/auth"
+  ],
+  "jwks_uri": "https://carxq.com/api/auth/jwks",
+  "scopes_supported": [
+    "openid",
+    "profile",
+    "email"
+  ],
+  "bearer_methods_supported": [
+    "header"
+  ],
+  "resource_documentation": "https://carxq.com/auth.md"
+}

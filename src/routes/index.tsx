@@ -5,6 +5,7 @@ import {
   agentDiscoveryLinkHeader,
   buildHomepageMarkdown,
   markdownNegotiationResponse,
+  withAgentDiscoveryLinkHeader,
 } from '#/lib/agent-discovery'
 import { DEFAULT_LOCALE, LOCALE_STORAGE_KEY, negotiateLocale, parseLocale } from '#/i18n/locales'
 import { localePath } from '#/i18n/link'
@@ -19,10 +20,12 @@ export const Route = createFileRoute('/')({
           })
         }
         const locale = negotiateLocale(request.headers.get('Accept-Language') ?? undefined)
-        return new Response(null, {
-          status: 302,
-          headers: { Location: localePath(locale, '/') },
-        })
+        return withAgentDiscoveryLinkHeader(
+          new Response(null, {
+            status: 302,
+            headers: { Location: localePath(locale, '/') },
+          }),
+        )
       },
     },
   },

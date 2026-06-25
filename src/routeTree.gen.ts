@@ -16,6 +16,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PdpaRouteImport } from './routes/pdpa'
+import { Route as OpenapiDotjsonRouteImport } from './routes/openapi[.]json'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AppRouteImport } from './routes/app'
@@ -26,13 +27,16 @@ import { Route as LocaleRouteRouteImport } from './routes/$locale/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as ApiIndexRouteImport } from './routes/api/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as LocaleIndexRouteImport } from './routes/$locale/index'
+import { Route as WellKnownUcpRouteImport } from './routes/well-known/ucp'
 import { Route as WellKnownOpenidConfigurationRouteImport } from './routes/well-known/openid-configuration'
 import { Route as WellKnownOauthProtectedResourceRouteImport } from './routes/well-known/oauth-protected-resource'
 import { Route as WellKnownOauthAuthorizationServerRouteImport } from './routes/well-known/oauth-authorization-server'
 import { Route as WellKnownApiCatalogRouteImport } from './routes/well-known/api-catalog'
+import { Route as WellKnownAcpDotjsonRouteImport } from './routes/well-known/acp[.]json'
 import { Route as RCodeRouteImport } from './routes/r/$code'
 import { Route as PayRentalIdRouteImport } from './routes/pay/$rentalId'
 import { Route as InternalLoginRouteImport } from './routes/internal/login'
@@ -61,6 +65,7 @@ import { Route as LocaleAboutRouteImport } from './routes/$locale/about'
 import { Route as AppRentalsIndexRouteImport } from './routes/app/rentals/index'
 import { Route as AppMaintenanceIndexRouteImport } from './routes/app/maintenance/index'
 import { Route as AppCustomersIndexRouteImport } from './routes/app/customers/index'
+import { Route as ApiV1IndexRouteImport } from './routes/api/v1/index'
 import { Route as AdminSettingsIndexRouteImport } from './routes/admin/settings/index'
 import { Route as AdminReportsIndexRouteImport } from './routes/admin/reports/index'
 import { Route as AdminRentalsIndexRouteImport } from './routes/admin/rentals/index'
@@ -81,6 +86,7 @@ import { Route as AppCustomersCustomerIdRouteImport } from './routes/app/custome
 import { Route as ApiWebhooksIpay88RouteImport } from './routes/api/webhooks/ipay88'
 import { Route as ApiPaymentResponseRouteImport } from './routes/api/payment/response'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiAcpCheckout_sessionsRouteImport } from './routes/api/acp/checkout_sessions'
 import { Route as AdminRentalsRentalIdRouteImport } from './routes/admin/rentals/$rentalId'
 import { Route as AdminPromosPromoIdRouteImport } from './routes/admin/promos/$promoId'
 import { Route as AdminCustomersCustomerIdRouteImport } from './routes/admin/customers/$customerId'
@@ -136,6 +142,11 @@ const PdpaRoute = PdpaRouteImport.update({
   path: '/pdpa',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OpenapiDotjsonRoute = OpenapiDotjsonRouteImport.update({
+  id: '/openapi.json',
+  path: '/openapi.json',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -186,6 +197,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiIndexRoute = ApiIndexRouteImport.update({
+  id: '/api/',
+  path: '/api/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -200,6 +216,11 @@ const LocaleIndexRoute = LocaleIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LocaleRouteRoute,
+} as any)
+const WellKnownUcpRoute = WellKnownUcpRouteImport.update({
+  id: '/well-known/ucp',
+  path: '/well-known/ucp',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const WellKnownOpenidConfigurationRoute =
   WellKnownOpenidConfigurationRouteImport.update({
@@ -222,6 +243,11 @@ const WellKnownOauthAuthorizationServerRoute =
 const WellKnownApiCatalogRoute = WellKnownApiCatalogRouteImport.update({
   id: '/well-known/api-catalog',
   path: '/well-known/api-catalog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WellKnownAcpDotjsonRoute = WellKnownAcpDotjsonRouteImport.update({
+  id: '/well-known/acp.json',
+  path: '/well-known/acp.json',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RCodeRoute = RCodeRouteImport.update({
@@ -364,6 +390,11 @@ const AppCustomersIndexRoute = AppCustomersIndexRouteImport.update({
   path: '/customers/',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiV1IndexRoute = ApiV1IndexRouteImport.update({
+  id: '/api/v1/',
+  path: '/api/v1/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminSettingsIndexRoute = AdminSettingsIndexRouteImport.update({
   id: '/settings/',
   path: '/settings/',
@@ -466,6 +497,11 @@ const ApiPaymentResponseRoute = ApiPaymentResponseRouteImport.update({
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAcpCheckout_sessionsRoute = ApiAcpCheckout_sessionsRouteImport.update({
+  id: '/api/acp/checkout_sessions',
+  path: '/api/acp/checkout_sessions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRentalsRentalIdRoute = AdminRentalsRentalIdRouteImport.update({
@@ -580,6 +616,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/openapi.json': typeof OpenapiDotjsonRoute
   '/pdpa': typeof PdpaRoute
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
@@ -612,13 +649,16 @@ export interface FileRoutesByFullPath {
   '/internal/login': typeof InternalLoginRoute
   '/pay/$rentalId': typeof PayRentalIdRoute
   '/r/$code': typeof RCodeRoute
+  '/well-known/acp.json': typeof WellKnownAcpDotjsonRoute
   '/well-known/api-catalog': typeof WellKnownApiCatalogRoute
   '/well-known/oauth-authorization-server': typeof WellKnownOauthAuthorizationServerRoute
   '/well-known/oauth-protected-resource': typeof WellKnownOauthProtectedResourceRoute
   '/well-known/openid-configuration': typeof WellKnownOpenidConfigurationRoute
+  '/well-known/ucp': typeof WellKnownUcpRoute
   '/$locale/': typeof LocaleIndexRoute
   '/account/': typeof AccountIndexRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/': typeof ApiIndexRoute
   '/app/': typeof AppIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/$locale/blog/$slug': typeof LocaleBlogSlugRoute
@@ -636,6 +676,7 @@ export interface FileRoutesByFullPath {
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/promos/$promoId': typeof AdminPromosPromoIdRoute
   '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
+  '/api/acp/checkout_sessions': typeof ApiAcpCheckout_sessionsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/payment/response': typeof ApiPaymentResponseRoute
   '/api/webhooks/ipay88': typeof ApiWebhooksIpay88Route
@@ -656,6 +697,7 @@ export interface FileRoutesByFullPath {
   '/admin/rentals/': typeof AdminRentalsIndexRoute
   '/admin/reports/': typeof AdminReportsIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
+  '/api/v1/': typeof ApiV1IndexRoute
   '/app/customers/': typeof AppCustomersIndexRoute
   '/app/maintenance/': typeof AppMaintenanceIndexRoute
   '/app/rentals/': typeof AppRentalsIndexRoute
@@ -669,6 +711,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/openapi.json': typeof OpenapiDotjsonRoute
   '/pdpa': typeof PdpaRoute
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
@@ -701,13 +744,16 @@ export interface FileRoutesByTo {
   '/internal/login': typeof InternalLoginRoute
   '/pay/$rentalId': typeof PayRentalIdRoute
   '/r/$code': typeof RCodeRoute
+  '/well-known/acp.json': typeof WellKnownAcpDotjsonRoute
   '/well-known/api-catalog': typeof WellKnownApiCatalogRoute
   '/well-known/oauth-authorization-server': typeof WellKnownOauthAuthorizationServerRoute
   '/well-known/oauth-protected-resource': typeof WellKnownOauthProtectedResourceRoute
   '/well-known/openid-configuration': typeof WellKnownOpenidConfigurationRoute
+  '/well-known/ucp': typeof WellKnownUcpRoute
   '/$locale': typeof LocaleIndexRoute
   '/account': typeof AccountIndexRoute
   '/admin': typeof AdminIndexRoute
+  '/api': typeof ApiIndexRoute
   '/app': typeof AppIndexRoute
   '/blog': typeof BlogIndexRoute
   '/$locale/blog/$slug': typeof LocaleBlogSlugRoute
@@ -725,6 +771,7 @@ export interface FileRoutesByTo {
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/promos/$promoId': typeof AdminPromosPromoIdRoute
   '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
+  '/api/acp/checkout_sessions': typeof ApiAcpCheckout_sessionsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/payment/response': typeof ApiPaymentResponseRoute
   '/api/webhooks/ipay88': typeof ApiWebhooksIpay88Route
@@ -745,6 +792,7 @@ export interface FileRoutesByTo {
   '/admin/rentals': typeof AdminRentalsIndexRoute
   '/admin/reports': typeof AdminReportsIndexRoute
   '/admin/settings': typeof AdminSettingsIndexRoute
+  '/api/v1': typeof ApiV1IndexRoute
   '/app/customers': typeof AppCustomersIndexRoute
   '/app/maintenance': typeof AppMaintenanceIndexRoute
   '/app/rentals': typeof AppRentalsIndexRoute
@@ -763,6 +811,7 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/openapi.json': typeof OpenapiDotjsonRoute
   '/pdpa': typeof PdpaRoute
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
@@ -795,13 +844,16 @@ export interface FileRoutesById {
   '/internal/login': typeof InternalLoginRoute
   '/pay/$rentalId': typeof PayRentalIdRoute
   '/r/$code': typeof RCodeRoute
+  '/well-known/acp.json': typeof WellKnownAcpDotjsonRoute
   '/well-known/api-catalog': typeof WellKnownApiCatalogRoute
   '/well-known/oauth-authorization-server': typeof WellKnownOauthAuthorizationServerRoute
   '/well-known/oauth-protected-resource': typeof WellKnownOauthProtectedResourceRoute
   '/well-known/openid-configuration': typeof WellKnownOpenidConfigurationRoute
+  '/well-known/ucp': typeof WellKnownUcpRoute
   '/$locale/': typeof LocaleIndexRoute
   '/account/': typeof AccountIndexRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/': typeof ApiIndexRoute
   '/app/': typeof AppIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/$locale/blog/$slug': typeof LocaleBlogSlugRoute
@@ -819,6 +871,7 @@ export interface FileRoutesById {
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/promos/$promoId': typeof AdminPromosPromoIdRoute
   '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
+  '/api/acp/checkout_sessions': typeof ApiAcpCheckout_sessionsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/payment/response': typeof ApiPaymentResponseRoute
   '/api/webhooks/ipay88': typeof ApiWebhooksIpay88Route
@@ -839,6 +892,7 @@ export interface FileRoutesById {
   '/admin/rentals/': typeof AdminRentalsIndexRoute
   '/admin/reports/': typeof AdminReportsIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
+  '/api/v1/': typeof ApiV1IndexRoute
   '/app/customers/': typeof AppCustomersIndexRoute
   '/app/maintenance/': typeof AppMaintenanceIndexRoute
   '/app/rentals/': typeof AppRentalsIndexRoute
@@ -858,6 +912,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/forgot-password'
     | '/login'
+    | '/openapi.json'
     | '/pdpa'
     | '/privacy'
     | '/refund-policy'
@@ -890,13 +945,16 @@ export interface FileRouteTypes {
     | '/internal/login'
     | '/pay/$rentalId'
     | '/r/$code'
+    | '/well-known/acp.json'
     | '/well-known/api-catalog'
     | '/well-known/oauth-authorization-server'
     | '/well-known/oauth-protected-resource'
     | '/well-known/openid-configuration'
+    | '/well-known/ucp'
     | '/$locale/'
     | '/account/'
     | '/admin/'
+    | '/api/'
     | '/app/'
     | '/blog/'
     | '/$locale/blog/$slug'
@@ -914,6 +972,7 @@ export interface FileRouteTypes {
     | '/admin/customers/$customerId'
     | '/admin/promos/$promoId'
     | '/admin/rentals/$rentalId'
+    | '/api/acp/checkout_sessions'
     | '/api/auth/$'
     | '/api/payment/response'
     | '/api/webhooks/ipay88'
@@ -934,6 +993,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/'
     | '/admin/reports/'
     | '/admin/settings/'
+    | '/api/v1/'
     | '/app/customers/'
     | '/app/maintenance/'
     | '/app/rentals/'
@@ -947,6 +1007,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/forgot-password'
     | '/login'
+    | '/openapi.json'
     | '/pdpa'
     | '/privacy'
     | '/refund-policy'
@@ -979,13 +1040,16 @@ export interface FileRouteTypes {
     | '/internal/login'
     | '/pay/$rentalId'
     | '/r/$code'
+    | '/well-known/acp.json'
     | '/well-known/api-catalog'
     | '/well-known/oauth-authorization-server'
     | '/well-known/oauth-protected-resource'
     | '/well-known/openid-configuration'
+    | '/well-known/ucp'
     | '/$locale'
     | '/account'
     | '/admin'
+    | '/api'
     | '/app'
     | '/blog'
     | '/$locale/blog/$slug'
@@ -1003,6 +1067,7 @@ export interface FileRouteTypes {
     | '/admin/customers/$customerId'
     | '/admin/promos/$promoId'
     | '/admin/rentals/$rentalId'
+    | '/api/acp/checkout_sessions'
     | '/api/auth/$'
     | '/api/payment/response'
     | '/api/webhooks/ipay88'
@@ -1023,6 +1088,7 @@ export interface FileRouteTypes {
     | '/admin/rentals'
     | '/admin/reports'
     | '/admin/settings'
+    | '/api/v1'
     | '/app/customers'
     | '/app/maintenance'
     | '/app/rentals'
@@ -1040,6 +1106,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/forgot-password'
     | '/login'
+    | '/openapi.json'
     | '/pdpa'
     | '/privacy'
     | '/refund-policy'
@@ -1072,13 +1139,16 @@ export interface FileRouteTypes {
     | '/internal/login'
     | '/pay/$rentalId'
     | '/r/$code'
+    | '/well-known/acp.json'
     | '/well-known/api-catalog'
     | '/well-known/oauth-authorization-server'
     | '/well-known/oauth-protected-resource'
     | '/well-known/openid-configuration'
+    | '/well-known/ucp'
     | '/$locale/'
     | '/account/'
     | '/admin/'
+    | '/api/'
     | '/app/'
     | '/blog/'
     | '/$locale/blog/$slug'
@@ -1096,6 +1166,7 @@ export interface FileRouteTypes {
     | '/admin/customers/$customerId'
     | '/admin/promos/$promoId'
     | '/admin/rentals/$rentalId'
+    | '/api/acp/checkout_sessions'
     | '/api/auth/$'
     | '/api/payment/response'
     | '/api/webhooks/ipay88'
@@ -1116,6 +1187,7 @@ export interface FileRouteTypes {
     | '/admin/rentals/'
     | '/admin/reports/'
     | '/admin/settings/'
+    | '/api/v1/'
     | '/app/customers/'
     | '/app/maintenance/'
     | '/app/rentals/'
@@ -1134,6 +1206,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  OpenapiDotjsonRoute: typeof OpenapiDotjsonRoute
   PdpaRoute: typeof PdpaRoute
   PrivacyRoute: typeof PrivacyRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
@@ -1152,11 +1225,15 @@ export interface RootRouteChildren {
   InternalLoginRoute: typeof InternalLoginRoute
   PayRentalIdRoute: typeof PayRentalIdRoute
   RCodeRoute: typeof RCodeRoute
+  WellKnownAcpDotjsonRoute: typeof WellKnownAcpDotjsonRoute
   WellKnownApiCatalogRoute: typeof WellKnownApiCatalogRoute
   WellKnownOauthAuthorizationServerRoute: typeof WellKnownOauthAuthorizationServerRoute
   WellKnownOauthProtectedResourceRoute: typeof WellKnownOauthProtectedResourceRoute
   WellKnownOpenidConfigurationRoute: typeof WellKnownOpenidConfigurationRoute
+  WellKnownUcpRoute: typeof WellKnownUcpRoute
+  ApiIndexRoute: typeof ApiIndexRoute
   BlogIndexRoute: typeof BlogIndexRoute
+  ApiAcpCheckout_sessionsRoute: typeof ApiAcpCheckout_sessionsRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiPaymentResponseRoute: typeof ApiPaymentResponseRoute
   ApiWebhooksIpay88Route: typeof ApiWebhooksIpay88Route
@@ -1165,6 +1242,7 @@ export interface RootRouteChildren {
   InternalInviteTokenRoute: typeof InternalInviteTokenRoute
   WellKnownAgentSkillsIndexDotjsonRoute: typeof WellKnownAgentSkillsIndexDotjsonRoute
   WellKnownMcpServerCardDotjsonRoute: typeof WellKnownMcpServerCardDotjsonRoute
+  ApiV1IndexRoute: typeof ApiV1IndexRoute
   ApiDocumentsAgreementRentalIdRoute: typeof ApiDocumentsAgreementRentalIdRoute
   ApiDocumentsInvoiceRentalIdRoute: typeof ApiDocumentsInvoiceRentalIdRoute
 }
@@ -1218,6 +1296,13 @@ declare module '@tanstack/react-router' {
       path: '/pdpa'
       fullPath: '/pdpa'
       preLoaderRoute: typeof PdpaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/openapi.json': {
+      id: '/openapi.json'
+      path: '/openapi.json'
+      fullPath: '/openapi.json'
+      preLoaderRoute: typeof OpenapiDotjsonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -1290,6 +1375,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/': {
+      id: '/api/'
+      path: '/api'
+      fullPath: '/api/'
+      preLoaderRoute: typeof ApiIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/': {
       id: '/admin/'
       path: '/'
@@ -1310,6 +1402,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/$locale/'
       preLoaderRoute: typeof LocaleIndexRouteImport
       parentRoute: typeof LocaleRouteRoute
+    }
+    '/well-known/ucp': {
+      id: '/well-known/ucp'
+      path: '/well-known/ucp'
+      fullPath: '/well-known/ucp'
+      preLoaderRoute: typeof WellKnownUcpRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/well-known/openid-configuration': {
       id: '/well-known/openid-configuration'
@@ -1337,6 +1436,13 @@ declare module '@tanstack/react-router' {
       path: '/well-known/api-catalog'
       fullPath: '/well-known/api-catalog'
       preLoaderRoute: typeof WellKnownApiCatalogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/well-known/acp.json': {
+      id: '/well-known/acp.json'
+      path: '/well-known/acp.json'
+      fullPath: '/well-known/acp.json'
+      preLoaderRoute: typeof WellKnownAcpDotjsonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/r/$code': {
@@ -1535,6 +1641,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCustomersIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/v1/': {
+      id: '/api/v1/'
+      path: '/api/v1'
+      fullPath: '/api/v1/'
+      preLoaderRoute: typeof ApiV1IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/settings/': {
       id: '/admin/settings/'
       path: '/settings'
@@ -1673,6 +1786,13 @@ declare module '@tanstack/react-router' {
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/acp/checkout_sessions': {
+      id: '/api/acp/checkout_sessions'
+      path: '/api/acp/checkout_sessions'
+      fullPath: '/api/acp/checkout_sessions'
+      preLoaderRoute: typeof ApiAcpCheckout_sessionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/rentals/$rentalId': {
@@ -1955,6 +2075,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  OpenapiDotjsonRoute: OpenapiDotjsonRoute,
   PdpaRoute: PdpaRoute,
   PrivacyRoute: PrivacyRoute,
   RefundPolicyRoute: RefundPolicyRoute,
@@ -1973,12 +2094,16 @@ const rootRouteChildren: RootRouteChildren = {
   InternalLoginRoute: InternalLoginRoute,
   PayRentalIdRoute: PayRentalIdRoute,
   RCodeRoute: RCodeRoute,
+  WellKnownAcpDotjsonRoute: WellKnownAcpDotjsonRoute,
   WellKnownApiCatalogRoute: WellKnownApiCatalogRoute,
   WellKnownOauthAuthorizationServerRoute:
     WellKnownOauthAuthorizationServerRoute,
   WellKnownOauthProtectedResourceRoute: WellKnownOauthProtectedResourceRoute,
   WellKnownOpenidConfigurationRoute: WellKnownOpenidConfigurationRoute,
+  WellKnownUcpRoute: WellKnownUcpRoute,
+  ApiIndexRoute: ApiIndexRoute,
   BlogIndexRoute: BlogIndexRoute,
+  ApiAcpCheckout_sessionsRoute: ApiAcpCheckout_sessionsRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiPaymentResponseRoute: ApiPaymentResponseRoute,
   ApiWebhooksIpay88Route: ApiWebhooksIpay88Route,
@@ -1987,6 +2112,7 @@ const rootRouteChildren: RootRouteChildren = {
   InternalInviteTokenRoute: InternalInviteTokenRoute,
   WellKnownAgentSkillsIndexDotjsonRoute: WellKnownAgentSkillsIndexDotjsonRoute,
   WellKnownMcpServerCardDotjsonRoute: WellKnownMcpServerCardDotjsonRoute,
+  ApiV1IndexRoute: ApiV1IndexRoute,
   ApiDocumentsAgreementRentalIdRoute: ApiDocumentsAgreementRentalIdRoute,
   ApiDocumentsInvoiceRentalIdRoute: ApiDocumentsInvoiceRentalIdRoute,
 }

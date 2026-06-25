@@ -1,0 +1,21 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schemas/server-card/v1",
+  "serverInfo": {
+    "name": "XQCar Langkawi",
+    "version": "1.0.0"
+  },
+  "transport": {
+    "type": "streamable-http",
+    "endpoint": "https://carxq.com/api/mcp"
+  },
+  "capabilities": {
+    "tools": true,
+    "resources": true,
+    "prompts": false
+  },
+  "documentation": "https://carxq.com/llms.txt",
+  "authentication": {
+    "type": "oauth2",
+    "protectedResourceMetadata": "https://carxq.com/.well-known/oauth-protected-resource"
+  }
+}

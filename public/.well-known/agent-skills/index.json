@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  "skills": [
+    {
+      "name": "book-langkawi-car",
+      "type": "skill-md",
+      "description": "Book a car rental in Langkawi via XQCar — dates, fleet, pickup, and checkout.",
+      "url": "https://carxq.com/.well-known/agent-skills/book-langkawi-car.md",
+      "digest": "sha256:116ab3dd42538888028fca095ee9370debb1a93f61aba0d6ad5536a048f540cf"
+    },
+    {
+      "name": "langkawi-driving-guides",
+      "type": "skill-md",
+      "description": "Langkawi driving guides — pickup, routes, parking, fuel, and island know-how.",
+      "url": "https://carxq.com/.well-known/agent-skills/langkawi-driving-guides.md",
+      "digest": "sha256:6a29715174431bb3d3075325a8f77dfa93523420a236cd5b8358df6dd08237b1"
+    }
+  ]
+}

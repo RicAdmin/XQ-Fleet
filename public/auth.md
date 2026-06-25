@@ -8,7 +8,7 @@ This document is for AI agents and automated clients that need to discover how t
 
 ## Resource server
 
-- **Resource identifier:** `https://carxq.com`
+- **Resource identifier:** `https://carxq.com/`
 - **Protected resource metadata:** [/.well-known/oauth-protected-resource](https://carxq.com/.well-known/oauth-protected-resource)
 
 ## Authorization server
@@ -16,6 +16,7 @@ This document is for AI agents and automated clients that need to discover how t
 - **Issuer:** `https://carxq.com/api/auth`
 - **OAuth metadata:** [/.well-known/oauth-authorization-server](https://carxq.com/.well-known/oauth-authorization-server)
 - **OpenID Connect:** [/.well-known/openid-configuration](https://carxq.com/.well-known/openid-configuration)
+- **Registration:** `https://carxq.com/auth.md` (this document)
 
 ## Registration
 
@@ -47,7 +48,7 @@ XQCar uses session-based authentication for the public booking site. Agents shou
 
 ## Revocation
 
-Session revocation: `POST /api/auth/sign-out`
+Session revocation: `POST https://carxq.com/api/auth/sign-out`
 
 For API token revocation, contact hello@carxq.my.
 
