@@ -45,6 +45,7 @@
   color: var(--ink);
   background-color: var(--canvas);
   -webkit-font-smoothing: antialiased;
+  padding-block: 10px;
 }
 
 
@@ -323,9 +324,19 @@ img { display: block; max-width: 100%; }
   background-position: center 38%;
   position: relative;
 }
+.hero .stage .hero-stage-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 38%;
+  z-index: 0;
+}
 .hero .stage::before {
   content: "";
   position: absolute; inset: 0;
+  z-index: 1;
   background:
     linear-gradient(180deg, rgba(14,18,20,.72) 0%, rgba(14,18,20,.28) 42%, rgba(14,18,20,.62) 100%),
     linear-gradient(100deg, rgba(14,18,20,.78) 0%, rgba(14,18,20,.35) 48%, rgba(14,18,20,0) 68%);

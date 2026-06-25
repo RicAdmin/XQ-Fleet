@@ -2,9 +2,10 @@ import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 
 import { CxqLandingPage } from '#/components/landing/CxqLandingPage'
+import { HERO_BG } from '#/components/landing/cxq-landing-data'
 import { HomeStructuredData } from '#/components/seo/HomeStructuredData'
 import type { Locale } from '#/i18n/locales'
-import { getPublicCars, getPublicSeasonCalendar, type PublicCarRow } from '#/lib/portal-functions'
+import { getPublicCars, type PublicCarRow } from '#/lib/portal-functions'
 import type { SeasonRange } from '#/lib/pricing-logic'
 import { homeSeoMeta } from '#/lib/seo-locale-meta'
 
@@ -14,10 +15,24 @@ const indexSearchSchema = z.object({
 
 export const Route = createFileRoute('/$locale/')({
   validateSearch: indexSearchSchema,
-  head: ({ params }) => homeSeoMeta(params.locale as Locale),
+  head: ({ params }) => {
+    const seo = homeSeoMeta(params.locale as Locale)
+    return {
+      ...seo,
+      links: [
+        ...(seo.links ?? []),
+        {
+          rel: 'preload',
+          as: 'image',
+          href: HERO_BG,
+          fetchPriority: 'high',
+        },
+      ],
+    }
+  },
   beforeLoad: async () => {
-    const [cars, seasonCalendar] = await Promise.all([getPublicCars(), getPublicSeasonCalendar()])
-    return { cars, seasonCalendar }
+    const cars = await getPublicCars()
+    return { cars, seasonCalendar: [] as SeasonRange[] }
   },
   component: LandingPage,
 })

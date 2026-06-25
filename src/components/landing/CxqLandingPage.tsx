@@ -1,7 +1,7 @@
 import './cxq-landing-scoped.css'
 import './cxq-landing-overrides.css'
 
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense, type ReactNode } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import {
   ArrowRight,
@@ -38,7 +38,6 @@ import { LocaleLink } from '#/components/i18n/LocaleLink'
 import { PaymentMethodIcons } from '#/components/landing/payment-method-icons'
 import { LoadingSpinner } from '#/components/ui/LoadingSpinner'
 import {
-  CarDetailDialog,
   cloneBooking,
   defaultBooking,
   hasTripDates,
@@ -48,6 +47,7 @@ import {
 } from '#/components/landing/CarDetailDialog'
 
 import { LuggageFitModal } from '#/components/LuggageFitModal'
+import { LazySection } from '#/components/ui/LazySection'
 import { authClient } from '#/lib/auth-client'
 import { addCalendarDays, earliestPickupDate, formatTripDuration, isAllowedReturnDate, startOfLocalDay, toLocalYmd } from '#/lib/booking-datetime'
 import { displayDailyRateSen, usesSeasonDisplayPricing } from '#/lib/car-display-price'
@@ -56,28 +56,34 @@ import { loadTripSearch, saveTripSearch } from '#/lib/trip-search-storage'
 import { catalogFitInput } from '#/lib/car-catalog'
 import { carLuggageFit } from '#/lib/fleet-luggage-fit'
 import { isHondaNBox } from '#/lib/fleet-oku'
-import { filterPublicCars } from '#/lib/portal-functions'
+import { filterPublicCars, getPublicSeasonCalendar } from '#/lib/portal-functions'
 import type { PublicCarRow } from '#/lib/portal-functions'
 import type { SeasonRange } from '#/lib/pricing-logic'
 
 import {
   HERO_BG,
+  HERO_BG_LEGACY,
   FOOTER_CTA_FLEET_IMAGE,
   FOOTER_CTA_SCENERY_IMAGE,
   HOTELS,
   PICK_TIMES,
   RENTAL_LOCATIONS,
 } from './cxq-landing-data'
-import { reelsForLocale, type Reel } from '#/lib/reels-config'
+import type { Reel } from '#/lib/reels-config'
 import {
   TESTIMONIAL_HEADLINE_SCORE,
   TESTIMONIAL_SOURCE,
   testimonialInitials,
   testimonialsForLocale,
 } from '#/lib/testimonials-config'
+import type { Locale } from '#/i18n/locales'
 import { usePublicI18n } from '#/i18n/usePublicI18n'
 import { useLandingContent } from '#/i18n/useLandingContent'
 import type { TranslateFn } from '#/i18n/translate'
+
+const CarDetailDialogLazy = lazy(() =>
+  import('#/components/landing/CarDetailDialog').then((m) => ({ default: m.CarDetailDialog })),
+)
 
 function formatMYR(sen: number) {
   return `RM ${Math.round(sen / 100).toLocaleString()}`
@@ -162,11 +168,30 @@ export function CxqLandingPage({
   const { data: session, isPending: sessionPending } = authClient.useSession()
   const user = session?.user
   const { t, locale } = usePublicI18n()
-  const reels = useMemo(() => reelsForLocale(locale), [locale])
+  const [seasonCalendar, setSeasonCalendar] = useState<SeasonRange[]>(initialSeasonCalendar)
+  const [reelCatalog, setReelCatalog] = useState<Reel[]>([])
+
+  useEffect(() => {
+    if (initialSeasonCalendar.length > 0) {
+      setSeasonCalendar(initialSeasonCalendar)
+      return
+    }
+    void getPublicSeasonCalendar()
+      .then(setSeasonCalendar)
+      .catch(() => {})
+  }, [initialSeasonCalendar])
+
+  useEffect(() => {
+    if (!activeReel || reelCatalog.length > 0) return
+    void import('#/lib/reels-config').then(({ reelsForLocale }) => {
+      setReelCatalog(reelsForLocale(locale))
+    })
+  }, [activeReel, locale, reelCatalog.length])
+
   const activeReelLocalized = useMemo(() => {
     if (!activeReel) return null
-    return reels.find((r) => r.id === activeReel.id) ?? activeReel
-  }, [activeReel, reels])
+    return reelCatalog.find((r) => r.id === activeReel.id) ?? activeReel
+  }, [activeReel, reelCatalog])
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
@@ -377,48 +402,54 @@ export function CxqLandingPage({
           onOpenCar={tryOpenCar}
           pickDate={tripDatesSelected ? trip.pickDate : null}
           retDate={tripDatesSelected ? trip.retDate : null}
-          seasonCalendar={initialSeasonCalendar}
+          seasonCalendar={seasonCalendar}
         />
-        <CarCategoriesSection
-          cars={cars}
-          fleetLocked={!canBrowseFleet}
-          onRequireTrip={requireBookingSearch}
-          onOpenCar={tryOpenCar}
-        />
-        <CitiesSection />
-        <PromosSection />
-        <WhyChooseUs />
-        <StepByStep />
-        <TipsSection />
-        <AttractionsSection />
-        <EssentialLocations />
-        <FAQSection />
-        <ReelsSection reels={reels} onOpenReel={setActiveReel} />
-        <TestimonialsSection />
-        <CruiseBanner />
-        <FooterCta onSearch={() => scrollToAnchor('booking-dock')} onBookMini={bookMini} />
-        <SiteFooter
-          onScrollBooking={() => scrollToAnchor('booking-dock')}
-          onScrollFleet={() => scrollToAnchor('top-picks')}
-        />
+        <LazySection minHeight={720}>
+          <CarCategoriesSection
+            cars={cars}
+            fleetLocked={!canBrowseFleet}
+            onRequireTrip={requireBookingSearch}
+            onOpenCar={tryOpenCar}
+          />
+          <CitiesSection />
+          <PromosSection />
+          <WhyChooseUs />
+          <StepByStep />
+          <TipsSection />
+          <AttractionsSection />
+          <EssentialLocations />
+          <FAQSection />
+        </LazySection>
+        <LazySection minHeight={420}>
+          <ReelsSection locale={locale} onOpenReel={setActiveReel} />
+          <TestimonialsSection />
+          <CruiseBanner />
+          <FooterCta onSearch={() => scrollToAnchor('booking-dock')} onBookMini={bookMini} />
+          <SiteFooter
+            onScrollBooking={() => scrollToAnchor('booking-dock')}
+            onScrollFleet={() => scrollToAnchor('top-picks')}
+          />
+        </LazySection>
 
         {openCar && (
-          <CarDetailDialog
-            car={openCar}
-            fleet={cars}
-            booking={trip}
-            nights={nightsBetween(trip.pickDate, trip.retDate)}
-            checkoutReady={canBrowseFleet}
-            seasonCalendar={initialSeasonCalendar}
-            onClose={() => setOpenCar(null)}
-            onBeginCheckout={goToCheckout}
-            onSelectCar={setOpenCar}
-          />
+          <Suspense fallback={null}>
+            <CarDetailDialogLazy
+              car={openCar}
+              fleet={cars}
+              booking={trip}
+              nights={nightsBetween(trip.pickDate, trip.retDate)}
+              checkoutReady={canBrowseFleet}
+              seasonCalendar={seasonCalendar}
+              onClose={() => setOpenCar(null)}
+              onBeginCheckout={goToCheckout}
+              onSelectCar={setOpenCar}
+            />
+          </Suspense>
         )}
         {activeReelLocalized && (
           <ReelLightbox
             reel={activeReelLocalized}
-            reels={reels}
+            reels={reelCatalog.length > 0 ? reelCatalog : [activeReelLocalized]}
             onClose={() => setActiveReel(null)}
             onChange={setActiveReel}
           />
@@ -756,7 +787,19 @@ function Hero() {
   const { t } = usePublicI18n()
   return (
     <section className="hero layout-bleed" data-screen-label="Hero">
-      <div className="stage" style={{ backgroundImage: `url('${encodeURI(HERO_BG)}')` }}>
+      <div className="stage">
+        <picture>
+          <source srcSet={HERO_BG} type="image/jpeg" />
+          <img
+            className="hero-stage-img"
+            src={HERO_BG_LEGACY}
+            alt=""
+            fetchPriority="high"
+            decoding="async"
+            width={1920}
+            height={1080}
+          />
+        </picture>
         <div className="hero-title-block">
           <span className="eyebrow hero-eyebrow-full">{t('hero.eyebrowFull')}</span>
           <span className="eyebrow hero-eyebrow-short">{t('hero.eyebrowShort')}</span>
@@ -2311,9 +2354,21 @@ function ReelCard({ reel, onOpenReel }: { reel: Reel; onOpenReel: (r: Reel) => v
   )
 }
 
-function ReelsSection({ reels, onOpenReel }: { reels: Reel[]; onOpenReel: (r: Reel) => void }) {
+function ReelsSection({ locale, onOpenReel }: { locale: Locale; onOpenReel: (r: Reel) => void }) {
   const { t } = usePublicI18n()
+  const [reels, setReels] = useState<Reel[]>([])
   const railRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    void import('#/lib/reels-config').then(({ reelsForLocale }) => {
+      if (!cancelled) setReels(reelsForLocale(locale))
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [locale])
+
   const scroll = (dir: number) => {
     const el = railRef.current
     if (!el) return
