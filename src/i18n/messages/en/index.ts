@@ -44,10 +44,11 @@ export const enFooter = {
   contact: 'Contact',
   roadside: '24/7 roadside · +60 11 3521 5576',
   weAccept: 'We accept',
-  copyright: '© {year} XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - V2.0',
+  copyright: '© 2026 XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - Release.260626.01',
   instagram: 'Instagram',
-  twitter: 'Twitter',
   facebook: 'Facebook',
+  tiktok: 'TikTok',
+  xiaohongshu: 'Xiaohongshu (小红书)',
 } as const
 
 export const enHero = {

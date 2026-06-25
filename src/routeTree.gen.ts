@@ -29,6 +29,10 @@ import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
 import { Route as LocaleIndexRouteImport } from './routes/$locale/index'
+import { Route as WellKnownOpenidConfigurationRouteImport } from './routes/well-known/openid-configuration'
+import { Route as WellKnownOauthProtectedResourceRouteImport } from './routes/well-known/oauth-protected-resource'
+import { Route as WellKnownOauthAuthorizationServerRouteImport } from './routes/well-known/oauth-authorization-server'
+import { Route as WellKnownApiCatalogRouteImport } from './routes/well-known/api-catalog'
 import { Route as RCodeRouteImport } from './routes/r/$code'
 import { Route as PayRentalIdRouteImport } from './routes/pay/$rentalId'
 import { Route as InternalLoginRouteImport } from './routes/internal/login'
@@ -39,6 +43,7 @@ import { Route as GuidesKnowHowRouteImport } from './routes/guides/know-how'
 import { Route as CheckoutCarIdRouteImport } from './routes/checkout/$carId'
 import { Route as BookCarIdRouteImport } from './routes/book/$carId'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as AccountRentalsRouteImport } from './routes/account/rentals'
 import { Route as AccountProfileRouteImport } from './routes/account/profile'
 import { Route as AccountNotificationsRouteImport } from './routes/account/notifications'
@@ -66,6 +71,8 @@ import { Route as AdminCarsIndexRouteImport } from './routes/admin/cars/index'
 import { Route as AdminAffiliatesIndexRouteImport } from './routes/admin/affiliates/index'
 import { Route as AccountBookingsIndexRouteImport } from './routes/account/bookings/index'
 import { Route as LocaleBlogIndexRouteImport } from './routes/$locale/blog/index'
+import { Route as WellKnownMcpServerCardDotjsonRouteImport } from './routes/well-known/mcp/server-card[.]json'
+import { Route as WellKnownAgentSkillsIndexDotjsonRouteImport } from './routes/well-known/agent-skills/index[.]json'
 import { Route as InternalInviteTokenRouteImport } from './routes/internal/invite/$token'
 import { Route as CheckoutConfirmedRentalIdRouteImport } from './routes/checkout/confirmed/$rentalId'
 import { Route as BookingConfirmedRentalIdRouteImport } from './routes/booking/confirmed/$rentalId'
@@ -194,6 +201,29 @@ const LocaleIndexRoute = LocaleIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LocaleRouteRoute,
 } as any)
+const WellKnownOpenidConfigurationRoute =
+  WellKnownOpenidConfigurationRouteImport.update({
+    id: '/well-known/openid-configuration',
+    path: '/well-known/openid-configuration',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const WellKnownOauthProtectedResourceRoute =
+  WellKnownOauthProtectedResourceRouteImport.update({
+    id: '/well-known/oauth-protected-resource',
+    path: '/well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const WellKnownOauthAuthorizationServerRoute =
+  WellKnownOauthAuthorizationServerRouteImport.update({
+    id: '/well-known/oauth-authorization-server',
+    path: '/well-known/oauth-authorization-server',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const WellKnownApiCatalogRoute = WellKnownApiCatalogRouteImport.update({
+  id: '/well-known/api-catalog',
+  path: '/well-known/api-catalog',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RCodeRoute = RCodeRouteImport.update({
   id: '/r/$code',
   path: '/r/$code',
@@ -242,6 +272,11 @@ const BookCarIdRoute = BookCarIdRouteImport.update({
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/blog/$slug',
   path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountRentalsRoute = AccountRentalsRouteImport.update({
@@ -379,6 +414,18 @@ const LocaleBlogIndexRoute = LocaleBlogIndexRouteImport.update({
   path: '/blog/',
   getParentRoute: () => LocaleRouteRoute,
 } as any)
+const WellKnownMcpServerCardDotjsonRoute =
+  WellKnownMcpServerCardDotjsonRouteImport.update({
+    id: '/well-known/mcp/server-card.json',
+    path: '/well-known/mcp/server-card.json',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const WellKnownAgentSkillsIndexDotjsonRoute =
+  WellKnownAgentSkillsIndexDotjsonRouteImport.update({
+    id: '/well-known/agent-skills/index.json',
+    path: '/well-known/agent-skills/index.json',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const InternalInviteTokenRoute = InternalInviteTokenRouteImport.update({
   id: '/internal/invite/$token',
   path: '/internal/invite/$token',
@@ -554,6 +601,7 @@ export interface FileRoutesByFullPath {
   '/account/notifications': typeof AccountNotificationsRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/rentals': typeof AccountRentalsRoute
+  '/api/health': typeof ApiHealthRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/book/$carId': typeof BookCarIdRoute
   '/checkout/$carId': typeof CheckoutCarIdRoute
@@ -564,6 +612,10 @@ export interface FileRoutesByFullPath {
   '/internal/login': typeof InternalLoginRoute
   '/pay/$rentalId': typeof PayRentalIdRoute
   '/r/$code': typeof RCodeRoute
+  '/well-known/api-catalog': typeof WellKnownApiCatalogRoute
+  '/well-known/oauth-authorization-server': typeof WellKnownOauthAuthorizationServerRoute
+  '/well-known/oauth-protected-resource': typeof WellKnownOauthProtectedResourceRoute
+  '/well-known/openid-configuration': typeof WellKnownOpenidConfigurationRoute
   '/$locale/': typeof LocaleIndexRoute
   '/account/': typeof AccountIndexRoute
   '/admin/': typeof AdminIndexRoute
@@ -592,6 +644,8 @@ export interface FileRoutesByFullPath {
   '/booking/confirmed/$rentalId': typeof BookingConfirmedRentalIdRoute
   '/checkout/confirmed/$rentalId': typeof CheckoutConfirmedRentalIdRoute
   '/internal/invite/$token': typeof InternalInviteTokenRoute
+  '/well-known/agent-skills/index.json': typeof WellKnownAgentSkillsIndexDotjsonRoute
+  '/well-known/mcp/server-card.json': typeof WellKnownMcpServerCardDotjsonRoute
   '/$locale/blog/': typeof LocaleBlogIndexRoute
   '/account/bookings/': typeof AccountBookingsIndexRoute
   '/admin/affiliates/': typeof AdminAffiliatesIndexRoute
@@ -636,6 +690,7 @@ export interface FileRoutesByTo {
   '/account/notifications': typeof AccountNotificationsRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/rentals': typeof AccountRentalsRoute
+  '/api/health': typeof ApiHealthRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/book/$carId': typeof BookCarIdRoute
   '/checkout/$carId': typeof CheckoutCarIdRoute
@@ -646,6 +701,10 @@ export interface FileRoutesByTo {
   '/internal/login': typeof InternalLoginRoute
   '/pay/$rentalId': typeof PayRentalIdRoute
   '/r/$code': typeof RCodeRoute
+  '/well-known/api-catalog': typeof WellKnownApiCatalogRoute
+  '/well-known/oauth-authorization-server': typeof WellKnownOauthAuthorizationServerRoute
+  '/well-known/oauth-protected-resource': typeof WellKnownOauthProtectedResourceRoute
+  '/well-known/openid-configuration': typeof WellKnownOpenidConfigurationRoute
   '/$locale': typeof LocaleIndexRoute
   '/account': typeof AccountIndexRoute
   '/admin': typeof AdminIndexRoute
@@ -674,6 +733,8 @@ export interface FileRoutesByTo {
   '/booking/confirmed/$rentalId': typeof BookingConfirmedRentalIdRoute
   '/checkout/confirmed/$rentalId': typeof CheckoutConfirmedRentalIdRoute
   '/internal/invite/$token': typeof InternalInviteTokenRoute
+  '/well-known/agent-skills/index.json': typeof WellKnownAgentSkillsIndexDotjsonRoute
+  '/well-known/mcp/server-card.json': typeof WellKnownMcpServerCardDotjsonRoute
   '/$locale/blog': typeof LocaleBlogIndexRoute
   '/account/bookings': typeof AccountBookingsIndexRoute
   '/admin/affiliates': typeof AdminAffiliatesIndexRoute
@@ -723,6 +784,7 @@ export interface FileRoutesById {
   '/account/notifications': typeof AccountNotificationsRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/rentals': typeof AccountRentalsRoute
+  '/api/health': typeof ApiHealthRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/book/$carId': typeof BookCarIdRoute
   '/checkout/$carId': typeof CheckoutCarIdRoute
@@ -733,6 +795,10 @@ export interface FileRoutesById {
   '/internal/login': typeof InternalLoginRoute
   '/pay/$rentalId': typeof PayRentalIdRoute
   '/r/$code': typeof RCodeRoute
+  '/well-known/api-catalog': typeof WellKnownApiCatalogRoute
+  '/well-known/oauth-authorization-server': typeof WellKnownOauthAuthorizationServerRoute
+  '/well-known/oauth-protected-resource': typeof WellKnownOauthProtectedResourceRoute
+  '/well-known/openid-configuration': typeof WellKnownOpenidConfigurationRoute
   '/$locale/': typeof LocaleIndexRoute
   '/account/': typeof AccountIndexRoute
   '/admin/': typeof AdminIndexRoute
@@ -761,6 +827,8 @@ export interface FileRoutesById {
   '/booking/confirmed/$rentalId': typeof BookingConfirmedRentalIdRoute
   '/checkout/confirmed/$rentalId': typeof CheckoutConfirmedRentalIdRoute
   '/internal/invite/$token': typeof InternalInviteTokenRoute
+  '/well-known/agent-skills/index.json': typeof WellKnownAgentSkillsIndexDotjsonRoute
+  '/well-known/mcp/server-card.json': typeof WellKnownMcpServerCardDotjsonRoute
   '/$locale/blog/': typeof LocaleBlogIndexRoute
   '/account/bookings/': typeof AccountBookingsIndexRoute
   '/admin/affiliates/': typeof AdminAffiliatesIndexRoute
@@ -811,6 +879,7 @@ export interface FileRouteTypes {
     | '/account/notifications'
     | '/account/profile'
     | '/account/rentals'
+    | '/api/health'
     | '/blog/$slug'
     | '/book/$carId'
     | '/checkout/$carId'
@@ -821,6 +890,10 @@ export interface FileRouteTypes {
     | '/internal/login'
     | '/pay/$rentalId'
     | '/r/$code'
+    | '/well-known/api-catalog'
+    | '/well-known/oauth-authorization-server'
+    | '/well-known/oauth-protected-resource'
+    | '/well-known/openid-configuration'
     | '/$locale/'
     | '/account/'
     | '/admin/'
@@ -849,6 +922,8 @@ export interface FileRouteTypes {
     | '/booking/confirmed/$rentalId'
     | '/checkout/confirmed/$rentalId'
     | '/internal/invite/$token'
+    | '/well-known/agent-skills/index.json'
+    | '/well-known/mcp/server-card.json'
     | '/$locale/blog/'
     | '/account/bookings/'
     | '/admin/affiliates/'
@@ -893,6 +968,7 @@ export interface FileRouteTypes {
     | '/account/notifications'
     | '/account/profile'
     | '/account/rentals'
+    | '/api/health'
     | '/blog/$slug'
     | '/book/$carId'
     | '/checkout/$carId'
@@ -903,6 +979,10 @@ export interface FileRouteTypes {
     | '/internal/login'
     | '/pay/$rentalId'
     | '/r/$code'
+    | '/well-known/api-catalog'
+    | '/well-known/oauth-authorization-server'
+    | '/well-known/oauth-protected-resource'
+    | '/well-known/openid-configuration'
     | '/$locale'
     | '/account'
     | '/admin'
@@ -931,6 +1011,8 @@ export interface FileRouteTypes {
     | '/booking/confirmed/$rentalId'
     | '/checkout/confirmed/$rentalId'
     | '/internal/invite/$token'
+    | '/well-known/agent-skills/index.json'
+    | '/well-known/mcp/server-card.json'
     | '/$locale/blog'
     | '/account/bookings'
     | '/admin/affiliates'
@@ -979,6 +1061,7 @@ export interface FileRouteTypes {
     | '/account/notifications'
     | '/account/profile'
     | '/account/rentals'
+    | '/api/health'
     | '/blog/$slug'
     | '/book/$carId'
     | '/checkout/$carId'
@@ -989,6 +1072,10 @@ export interface FileRouteTypes {
     | '/internal/login'
     | '/pay/$rentalId'
     | '/r/$code'
+    | '/well-known/api-catalog'
+    | '/well-known/oauth-authorization-server'
+    | '/well-known/oauth-protected-resource'
+    | '/well-known/openid-configuration'
     | '/$locale/'
     | '/account/'
     | '/admin/'
@@ -1017,6 +1104,8 @@ export interface FileRouteTypes {
     | '/booking/confirmed/$rentalId'
     | '/checkout/confirmed/$rentalId'
     | '/internal/invite/$token'
+    | '/well-known/agent-skills/index.json'
+    | '/well-known/mcp/server-card.json'
     | '/$locale/blog/'
     | '/account/bookings/'
     | '/admin/affiliates/'
@@ -1052,6 +1141,7 @@ export interface RootRouteChildren {
   RentalAgreementRoute: typeof RentalAgreementRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   TermsRoute: typeof TermsRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   BlogSlugRoute: typeof BlogSlugRoute
   BookCarIdRoute: typeof BookCarIdRoute
   CheckoutCarIdRoute: typeof CheckoutCarIdRoute
@@ -1062,6 +1152,10 @@ export interface RootRouteChildren {
   InternalLoginRoute: typeof InternalLoginRoute
   PayRentalIdRoute: typeof PayRentalIdRoute
   RCodeRoute: typeof RCodeRoute
+  WellKnownApiCatalogRoute: typeof WellKnownApiCatalogRoute
+  WellKnownOauthAuthorizationServerRoute: typeof WellKnownOauthAuthorizationServerRoute
+  WellKnownOauthProtectedResourceRoute: typeof WellKnownOauthProtectedResourceRoute
+  WellKnownOpenidConfigurationRoute: typeof WellKnownOpenidConfigurationRoute
   BlogIndexRoute: typeof BlogIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiPaymentResponseRoute: typeof ApiPaymentResponseRoute
@@ -1069,6 +1163,8 @@ export interface RootRouteChildren {
   BookingConfirmedRentalIdRoute: typeof BookingConfirmedRentalIdRoute
   CheckoutConfirmedRentalIdRoute: typeof CheckoutConfirmedRentalIdRoute
   InternalInviteTokenRoute: typeof InternalInviteTokenRoute
+  WellKnownAgentSkillsIndexDotjsonRoute: typeof WellKnownAgentSkillsIndexDotjsonRoute
+  WellKnownMcpServerCardDotjsonRoute: typeof WellKnownMcpServerCardDotjsonRoute
   ApiDocumentsAgreementRentalIdRoute: typeof ApiDocumentsAgreementRentalIdRoute
   ApiDocumentsInvoiceRentalIdRoute: typeof ApiDocumentsInvoiceRentalIdRoute
 }
@@ -1215,6 +1311,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LocaleIndexRouteImport
       parentRoute: typeof LocaleRouteRoute
     }
+    '/well-known/openid-configuration': {
+      id: '/well-known/openid-configuration'
+      path: '/well-known/openid-configuration'
+      fullPath: '/well-known/openid-configuration'
+      preLoaderRoute: typeof WellKnownOpenidConfigurationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/well-known/oauth-protected-resource': {
+      id: '/well-known/oauth-protected-resource'
+      path: '/well-known/oauth-protected-resource'
+      fullPath: '/well-known/oauth-protected-resource'
+      preLoaderRoute: typeof WellKnownOauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/well-known/oauth-authorization-server': {
+      id: '/well-known/oauth-authorization-server'
+      path: '/well-known/oauth-authorization-server'
+      fullPath: '/well-known/oauth-authorization-server'
+      preLoaderRoute: typeof WellKnownOauthAuthorizationServerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/well-known/api-catalog': {
+      id: '/well-known/api-catalog'
+      path: '/well-known/api-catalog'
+      fullPath: '/well-known/api-catalog'
+      preLoaderRoute: typeof WellKnownApiCatalogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/r/$code': {
       id: '/r/$code'
       path: '/r/$code'
@@ -1283,6 +1407,13 @@ declare module '@tanstack/react-router' {
       path: '/blog/$slug'
       fullPath: '/blog/$slug'
       preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account/rentals': {
@@ -1473,6 +1604,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/$locale/blog/'
       preLoaderRoute: typeof LocaleBlogIndexRouteImport
       parentRoute: typeof LocaleRouteRoute
+    }
+    '/well-known/mcp/server-card.json': {
+      id: '/well-known/mcp/server-card.json'
+      path: '/well-known/mcp/server-card.json'
+      fullPath: '/well-known/mcp/server-card.json'
+      preLoaderRoute: typeof WellKnownMcpServerCardDotjsonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/well-known/agent-skills/index.json': {
+      id: '/well-known/agent-skills/index.json'
+      path: '/well-known/agent-skills/index.json'
+      fullPath: '/well-known/agent-skills/index.json'
+      preLoaderRoute: typeof WellKnownAgentSkillsIndexDotjsonRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/internal/invite/$token': {
       id: '/internal/invite/$token'
@@ -1817,6 +1962,7 @@ const rootRouteChildren: RootRouteChildren = {
   RentalAgreementRoute: RentalAgreementRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   TermsRoute: TermsRoute,
+  ApiHealthRoute: ApiHealthRoute,
   BlogSlugRoute: BlogSlugRoute,
   BookCarIdRoute: BookCarIdRoute,
   CheckoutCarIdRoute: CheckoutCarIdRoute,
@@ -1827,6 +1973,11 @@ const rootRouteChildren: RootRouteChildren = {
   InternalLoginRoute: InternalLoginRoute,
   PayRentalIdRoute: PayRentalIdRoute,
   RCodeRoute: RCodeRoute,
+  WellKnownApiCatalogRoute: WellKnownApiCatalogRoute,
+  WellKnownOauthAuthorizationServerRoute:
+    WellKnownOauthAuthorizationServerRoute,
+  WellKnownOauthProtectedResourceRoute: WellKnownOauthProtectedResourceRoute,
+  WellKnownOpenidConfigurationRoute: WellKnownOpenidConfigurationRoute,
   BlogIndexRoute: BlogIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiPaymentResponseRoute: ApiPaymentResponseRoute,
@@ -1834,6 +1985,8 @@ const rootRouteChildren: RootRouteChildren = {
   BookingConfirmedRentalIdRoute: BookingConfirmedRentalIdRoute,
   CheckoutConfirmedRentalIdRoute: CheckoutConfirmedRentalIdRoute,
   InternalInviteTokenRoute: InternalInviteTokenRoute,
+  WellKnownAgentSkillsIndexDotjsonRoute: WellKnownAgentSkillsIndexDotjsonRoute,
+  WellKnownMcpServerCardDotjsonRoute: WellKnownMcpServerCardDotjsonRoute,
   ApiDocumentsAgreementRentalIdRoute: ApiDocumentsAgreementRentalIdRoute,
   ApiDocumentsInvoiceRentalIdRoute: ApiDocumentsInvoiceRentalIdRoute,
 }

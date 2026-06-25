@@ -5,6 +5,13 @@
 [build.environment]
   NODE_VERSION = "20"
 
+# Serve /.well-known/* from SSR routes under /well-known/* (TanStack ignores dot-prefixed route files)
+[[redirects]]
+  from = "/.well-known/*"
+  to = "/well-known/:splat"
+  status = 200
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]
@@ -23,3 +30,18 @@
   for = "/image/*"
   [headers.values]
     Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/"
+  [headers.values]
+    Link = "</.well-known/api-catalog>; rel=\"api-catalog\", </.well-known/openid-configuration>; rel=\"openid-configuration\", </.well-known/oauth-protected-resource>; rel=\"oauth-protected-resource\", </llms.txt>; rel=\"describedby\", </auth.md>; rel=\"service-doc\""
+
+[[headers]]
+  for = "/en"
+  [headers.values]
+    Link = "</.well-known/api-catalog>; rel=\"api-catalog\", </.well-known/openid-configuration>; rel=\"openid-configuration\", </.well-known/oauth-protected-resource>; rel=\"oauth-protected-resource\", </llms.txt>; rel=\"describedby\", </auth.md>; rel=\"service-doc\""
+
+[[headers]]
+  for = "/en/"
+  [headers.values]
+    Link = "</.well-known/api-catalog>; rel=\"api-catalog\", </.well-known/openid-configuration>; rel=\"openid-configuration\", </.well-known/oauth-protected-resource>; rel=\"oauth-protected-resource\", </llms.txt>; rel=\"describedby\", </auth.md>; rel=\"service-doc\""

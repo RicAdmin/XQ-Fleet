@@ -36,6 +36,7 @@ import { BrandName } from '#/components/BrandName'
 import { LanguageSwitcher } from '#/components/i18n/LanguageSwitcher'
 import { LocaleLink } from '#/components/i18n/LocaleLink'
 import { PaymentMethodIcons } from '#/components/landing/payment-method-icons'
+import { FooterSocialLinks } from '#/components/landing/footer-social-links'
 import { LoadingSpinner } from '#/components/ui/LoadingSpinner'
 import {
   cloneBooking,
@@ -2704,7 +2705,6 @@ export function SiteFooter({
 }) {
   const { t, href } = usePublicI18n()
   const homePath = href('/')
-  const year = new Date().getFullYear()
 
   return (
     <footer className="site-footer">
@@ -2719,17 +2719,7 @@ export function SiteFooter({
             <p className="tag">{t('footer.tagline2')}</p>
             <p className="tag footer-tagline-signature">{t('footer.signature')}</p>
           </div>
-          <div className="socials">
-            <a href="https://instagram.com" aria-label={t('footer.instagram')}>
-              <Sparkles size={14} />
-            </a>
-            <a href="https://twitter.com" aria-label={t('footer.twitter')}>
-              <ArrowRight size={14} />
-            </a>
-            <a href="https://facebook.com" aria-label={t('footer.facebook')}>
-              <Users size={14} />
-            </a>
-          </div>
+          <FooterSocialLinks />
         </div>
         <div>
           <h5>{t('footer.planTrip')}</h5>
@@ -2821,7 +2811,7 @@ export function SiteFooter({
         />
       </div>
       <div className="bottom">
-        <span>{t('footer.copyright', { year })}</span>
+        <span>{t('footer.copyright')}</span>
         <span>
           <LocaleLink to="/privacy" style={{ marginRight: 18 }}>
             {t('footer.privacy')}

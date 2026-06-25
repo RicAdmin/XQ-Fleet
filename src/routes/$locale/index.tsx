@@ -2,8 +2,15 @@ import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 
 import { CxqLandingPage } from '#/components/landing/CxqLandingPage'
+import { WebMcpTools } from '#/components/landing/WebMcpTools'
 import { HERO_BG, HERO_BG_768 } from '#/components/landing/cxq-landing-data'
 import { HomeStructuredData } from '#/components/seo/HomeStructuredData'
+import {
+  acceptsMarkdown,
+  agentDiscoveryLinkHeader,
+  buildHomepageMarkdown,
+  markdownNegotiationResponse,
+} from '#/lib/agent-discovery'
 import type { Locale } from '#/i18n/locales'
 import { getPublicCars, type PublicCarRow } from '#/lib/portal-functions'
 import type { SeasonRange } from '#/lib/pricing-logic'
@@ -15,6 +22,18 @@ const indexSearchSchema = z.object({
 
 export const Route = createFileRoute('/$locale/')({
   validateSearch: indexSearchSchema,
+  server: {
+    handlers: {
+      GET: async ({ request, next }) => {
+        if (acceptsMarkdown(request)) {
+          return markdownNegotiationResponse(buildHomepageMarkdown(), {
+            Link: agentDiscoveryLinkHeader(),
+          })
+        }
+        return next()
+      },
+    },
+  },
   head: ({ params }) => {
     const seo = homeSeoMeta(params.locale as Locale)
     return {
@@ -54,6 +73,7 @@ function LandingPage() {
   return (
     <>
       <HomeStructuredData />
+      <WebMcpTools />
       <CxqLandingPage
         initialCars={cars}
         initialSeasonCalendar={seasonCalendar}

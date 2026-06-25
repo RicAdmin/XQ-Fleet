@@ -48,10 +48,11 @@ export const zhMessages: EnMessages = {
     contact: '联系',
     roadside: '24/7 道路救援 · +60 11 3521 5576',
     weAccept: '我们接受',
-    copyright: '© {year} XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - V2.0',
+    copyright: '© 2026 XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - Release.260626.01',
     instagram: 'Instagram',
-    twitter: 'Twitter',
     facebook: 'Facebook',
+    tiktok: 'TikTok',
+    xiaohongshu: '小红书',
   },
   hero: {
     eyebrowFull: 'XQ Car · 2015年创立于兰卡威，马来西亚',
