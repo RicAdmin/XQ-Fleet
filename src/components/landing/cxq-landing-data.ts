@@ -1,8 +1,12 @@
 /** Static marketing content ported from xq-car-web (XQ Car landing). */
 
-export const HERO_BG = '/image/hero-langkawi-adventure.jpg'
-/** Legacy PNG fallback (1 MB); prefer HERO_BG JPEG for LCP. */
+export const HERO_BG = '/image/hero-langkawi-adventure-1280.jpg'
+export const HERO_BG_768 = '/image/hero-langkawi-adventure-768.jpg'
+export const HERO_BG_FULL = '/image/hero-langkawi-adventure.jpg'
+/** Legacy PNG fallback (1 MB); prefer JPEG variants for LCP. */
 export const HERO_BG_LEGACY = '/image/Rent a Car in Langkawi for Every Adventure.png'
+
+export const HERO_BG_SRCSET = `${HERO_BG_768} 768w, ${HERO_BG} 1280w, ${HERO_BG_FULL} 1920w`
 
 export const AUTH_ASIDE_BG = '/image/Login form.JPG'
 

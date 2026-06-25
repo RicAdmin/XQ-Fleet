@@ -62,7 +62,7 @@ import type { SeasonRange } from '#/lib/pricing-logic'
 
 import {
   HERO_BG,
-  HERO_BG_LEGACY,
+  HERO_BG_SRCSET,
   FOOTER_CTA_FLEET_IMAGE,
   FOOTER_CTA_SCENERY_IMAGE,
   HOTELS,
@@ -355,6 +355,7 @@ export function CxqLandingPage({
   return (
     <div className="cxq-landing-page">
       <div className="page" data-screen-label="XQ Car Landing">
+        <main id="main-content">
         <div style={{ position: 'relative' }}>
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 5 }}>
             <LandingNav
@@ -425,11 +426,13 @@ export function CxqLandingPage({
           <TestimonialsSection />
           <CruiseBanner />
           <FooterCta onSearch={() => scrollToAnchor('booking-dock')} onBookMini={bookMini} />
-          <SiteFooter
-            onScrollBooking={() => scrollToAnchor('booking-dock')}
-            onScrollFleet={() => scrollToAnchor('top-picks')}
-          />
         </LazySection>
+        </main>
+
+        <SiteFooter
+          onScrollBooking={() => scrollToAnchor('booking-dock')}
+          onScrollFleet={() => scrollToAnchor('top-picks')}
+        />
 
         {openCar && (
           <Suspense fallback={null}>
@@ -540,19 +543,21 @@ function NavModelSearch({
   }
 
   return (
-    <div
-      ref={rootRef}
-      className="nav-search"
-    >
+    <div ref={rootRef} className="nav-search">
       <Search size={15} aria-hidden />
       <input
         ref={inputRef}
-        type="search"
+        type="text"
+        role="combobox"
+        inputMode="search"
+        enterKeyHint="search"
         value={query}
         placeholder={t('nav.searchPlaceholder')}
         aria-label={t('nav.searchAria')}
         aria-expanded={open && matches.length > 0}
+        aria-haspopup="listbox"
         aria-controls={matches.length > 0 ? 'nav-model-search-list' : undefined}
+        aria-autocomplete="list"
         autoComplete="off"
         onChange={(e) => {
           onQueryChange(e.target.value)
@@ -789,15 +794,16 @@ function Hero() {
     <section className="hero layout-bleed" data-screen-label="Hero">
       <div className="stage">
         <picture>
-          <source srcSet={HERO_BG} type="image/jpeg" />
           <img
             className="hero-stage-img"
-            src={HERO_BG_LEGACY}
+            src={HERO_BG}
+            srcSet={HERO_BG_SRCSET}
+            sizes="100vw"
             alt=""
             fetchPriority="high"
             decoding="async"
-            width={1920}
-            height={1080}
+            width={1280}
+            height={720}
           />
         </picture>
         <div className="hero-title-block">
@@ -1576,86 +1582,86 @@ function FleetCarCard({
 
   return (
     <>
-      <article
-        className="car-card"
-        onClick={handleOpen}
-        onKeyDown={(e) => e.key === 'Enter' && handleOpen()}
-        role="button"
-        tabIndex={0}
-      >
-        <div className="car-photo">
-          {isHondaNBox(car) ? <span className="tag-oku">{t('booking.okuFriendly')}</span> : null}
-          <span className="tag">{car.category}</span>
-          <span
+      <article className="car-card">
+        <button
+          type="button"
+          className="car-card-hit"
+          onClick={handleOpen}
+          aria-label={`${car.make} ${car.model}, ${t('booking.startFrom')} ${formatMYR(listedDailyRateSen)} ${t('common.perDay')}`}
+        >
+          <div className="car-photo">
+            {isHondaNBox(car) ? <span className="tag-oku">{t('booking.okuFriendly')}</span> : null}
+            <span className="tag">{car.category}</span>
+            {car.coverPhotoUrl ? (
+              <img
+                src={car.coverPhotoUrl}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                width={520}
+                height={325}
+                sizes="(max-width: 768px) 100vw, 260px"
+              />
+            ) : (
+              <div style={{ color: 'var(--muted)' }}>{t('booking.noPhoto')}</div>
+            )}
+          </div>
+          <div className="car-info">
+            <div className="flex between items-center">
+              <div className="name">
+                {car.make} {car.model}
+              </div>
+              <span className="rate" title={t('booking.fleetVehicle')}>
+                <Star size={12} style={{ color: 'var(--brand-sun)' }} />
+                4.8
+              </span>
+            </div>
+            <div className="specs">
+              <span>
+                <Users size={12} />
+                {t('booking.seatsCount', { count: fit.seats })}
+              </span>
+              <span>
+                <DoorOpen size={12} />
+                {t('booking.doorsCount', { count: fit.doors })}
+              </span>
+            </div>
+            <div className="row">
+              <div>
+                <div className="price-bit">
+                  {showSeasonPrice ? t('booking.avgPerDay') : t('booking.startFrom')}
+                </div>
+                <div className="price">
+                  {formatMYR(listedDailyRateSen)}
+                  <span className="per"> {t('common.perDay')}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </button>
+        <div className="car-card-actions">
+          <button
+            type="button"
+            className="spec-luggage"
+            title={t('booking.luggageFit')}
+            aria-label={`${t('booking.luggageFit')}: ${totalBags}`}
+            onClick={() => setShowLuggage(true)}
+          >
+            <Luggage size={12} />
+            {totalBags}
+          </button>
+          <button type="button" className="btn btn-sm" onClick={handleOpen}>
+            {t('booking.rent')} <ArrowRight size={12} />
+          </button>
+          <button
+            type="button"
             className={'heart' + (fav ? ' on' : '')}
-            onClick={(e) => {
-              e.stopPropagation()
-              setFav((f) => !f)
-            }}
-            onKeyDown={(e) => e.stopPropagation()}
-            role="presentation"
+            aria-label={fav ? 'Remove from favorites' : 'Add to favorites'}
+            aria-pressed={fav}
+            onClick={() => setFav((f) => !f)}
           >
             <Heart size={14} fill={fav ? 'currentColor' : 'none'} />
-          </span>
-          {car.coverPhotoUrl ? (
-            <img src={car.coverPhotoUrl} alt={`${car.make} ${car.model} – car rental Langkawi`} loading="lazy" />
-          ) : (
-            <div style={{ color: 'var(--muted)' }}>{t('booking.noPhoto')}</div>
-          )}
-        </div>
-        <div className="car-info">
-          <div className="flex between items-center">
-            <div className="name">
-              {car.make} {car.model}
-            </div>
-            <span className="rate" title={t('booking.fleetVehicle')}>
-              <Star size={12} style={{ color: 'var(--brand-sun)' }} />
-              4.8
-            </span>
-          </div>
-          <div className="specs">
-            <span>
-              <Users size={12} />
-              {t('booking.seatsCount', { count: fit.seats })}
-            </span>
-            <span>
-              <DoorOpen size={12} />
-              {t('booking.doorsCount', { count: fit.doors })}
-            </span>
-            <button
-              type="button"
-              className="spec-luggage"
-              title={t('booking.luggageFit')}
-              onClick={(e) => {
-                e.stopPropagation()
-                setShowLuggage(true)
-              }}
-            >
-              <Luggage size={12} />
-              {totalBags}
-            </button>
-          </div>
-          <div className="row">
-            <div>
-              <div className="price-bit">
-                {showSeasonPrice ? t('booking.avgPerDay') : t('booking.startFrom')}
-              </div>
-              <div className="price">
-                {formatMYR(listedDailyRateSen)}
-                <span className="per"> {t('common.perDay')}</span>
-              </div>
-            </div>
-            <button
-              type="button"
-              className="btn btn-sm"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleOpen()
-              }}
-            >
-              {t('booking.rent')} <ArrowRight size={12} />
-            </button>
-          </div>
+          </button>
         </div>
       </article>
       {showLuggage && <LuggageFitModal car={car} onClose={() => setShowLuggage(false)} />}
@@ -2296,12 +2302,11 @@ function ReelCard({ reel, onOpenReel }: { reel: Reel; onOpenReel: (r: Reel) => v
   }
 
   return (
-    <article
+    <button
+      type="button"
       className={`reel${previewing ? ' reel--previewing' : ''}`}
-      role="button"
-      tabIndex={0}
+      aria-label={`${reel.car.make} ${reel.car.model} reel`}
       onClick={() => onOpenReel(reel)}
-      onKeyDown={(e) => e.key === 'Enter' && onOpenReel(reel)}
       onMouseEnter={startPreview}
       onMouseLeave={stopPreview}
       onFocus={startPreview}
@@ -2350,7 +2355,7 @@ function ReelCard({ reel, onOpenReel }: { reel: Reel; onOpenReel: (r: Reel) => v
           </div>
         </div>
       </div>
-    </article>
+    </button>
   )
 }
 

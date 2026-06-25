@@ -710,13 +710,60 @@ img { display: block; max-width: 100%; }
   border: 1px solid var(--line);
   border-radius: 16px;
   overflow: hidden;
-  display: flex; flex-direction: column;
-  cursor: pointer;
+  display: flex;
+  flex-direction: column;
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
+.car-card-hit {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.car-card-hit:focus-visible {
+  outline: 2px solid var(--brand-leaf);
+  outline-offset: -2px;
+}
+.car-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px 14px;
+}
+.car-card-actions .btn.btn-sm {
+  margin-left: auto;
+  min-height: 44px;
+  min-width: 44px;
+}
+.car-card-actions .heart {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  background: rgba(255,255,255,.92);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  transition: color .15s;
+}
+.car-card-actions .heart:hover,
+.car-card-actions .heart.on {
+  color: var(--brand-coral);
+}
 .car-card--locked {
-  cursor: not-allowed;
   opacity: 0.62;
+}
+.car-card--locked .car-card-hit {
+  cursor: not-allowed;
 }
 .car-card--locked:hover {
   transform: none;
@@ -2953,7 +3000,7 @@ input[type=range] { width: 100%; accent-color: var(--brand-leaf); }
 .bk-field .val .bk-date { font-weight: 500; }
 .bk-field .val .bk-sep { color: var(--muted-2); }
 .bk-field .val .bk-time { color: var(--muted); font-weight: 400; }
-.bk-field .val .bk-time--empty { color: var(--brand-coral); font-weight: 500; }
+.bk-field .val .bk-time--empty { color: #9A3D00; font-weight: 600; }
 
 /* Location menu with hotel search */
 .loc-menu {
@@ -3111,6 +3158,11 @@ input[type=range] { width: 100%; accent-color: var(--brand-leaf); }
   position: relative;
   flex: 0 0 240px;
   height: 426px; /* ~9:16 */
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
   border-radius: 18px;
   overflow: hidden;
   background: var(--ink);
@@ -3118,6 +3170,10 @@ input[type=range] { width: 100%; accent-color: var(--brand-leaf); }
   cursor: pointer;
   transition: transform .2s ease, box-shadow .2s ease;
   isolation: isolate;
+}
+.reel:focus-visible {
+  outline: 2px solid var(--brand-leaf);
+  outline-offset: 2px;
 }
 
 @media (min-width: 1101px) {
@@ -4518,22 +4574,24 @@ input[type=range] { width: 100%; accent-color: var(--brand-leaf); }
    Car card — luggage inline spec
    ===================================================== */
 .spec-luggage {
-  display: inline-flex; align-items: center;
+  display: inline-flex; align-items: center; justify-content: center;
   gap: 4px;
-  background: rgba(255,102,0,.1);
-  color: var(--brand-leaf);
-  border: 1px solid rgba(255,102,0,.22);
+  min-height: 44px;
+  min-width: 44px;
+  background: rgba(154, 61, 0, 0.08);
+  color: #9A3D00;
+  border: 1px solid rgba(154, 61, 0, 0.35);
   border-radius: 999px;
-  padding: 3px 9px;
-  font: 600 11px/1 var(--font-sans);
+  padding: 8px 12px;
+  font: 600 12px/1 var(--font-sans);
   letter-spacing: -.005em;
   cursor: pointer;
   transition: all .15s;
 }
 .spec-luggage:hover {
-  background: var(--brand-leaf);
+  background: var(--brand-leaf-2);
   color: #fff;
-  border-color: var(--brand-leaf);
+  border-color: var(--brand-leaf-2);
 }
 .spec-luggage::after {
   content: "fit";

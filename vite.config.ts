@@ -29,5 +29,8 @@ export default defineConfig(({ mode }) => {
     define: {
       'import.meta.env.VITE_SITE_URL': JSON.stringify(siteUrl),
     },
+    build: {
+      sourcemap: true,
+    },
   }
 })

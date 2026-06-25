@@ -55,7 +55,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       {
         rel: 'icon',
         type: 'image/png',
-        href: '/image/xqCarLogo.png',
+        href: '/image/xqCarLogo-96.png',
       },
     ],
   }),

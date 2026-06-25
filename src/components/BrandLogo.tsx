@@ -14,6 +14,8 @@ export default function BrandLogo({
   return (
     <img
       src={BRAND_LOGO_PATH}
+      srcSet={`${BRAND_LOGO_PATH} 96w`}
+      sizes={`${size}px`}
       alt={alt}
       width={size}
       height={size}

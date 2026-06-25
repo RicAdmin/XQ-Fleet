@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 
 import { CxqLandingPage } from '#/components/landing/CxqLandingPage'
-import { HERO_BG } from '#/components/landing/cxq-landing-data'
+import { HERO_BG, HERO_BG_768 } from '#/components/landing/cxq-landing-data'
 import { HomeStructuredData } from '#/components/seo/HomeStructuredData'
 import type { Locale } from '#/i18n/locales'
 import { getPublicCars, type PublicCarRow } from '#/lib/portal-functions'
@@ -24,8 +24,16 @@ export const Route = createFileRoute('/$locale/')({
         {
           rel: 'preload',
           as: 'image',
+          href: HERO_BG_768,
+          fetchPriority: 'high',
+          media: '(max-width: 768px)',
+        },
+        {
+          rel: 'preload',
+          as: 'image',
           href: HERO_BG,
           fetchPriority: 'high',
+          media: '(min-width: 769px)',
         },
       ],
     }

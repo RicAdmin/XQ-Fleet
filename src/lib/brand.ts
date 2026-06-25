@@ -1,7 +1,9 @@
 /** Public path to the XQ Car brand logo (served from `public/image/`). */
 export const BRAND_NAME = 'XQCar'
 export const BRAND_NAME_PROSE = 'XQ Car'
-export const BRAND_LOGO_PATH = '/image/xqCarLogo.png'
+/** UI logo (96×96). Full PNG kept for email/PDF. */
+export const BRAND_LOGO_PATH = '/image/xqCarLogo-96.png'
+export const BRAND_LOGO_PATH_FULL = '/image/xqCarLogo.png'
 
 function resolveSiteUrl(siteUrl?: string): string {
   const raw =
@@ -53,7 +55,7 @@ export function publicLocalePath(path: string, locale: Locale = DEFAULT_LOCALE, 
 
 /** Absolute URL for email clients and external links. */
 export function brandLogoUrl(siteUrl?: string): string {
-  return publicSitePath(BRAND_LOGO_PATH, siteUrl)
+  return publicSitePath(BRAND_LOGO_PATH_FULL, siteUrl)
 }
 
 /**
