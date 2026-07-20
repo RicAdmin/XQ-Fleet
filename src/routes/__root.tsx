@@ -15,6 +15,20 @@ interface MyRouterContext {
 
 const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getItem('theme');var mode=(stored==='light'||stored==='dark'||stored==='auto')?stored:'auto';var prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;var resolved=mode==='auto'?(prefersDark?'dark':'light'):mode;var root=document.documentElement;root.classList.remove('light','dark');root.classList.add(resolved);if(mode==='auto'){root.removeAttribute('data-theme')}else{root.setAttribute('data-theme',mode)}root.style.colorScheme=resolved;}catch(e){}})();`
 
+// Langkawi_Preference affiliate tracker — only rendered when both env vars
+// are set, so tracking is silently skipped in environments without them.
+function affiliateTrackingScript() {
+  const baseUrl = import.meta.env.VITE_AFFILIATE_TRACKING_BASE_URL
+  const publicKey = import.meta.env.VITE_AFFILIATE_TRACKING_PUBLIC_KEY
+  if (!baseUrl || !publicKey) return null
+  return {
+    src: `${baseUrl.replace(/\/$/, '')}/scripts/refferq-tracker.js`,
+    'data-api-key': publicKey,
+    'data-api-url': baseUrl.replace(/\/$/, ''),
+    defer: true,
+  }
+}
+
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   beforeLoad: async ({ location }) => {
     const search = location.search as Record<string, unknown> | undefined
@@ -58,6 +72,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         href: '/image/xqCarLogo-96.png',
       },
     ],
+    scripts: [affiliateTrackingScript()].filter(Boolean) as { src: string }[],
   }),
   shellComponent: RootDocument,
 })

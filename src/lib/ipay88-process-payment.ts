@@ -120,6 +120,7 @@ export async function processIpay88Payment(
       rentalId: payments.rentalId,
       status: payments.status,
       amountSen: payments.amountSen,
+      currency: payments.currency,
     })
     .from(payments)
     .where(eq(payments.id, paymentUuid))
@@ -229,6 +230,7 @@ export async function processIpay88Payment(
         couponCode: rentals.couponCode,
         totalAmountSen: rentals.totalAmountSen,
         createdAt: rentals.createdAt,
+        refferqRefCode: rentals.refferqRefCode,
         carMake: cars.make,
         carModel: cars.model,
         carYear: cars.year,
@@ -323,6 +325,16 @@ export async function processIpay88Payment(
         },
       ).catch((err: unknown) => {
         console.error('[iPay88] success email send failed', err)
+      })
+
+      const { reportConversion } = await import('#/lib/affiliate-tracking-conversion.server')
+      reportConversion({
+        refCode: rentalData.refferqRefCode,
+        bookingReference: bookingRef,
+        amountCents: payment.amountSen,
+        currency: payment.currency,
+        customerEmail: rentalData.customerEmail ?? '',
+        customerName: rentalData.customerName ?? '',
       })
     }
 

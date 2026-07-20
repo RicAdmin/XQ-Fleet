@@ -297,6 +297,9 @@ export const rentals = pgTable(
     // attribution row is set when the same transaction inserts the attribution.
     affiliateRefCode: text('affiliate_ref_code'),
     affiliateAttributionId: uuid('affiliate_attribution_id'),
+    // Captured at booking time from the `refferq_ref` cookie set by the
+    // Langkawi_Preference tracker script — separate external affiliate network.
+    refferqRefCode: text('refferq_ref_code'),
     createdByUserId: text('created_by_user_id').references(() => users.id, {
       onDelete: 'set null',
     }),

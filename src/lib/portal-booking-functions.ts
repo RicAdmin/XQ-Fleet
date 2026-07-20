@@ -435,6 +435,18 @@ export const createPortalBooking = createServerFn({ method: 'POST' })
       affiliateRefCode = null
     }
 
+    // Langkawi_Preference external affiliate ref, set by the injected tracker
+    // script's `refferq_ref` cookie. Independent of the in-house affiliate
+    // system above. Best-effort: never blocks the booking.
+    let refferqRefCode: string | null = null
+    try {
+      const { getCookie } = await import('@tanstack/react-start/server')
+      const raw = getCookie('refferq_ref')?.trim()
+      refferqRefCode = raw && /^[A-Za-z0-9-]{3,32}$/.test(raw) ? raw : null
+    } catch {
+      refferqRefCode = null
+    }
+
     const { getPaymentSettings } = await import('#/lib/settings-functions')
     const paymentConfig = await getPaymentSettings()
 
@@ -557,6 +569,7 @@ export const createPortalBooking = createServerFn({ method: 'POST' })
           paidAmountSen: 0,
           paymentHoldExpiresAt: holdExpiry,
           affiliateRefCode,
+          refferqRefCode,
           createdByUserId: session?.user.id ?? null,
         })
         .returning({ id: rentals.id })
