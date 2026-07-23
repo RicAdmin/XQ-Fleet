@@ -31,16 +31,16 @@ Families and remote workers with a week-ish stay who already know the 3-day outl
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
+| Claim or detail                                           | Source                                                                                                            | Checked    | Status   |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ---------- | -------- |
 | 5–7 day pacing advice in independent itinerary journalism | https://malaysiajourneys.com/langkawi-itinerary-how-to-spend-3-5-or-7-days-on-eagle-island/ (accessed 2026-07-23) | 2026-07-23 | verified |
-| Archive 3-day post as structural predecessor | content/blog/langkawi-3-day-itinerary-by-car.md | 2026-07-23 | verified |
-| Weekly pricing available for 7+ day stays | content/blog/langkawi-weekly-monthly-car-rental.md; data/Car.csv | 2026-07-23 | verified |
+| Archive 3-day post as structural predecessor              | content/blog/langkawi-3-day-itinerary-by-car.md                                                                   | 2026-07-23 | verified |
+| Weekly pricing available for 7+ day stays                 | content/blog/langkawi-weekly-monthly-car-rental.md; data/Car.csv                                                  | 2026-07-23 | verified |
 
 ## Product Connections
 
 - Vehicle slugs: perodua-alza, perodua-bezza, toyota-veloz
-- Internal links: /en/blog/langkawi-3-day-itinerary-by-car, /en/blog/langkawi-weekly-monthly-car-rental, /en/blog/tanjung-rhu-beach-drive-langkawi
+- Internal links: /en/blog/langkawi-3-day-itinerary-by-car, /en/blog/langkawi-weekly-monthly-car-rental, /en/blog/driving-langkawi-first-time
 
 ## Search Language
 

@@ -31,11 +31,11 @@ Families with children needing a weather-flex day.
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| Project images exist for both attractions | public/image/Attractions/Underwater World.png; public/image/Attractions/Wildlife Park.png | 2026-07-23 | verified |
-| Official tourism lists family attractions across the island | https://naturallylangkawi.my/ (accessed 2026-07-23) | 2026-07-23 | verified |
-| Current opening hours and ticket prices | Official attraction sites / operator check | — | operator check required |
+| Claim or detail                                             | Source                                                                                    | Checked    | Status                  |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ---------- | ----------------------- |
+| Project images exist for both attractions                   | public/image/Attractions/Underwater World.png; public/image/Attractions/Wildlife Park.png | 2026-07-23 | verified                |
+| Official tourism lists family attractions across the island | https://naturallylangkawi.my/ (accessed 2026-07-23)                                       | 2026-07-23 | verified                |
+| Current opening hours and ticket prices                     | Official attraction sites / operator check                                                | —          | operator check required |
 
 ## Product Connections
 

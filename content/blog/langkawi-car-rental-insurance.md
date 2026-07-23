@@ -2,28 +2,46 @@
 title: Car Rental Insurance in Langkawi Explained
 metaTitle: Langkawi Car Rental Insurance · What's Covered · XQ Car
 metaDescription: >-
-  Langkawi car rental insurance: collision damage, third party, excess, and what
-  to ask before you sign. Plain-language guide for tourists.
+  Third-party cover, CDW options, excess, and common exclusions in Langkawi
+  rentals — plain language tied to the rental agreement.
 category: Guides
 tag: Insurance
 language: en
 publishedAt: '2026-03-22'
-updatedAt: '2026-05-05'
-heroImage: 'https://images.unsplash.com/photo-1493238792000-8113da705763?w=1800&q=85'
-excerpt: 'CDW, excess, and what your travel card might already cover.'
+updatedAt: '2026-07-23'
+heroImage: /image/hero-langkawi-adventure-768.jpg
+excerpt: >-
+  What Malaysian third-party cover means, where CDW helps, and which damages
+  usually stay with you.
 keywords:
   - langkawi car rental insurance
   - car hire insurance malaysia langkawi
 ---
 
-Car rental insurance in Langkawi typically includes basic third-party liability as required by Malaysian law. Collision damage waiver (CDW) reduces your financial exposure if the vehicle is damaged — terms vary by car class and booking channel. Always read the excess amount before pickup.
+XQ Car vehicles carry third-party motor insurance as required under Malaysian law. Comprehensive cover and Collision Damage Waiver (CDW) options, when offered, follow insurer terms, deductibles, and the excess amount disclosed at booking. Read that excess before you drive off — it is the number that matters in a claim.
 
-## What is usually included
+## What is usually in place
 
-- Third-party bodily injury and property (statutory minimum)
-- Basic collision coverage per fleet policy
-- 24/7 roadside assistance for breakdowns
+- Statutory third-party liability
+- Comprehensive / CDW options only when shown at booking
+- Basic roadside help for mechanical breakdown within Langkawi during business hours (see the rental agreement for callout fees)
 
-## Travel credit card coverage
+## Common exclusions (renter remains liable)
 
-Some premium cards include rental car excess insurance if you pay the full rental with that card. Bring proof and policy wording — local counters cannot guess your bank’s rules.
+Drawn from the current rental agreement themes:
+
+- Drink- or drug-related driving
+- Unauthorised drivers
+- Tyre, rim, windscreen, and glass damage
+- Underbody damage from flooded roads, off-road use, or hard speed bumps
+- Interior damage and water ingress from open windows
+- Personal belongings left in the car
+- Single-vehicle incidents without a police report
+
+You remain liable for the disclosed insurance excess on covered losses, regardless of fault.
+
+## Travel credit cards
+
+Some cards reimburse rental excess if you pay the full rental on that card. Bring policy wording — the island counter cannot interpret your bank’s rules for you.
+
+Related: [requirements](/en/blog/rent-a-car-langkawi-requirements) · [refund policy](/en/refund-policy)

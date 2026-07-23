@@ -31,16 +31,16 @@ Families and couples combining shopping with a Kuah base or day trip from Cenang
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| Kuah town post covers jetty/shopping overview — this plan focuses shopping-day logistics | content/blog/kuah-town-langkawi-car-rental.md | 2026-07-23 | verified |
-| Bezza 508 L boot useful for shopping loads | data/Car.csv | 2026-07-23 | verified |
-| Current mall parking fees and peak hours | XQ Car operator notes | — | operator check required |
+| Claim or detail                                                                                         | Source                                          | Checked    | Status                  |
+| ------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | ---------- | ----------------------- |
+| Ferry jetty guide covers Kuah arrival logistics — this plan focuses shopping-day parking and boot space | content/blog/langkawi-ferry-jetty-car-rental.md | 2026-07-23 | verified                |
+| Bezza 508 L boot useful for shopping loads                                                              | data/Car.csv                                    | 2026-07-23 | verified                |
+| Current mall parking fees and peak hours                                                                | XQ Car operator notes                           | —          | operator check required |
 
 ## Product Connections
 
 - Vehicle slugs: perodua-bezza, toyota-vios-3g, honda-city-5g
-- Internal links: /en/blog/kuah-town-langkawi-car-rental, /en/blog/langkawi-ferry-jetty-car-rental, /en/blog/cheap-car-rental-langkawi-tips
+- Internal links: /en/blog/langkawi-ferry-jetty-car-rental, /en/blog/cheap-car-rental-langkawi-tips, /en/blog/axia-vs-bezza-langkawi-rental
 
 ## Search Language
 

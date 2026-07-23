@@ -31,11 +31,11 @@ Couples and enthusiasts tempted by lifestyle vehicle photos.
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| Suzuki Jimny RM350/400/450; Mini Convertible RM550/600/650; Seaside limited RM650/700/750 | data/Car.csv | 2026-07-23 | verified |
-| Travel guides note standard cars suffice for waterfall/Datai roads | https://www.mtcarrentals.com/id/en/blog/renting-a-car-in-langkawi-island-road-trip-guide-20260516/ (accessed 2026-07-23) | 2026-07-23 | verified |
-| When Jimny is genuinely useful on-island per operator experience | XQ Car operator notes | — | operator check required |
+| Claim or detail                                                                           | Source                                                                                                                   | Checked    | Status                  |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------- | ----------------------- |
+| Suzuki Jimny RM350/400/450; Mini Convertible RM550/600/650; Seaside limited RM650/700/750 | data/Car.csv                                                                                                             | 2026-07-23 | verified                |
+| Travel guides note standard cars suffice for waterfall/Datai roads                        | https://www.mtcarrentals.com/id/en/blog/renting-a-car-in-langkawi-island-road-trip-guide-20260516/ (accessed 2026-07-23) | 2026-07-23 | verified                |
+| When Jimny is genuinely useful on-island per operator experience                          | XQ Car operator notes                                                                                                    | —          | operator check required |
 
 ## Product Connections
 

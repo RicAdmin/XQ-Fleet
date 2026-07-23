@@ -31,16 +31,16 @@ Self-drive visitors based in Cenang, Kok, or Kuah planning a nature half-day.
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| Telaga Tujuh and Temurun listed as Geopark waterfall attractions with rainforest access | https://naturallylangkawi.my/wp-content/uploads/pdf/Geopark.pdf (accessed 2026-07-23) | 2026-07-23 | verified |
-| Standard cars navigate northwest waterfall roads; 4WD not required per operator travel guides | https://www.mtcarrentals.com/id/en/blog/renting-a-car-in-langkawi-island-road-trip-guide-20260516/ (accessed 2026-07-23) | 2026-07-23 | verified |
-| Current parking fees, trail closures, and monkey-related incidents | XQ Car operator / on-island check | — | operator check required |
+| Claim or detail                                                                               | Source                                                                                                                   | Checked    | Status                  |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------- | ----------------------- |
+| Telaga Tujuh and Temurun listed as Geopark waterfall attractions with rainforest access       | https://naturallylangkawi.my/wp-content/uploads/pdf/Geopark.pdf (accessed 2026-07-23)                                    | 2026-07-23 | verified                |
+| Standard cars navigate northwest waterfall roads; 4WD not required per operator travel guides | https://www.mtcarrentals.com/id/en/blog/renting-a-car-in-langkawi-island-road-trip-guide-20260516/ (accessed 2026-07-23) | 2026-07-23 | verified                |
+| Current parking fees, trail closures, and monkey-related incidents                            | XQ Car operator / on-island check                                                                                        | —          | operator check required |
 
 ## Product Connections
 
 - Vehicle slugs: perodua-axia, perodua-bezza, perodua-alza, suzuki-jimny
-- Internal links: /en/blog/langkawi-sky-bridge-by-car, /en/blog/driving-langkawi-first-time, /en/blog/langkawi-hotel-car-delivery
+- Internal links: /en/blog/driving-langkawi-first-time, /en/blog/langkawi-hotel-car-delivery, /en/blog/langkawi-3-day-itinerary-by-car
 
 ## Search Language
 

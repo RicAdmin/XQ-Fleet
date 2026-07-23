@@ -31,10 +31,10 @@ International visitors used to automatics and groups eyeing the 14-seater.
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| Urvan transmission Manual; most other seeded cars Auto | data/Car.csv Transmission column | 2026-07-23 | verified |
-| Left-hand traffic reminder for first-timers | content/blog/driving-langkawi-first-time.md | 2026-07-23 | verified |
+| Claim or detail                                        | Source                                      | Checked    | Status   |
+| ------------------------------------------------------ | ------------------------------------------- | ---------- | -------- |
+| Urvan transmission Manual; most other seeded cars Auto | data/Car.csv Transmission column            | 2026-07-23 | verified |
+| Left-hand traffic reminder for first-timers            | content/blog/driving-langkawi-first-time.md | 2026-07-23 | verified |
 
 ## Product Connections
 

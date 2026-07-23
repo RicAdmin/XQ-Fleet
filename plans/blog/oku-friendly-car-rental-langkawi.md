@@ -31,11 +31,11 @@ Travellers with reduced mobility, caregivers, and families planning inclusive is
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| About page claim: only OKU-friendly rental on the island | src/components/about/AboutPage.tsx | 2026-07-23 | verified |
-| Tag_Small_OKU true on perodua-axia and honda-n-box in seed | data/Car.csv | 2026-07-23 | verified |
-| Which modifications (hand controls, ramps) are actually available and lead times | XQ Car operator confirmation | — | operator check required |
+| Claim or detail                                                                  | Source                             | Checked    | Status                  |
+| -------------------------------------------------------------------------------- | ---------------------------------- | ---------- | ----------------------- |
+| About page claim: only OKU-friendly rental on the island                         | src/components/about/AboutPage.tsx | 2026-07-23 | verified                |
+| Tag_Small_OKU true on perodua-axia and honda-n-box in seed                       | data/Car.csv                       | 2026-07-23 | verified                |
+| Which modifications (hand controls, ramps) are actually available and lead times | XQ Car operator confirmation       | —          | operator check required |
 
 ## Product Connections
 

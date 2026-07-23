@@ -1,30 +1,39 @@
 ---
-title: Free Hotel Car Delivery in Langkawi
-metaTitle: Free Hotel Car Delivery Langkawi · How It Works · XQ Car
+title: Hotel Car Delivery in Langkawi
+metaTitle: Hotel Car Delivery Langkawi · Free List vs Custom Fee · XQ Car
 metaDescription: >-
-  Free car delivery to Langkawi hotels, resorts, and homestays. Pantai Cenang,
-  Kuah, Datai, and The Andaman — no extra fee at XQ Car.
+  Free delivery to hotels on the XQ Car booking list; custom-typed villas use
+  the hotel delivery fee (RM50 on current seed pricing). How to choose.
 category: Airport & Pickup
 tag: Delivery
 language: en
 publishedAt: '2026-04-25'
-updatedAt: '2026-05-18'
-heroImage: 'https://images.unsplash.com/photo-1493238792000-8113da705763?w=1800&q=85'
-excerpt: Skip the taxi from LGK — we bring the car to your lobby.
+updatedAt: '2026-07-23'
+heroImage: /image/hero-langkawi-adventure-768.jpg
+excerpt: >-
+  List hotels are free; custom addresses are not. Pick the right checkout option
+  before you assume zero delivery fee.
 keywords:
   - langkawi hotel car delivery
   - car rental delivered to hotel langkawi
 ---
 
-Hotel car delivery in Langkawi is included free with XQ Car bookings. Select your hotel at checkout or message us the property name — we meet you at reception or the security gate with the vehicle ready.
+Hotel delivery is free when you select a property from the XQ Car hotel list at checkout. If you type a custom villa, homestay, or unlisted pin, the booking applies the hotel delivery fee — RM50 on current seed pricing (checked 2026-07-23). Airport Door 3 and Kuah Jetty meets stay free.
 
-## Resorts we deliver to daily
+## What counts as free
 
-- Pantai Cenang & Tengah strips
-- The Datai, Four Seasons, St Regis (north)
-- Kuah town hotels and homestays
-- Airport and ferry jetty (same free policy)
+- Hotels and resorts chosen from the autocomplete hotel list
+- Langkawi International Airport (Door 3)
+- Kuah Ferry Jetty
 
-## Return pickup
+Common free zones guests use: Pantai Cenang and Tengah strips, Kuah hotels on the list, and major north-island resorts when they appear in the list.
 
-We can collect from the same hotel at end of rental — specify when booking. Early flight? Airport return still available 24/7.
+## What incurs the delivery fee
+
+Custom-typed addresses that are not on the hotel list — private villas, unmarked homestays, or “near…” descriptions. If your place is missing from the list, message us the exact name before booking so we can confirm fee and access.
+
+## Return collection
+
+You can return at the same hotel, switch to LGK Door 3 for an early flight, or use the jetty when departing by ferry. Say so at booking. Door 3 returns remain available 24/7.
+
+Related: [airport pickup](/en/blog/langkawi-airport-car-rental-pickup) · [Cenang parking notes](/en/blog/pantai-cenang-car-rental-guide)

@@ -31,16 +31,16 @@ Couples and photographers with a rental car who already saw Cenang and Sky Bridg
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| Datai Bay, Telaga Harbour, Burau Bay named free-delivery zones | src/components/about/AboutPage.tsx | 2026-07-23 | verified |
-| Northern coastal / Datai drives described as scenic rainforest-to-sea routes | https://www.mtcarrentals.com/id/en/blog/renting-a-car-in-langkawi-island-road-trip-guide-20260516/ (accessed 2026-07-23) | 2026-07-23 | verified |
-| Current Datai road alignment / golf-course detours | XQ Car operator / recent drive check | — | operator check required |
+| Claim or detail                                                              | Source                                                                                                                   | Checked    | Status                  |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------- | ----------------------- |
+| Datai Bay, Telaga Harbour, Burau Bay named free-delivery zones               | src/components/about/AboutPage.tsx                                                                                       | 2026-07-23 | verified                |
+| Northern coastal / Datai drives described as scenic rainforest-to-sea routes | https://www.mtcarrentals.com/id/en/blog/renting-a-car-in-langkawi-island-road-trip-guide-20260516/ (accessed 2026-07-23) | 2026-07-23 | verified                |
+| Current Datai road alignment / golf-course detours                           | XQ Car operator / recent drive check                                                                                     | —          | operator check required |
 
 ## Product Connections
 
 - Vehicle slugs: perodua-bezza, honda-city-5g, suzuki-jimny, mini-convertible
-- Internal links: /en/blog/tanjung-rhu-beach-drive-langkawi, /en/blog/langkawi-3-day-itinerary-by-car, /en/blog/langkawi-hotel-car-delivery
+- Internal links: /en/blog/langkawi-3-day-itinerary-by-car, /en/blog/langkawi-hotel-car-delivery, /en/blog/driving-langkawi-first-time
 
 ## Search Language
 

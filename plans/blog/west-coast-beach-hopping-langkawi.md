@@ -31,11 +31,11 @@ Beach-first visitors based on the west coast who already have a rental.
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| Cenang, Tengah, Kok named in delivery/about geography | src/components/about/AboutPage.tsx; content/blog/pantai-cenang-car-rental-guide.md overlap control | 2026-07-23 | verified |
-| Evening Cenang congestion called out in existing Cenang guide | content/blog/pantai-cenang-car-rental-guide.md | 2026-07-23 | verified |
-| Current paid/informal parking patterns on Tengah and Kok | XQ Car operator notes | — | operator check required |
+| Claim or detail                                               | Source                                                                                             | Checked    | Status                  |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ---------- | ----------------------- |
+| Cenang, Tengah, Kok named in delivery/about geography         | src/components/about/AboutPage.tsx; content/blog/pantai-cenang-car-rental-guide.md overlap control | 2026-07-23 | verified                |
+| Evening Cenang congestion called out in existing Cenang guide | content/blog/pantai-cenang-car-rental-guide.md                                                     | 2026-07-23 | verified                |
+| Current paid/informal parking patterns on Tengah and Kok      | XQ Car operator notes                                                                              | —          | operator check required |
 
 ## Product Connections
 

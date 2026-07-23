@@ -31,16 +31,16 @@ Malaysian travellers using Kuala Perlis–Langkawi RoRo during the LADA cashback
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| Cashback Mai Langkawi runs 1 Aug–31 Oct 2026 for eligible Malaysian RoRo passengers with 2+ night stay | https://naturallylangkawi.my/ (accessed 2026-07-23) | 2026-07-23 | verified |
-| XQ Car free Kuah Jetty pickup/drop-off | src/components/about/AboutPage.tsx; content/blog/langkawi-ferry-jetty-car-rental.md (overlap only) | 2026-07-23 | verified |
-| Peak jetty meet process and wait times on promo weekends | XQ Car operator notes | — | operator check required |
+| Claim or detail                                                                                        | Source                                                                                             | Checked    | Status                  |
+| ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- | ---------- | ----------------------- |
+| Cashback Mai Langkawi runs 1 Aug–31 Oct 2026 for eligible Malaysian RoRo passengers with 2+ night stay | https://naturallylangkawi.my/ (accessed 2026-07-23)                                                | 2026-07-23 | verified                |
+| XQ Car free Kuah Jetty pickup/drop-off                                                                 | src/components/about/AboutPage.tsx; content/blog/langkawi-ferry-jetty-car-rental.md (overlap only) | 2026-07-23 | verified                |
+| Peak jetty meet process and wait times on promo weekends                                               | XQ Car operator notes                                                                              | —          | operator check required |
 
 ## Product Connections
 
 - Vehicle slugs: perodua-axia, perodua-bezza, perodua-alza
-- Internal links: /en/blog/langkawi-ferry-jetty-car-rental, /en/blog/kuah-town-langkawi-car-rental, /en/blog/book-car-rental-langkawi-online
+- Internal links: /en/blog/langkawi-ferry-jetty-car-rental, /en/blog/book-car-rental-langkawi-online, /en/blog/cheap-car-rental-langkawi-tips
 
 ## Search Language
 

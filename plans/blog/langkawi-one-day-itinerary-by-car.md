@@ -31,15 +31,15 @@ Transit visitors and short stays with exactly one full driving day.
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| Peak SkyCab queue advice: go early | https://travelguidestip.com/langkawi-itinerary/ (accessed 2026-07-23) | 2026-07-23 | verified |
-| Archive already has 3-day itinerary — keep this strictly one-day | content/blog/langkawi-3-day-itinerary-by-car.md | 2026-07-23 | verified |
+| Claim or detail                                                  | Source                                                                | Checked    | Status   |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------- | ---------- | -------- |
+| Peak SkyCab queue advice: go early                               | https://travelguidestip.com/langkawi-itinerary/ (accessed 2026-07-23) | 2026-07-23 | verified |
+| Archive already has 3-day itinerary — keep this strictly one-day | content/blog/langkawi-3-day-itinerary-by-car.md                       | 2026-07-23 | verified |
 
 ## Product Connections
 
 - Vehicle slugs: perodua-bezza, perodua-axia, honda-city-5g
-- Internal links: /en/blog/langkawi-3-day-itinerary-by-car, /en/blog/langkawi-sky-bridge-by-car, /en/blog/kilim-geoforest-park-road-trip
+- Internal links: /en/blog/langkawi-3-day-itinerary-by-car, /en/blog/driving-langkawi-first-time, /en/blog/pantai-cenang-car-rental-guide
 
 ## Search Language
 

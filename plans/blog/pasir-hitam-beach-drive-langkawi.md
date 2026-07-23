@@ -31,15 +31,15 @@ Curious self-drivers collecting varied landscapes beyond Cenang.
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| Pantai Pasir Hitam listed among Langkawi beaches in official tourism materials | https://naturallylangkawi.my/wp-content/uploads/pdf/Geopark.pdf (accessed 2026-07-23) | 2026-07-23 | verified |
-| Current parking, swim safety, and stall hours | XQ Car operator / recent visit | — | operator check required |
+| Claim or detail                                                                | Source                                                                                | Checked    | Status                  |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- | ---------- | ----------------------- |
+| Pantai Pasir Hitam listed among Langkawi beaches in official tourism materials | https://naturallylangkawi.my/wp-content/uploads/pdf/Geopark.pdf (accessed 2026-07-23) | 2026-07-23 | verified                |
+| Current parking, swim safety, and stall hours                                  | XQ Car operator / recent visit                                                        | —          | operator check required |
 
 ## Product Connections
 
 - Vehicle slugs: perodua-axia, perodua-bezza
-- Internal links: /en/blog/tanjung-rhu-beach-drive-langkawi, /en/blog/kilim-geoforest-park-road-trip, /en/blog/driving-langkawi-first-time
+- Internal links: /en/blog/driving-langkawi-first-time, /en/blog/langkawi-3-day-itinerary-by-car, /en/blog/langkawi-monsoon-season-car-rental
 
 ## Search Language
 

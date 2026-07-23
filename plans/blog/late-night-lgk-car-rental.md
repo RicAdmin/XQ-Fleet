@@ -31,11 +31,11 @@ Travellers on late AirAsia/Firefly-style arrivals and dawn departures.
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| 24/7 Door 3 counter and flight-number tracking described in airport post | content/blog/langkawi-airport-car-rental-pickup.md (re-verify operational claim) | 2026-07-23 | verified |
-| Booking copy: airport Door 3 · 24/7 | src/i18n/messages/en/booking.ts | 2026-07-23 | verified |
-| Actual staffing patterns for 02:00–05:00 arrivals | XQ Car operator confirmation | — | operator check required |
+| Claim or detail                                                          | Source                                                                           | Checked    | Status                  |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------------------- | ---------- | ----------------------- |
+| 24/7 Door 3 counter and flight-number tracking described in airport post | content/blog/langkawi-airport-car-rental-pickup.md (re-verify operational claim) | 2026-07-23 | verified                |
+| Booking copy: airport Door 3 · 24/7                                      | src/i18n/messages/en/booking.ts                                                  | 2026-07-23 | verified                |
+| Actual staffing patterns for 02:00–05:00 arrivals                        | XQ Car operator confirmation                                                     | —          | operator check required |
 
 ## Product Connections
 

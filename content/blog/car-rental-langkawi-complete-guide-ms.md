@@ -1,39 +1,54 @@
 ---
 title: Panduan Lengkap Sewa Kereta di Langkawi (2026)
-metaTitle: Panduan Sewa Kereta Langkawi 2026 | Harga & Tips · XQ Car
+metaTitle: Panduan Sewa Kereta Langkawi 2026 | Harga & Ambil · XQ Car
 metaDescription: >-
-  Semua yang perlu anda tahu tentang sewa kereta di Langkawi — ambil di lapangan
-  terbang, kadar dari RM 70, dokumen, insurans, dan tips memandu dari flit
-  tempatan sejak 2015.
+  Sewa kereta Langkawi dari RM70/hari (musim rendah, semakan 2026-07-23). Pintu 3
+  LGK, Jeti Kuah, dokumen, minyak same-to-same, dan cara pilih kereta.
 category: Guides
-tag: Pillar guide
+tag: Panduan utama
 language: ms
 publishedAt: '2026-01-08'
-updatedAt: '2026-05-15'
-heroImage: 'https://images.unsplash.com/photo-1493238792000-8113da705763?w=1800&q=85'
+updatedAt: '2026-07-23'
+heroImage: /image/hero-langkawi-adventure-768.jpg
 excerpt: >-
-  Penghantaran lapangan terbang, kadar harian adil, dan dokumen yang benar-benar
-  diperlukan — panduan operator tempatan untuk sewa di pulau.
+  Kadar 2026, dokumen, ambil Pintu 3, dan bilakah sewa lebih berbaloi daripada
+  Grab.
 keywords:
-  - car rental langkawi
-  - langkawi car rental
-  - rent a car langkawi
+  - sewa kereta langkawi
+  - kereta sewa langkawi
+  - panduan sewa kereta langkawi
 ---
 
-Sewa kereta di Langkawi adalah cara paling fleksibel untuk meneroka pulau mengikut rentak anda. Kadar bermula sekitar RM 70/hari untuk kereta ekonomi apabila tempah terus dengan XQ Car.
+Sewa kereta di Langkawi apabila anda ada dua hari penuh atau lebih untuk bergerak luar satu kawasan pantai. Tempah terus dengan armada tempatan: hatchback ekonomi bermula RM70/hari pada musim rendah (Perodua Axia, semakan 2026-07-23), dengan pertemuan percuma di Pintu 3 LGK atau Jeti Kuah jika anda pilih lokasi itu semasa checkout.
 
-## Mengapa sewa kereta di Langkawi?
+## Mengapa sewa, bukan Grab atau teksi?
 
-Taksi sesuai untuk perjalanan tunggal tetapi mahal untuk hari pelbagai hentian di seluruh pulau.
+Langkawi tiada landasan keretapi dan liputan bas terhad di luar Cenang dan Kuah. Transfer lapangan terbang, hari SkyCab, lalu pantai utara — itu beberapa perjalanan e-hailing berasingan. Kereta kompak automatik dari RM70/hari biasanya lebih berbaloi selepas kira-kira dua hari penuh untuk pasangan. Jika anda hanya bermalam di Cenang, Grab mungkin masih menang.
 
-## Kos sewa kereta 2026
+## Berapa kos sewa kereta Langkawi 2026?
 
-Ekonomi RM 70–120/hari; MPV RM 120–180/hari. Penghantaran percuma ke LGK Pintu 3, jeti, atau hotel.
+XQ Car mengguna kalendar Musim Rendah, Puncak, dan Super Puncak. Kadar seed semakan 2026-07-23:
+
+| Kelas         | Contoh        | Rendah | Puncak | Super puncak |
+| ------------- | ------------- | ------ | ------ | ------------ |
+| Hatch ekonomi | Perodua Axia  | RM70   | RM100  | RM120        |
+| Sedan ekonomi | Perodua Bezza | RM80   | RM110  | RM130        |
+| MPV keluarga  | Perodua Alza  | RM130  | RM200  | RM240        |
+| MPV besar     | Toyota Innova | RM140  | RM240  | RM280        |
+| 4×4 khas      | Suzuki Jimny  | RM350  | RM400  | RM450        |
+
+Tiada diskaun peratusan mingguan automatik dalam enjin tempahan — trip lebih lama hanya mendarab kadar harian musim (maksimum 30 hari dalam data seed). Penghantaran ke Pintu 3, Jeti Kuah, dan hotel dalam senarai tempahan adalah percuma; alamat taip sendiri menggunakan yuran penghantaran hotel (RM50 pada harga seed semasa). Dasar minyak: same-to-same.
 
 ## Dokumen dan umur
 
-Lesen sah, pasport/IC, kad kredit; umur minimum 23, sekurang-kurangnya satu tahun memandu.
+Umur 23–65, lesen sah sekurang-kurangnya setahun, pasport atau MyKad, dan kad kredit untuk deposit. Warga Malaysia: MyKad + lesen. Pelawat: bawa IDP bersama lesen asal jika ragu. Baca [panduan keperluan](/en/blog/rent-a-car-langkawi-requirements) atau hubungi kami sebelum terbang jika dokumen anda luar biasa.
 
-## Tempah terus dengan XQ Car
+## Tempat ambil yang penting
 
-Tempahan dalam ~90 saat di carxq.com — pasukan yang sama jumpa anda di Pintu 3.
+- **Pintu 3 LGK** — 24/7; kongsi nombor penerbangan. [Panduan lapangan terbang](/ms/blog/langkawi-airport-car-rental-pickup-ms)
+- **Jeti Feri Kuah** — ketibaan dari Pulau Pinang / Kuala Kedah / Kuala Perlis
+- **Hotel dalam senarai** — pilih semasa checkout
+
+## Tempah di carxq.com
+
+Pilih tarikh, kereta, lokasi ambil, tambah seat kanak-kanak (RM30) atau pemandu kedua (RM20) jika perlu, kemudian bayar dalam talian atau di tempat ambil jika ditawarkan. Anda berurusan dengan pasukan pulau yang sama yang serah kunci.

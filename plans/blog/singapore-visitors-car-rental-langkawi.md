@@ -31,11 +31,11 @@ Singapore residents and expats planning a long weekend in Langkawi.
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| Requirements post notes Singapore licences commonly accepted for short stays; IDP removes debate | content/blog/rent-a-car-langkawi-requirements.md (re-verify) | 2026-07-23 | verified |
-| Door 3 pickup flow | content/blog/langkawi-airport-car-rental-pickup.md | 2026-07-23 | verified |
-| Current counter practice for Singapore softcopy licences | XQ Car operator confirmation | — | operator check required |
+| Claim or detail                                                                                  | Source                                                       | Checked    | Status                  |
+| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------ | ---------- | ----------------------- |
+| Requirements post notes Singapore licences commonly accepted for short stays; IDP removes debate | content/blog/rent-a-car-langkawi-requirements.md (re-verify) | 2026-07-23 | verified                |
+| Door 3 pickup flow                                                                               | content/blog/langkawi-airport-car-rental-pickup.md           | 2026-07-23 | verified                |
+| Current counter practice for Singapore softcopy licences                                         | XQ Car operator confirmation                                 | —          | operator check required |
 
 ## Product Connections
 

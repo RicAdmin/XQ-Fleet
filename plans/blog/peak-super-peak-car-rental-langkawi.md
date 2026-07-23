@@ -31,11 +31,11 @@ Trip planners comparing dates, especially Malaysian school holidays and festive 
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| Season types Low, Peak, Super Peak seeded from data/Season.csv | data/Season.csv; scripts/seed-season-from-csv.ts | 2026-07-23 | verified |
-| Axia RM70/100/120; Alza RM130/200/240 across seasons | data/Car.csv | 2026-07-23 | verified |
-| Qualitative demand: school holidays spike rental scarcity | https://malaysiajourneys.com/langkawi-itinerary-how-to-spend-3-5-or-7-days-on-eagle-island/ (accessed 2026-07-23) | 2026-07-23 | verified |
+| Claim or detail                                                | Source                                                                                                            | Checked    | Status   |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ---------- | -------- |
+| Season types Low, Peak, Super Peak seeded from data/Season.csv | data/Season.csv; scripts/seed-season-from-csv.ts                                                                  | 2026-07-23 | verified |
+| Axia RM70/100/120; Alza RM130/200/240 across seasons           | data/Car.csv                                                                                                      | 2026-07-23 | verified |
+| Qualitative demand: school holidays spike rental scarcity      | https://malaysiajourneys.com/langkawi-itinerary-how-to-spend-3-5-or-7-days-on-eagle-island/ (accessed 2026-07-23) | 2026-07-23 | verified |
 
 ## Product Connections
 

@@ -31,11 +31,11 @@ Extended families, wedding parties, dive/tour groups, and corporate visitors.
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| nissan-urvan 14 seats manual diesel from RM200 low / RM280 peak / RM320 super peak | data/Car.csv | 2026-07-23 | verified |
-| hyundai-staria 10 seats from RM400 low / RM450 peak / RM500 super peak | data/Car.csv | 2026-07-23 | verified |
-| Manual Urvan driver confidence requirement and wedding lead times | XQ Car operator notes | — | operator check required |
+| Claim or detail                                                                    | Source                | Checked    | Status                  |
+| ---------------------------------------------------------------------------------- | --------------------- | ---------- | ----------------------- |
+| nissan-urvan 14 seats manual diesel from RM200 low / RM280 peak / RM320 super peak | data/Car.csv          | 2026-07-23 | verified                |
+| hyundai-staria 10 seats from RM400 low / RM450 peak / RM500 super peak             | data/Car.csv          | 2026-07-23 | verified                |
+| Manual Urvan driver confidence requirement and wedding lead times                  | XQ Car operator notes | —          | operator check required |
 
 ## Product Connections
 

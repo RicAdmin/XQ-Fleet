@@ -31,11 +31,11 @@ Budget solo travellers and couples weighing scooter listings against car quotes.
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
+| Claim or detail                                                                | Source                                                                  | Checked    | Status   |
+| ------------------------------------------------------------------------------ | ----------------------------------------------------------------------- | ---------- | -------- |
 | Qualitative scooter pricing ~RM35–60/day in traveller guides; licence required | https://mystravels.com/how-to-get-around-langkawi (accessed 2026-07-23) | 2026-07-23 | verified |
-| XQ Car economy from RM70/day low season Axia | data/Car.csv | 2026-07-23 | verified |
-| Existing car vs Grab/taxi post — keep scooter angle distinct | content/blog/langkawi-car-rental-vs-taxi-grab.md | 2026-07-23 | verified |
+| XQ Car economy from RM70/day low season Axia                                   | data/Car.csv                                                            | 2026-07-23 | verified |
+| Existing car vs Grab/taxi post — keep scooter angle distinct                   | content/blog/langkawi-car-rental-vs-taxi-grab.md                        | 2026-07-23 | verified |
 
 ## Product Connections
 

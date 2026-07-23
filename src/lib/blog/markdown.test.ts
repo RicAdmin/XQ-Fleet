@@ -35,11 +35,7 @@ describe('parseBlogMarkdown', () => {
   it('loads the sanitizer with the AWS Lambda module flags', () => {
     const result = spawnSync(
       process.execPath,
-      [
-        '--no-experimental-require-module',
-        '-e',
-        "require('sanitize-html')",
-      ],
+      ['--no-experimental-require-module', '-e', "require('sanitize-html')"],
       { cwd: process.cwd(), encoding: 'utf8' },
     )
 
@@ -54,10 +50,10 @@ describe('parseBlogMarkdown', () => {
       }),
     )
 
-    expect(posts).toHaveLength(24)
-    expect(new Set(posts.map((post) => post.slug)).size).toBe(24)
+    expect(posts).toHaveLength(18)
+    expect(new Set(posts.map((post) => post.slug)).size).toBe(18)
     expect(posts.filter((post) => post.language === 'ms')).toHaveLength(2)
-    expect(posts.filter((post) => post.language === 'zh')).toHaveLength(2)
+    expect(posts.filter((post) => post.language === 'zh')).toHaveLength(0)
   })
 
   it('parses frontmatter and derives the lead, body, author, and read time', async () => {

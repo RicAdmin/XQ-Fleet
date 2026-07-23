@@ -31,9 +31,9 @@ Families already leaning MPV after reading the general family-car post.
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| Alza 7 seats RM130/200/240; Veloz 7 seats RM150/250/290; Innova 8 seats RM140/240/280 | data/Car.csv | 2026-07-23 | verified |
+| Claim or detail                                                                             | Source                                                          | Checked    | Status   |
+| ------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ---------- | -------- |
+| Alza 7 seats RM130/200/240; Veloz 7 seats RM150/250/290; Innova 8 seats RM140/240/280       | data/Car.csv                                                    | 2026-07-23 | verified |
 | Existing family post covers MPV vs sedan broadly — this plan narrows to 7–8 seat comparison | content/blog/best-car-langkawi-family-trip.md (overlap control) | 2026-07-23 | verified |
 
 ## Product Connections

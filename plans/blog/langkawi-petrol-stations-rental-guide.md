@@ -31,17 +31,17 @@ First-time self-drive tourists, especially those heading north or northwest.
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| National unsubsidised RON95 RM3.42/L for week 16–22 Jul 2026; Budi95 RM1.99 for eligible Malaysians | https://paultan.org/2026/07/15/malaysian-fuel-prices-july-16-to-22-2026-diesel-up-10-sen-rm4-07-ron95-up-five-sen-to-rm3-42-per-litre/ (accessed 2026-07-23) | 2026-07-23 | verified |
-| Fuel policy Same-to-Same on fleet seed | data/Car.csv Fuel_Policy column | 2026-07-23 | verified |
-| Stations cluster Kuah/Cenang/Padang Matsirat; thin on west/north stretches | https://malaysiajourneys.com/getting-to-langkawi-getting-around-your-complete-transport-guide/ (accessed 2026-07-23); content/blog/driving-langkawi-first-time.md overlap only | 2026-07-23 | verified |
-| Operator-preferred stations near LGK return and Cenang evening returns | XQ Car operator notes | — | operator check required |
+| Claim or detail                                                                                     | Source                                                                                                                                                                         | Checked    | Status                  |
+| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | ----------------------- |
+| National unsubsidised RON95 RM3.42/L for week 16–22 Jul 2026; Budi95 RM1.99 for eligible Malaysians | https://paultan.org/2026/07/15/malaysian-fuel-prices-july-16-to-22-2026-diesel-up-10-sen-rm4-07-ron95-up-five-sen-to-rm3-42-per-litre/ (accessed 2026-07-23)                   | 2026-07-23 | verified                |
+| Fuel policy Same-to-Same on fleet seed                                                              | data/Car.csv Fuel_Policy column                                                                                                                                                | 2026-07-23 | verified                |
+| Stations cluster Kuah/Cenang/Padang Matsirat; thin on west/north stretches                          | https://malaysiajourneys.com/getting-to-langkawi-getting-around-your-complete-transport-guide/ (accessed 2026-07-23); content/blog/driving-langkawi-first-time.md overlap only | 2026-07-23 | verified                |
+| Operator-preferred stations near LGK return and Cenang evening returns                              | XQ Car operator notes                                                                                                                                                          | —          | operator check required |
 
 ## Product Connections
 
 - Vehicle slugs: perodua-axia, nissan-urvan
-- Internal links: /en/blog/driving-langkawi-first-time, /en/blog/tanjung-rhu-beach-drive-langkawi, /en/blog/car-rental-langkawi-complete-guide
+- Internal links: /en/blog/driving-langkawi-first-time, /en/blog/langkawi-3-day-itinerary-by-car, /en/blog/car-rental-langkawi-complete-guide
 
 ## Search Language
 

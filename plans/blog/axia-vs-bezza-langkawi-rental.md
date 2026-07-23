@@ -31,10 +31,10 @@ Couples and small families comparing economy cars online.
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
+| Claim or detail                                                              | Source       | Checked    | Status   |
+| ---------------------------------------------------------------------------- | ------------ | ---------- | -------- |
 | Axia promotional/low RM70, peak RM100, super RM120; boot 255 L; OKU tag true | data/Car.csv | 2026-07-23 | verified |
-| Bezza promotional/low RM80, peak RM110, super RM130; boot 508 L | data/Car.csv | 2026-07-23 | verified |
+| Bezza promotional/low RM80, peak RM110, super RM130; boot 508 L              | data/Car.csv | 2026-07-23 | verified |
 
 ## Product Connections
 
