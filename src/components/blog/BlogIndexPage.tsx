@@ -147,7 +147,6 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
                 aria-label={post.title}
               />
               <div className="blog-card-body">
-                <span className="blog-card-tag">{post.category}</span>
                 <span className="blog-card-meta">
                   {formatBlogDate(post.publishedAt)} · {post.readTimeMin} min
                 </span>

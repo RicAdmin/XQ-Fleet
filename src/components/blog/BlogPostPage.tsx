@@ -57,7 +57,6 @@ export function BlogPostPage({ post, allPosts }: BlogPostPageProps) {
             <ArrowLeft size={16} />
           </LocaleLink>
           <div className="post-hero-inner">
-            <span className="post-hero-tag">{post.category}</span>
             <h1>{post.title}</h1>
             <div className="post-hero-meta">
               <span>
@@ -158,7 +157,6 @@ export function BlogPostPage({ post, allPosts }: BlogPostPageProps) {
                   aria-label={r.title}
                 />
                 <div className="blog-card-body">
-                  <span className="blog-card-tag">{r.category}</span>
                   <h3>{r.title}</h3>
                   <p>{r.excerpt}</p>
                 </div>
