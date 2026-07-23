@@ -3,7 +3,9 @@ title: 'Cashback Feri RoRo: Sewa Kereta Selepas Sampai Jeti Kuah'
 slug: 'langkawi-ferry-cashback-car-rental-ms'
 language: ms
 category: Airport & Pickup
-status: pending
+status: complete
+completedAt: 2026-07-23
+output: content/blog/langkawi-ferry-cashback-car-rental-ms.md
 created: 2026-07-23
 primaryQuery: 'cashback mai langkawi sewa kereta'
 readerIntent: 'Gabungkan kelayakan Cashback Mai Langkawi dengan keputusan sewa kereta pada hari ketibaan'
@@ -31,11 +33,11 @@ Keluarga dan kumpulan Malaysia yang guna RoRo Kuala Perlis–Langkawi semasa kem
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| Cashback Mai Langkawi 1 Aug–31 Oct 2026, Malaysian citizens excl. Langkawi residents, return RoRo, 2+ nights | https://naturallylangkawi.my/kempenb1f1/ (accessed 2026-07-23) | 2026-07-23 | verified |
-| Free jetty meet for preset location | src/lib/pricing-logic.ts | 2026-07-23 | verified |
-| Peak jetty wait times on promo weekends | XQ Car operator notes | 2026-07-23 | operator check required |
+| Claim or detail                                                                                              | Source                                                         | Checked    | Status                                                                             |
+| ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------- |
+| Cashback Mai Langkawi 1 Aug–31 Oct 2026, Malaysian citizens excl. Langkawi residents, return RoRo, 2+ nights | https://naturallylangkawi.my/kempenb1f1/ (accessed 2026-07-23) | 2026-07-23 | verified                                                                           |
+| Free jetty meet for preset location                                                                          | src/lib/pricing-logic.ts                                       | 2026-07-23 | verified                                                                           |
+| Peak jetty wait times on promo weekends                                                                      | XQ Car operator notes                                          | 2026-07-23 | operator check required — qualified as weekend congestion, not specific wait times |
 
 ## Product Connections
 
