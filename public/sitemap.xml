@@ -139,6 +139,16 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://car.xqholidays.com.my/en/blog/car-rental-langkawi-complete-guide" />
   </url>
   <url>
+    <loc>https://car.xqholidays.com.my/en/blog/cheap-car-rental-langkawi-tips-ms</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/cheap-car-rental-langkawi-tips-ms" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://car.xqholidays.com.my/ms/blog/cheap-car-rental-langkawi-tips-ms" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://car.xqholidays.com.my/zh/blog/cheap-car-rental-langkawi-tips-ms" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://car.xqholidays.com.my/en/blog/cheap-car-rental-langkawi-tips-ms" />
+  </url>
+  <url>
     <loc>https://car.xqholidays.com.my/en/blog/cheap-car-rental-langkawi-tips-zh</loc>
     <lastmod>2026-07-23</lastmod>
     <changefreq>monthly</changefreq>
@@ -150,7 +160,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/en/blog/cheap-car-rental-langkawi-tips</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/cheap-car-rental-langkawi-tips" />
@@ -180,7 +190,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/en/blog/langkawi-airport-car-rental-pickup-ms</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-airport-car-rental-pickup-ms" />
@@ -190,7 +200,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/en/blog/langkawi-airport-car-rental-pickup</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-airport-car-rental-pickup" />
@@ -210,7 +220,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/en/blog/langkawi-car-rental-insurance</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-car-rental-insurance" />
@@ -219,8 +229,18 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://car.xqholidays.com.my/en/blog/langkawi-car-rental-insurance" />
   </url>
   <url>
+    <loc>https://car.xqholidays.com.my/en/blog/langkawi-car-rental-vs-taxi-grab-ms</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-car-rental-vs-taxi-grab-ms" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://car.xqholidays.com.my/ms/blog/langkawi-car-rental-vs-taxi-grab-ms" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://car.xqholidays.com.my/zh/blog/langkawi-car-rental-vs-taxi-grab-ms" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://car.xqholidays.com.my/en/blog/langkawi-car-rental-vs-taxi-grab-ms" />
+  </url>
+  <url>
     <loc>https://car.xqholidays.com.my/en/blog/langkawi-car-rental-vs-taxi-grab</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-car-rental-vs-taxi-grab" />
@@ -250,7 +270,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/en/blog/langkawi-ferry-jetty-car-rental-ms</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-ferry-jetty-car-rental-ms" />
@@ -260,7 +280,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/en/blog/langkawi-ferry-jetty-car-rental</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-ferry-jetty-car-rental" />
@@ -319,6 +339,16 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://car.xqholidays.com.my/en/blog/pantai-cenang-car-rental-guide" />
   </url>
   <url>
+    <loc>https://car.xqholidays.com.my/en/blog/rent-a-car-langkawi-requirements-ms</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/rent-a-car-langkawi-requirements-ms" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://car.xqholidays.com.my/ms/blog/rent-a-car-langkawi-requirements-ms" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://car.xqholidays.com.my/zh/blog/rent-a-car-langkawi-requirements-ms" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://car.xqholidays.com.my/en/blog/rent-a-car-langkawi-requirements-ms" />
+  </url>
+  <url>
     <loc>https://car.xqholidays.com.my/en/blog/rent-a-car-langkawi-requirements-zh</loc>
     <lastmod>2026-07-23</lastmod>
     <changefreq>monthly</changefreq>
@@ -330,7 +360,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/en/blog/rent-a-car-langkawi-requirements</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/rent-a-car-langkawi-requirements" />
@@ -487,6 +517,16 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://car.xqholidays.com.my/en/blog/car-rental-langkawi-complete-guide" />
   </url>
   <url>
+    <loc>https://car.xqholidays.com.my/ms/blog/cheap-car-rental-langkawi-tips-ms</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/cheap-car-rental-langkawi-tips-ms" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://car.xqholidays.com.my/ms/blog/cheap-car-rental-langkawi-tips-ms" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://car.xqholidays.com.my/zh/blog/cheap-car-rental-langkawi-tips-ms" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://car.xqholidays.com.my/en/blog/cheap-car-rental-langkawi-tips-ms" />
+  </url>
+  <url>
     <loc>https://car.xqholidays.com.my/ms/blog/cheap-car-rental-langkawi-tips-zh</loc>
     <lastmod>2026-07-23</lastmod>
     <changefreq>monthly</changefreq>
@@ -498,7 +538,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/ms/blog/cheap-car-rental-langkawi-tips</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/cheap-car-rental-langkawi-tips" />
@@ -528,7 +568,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/ms/blog/langkawi-airport-car-rental-pickup-ms</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-airport-car-rental-pickup-ms" />
@@ -538,7 +578,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/ms/blog/langkawi-airport-car-rental-pickup</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-airport-car-rental-pickup" />
@@ -558,7 +598,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/ms/blog/langkawi-car-rental-insurance</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-car-rental-insurance" />
@@ -567,8 +607,18 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://car.xqholidays.com.my/en/blog/langkawi-car-rental-insurance" />
   </url>
   <url>
+    <loc>https://car.xqholidays.com.my/ms/blog/langkawi-car-rental-vs-taxi-grab-ms</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-car-rental-vs-taxi-grab-ms" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://car.xqholidays.com.my/ms/blog/langkawi-car-rental-vs-taxi-grab-ms" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://car.xqholidays.com.my/zh/blog/langkawi-car-rental-vs-taxi-grab-ms" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://car.xqholidays.com.my/en/blog/langkawi-car-rental-vs-taxi-grab-ms" />
+  </url>
+  <url>
     <loc>https://car.xqholidays.com.my/ms/blog/langkawi-car-rental-vs-taxi-grab</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-car-rental-vs-taxi-grab" />
@@ -598,7 +648,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/ms/blog/langkawi-ferry-jetty-car-rental-ms</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-ferry-jetty-car-rental-ms" />
@@ -608,7 +658,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/ms/blog/langkawi-ferry-jetty-car-rental</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-ferry-jetty-car-rental" />
@@ -667,6 +717,16 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://car.xqholidays.com.my/en/blog/pantai-cenang-car-rental-guide" />
   </url>
   <url>
+    <loc>https://car.xqholidays.com.my/ms/blog/rent-a-car-langkawi-requirements-ms</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/rent-a-car-langkawi-requirements-ms" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://car.xqholidays.com.my/ms/blog/rent-a-car-langkawi-requirements-ms" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://car.xqholidays.com.my/zh/blog/rent-a-car-langkawi-requirements-ms" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://car.xqholidays.com.my/en/blog/rent-a-car-langkawi-requirements-ms" />
+  </url>
+  <url>
     <loc>https://car.xqholidays.com.my/ms/blog/rent-a-car-langkawi-requirements-zh</loc>
     <lastmod>2026-07-23</lastmod>
     <changefreq>monthly</changefreq>
@@ -678,7 +738,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/ms/blog/rent-a-car-langkawi-requirements</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/rent-a-car-langkawi-requirements" />
@@ -835,6 +895,16 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://car.xqholidays.com.my/en/blog/car-rental-langkawi-complete-guide" />
   </url>
   <url>
+    <loc>https://car.xqholidays.com.my/zh/blog/cheap-car-rental-langkawi-tips-ms</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/cheap-car-rental-langkawi-tips-ms" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://car.xqholidays.com.my/ms/blog/cheap-car-rental-langkawi-tips-ms" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://car.xqholidays.com.my/zh/blog/cheap-car-rental-langkawi-tips-ms" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://car.xqholidays.com.my/en/blog/cheap-car-rental-langkawi-tips-ms" />
+  </url>
+  <url>
     <loc>https://car.xqholidays.com.my/zh/blog/cheap-car-rental-langkawi-tips-zh</loc>
     <lastmod>2026-07-23</lastmod>
     <changefreq>monthly</changefreq>
@@ -846,7 +916,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/zh/blog/cheap-car-rental-langkawi-tips</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/cheap-car-rental-langkawi-tips" />
@@ -876,7 +946,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/zh/blog/langkawi-airport-car-rental-pickup-ms</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-airport-car-rental-pickup-ms" />
@@ -886,7 +956,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/zh/blog/langkawi-airport-car-rental-pickup</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-airport-car-rental-pickup" />
@@ -906,7 +976,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/zh/blog/langkawi-car-rental-insurance</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-car-rental-insurance" />
@@ -915,8 +985,18 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://car.xqholidays.com.my/en/blog/langkawi-car-rental-insurance" />
   </url>
   <url>
+    <loc>https://car.xqholidays.com.my/zh/blog/langkawi-car-rental-vs-taxi-grab-ms</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-car-rental-vs-taxi-grab-ms" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://car.xqholidays.com.my/ms/blog/langkawi-car-rental-vs-taxi-grab-ms" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://car.xqholidays.com.my/zh/blog/langkawi-car-rental-vs-taxi-grab-ms" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://car.xqholidays.com.my/en/blog/langkawi-car-rental-vs-taxi-grab-ms" />
+  </url>
+  <url>
     <loc>https://car.xqholidays.com.my/zh/blog/langkawi-car-rental-vs-taxi-grab</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-car-rental-vs-taxi-grab" />
@@ -946,7 +1026,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/zh/blog/langkawi-ferry-jetty-car-rental-ms</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-ferry-jetty-car-rental-ms" />
@@ -956,7 +1036,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/zh/blog/langkawi-ferry-jetty-car-rental</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/langkawi-ferry-jetty-car-rental" />
@@ -1015,6 +1095,16 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://car.xqholidays.com.my/en/blog/pantai-cenang-car-rental-guide" />
   </url>
   <url>
+    <loc>https://car.xqholidays.com.my/zh/blog/rent-a-car-langkawi-requirements-ms</loc>
+    <lastmod>2026-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/rent-a-car-langkawi-requirements-ms" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://car.xqholidays.com.my/ms/blog/rent-a-car-langkawi-requirements-ms" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://car.xqholidays.com.my/zh/blog/rent-a-car-langkawi-requirements-ms" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://car.xqholidays.com.my/en/blog/rent-a-car-langkawi-requirements-ms" />
+  </url>
+  <url>
     <loc>https://car.xqholidays.com.my/zh/blog/rent-a-car-langkawi-requirements-zh</loc>
     <lastmod>2026-07-23</lastmod>
     <changefreq>monthly</changefreq>
@@ -1026,7 +1116,7 @@
   </url>
   <url>
     <loc>https://car.xqholidays.com.my/zh/blog/rent-a-car-langkawi-requirements</loc>
-    <lastmod>2026-07-23</lastmod>
+    <lastmod>2026-07-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://car.xqholidays.com.my/en/blog/rent-a-car-langkawi-requirements" />
