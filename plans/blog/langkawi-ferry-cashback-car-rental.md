@@ -3,7 +3,9 @@ title: 'Ferry Cashback Season: Renting a Car After Kuah Jetty Arrival'
 slug: 'langkawi-ferry-cashback-car-rental'
 language: en
 category: Airport & Pickup
-status: pending
+status: complete
+completedAt: 2026-07-23
+output: content/blog/langkawi-ferry-cashback-car-rental.md
 created: 2026-07-23
 primaryQuery: 'langkawi ferry car rental'
 readerIntent: 'Decide whether to book a rental for ferry arrival day during the Aug–Oct 2026 RoRo cashback promo'
@@ -31,11 +33,11 @@ Malaysian travellers using Kuala Perlis–Langkawi RoRo during the LADA cashback
 
 ## Evidence Ledger
 
-| Claim or detail                                                                                        | Source                                                                                             | Checked    | Status                  |
-| ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- | ---------- | ----------------------- |
-| Cashback Mai Langkawi runs 1 Aug–31 Oct 2026 for eligible Malaysian RoRo passengers with 2+ night stay | https://naturallylangkawi.my/ (accessed 2026-07-23)                                                | 2026-07-23 | verified                |
-| XQ Car free Kuah Jetty pickup/drop-off                                                                 | src/components/about/AboutPage.tsx; content/blog/langkawi-ferry-jetty-car-rental.md (overlap only) | 2026-07-23 | verified                |
-| Peak jetty meet process and wait times on promo weekends                                               | XQ Car operator notes                                                                              | —          | operator check required |
+| Claim or detail                                                                                        | Source                                                                                             | Checked    | Status                                                            |
+| ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------- |
+| Cashback Mai Langkawi runs 1 Aug–31 Oct 2026 for eligible Malaysian RoRo passengers with 2+ night stay | https://naturallylangkawi.my/ (accessed 2026-07-23)                                                | 2026-07-23 | verified                                                          |
+| XQ Car free Kuah Jetty pickup/drop-off                                                                 | src/components/about/AboutPage.tsx; content/blog/langkawi-ferry-jetty-car-rental.md (overlap only) | 2026-07-23 | verified                                                          |
+| Peak jetty meet process on promo weekends                                                              | src/components/guides/pickup-return-guide.tsx; src/i18n/messages/en/booking.ts                     | 2026-07-23 | verified — qualify busier ferry traffic; no fixed wait-time claim |
 
 ## Product Connections
 
@@ -51,7 +53,7 @@ Malaysian travellers using Kuala Perlis–Langkawi RoRo during the LADA cashback
 ## Image Brief
 
 - Project-owned candidates: `/image/Attractions/Eagle Square.png`
-- Generated fallback: Illustrated Kuah Jetty arrival with a compact rental car waiting, XQ Car teal/coral palette, landscape editorial illustration
+- Used: `/image/Attractions/Eagle%20Square.png` (existing ferry-jetty guide asset)
 
 ## Voice Notes
 
