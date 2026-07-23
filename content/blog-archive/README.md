@@ -12,5 +12,6 @@ Moved out of `content/blog/` on 2026-07-23 so they are not published.
 | langkawi-sky-bridge-by-car            | Thin timing stub; undated ticket claims                                                  |
 | tanjung-rhu-beach-drive-langkawi      | Scenic stub; little cost/vehicle trade-off                                               |
 | kuah-town-langkawi-car-rental         | Overlaps ferry-jetty guide + queued duty-free shopping plan                              |
+| book-car-rental-langkawi-online       | Booking UI walkthrough; low search intent vs requirements/pricing guides                 |
 
 Do not move these back without rewriting to the blog-writer bar.

@@ -1,22 +1,27 @@
 ---
 name: blog-writer
-description: Write and verify publishable XQ Car blog posts from confirmed queued plans. Use when asked to draft, write, complete, or publish an article from the XQ Car blog queue.
+description: Write and verify publishable XQ Car blog posts from the publishing sequence. Use when asked to draft, write, complete, or publish the next blog post, or any article from the XQ Car blog queue.
 ---
 
 # XQ Car Blog Writer
 
 Turn one confirmed plan into a factual Markdown post in `content/blog/`. Each English, Malay, or Chinese article is an independent post.
 
-## 1. Select and claim queued work
+## 1. Read the publishing sequence and claim the next post
 
-Read `plans/blog/PUBLISHING_QUEUE.md` and the linked plans:
+The publishing sequence is [`plans/blog/PUBLISHING_QUEUE.md`](../../../plans/blog/PUBLISHING_QUEUE.md). Read it first on every invocation, then open the linked plan files as needed.
 
-- Honor a queued slug or title named by the user, including a future-dated entry.
-- Otherwise select the first entry whose optional date is today or earlier; an undated entry is immediately eligible.
-- When no entry is eligible, stop and report the next scheduled entry.
-- When the queue is empty, stop and recommend `$blog-planner`.
+Pick work in this order:
 
-Require the selected plan to have `status: pending`. Change it to `status: in-progress` before drafting. If publication becomes blocked, restore `pending` and record the blocker under `Freshness and Operator Checks`.
+1. If the user names a queued slug or title, use that entry — including a future-dated one.
+2. Otherwise walk the sequence from the top and claim the first **eligible** entry:
+   - Undated entries are immediately eligible.
+   - Dated entries are eligible when their date is today or earlier.
+   - Skip entries whose plan `status` is not `pending` (already `in-progress`, `complete`, or missing).
+3. If nothing is eligible, stop. Report the next dated entry and its schedule; do not invent work.
+4. If the sequence is empty, stop and recommend `$blog-planner`.
+
+Do not ask which post to write when eligibility is clear. State the chosen slug, title, language, and queue position, then claim it: set the plan to `status: in-progress` before drafting. If publication becomes blocked, restore `pending` and record the blocker under `Freshness and Operator Checks`.
 
 **Complete when:** exactly one queued plan is in scope and its status reflects whether writing is active or blocked.
 
@@ -123,9 +128,9 @@ completedAt: YYYY-MM-DD
 output: content/blog/<slug>.md
 ```
 
-Remove the completed entry from `plans/blog/PUBLISHING_QUEUE.md`; its plan remains the publication record.
+Remove the completed entry from the publishing sequence in `plans/blog/PUBLISHING_QUEUE.md`; its plan remains the publication record.
 
-**Complete when:** validation passes, the plan is complete, the output resolves, and the queue contains no completed entry.
+**Complete when:** validation passes, the plan is complete, the output resolves, and the publishing sequence contains no completed entry.
 
 ## Handoff
 

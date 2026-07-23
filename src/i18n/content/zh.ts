@@ -36,19 +36,21 @@ export const zhLandingContent: LandingContent = {
       img: '/image/Attractions/Sky%20bridge.png',
     },
     {
-      id: 'book-rental-step-by-step',
-      slug: 'book-car-rental-langkawi-online',
+      id: 'rent-car-requirements',
+      slug: 'rent-a-car-langkawi-requirements',
       tag: '指南',
-      title: '如何一步步在线预订 XQ Car 租车',
-      excerpt: '用可视化流程带您走过每个界面，第一次下单也能像老手一样顺滑。',
-      img: '/image/Attractions/pantai%20cenang.png',
+      title: '兰卡威租车条件 — 证件与年龄要求',
+      excerpt:
+        '驾照、国际驾驶许可、押金与年龄核查，避免机场 Door 3 或码头交接因材料不全延误。',
+      img: '/image/hero-langkawi-adventure-768.jpg',
     },
     {
       id: 'monsoon-travel-langkawi',
       slug: 'langkawi-monsoon-season-car-rental',
       tag: '规划',
       title: '为何雨季往往是最宁静的探索时机',
-      excerpt: '人流更少、山峦更苍翠，还有淡季价格——若行程落在五月至六月可参考这些体验。',
+      excerpt:
+        '人流更少、山峦更苍翠，还有淡季价格——若行程落在五月至六月可参考这些体验。',
       img: '/image/Attractions/Kilim%20Geoforest%20Park.png',
     },
   ],
@@ -63,7 +65,8 @@ export const zhLandingContent: LandingContent = {
       cenang: '20 km',
       kuah: '29 km',
       time: '车程约 32 分钟',
-      mapsUrl: 'https://www.google.com/maps/place/Langkawi+Sky+Bridge/@6.3860,99.6622,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Langkawi+Sky+Bridge/@6.3860,99.6622,17z',
       img: '/image/Attractions/Sky%20bridge.png',
     },
     {
@@ -76,7 +79,8 @@ export const zhLandingContent: LandingContent = {
       cenang: '19 km',
       kuah: '28 km',
       time: '车程约 28 分钟',
-      mapsUrl: 'https://www.google.com/maps/place/Langkawi+Cable+Car/@6.3710,99.6719,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Langkawi+Cable+Car/@6.3710,99.6719,17z',
       img: '/image/Attractions/Skycab.png',
     },
     {
@@ -89,7 +93,8 @@ export const zhLandingContent: LandingContent = {
       cenang: '此处',
       kuah: '19 km',
       time: '车程约 9 分钟',
-      mapsUrl: 'https://www.google.com/maps/place/Pantai+Cenang/@6.2913,99.7289,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Pantai+Cenang/@6.2913,99.7289,17z',
       img: '/image/Attractions/pantai%20cenang.png',
     },
     {
@@ -102,7 +107,8 @@ export const zhLandingContent: LandingContent = {
       cenang: '29 km',
       kuah: '11 km',
       time: '车程约 28 分钟',
-      mapsUrl: 'https://www.google.com/maps/place/Kilim+Karst+Geoforest+Park/@6.4050,99.8582,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Kilim+Karst+Geoforest+Park/@6.4050,99.8582,17z',
       img: '/image/Attractions/Kilim%20Geoforest%20Park.png',
     },
     {
@@ -115,7 +121,8 @@ export const zhLandingContent: LandingContent = {
       cenang: '26 km',
       kuah: '24 km',
       time: '车程约 31 分钟',
-      mapsUrl: 'https://www.google.com/maps/place/Pantai+Tanjung+Rhu/@6.4581,99.8249,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Pantai+Tanjung+Rhu/@6.4581,99.8249,17z',
       img: '/image/Attractions/Tanjung%20Rhu.png',
     },
     {
@@ -128,7 +135,8 @@ export const zhLandingContent: LandingContent = {
       cenang: '1 km',
       kuah: '19 km',
       time: '车程约 10 分钟',
-      mapsUrl: 'https://www.google.com/maps/place/Underwater+World+Langkawi/@6.2878,99.7286,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Underwater+World+Langkawi/@6.2878,99.7286,17z',
       img: '/image/Attractions/Underwater%20World.png',
     },
     {
@@ -141,7 +149,8 @@ export const zhLandingContent: LandingContent = {
       cenang: '22 km',
       kuah: '4 km',
       time: '车程约 21 分钟',
-      mapsUrl: 'https://www.google.com/maps/place/Eagle+Square+Langkawi/@6.3083,99.8520,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Eagle+Square+Langkawi/@6.3083,99.8520,17z',
       img: '/image/Attractions/Eagle%20Square.png',
     },
     {
@@ -154,7 +163,8 @@ export const zhLandingContent: LandingContent = {
       cenang: '20 km',
       kuah: '29 km',
       time: '车程约 28 分钟',
-      mapsUrl: 'https://www.google.com/maps/place/Air+Terjun+Telaga+Tujuh/@6.3818,99.6729,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Air+Terjun+Telaga+Tujuh/@6.3818,99.6729,17z',
       img: '/image/Attractions/Telaga%20Tujuh%20Waterfall.png',
     },
     {
@@ -167,7 +177,8 @@ export const zhLandingContent: LandingContent = {
       cenang: '28 km',
       kuah: '10 km',
       time: '车程约 26 分钟',
-      mapsUrl: 'https://www.google.com/maps/place/Langkawi+Wildlife+Park/@6.3873,99.8619,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Langkawi+Wildlife+Park/@6.3873,99.8619,17z',
       img: '/image/Attractions/Wildlife%20Park.png',
     },
     {
@@ -180,7 +191,8 @@ export const zhLandingContent: LandingContent = {
       cenang: 'boat',
       kuah: 'boat',
       time: '渡轮约 45 分钟',
-      mapsUrl: 'https://www.google.com/maps/place/Pulau+Payar+Marine+Park/@6.0740,100.0562,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Pulau+Payar+Marine+Park/@6.0740,100.0562,17z',
       img: '/image/Attractions/Pulau%20Payar%20Marine%20Park.png',
     },
   ],
@@ -228,8 +240,7 @@ export const zhLandingContent: LandingContent = {
     {
       c: 'Eligibility',
       q: '租车需要满足哪些条件？',
-      a:
-        '年满 23 周岁且不超过 65 周岁，持有有效马来西亚驾照或认可的国际驾照，并拥有至少一年的驾龄，即可办理租车。',
+      a: '年满 23 周岁且不超过 65 周岁，持有有效马来西亚驾照或认可的国际驾照，并拥有至少一年的驾龄，即可办理租车。',
     },
     {
       c: 'Pickup & Extras',
@@ -239,8 +250,7 @@ export const zhLandingContent: LandingContent = {
     {
       c: 'Booking & Pricing',
       q: '租金如何计费？',
-      a:
-        '以每 24 小时为计费单位，周租或长租可享阶梯优惠。费用因季节与车型而异，欢迎在预订前向客服索取最新报价。',
+      a: '以每 24 小时为计费单位，周租或长租可享阶梯优惠。费用因季节与车型而异，欢迎在预订前向客服索取最新报价。',
     },
     {
       c: 'Insurance & Safety',
@@ -250,8 +260,7 @@ export const zhLandingContent: LandingContent = {
     {
       c: 'Pickup & Extras',
       q: '可以在兰卡威国际机场取车吗？',
-      a:
-        '可以——机场提车是我们的热门方案。团队在兰卡威国际机场（LGK）到达大厅 3 号门外全天候等候，不产生额外接机费用。请在下单时提供航班信息，我们会为您安排接机与交车。',
+      a: '可以——机场提车是我们的热门方案。团队在兰卡威国际机场（LGK）到达大厅 3 号门外全天候等候，不产生额外接机费用。请在下单时提供航班信息，我们会为您安排接机与交车。',
     },
     {
       c: 'Insurance & Safety',
@@ -271,8 +280,7 @@ export const zhLandingContent: LandingContent = {
     {
       c: 'Booking & Pricing',
       q: '如何更改或取消订单？',
-      a:
-        '请联系客服团队。提车时间前 48 小时以上取消可免费处理；更近时间的取消可能会产生象征性手续费。',
+      a: '请联系客服团队。提车时间前 48 小时以上取消可免费处理；更近时间的取消可能会产生象征性手续费。',
     },
     {
       c: 'Pickup & Extras',
@@ -282,8 +290,7 @@ export const zhLandingContent: LandingContent = {
     {
       c: 'Insurance & Safety',
       q: '如果还车时间迟到了怎么办？',
-      a:
-        '若超时超过约 30 分钟，可能要支付少量延迟费用。请先与我们沟通，我们会尽量帮您协调。',
+      a: '若超时超过约 30 分钟，可能要支付少量延迟费用。请先与我们沟通，我们会尽量帮您协调。',
     },
     {
       c: 'Eligibility',
@@ -298,8 +305,7 @@ export const zhLandingContent: LandingContent = {
     {
       c: 'Booking & Pricing',
       q: '兰卡威租车最经济实惠的选择是什么？',
-      a:
-        '经济型座驾起价约 RM 70／天，是自主环岛的高性价比之选。提前预订或连住七个晚上以上还可自动解锁更低折扣。',
+      a: '经济型座驾起价约 RM 70／天，是自主环岛的高性价比之选。提前预订或连住七个晚上以上还可自动解锁更低折扣。',
     },
   ],
   faqCats: [
@@ -316,8 +322,7 @@ export const zhLandingContent: LandingContent = {
       season: '提前 1 个月以上预订',
       title: '越早预订越多优惠',
       pct: 10,
-      body:
-        '至少在出行前一月完成预订可享精选车型九折优惠——旺季车源紧俏，尽早锁定中意座驾。',
+      body: '至少在出行前一月完成预订可享精选车型九折优惠——旺季车源紧俏，尽早锁定中意座驾。',
       image: '/image/Langkawi Car Rental - Pick This Car.png',
     },
     {
@@ -326,8 +331,7 @@ export const zhLandingContent: LandingContent = {
       season: '四季分级费率',
       title: '淡季自驾更划算',
       pct: 20,
-      body:
-        '兰卡威租车价格按四套季节梯度浮动。在低峰时段出行，人少海静、车流更稀疏，同时也能享受更友善的费率。',
+      body: '兰卡威租车价格按四套季节梯度浮动。在低峰时段出行，人少海静、车流更稀疏，同时也能享受更友善的费率。',
       image: '/image/Attractions/pantai cenang.png',
     },
     {
@@ -336,8 +340,7 @@ export const zhLandingContent: LandingContent = {
       season: '连租 ≥7 天',
       title: '住得更久，省得更多',
       pct: 30,
-      body:
-        '若在兰卡威旅居超过七天，延展租期日均可享最高约七折的优惠，非常适合一周以上的慢旅行与沉浸式度假。',
+      body: '若在兰卡威旅居超过七天，延展租期日均可享最高约七折的优惠，非常适合一周以上的慢旅行与沉浸式度假。',
       image: '/image/Attractions/Tanjung Rhu.png',
     },
   ],
@@ -412,8 +415,7 @@ export const zhLandingContent: LandingContent = {
   whyMain: {
     big: '11 年',
     bigSub: '深耕兰卡威路网',
-    body:
-      'XQ Holidays 源于一个简单的信念——向世界展示兰卡威岛上的至美体验。自 2015 年以来，我们自持并精心养护的车队助力旅客以更安心、自由而从容的方式丈量这座海岛。',
+    body: 'XQ Holidays 源于一个简单的信念——向世界展示兰卡威岛上的至美体验。自 2015 年以来，我们自持并精心养护的车队助力旅客以更安心、自由而从容的方式丈量这座海岛。',
     bullets: [
       '全部车辆在授权经销网络完成定期保养',
       '每次换手前都会洁净与全面检查',

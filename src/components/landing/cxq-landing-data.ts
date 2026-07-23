@@ -4,14 +4,17 @@ export const HERO_BG = '/image/hero-langkawi-adventure-1280.jpg'
 export const HERO_BG_768 = '/image/hero-langkawi-adventure-768.jpg'
 export const HERO_BG_FULL = '/image/hero-langkawi-adventure.jpg'
 /** Legacy PNG fallback (1 MB); prefer JPEG variants for LCP. */
-export const HERO_BG_LEGACY = '/image/Rent a Car in Langkawi for Every Adventure.png'
+export const HERO_BG_LEGACY =
+  '/image/Rent a Car in Langkawi for Every Adventure.png'
 
 export const HERO_BG_SRCSET = `${HERO_BG_768} 768w, ${HERO_BG} 1280w, ${HERO_BG_FULL} 1920w`
 
 export const AUTH_ASIDE_BG = '/image/Login form.JPG'
 
-export const FOOTER_CTA_FLEET_IMAGE = '/image/Langkawi Car Rental - Pick This Car.JPG'
-export const FOOTER_CTA_SCENERY_IMAGE = '/image/Langkawi Car Rental - Pick This Car.png'
+export const FOOTER_CTA_FLEET_IMAGE =
+  '/image/Langkawi Car Rental - Pick This Car.JPG'
+export const FOOTER_CTA_SCENERY_IMAGE =
+  '/image/Langkawi Car Rental - Pick This Car.png'
 
 export const HOTELS = [
   'The Datai Langkawi',
@@ -140,24 +143,32 @@ export const BLOG_TIPS = [
     img: '/image/Attractions/Sky%20bridge.png',
   },
   {
-    id: 'book-rental-step-by-step',
-    slug: 'book-car-rental-langkawi-online',
+    id: 'rent-car-requirements',
+    slug: 'rent-a-car-langkawi-requirements',
     tag: 'Guides',
-    title: 'How to book your XQ Car rental online — step by step',
-    excerpt: 'A quick visual walkthrough of every screen, so your first rental feels like your tenth.',
-    img: '/image/Attractions/pantai%20cenang.png',
+    title: 'How to rent a car in Langkawi — documents & age rules',
+    excerpt:
+      'Licence, IDP, deposit, and age checks so Door 3 or jetty handover does not stall on paperwork.',
+    img: '/image/hero-langkawi-adventure-768.jpg',
   },
   {
     id: 'monsoon-travel-langkawi',
     slug: 'langkawi-monsoon-season-car-rental',
     tag: 'Planning',
     title: 'Why monsoon season is the quietest time to explore',
-    excerpt: 'Fewer crowds, greener hills, and off-peak rates — what to expect if you visit between May and June.',
+    excerpt:
+      'Fewer crowds, greener hills, and off-peak rates — what to expect if you visit between May and June.',
     img: '/image/Attractions/Kilim%20Geoforest%20Park.png',
   },
 ] as const
 
-export const ATTR_CATS = ['All', 'Beaches', 'Adventure', 'Nature', 'Landmarks'] as const
+export const ATTR_CATS = [
+  'All',
+  'Beaches',
+  'Adventure',
+  'Nature',
+  'Landmarks',
+] as const
 
 /** Local attraction photos in `public/image/Attractions/`. */
 function attractionImage(filename: string): string {
@@ -175,7 +186,8 @@ export const ATTRACTIONS = [
     cenang: '20 km',
     kuah: '29 km',
     time: '32 min drive',
-    mapsUrl: 'https://www.google.com/maps/place/Langkawi+Sky+Bridge/@6.3860,99.6622,17z',
+    mapsUrl:
+      'https://www.google.com/maps/place/Langkawi+Sky+Bridge/@6.3860,99.6622,17z',
     img: attractionImage('Sky bridge.png'),
   },
   {
@@ -188,7 +200,8 @@ export const ATTRACTIONS = [
     cenang: '19 km',
     kuah: '28 km',
     time: '28 min drive',
-    mapsUrl: 'https://www.google.com/maps/place/Langkawi+Cable+Car/@6.3710,99.6719,17z',
+    mapsUrl:
+      'https://www.google.com/maps/place/Langkawi+Cable+Car/@6.3710,99.6719,17z',
     img: attractionImage('Skycab.png'),
   },
   {
@@ -201,7 +214,8 @@ export const ATTRACTIONS = [
     cenang: 'Here',
     kuah: '19 km',
     time: '9 min drive',
-    mapsUrl: 'https://www.google.com/maps/place/Pantai+Cenang/@6.2913,99.7289,17z',
+    mapsUrl:
+      'https://www.google.com/maps/place/Pantai+Cenang/@6.2913,99.7289,17z',
     img: attractionImage('pantai cenang.png'),
   },
   {
@@ -214,7 +228,8 @@ export const ATTRACTIONS = [
     cenang: '29 km',
     kuah: '11 km',
     time: '28 min drive',
-    mapsUrl: 'https://www.google.com/maps/place/Kilim+Karst+Geoforest+Park/@6.4050,99.8582,17z',
+    mapsUrl:
+      'https://www.google.com/maps/place/Kilim+Karst+Geoforest+Park/@6.4050,99.8582,17z',
     img: attractionImage('Kilim Geoforest Park.png'),
   },
   {
@@ -227,7 +242,8 @@ export const ATTRACTIONS = [
     cenang: '26 km',
     kuah: '24 km',
     time: '31 min drive',
-    mapsUrl: 'https://www.google.com/maps/place/Pantai+Tanjung+Rhu/@6.4581,99.8249,17z',
+    mapsUrl:
+      'https://www.google.com/maps/place/Pantai+Tanjung+Rhu/@6.4581,99.8249,17z',
     img: attractionImage('Tanjung Rhu.png'),
   },
   {
@@ -240,7 +256,8 @@ export const ATTRACTIONS = [
     cenang: '1 km',
     kuah: '19 km',
     time: '10 min drive',
-    mapsUrl: 'https://www.google.com/maps/place/Underwater+World+Langkawi/@6.2878,99.7286,17z',
+    mapsUrl:
+      'https://www.google.com/maps/place/Underwater+World+Langkawi/@6.2878,99.7286,17z',
     img: attractionImage('Underwater World.png'),
   },
   {
@@ -253,7 +270,8 @@ export const ATTRACTIONS = [
     cenang: '22 km',
     kuah: '4 km',
     time: '21 min drive',
-    mapsUrl: 'https://www.google.com/maps/place/Eagle+Square+Langkawi/@6.3083,99.8520,17z',
+    mapsUrl:
+      'https://www.google.com/maps/place/Eagle+Square+Langkawi/@6.3083,99.8520,17z',
     img: attractionImage('Eagle Square.png'),
   },
   {
@@ -266,7 +284,8 @@ export const ATTRACTIONS = [
     cenang: '20 km',
     kuah: '29 km',
     time: '28 min drive',
-    mapsUrl: 'https://www.google.com/maps/place/Air+Terjun+Telaga+Tujuh/@6.3818,99.6729,17z',
+    mapsUrl:
+      'https://www.google.com/maps/place/Air+Terjun+Telaga+Tujuh/@6.3818,99.6729,17z',
     img: attractionImage('Telaga Tujuh Waterfall.png'),
   },
   {
@@ -279,7 +298,8 @@ export const ATTRACTIONS = [
     cenang: '28 km',
     kuah: '10 km',
     time: '26 min drive',
-    mapsUrl: 'https://www.google.com/maps/place/Langkawi+Wildlife+Park/@6.3873,99.8619,17z',
+    mapsUrl:
+      'https://www.google.com/maps/place/Langkawi+Wildlife+Park/@6.3873,99.8619,17z',
     img: attractionImage('Wildlife Park.png'),
   },
   {
@@ -292,7 +312,8 @@ export const ATTRACTIONS = [
     cenang: 'boat',
     kuah: 'boat',
     time: '45 min ferry',
-    mapsUrl: 'https://www.google.com/maps/place/Pulau+Payar+Marine+Park/@6.0740,100.0562,17z',
+    mapsUrl:
+      'https://www.google.com/maps/place/Pulau+Payar+Marine+Park/@6.0740,100.0562,17z',
     img: attractionImage('Pulau Payar Marine Park.png'),
   },
 ] as const

@@ -42,4 +42,4 @@ Staff walk you to the vehicle in the short-term parking area by the terminal. Fi
 
 Return at the same Door 3 meeting point unless you arranged hotel collection. Allow about 30 minutes before check-in for inspection and deposit paperwork. Deposit release timing depends on your card issuer — typically several business days after final adjustments (see terms). Early-morning flights are covered; there is no separate after-hours airport surcharge for Door 3 meets on XQ Car bookings.
 
-Next reads: [book online](/en/blog/book-car-rental-langkawi-online) · [fuel / same-to-same](/en/blog/driving-langkawi-first-time)
+Next reads: [documents & requirements](/en/blog/rent-a-car-langkawi-requirements) · [fuel / same-to-same](/en/blog/driving-langkawi-first-time)

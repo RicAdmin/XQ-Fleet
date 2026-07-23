@@ -47,12 +47,13 @@ export const enLandingContent: LandingContent = {
       img: '/image/Attractions/Sky%20bridge.png',
     },
     {
-      id: 'book-rental-step-by-step',
-      slug: 'book-car-rental-langkawi-online',
+      id: 'rent-car-requirements',
+      slug: 'rent-a-car-langkawi-requirements',
       tag: 'Guides',
-      title: 'How to book your XQ Car rental online — step by step',
-      excerpt: 'A quick visual walkthrough of every screen, so your first rental feels like your tenth.',
-      img: '/image/Attractions/pantai%20cenang.png',
+      title: 'How to rent a car in Langkawi — documents & age rules',
+      excerpt:
+        'Licence, IDP, deposit, and age checks so Door 3 or jetty handover does not stall on paperwork.',
+      img: '/image/hero-langkawi-adventure-768.jpg',
     },
     {
       id: 'monsoon-travel-langkawi',
@@ -75,7 +76,8 @@ export const enLandingContent: LandingContent = {
       cenang: '20 km',
       kuah: '29 km',
       time: '32 min drive',
-      mapsUrl: 'https://www.google.com/maps/place/Langkawi+Sky+Bridge/@6.3860,99.6622,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Langkawi+Sky+Bridge/@6.3860,99.6622,17z',
       img: attractionImage('Sky bridge.png'),
     },
     {
@@ -88,7 +90,8 @@ export const enLandingContent: LandingContent = {
       cenang: '19 km',
       kuah: '28 km',
       time: '28 min drive',
-      mapsUrl: 'https://www.google.com/maps/place/Langkawi+Cable+Car/@6.3710,99.6719,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Langkawi+Cable+Car/@6.3710,99.6719,17z',
       img: attractionImage('Skycab.png'),
     },
     {
@@ -101,7 +104,8 @@ export const enLandingContent: LandingContent = {
       cenang: 'Here',
       kuah: '19 km',
       time: '9 min drive',
-      mapsUrl: 'https://www.google.com/maps/place/Pantai+Cenang/@6.2913,99.7289,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Pantai+Cenang/@6.2913,99.7289,17z',
       img: attractionImage('pantai cenang.png'),
     },
     {
@@ -114,7 +118,8 @@ export const enLandingContent: LandingContent = {
       cenang: '29 km',
       kuah: '11 km',
       time: '28 min drive',
-      mapsUrl: 'https://www.google.com/maps/place/Kilim+Karst+Geoforest+Park/@6.4050,99.8582,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Kilim+Karst+Geoforest+Park/@6.4050,99.8582,17z',
       img: attractionImage('Kilim Geoforest Park.png'),
     },
     {
@@ -127,7 +132,8 @@ export const enLandingContent: LandingContent = {
       cenang: '26 km',
       kuah: '24 km',
       time: '31 min drive',
-      mapsUrl: 'https://www.google.com/maps/place/Pantai+Tanjung+Rhu/@6.4581,99.8249,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Pantai+Tanjung+Rhu/@6.4581,99.8249,17z',
       img: attractionImage('Tanjung Rhu.png'),
     },
     {
@@ -140,7 +146,8 @@ export const enLandingContent: LandingContent = {
       cenang: '1 km',
       kuah: '19 km',
       time: '10 min drive',
-      mapsUrl: 'https://www.google.com/maps/place/Underwater+World+Langkawi/@6.2878,99.7286,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Underwater+World+Langkawi/@6.2878,99.7286,17z',
       img: attractionImage('Underwater World.png'),
     },
     {
@@ -153,7 +160,8 @@ export const enLandingContent: LandingContent = {
       cenang: '22 km',
       kuah: '4 km',
       time: '21 min drive',
-      mapsUrl: 'https://www.google.com/maps/place/Eagle+Square+Langkawi/@6.3083,99.8520,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Eagle+Square+Langkawi/@6.3083,99.8520,17z',
       img: attractionImage('Eagle Square.png'),
     },
     {
@@ -166,7 +174,8 @@ export const enLandingContent: LandingContent = {
       cenang: '20 km',
       kuah: '29 km',
       time: '28 min drive',
-      mapsUrl: 'https://www.google.com/maps/place/Air+Terjun+Telaga+Tujuh/@6.3818,99.6729,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Air+Terjun+Telaga+Tujuh/@6.3818,99.6729,17z',
       img: attractionImage('Telaga Tujuh Waterfall.png'),
     },
     {
@@ -179,7 +188,8 @@ export const enLandingContent: LandingContent = {
       cenang: '28 km',
       kuah: '10 km',
       time: '26 min drive',
-      mapsUrl: 'https://www.google.com/maps/place/Langkawi+Wildlife+Park/@6.3873,99.8619,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Langkawi+Wildlife+Park/@6.3873,99.8619,17z',
       img: attractionImage('Wildlife Park.png'),
     },
     {
@@ -192,7 +202,8 @@ export const enLandingContent: LandingContent = {
       cenang: 'boat',
       kuah: 'boat',
       time: '45 min ferry',
-      mapsUrl: 'https://www.google.com/maps/place/Pulau+Payar+Marine+Park/@6.0740,100.0562,17z',
+      mapsUrl:
+        'https://www.google.com/maps/place/Pulau+Payar+Marine+Park/@6.0740,100.0562,17z',
       img: attractionImage('Pulau Payar Marine Park.png'),
     },
   ],

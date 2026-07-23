@@ -1,6 +1,6 @@
 interface:
   display_name: 'XQ Car Blog Writer'
   short_description: 'Write and verify XQ Car blog posts'
-  default_prompt: 'Use $blog-writer to turn the next queued XQ Car blog plan into a publishable post.'
+  default_prompt: 'Use $blog-writer to read plans/blog/PUBLISHING_QUEUE.md, claim the next eligible plan, and turn it into a publishable post.'
 policy:
   allow_implicit_invocation: true
