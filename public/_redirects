@@ -1,0 +1,2 @@
+# Map RFC 8615 discovery paths onto undotted publish/SSR routes
+/.well-known/*  /well-known/:splat  200!

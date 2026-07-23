@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://carxq.com/api"
+      "url": "https://car.xqholidays.com.my/api"
     }
   ],
   "x-service-info": {
@@ -17,9 +17,9 @@
       "car-rental"
     ],
     "docs": {
-      "homepage": "https://carxq.com/",
-      "llms": "https://carxq.com/llms.txt",
-      "apiReference": "https://carxq.com/openapi.json"
+      "homepage": "https://car.xqholidays.com.my/",
+      "llms": "https://car.xqholidays.com.my/llms.txt",
+      "apiReference": "https://car.xqholidays.com.my/openapi.json"
     }
   },
   "paths": {

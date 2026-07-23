@@ -1,11 +1,7 @@
-import { createHash } from 'node:crypto'
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
-
 import { publicSitePath, publicSiteUrl } from '#/lib/brand'
+export { rewriteWellKnownUrl } from '#/lib/well-known-path'
 
 const API_CATALOG_PROFILE = 'https://www.rfc-editor.org/info/rfc9727'
-const AGENT_SKILLS_SCHEMA = 'https://schemas.agentskills.io/discovery/0.2.0/schema.json'
 const AUTH_MD_SKILL = 'https://workos.com/auth-md/v1'
 
 export function authIssuer(siteUrl?: string): string {
@@ -27,6 +23,7 @@ export function agentDiscoveryLinkHeader(siteUrl?: string): string {
     `<${origin}/.well-known/agent-skills/index.json>; rel="describedby"`,
   ].join(', ')
 }
+
 
 function jsonResponse(body: unknown, init?: ResponseInit): Response {
   return new Response(JSON.stringify(body, null, 2), {
@@ -267,54 +264,6 @@ export function buildMcpServerCard(siteUrl?: string) {
   }
 }
 
-type AgentSkillEntry = {
-  name: string
-  type: 'skill-md'
-  description: string
-  url: string
-  digest: string
-}
-
-export function sha256Digest(content: string): string {
-  return `sha256:${createHash('sha256').update(content).digest('hex')}`
-}
-
-export function buildAgentSkillsIndex(siteUrl?: string): {
-  $schema: string
-  skills: AgentSkillEntry[]
-} {
-  const skillsDir = join(process.cwd(), 'public/.well-known/agent-skills')
-  const skillFiles = [
-    {
-      name: 'book-langkawi-car',
-      file: 'book-langkawi-car.md',
-      description: 'Book a car rental in Langkawi via XQCar — dates, fleet, pickup, and checkout.',
-    },
-    {
-      name: 'langkawi-driving-guides',
-      file: 'langkawi-driving-guides.md',
-      description: 'Langkawi driving guides — pickup, routes, parking, fuel, and island know-how.',
-    },
-  ]
-
-  const skills: AgentSkillEntry[] = skillFiles.map(({ name, file, description }) => {
-    const filePath = join(skillsDir, file)
-    const content = readFileSync(filePath, 'utf8')
-    return {
-      name,
-      type: 'skill-md',
-      description,
-      url: publicSitePath(`/.well-known/agent-skills/${file}`, siteUrl),
-      digest: sha256Digest(content),
-    }
-  })
-
-  return {
-    $schema: AGENT_SKILLS_SCHEMA,
-    skills,
-  }
-}
-
 export function buildHomepageMarkdown(siteUrl?: string): string {
   const base = publicSiteUrl(siteUrl)
   return `# XQCar — Langkawi Car Rental
@@ -427,8 +376,4 @@ export function oauthProtectedResourceResponse(siteUrl?: string): Response {
 
 export function mcpServerCardResponse(siteUrl?: string): Response {
   return jsonResponse(buildMcpServerCard(siteUrl))
-}
-
-export function agentSkillsIndexResponse(siteUrl?: string): Response {
-  return jsonResponse(buildAgentSkillsIndex(siteUrl))
 }

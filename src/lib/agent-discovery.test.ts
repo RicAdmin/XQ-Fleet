@@ -5,13 +5,17 @@ import {
   buildAuthMd,
   buildHomepageMarkdown,
   buildMcpServerCard,
-  buildAgentSkillsIndex,
   buildOAuthAuthorizationServer,
   buildOAuthProtectedResource,
   buildOpenIdConfiguration,
-  sha256Digest,
+  rewriteWellKnownUrl,
   withAgentDiscoveryLinkHeader,
 } from '#/lib/agent-discovery'
+import {
+  buildAgentSkillsIndex,
+  sha256Digest,
+} from '#/lib/agent-discovery-skills'
+import { wellKnownDiscoveryResponse } from '#/lib/agent-discovery.server'
 
 describe('agent-discovery', () => {
   const site = 'https://carxq.com'
@@ -109,5 +113,20 @@ describe('agent-discovery', () => {
     )
     expect(response.headers.get('Link')).toContain('rel="api-catalog"')
     expect(response.headers.get('Link')).toContain('</.well-known/api-catalog>')
+  })
+
+  it('rewrites /.well-known paths onto /well-known route tree', () => {
+    const rewritten = rewriteWellKnownUrl(new URL(`${site}/.well-known/api-catalog`))
+    expect(rewritten.pathname).toBe('/well-known/api-catalog')
+    expect(rewriteWellKnownUrl(new URL(`${site}/en`)).pathname).toBe('/en')
+  })
+
+  it('serves discovery JSON for dotted well-known paths', async () => {
+    const response = wellKnownDiscoveryResponse('/.well-known/oauth-protected-resource', site)
+    expect(response).not.toBeNull()
+    expect(response!.headers.get('Content-Type')).toContain('application/json')
+    const body = await response!.json()
+    expect(body.resource).toBe(`${site}/`)
+    expect(body.authorization_servers).toEqual([`${site}/api/auth`])
   })
 })

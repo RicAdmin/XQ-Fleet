@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { copyFileSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import {
@@ -7,7 +7,6 @@ import {
   buildUcpProfile,
 } from '#/lib/agent-commerce-discovery'
 import {
-  buildAgentSkillsIndex,
   buildApiCatalog,
   buildAuthMd,
   buildMcpServerCard,
@@ -15,6 +14,7 @@ import {
   buildOAuthProtectedResource,
   buildOpenIdConfiguration,
 } from '#/lib/agent-discovery'
+import { buildAgentSkillsIndex } from '#/lib/agent-discovery-skills'
 
 export function resolveBuildSiteUrl(): string {
   const candidates = [
@@ -22,7 +22,7 @@ export function resolveBuildSiteUrl(): string {
     process.env.URL,
     process.env.DEPLOY_PRIME_URL,
     process.env.BETTER_AUTH_URL,
-    'https://carxq.com',
+    'https://car.xqholidays.com.my',
   ]
 
   for (const raw of candidates) {
@@ -30,7 +30,7 @@ export function resolveBuildSiteUrl(): string {
     if (trimmed) return trimmed
   }
 
-  return 'https://carxq.com'
+  return 'https://car.xqholidays.com.my'
 }
 
 function writeJson(relativePath: string, payload: unknown, siteUrl: string) {
@@ -49,21 +49,44 @@ function writeText(relativePath: string, content: string, siteUrl: string) {
 
 const siteUrl = resolveBuildSiteUrl()
 
-writeJson('.well-known/api-catalog', buildApiCatalog(siteUrl), siteUrl)
-writeJson(
-  '.well-known/oauth-authorization-server',
-  buildOAuthAuthorizationServer(siteUrl),
-  siteUrl,
-)
-writeJson('.well-known/openid-configuration', buildOpenIdConfiguration(siteUrl), siteUrl)
-writeJson(
-  '.well-known/oauth-protected-resource',
-  buildOAuthProtectedResource(siteUrl),
-  siteUrl,
-)
-writeJson('.well-known/mcp/server-card.json', buildMcpServerCard(siteUrl), siteUrl)
-writeJson('.well-known/agent-skills/index.json', buildAgentSkillsIndex(siteUrl), siteUrl)
-writeJson('.well-known/acp.json', buildAcpDiscovery(siteUrl), siteUrl)
-writeJson('.well-known/ucp', buildUcpProfile(siteUrl), siteUrl)
+const discoveryFiles: Array<{ path: string; payload: unknown }> = [
+  { path: 'api-catalog', payload: buildApiCatalog(siteUrl) },
+  { path: 'oauth-authorization-server', payload: buildOAuthAuthorizationServer(siteUrl) },
+  { path: 'openid-configuration', payload: buildOpenIdConfiguration(siteUrl) },
+  { path: 'oauth-protected-resource', payload: buildOAuthProtectedResource(siteUrl) },
+  { path: 'mcp/server-card.json', payload: buildMcpServerCard(siteUrl) },
+  { path: 'agent-skills/index.json', payload: buildAgentSkillsIndex(siteUrl) },
+  { path: 'acp.json', payload: buildAcpDiscovery(siteUrl) },
+  { path: 'ucp', payload: buildUcpProfile(siteUrl) },
+]
+
+for (const file of discoveryFiles) {
+  // Dotted path for local/dev; Netlify often strips `.well-known` from publishes.
+  writeJson(`.well-known/${file.path}`, file.payload, siteUrl)
+  // Undotted fallback for Netlify static + redirect/edge rewrite targets.
+  writeJson(`well-known/${file.path}`, file.payload, siteUrl)
+}
+
 writeJson('openapi.json', buildOpenApiCommerce(siteUrl), siteUrl)
 writeText('auth.md', buildAuthMd(siteUrl), siteUrl)
+
+// Skill markdown lives under public/.well-known/agent-skills/; mirror for Netlify undotted publish.
+const skillMarkdown = ['book-langkawi-car.md', 'langkawi-driving-guides.md']
+for (const file of skillMarkdown) {
+  const from = join(process.cwd(), 'public/.well-known/agent-skills', file)
+  const toDir = join(process.cwd(), 'public/well-known/agent-skills')
+  mkdirSync(toDir, { recursive: true })
+  copyFileSync(from, join(toDir, file))
+  console.log(`[well-known] Mirrored agent-skills/${file}`)
+}
+
+// Prefer publish-dir redirects (processed before some framework catch-alls).
+writeText(
+  '_redirects',
+  [
+    '# Map RFC 8615 discovery paths onto undotted publish/SSR routes',
+    '/.well-known/*  /well-known/:splat  200!',
+    '',
+  ].join('\n'),
+  siteUrl,
+)
