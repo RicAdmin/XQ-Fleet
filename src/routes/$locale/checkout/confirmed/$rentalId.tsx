@@ -11,6 +11,7 @@ import { SiteFooter } from '#/components/landing/CxqLandingPage'
 import type { Locale } from '#/i18n/locales'
 import { usePublicI18n } from '#/i18n/usePublicI18n'
 import type { TranslateFn } from '#/i18n/translate'
+import { trackPurchase } from '#/lib/ga'
 import { getGuestBookingSummary } from '#/lib/portal-booking-functions'
 
 export const Route = createFileRoute('/$locale/checkout/confirmed/$rentalId')({
@@ -148,6 +149,17 @@ function GuestBookingConfirmedPage() {
     }, 5000)
     return () => window.clearInterval(timer)
   }, [showPaymentPending, router])
+
+  useEffect(() => {
+    if (!showPaymentSuccess || !booking) return
+    trackPurchase({
+      pathname: window.location.pathname,
+      transactionId: booking.id,
+      // iPay88 may charge deposit-only; report amount collected, not full rental total.
+      valueSen: booking.paidAmountSen > 0 ? booking.paidAmountSen : booking.totalAmountSen,
+      currency: 'MYR',
+    })
+  }, [showPaymentSuccess, booking])
 
   let variant: ConfirmationVariant = 'notFound'
   if (booking) {

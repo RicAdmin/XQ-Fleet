@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Link, createFileRoute, getRouteApi, redirect, useNavigate } from '@tanstack/react-router'
 import {
@@ -16,6 +16,7 @@ import {
 import { z } from 'zod'
 
 import CustomerAccountChrome from '#/components/portal/CustomerAccountChrome'
+import { trackPurchase } from '#/lib/ga'
 import type { CustomerFacingStatus } from '#/lib/portal-booking-functions'
 import { getBookingDetail } from '#/lib/portal-booking-functions'
 
@@ -113,6 +114,17 @@ function BookingDetailPage() {
   const showPaymentFail =
     payment === 'error' || (payment === 'response' && booking.customerStatus === 'Pending Payment')
   const showPaymentSuccess = payment === 'response' && booking.customerStatus === 'Confirmed'
+
+  useEffect(() => {
+    if (!showPaymentSuccess) return
+    trackPurchase({
+      pathname: window.location.pathname,
+      transactionId: booking.id,
+      // iPay88 may charge deposit-only; report amount collected, not full rental total.
+      valueSen: booking.paidAmountSen > 0 ? booking.paidAmountSen : booking.totalAmountSen,
+      currency: 'MYR',
+    })
+  }, [showPaymentSuccess, booking.id, booking.paidAmountSen, booking.totalAmountSen])
 
   const startYmd = toYmd(new Date(booking.startDate))
   const endYmd = toYmd(new Date(booking.endDate))

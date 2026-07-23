@@ -18,6 +18,7 @@ import {
 import { authClient } from '#/lib/auth-client'
 import { getRequestSession } from '#/lib/auth-functions'
 import { toCheckoutCustomer } from '#/lib/checkout-session'
+import { trackBeginCheckout } from '#/lib/ga'
 import { saveTripSearch } from '#/lib/trip-search-storage'
 import { getPublicCarDetail, publicCarDetailToRow } from '#/lib/portal-functions'
 
@@ -83,6 +84,16 @@ function CheckoutPage() {
     if (!bookingHasCompleteTrip(booking)) return
     saveTripSearch(booking, booking)
   }, [booking])
+
+  useEffect(() => {
+    if (!bookingHasCompleteTrip(booking) || !carRow.id) return
+    trackBeginCheckout({
+      pathname: window.location.pathname,
+      carId: carRow.id,
+      tripComplete: true,
+      currency: 'MYR',
+    })
+  }, [booking, carRow.id])
 
   return (
     <div className="cxq-landing-page">

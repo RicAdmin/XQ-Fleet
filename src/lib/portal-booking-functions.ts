@@ -839,6 +839,7 @@ export type GuestBookingSummary = {
   startDate: Date
   endDate: Date
   totalAmountSen: number
+  paidAmountSen: number
   customerStatus: CustomerFacingStatus
   paymentStatus: string
 }
@@ -857,6 +858,7 @@ export const getGuestBookingSummary = createServerFn({ method: 'GET' })
         startDate: rentals.startDate,
         endDate: rentals.endDate,
         totalAmountSen: rentals.totalAmountSen,
+        paidAmountSen: rentals.paidAmountSen,
         rentalStatus: rentals.status,
         paymentStatus: rentals.paymentStatus,
       })
