@@ -8,7 +8,7 @@ category: Guides
 tag: Requirements
 language: en
 publishedAt: '2026-02-01'
-updatedAt: '2026-07-23'
+updatedAt: '2026-07-24'
 heroImage: /image/hero-langkawi-adventure-768.jpg
 excerpt: >-
   Age, licence, IDP, and deposit rules — with notes for Singapore, India, and
@@ -19,7 +19,15 @@ keywords:
   - langkawi rental documents
 ---
 
-To rent with XQ Car in Langkawi you must be 23–65, hold a valid driving licence for at least one year, present passport or MyKad, and provide a credit card for the refundable security deposit or pre-authorisation. Have physical documents at handover — softcopies alone can stall Door 3 or jetty pickup.
+To rent with XQ Car in Langkawi you must be **23–65**, hold a valid driving licence for **at least one year**, present passport or MyKad, and provide a **credit card** for the refundable security deposit or pre-authorisation. Have **physical documents** at handover — softcopies alone can stall Door 3 or jetty pickup.
+
+**Quick checklist**
+
+- Age 23–65 (operator rule per [rental agreement](/en/rental-agreement))
+- Licence held ≥1 year
+- Passport or MyKad + driving licence (physical cards)
+- Credit card for deposit — debit cards not accepted
+- International Driving Permit (IDP) when your home licence needs one (see table below)
 
 ## Licence notes by traveller origin
 
@@ -31,11 +39,15 @@ To rent with XQ Car in Langkawi you must be 23–65, hold a valid driving licenc
 | UK / EU / other Europe  | Home licence plus IDP if the licence is not clearly readable in English Latin script, or if your issuing country is not commonly recognised for short tourist rentals |
 | Australia / New Zealand | English-language licences are usually straightforward; an IDP still removes debate                                                                                    |
 
-Malaysia recognises IDPs under the 1949 Geneva Convention framework for visitors. Carry the IDP with the original licence — one without the other is not enough. Final acceptance sits with the pickup team against current JPJ visitor practice; when your paperwork is unusual, message us before travel.
+Malaysia recognises IDPs under the [1949 Geneva Convention](https://en.wikipedia.org/wiki/Geneva_Convention_on_Road_Traffic) framework for visitors. For official visitor guidance, see [JPJ foreign driving licence information](https://www.jpj.gov.my/en/web/guest/foreign-driving-licence) (accessed 2026-07-24). Carry the IDP with the original licence — one without the other is not enough. Final acceptance sits with the pickup team against current JPJ visitor practice; when your paperwork is unusual, message us before travel.
 
 ## Deposit and payment
 
-A credit-card pre-authorisation or refundable deposit covers damage excess risk and fuel differences. Debit cards are not accepted for deposit. You can pay the rental online (card / FPX where offered) or at pickup in approved cases. Deposit release after return follows your card issuer’s timeline.
+A credit-card pre-authorisation or refundable deposit covers damage excess risk and fuel differences. Debit cards are not accepted for deposit. You can pay the rental online (card / FPX where offered) or at pickup in approved cases. Deposit release after return follows your card issuer’s timeline — see [rental agreement](/en/rental-agreement) for operator terms.
+
+## Cover before you drive
+
+Statutory third-party cover is included; optional CDW and the **excess** amount appear only when shown at booking. Read [insurance explained](/en/blog/langkawi-car-rental-insurance) before pickup.
 
 ## Second drivers and child seats
 
@@ -43,4 +55,6 @@ Add a second driver at booking for RM20 (flat add-on in current pricing). They m
 
 ## Pickup after documents clear
 
-Airport: [Door 3 guide](/en/blog/langkawi-airport-car-rental-pickup). Ferry: [Kuah Jetty guide](/en/blog/langkawi-ferry-jetty-car-rental).
+Airport: [Door 3 guide](/en/blog/langkawi-airport-car-rental-pickup). Ferry: [Kuah Jetty guide](/en/blog/langkawi-ferry-jetty-car-rental). Still deciding transport mode? [Rental vs Grab](/en/blog/langkawi-car-rental-vs-taxi-grab). After you are eligible, match dates to the [season calendar in cheap tips](/en/blog/cheap-car-rental-langkawi-tips).
+
+Ready to book? Choose your pickup location at checkout on [XQ Car](/en#booking-dock) once documents are sorted.
