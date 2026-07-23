@@ -9,7 +9,7 @@ tag: Driving tips
 language: en
 publishedAt: '2026-07-23'
 updatedAt: '2026-07-23'
-heroImage: /image/Attractions/Telaga Tujuh Waterfall.png
+heroImage: /image/Attractions/Telaga%20Tujuh%20Waterfall.png
 excerpt: >-
   Both northwest waterfalls fit one driving day: Temurun for an easy walk,
   Telaga Tujuh for stairs — fill fuel before you leave Cenang or Kuah.
