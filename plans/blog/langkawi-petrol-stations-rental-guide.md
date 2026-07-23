@@ -3,7 +3,9 @@ title: 'Langkawi Petrol Stations & Rental Fuel Policy'
 slug: 'langkawi-petrol-stations-rental-guide'
 language: en
 category: Driving
-status: pending
+status: complete
+completedAt: 2026-07-23
+output: content/blog/langkawi-petrol-stations-rental-guide.md
 created: 2026-07-23
 primaryQuery: 'langkawi petrol station car rental'
 readerIntent: 'Know where to refuel, what RON95 costs visitors, and how same-to-same return works'
@@ -31,12 +33,13 @@ First-time self-drive tourists, especially those heading north or northwest.
 
 ## Evidence Ledger
 
-| Claim or detail                                                                                     | Source                                                                                                                                                                         | Checked    | Status                  |
-| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | ----------------------- |
-| National unsubsidised RON95 RM3.42/L for week 16–22 Jul 2026; Budi95 RM1.99 for eligible Malaysians | https://paultan.org/2026/07/15/malaysian-fuel-prices-july-16-to-22-2026-diesel-up-10-sen-rm4-07-ron95-up-five-sen-to-rm3-42-per-litre/ (accessed 2026-07-23)                   | 2026-07-23 | verified                |
-| Fuel policy Same-to-Same on fleet seed                                                              | data/Car.csv Fuel_Policy column                                                                                                                                                | 2026-07-23 | verified                |
-| Stations cluster Kuah/Cenang/Padang Matsirat; thin on west/north stretches                          | https://malaysiajourneys.com/getting-to-langkawi-getting-around-your-complete-transport-guide/ (accessed 2026-07-23); content/blog/driving-langkawi-first-time.md overlap only | 2026-07-23 | verified                |
-| Operator-preferred stations near LGK return and Cenang evening returns                              | XQ Car operator notes                                                                                                                                                          | —          | operator check required |
+| Claim or detail                                                                                       | Source                                                                                                                                                              | Checked    | Status   |
+| ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | -------- |
+| Unsubsidised RON95 RM3.62/L, RON97 RM4.20/L, diesel RM4.42/L for week 23–29 Jul 2026; Budi95 RM1.99   | https://mof.gov.my/portal/ms/berita/siaran-media/harga-minyak/risiko-geopolitik-yang-memuncak-di-asia-barat-meningkatkan-lagi-harga-petrol-dan-diesel-tanpa-subsidi | 2026-07-23 | verified |
+| Fuel policy Same-to-Same on fleet seed                                                                | data/Car.csv Fuel_Policy column                                                                                                                                     | 2026-07-23 | verified |
+| Stations cluster Kuah/Cenang/Padang Matsirat; thin on west/north stretches                            | src/components/guides/know-how-guide.tsx; src/components/guides/pickup-return-guide.tsx; content/blog/driving-langkawi-first-time.md                                | 2026-07-23 | verified |
+| Operator-preferred stations: Padang Matsirat (airport), Kuah Petronas (jetty), Cenang evening returns | src/components/guides/pickup-return-guide.tsx; src/components/guides/know-how-guide.tsx                                                                             | 2026-07-23 | verified |
+| Urvan and Staria are diesel; rest petrol RON95                                                        | data/Car.csv Fuel_Type column                                                                                                                                       | 2026-07-23 | verified |
 
 ## Product Connections
 
@@ -51,8 +54,8 @@ First-time self-drive tourists, especially those heading north or northwest.
 
 ## Image Brief
 
-- Project-owned candidates: `/image/hero-langkawi-adventure.jpg`
-- Generated fallback: Illustrated petrol pump scene with a compact rental car, clear RON95 signage, XQ Car palette, landscape
+- Cover: `/image/blog/langkawi-petrol-stations-rental-guide/cover.jpg` (generated 2026-07-23)
+- Prompt: Editorial illustration — compact rental hatchback at Malaysian petrol pump with RON95 signage, tropical island background, XQ Car navy/coral palette, landscape 16:9
 
 ## Voice Notes
 
@@ -60,5 +63,5 @@ Correct myths without lecturing. Date every price. Separate Malaysian subsidy ru
 
 ## Freshness and Operator Checks
 
-- Update RON95 figure to the MOF week current at draft time
-- Confirm diesel guidance for Urvan
+- RON95/diesel figures updated to MOF week 23–29 Jul 2026 at draft
+- Diesel guidance confirmed for Urvan and Staria from Car.csv
