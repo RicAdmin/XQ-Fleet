@@ -61,5 +61,5 @@ Fokus ketibaan feri Malaysia; elak ulang panduan lapangan terbang.
 
 ## Freshness and Operator Checks
 
-- Sahkan lokasi papan tanda jumpa di jeti
-- Semak window waktu di luar puncak feri
+- Lokasi papan jingga di sebelah kaunter teksi jeti disahkan melalui panduan pickup-return (2026-07-23)
+- Tetingkap waktu luar puncak feri: pembaca diminta WhatsApp untuk sahkan pertemuan
