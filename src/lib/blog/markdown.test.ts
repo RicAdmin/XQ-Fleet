@@ -1,3 +1,5 @@
+import { spawnSync } from 'node:child_process'
+
 import { describe, expect, it } from 'vitest'
 
 import { parseBlogMarkdown } from '#/lib/blog/markdown'
@@ -30,6 +32,20 @@ Walk into the arrivals hall and follow the Door 3 signs.
 `
 
 describe('parseBlogMarkdown', () => {
+  it('loads the sanitizer with the AWS Lambda module flags', () => {
+    const result = spawnSync(
+      process.execPath,
+      [
+        '--no-experimental-require-module',
+        '-e',
+        "require('sanitize-html')",
+      ],
+      { cwd: process.cwd(), encoding: 'utf8' },
+    )
+
+    expect(result.status, result.stderr).toBe(0)
+  })
+
   it('parses the complete migrated archive with unique filename slugs', async () => {
     const posts = await Promise.all(
       Object.entries(archive).map(([path, raw]) => {
