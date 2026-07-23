@@ -49,7 +49,8 @@ export const msMessages: EnMessages = {
     contact: 'Hubungi',
     roadside: 'Bantuan jalan raya 24/7 · +60 11 3521 5576',
     weAccept: 'Kami terima',
-    copyright: '© 2026 XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - Release.260626.01',
+    copyright:
+      '© 2026 XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - Release.260626.01',
     instagram: 'Instagram',
     facebook: 'Facebook',
     tiktok: 'TikTok',
@@ -66,9 +67,12 @@ export const msMessages: EnMessages = {
   common: {
     selectDate: 'Pilih tarikh',
     selectTime: 'Pilih masa',
-    searchCarsPrompt: 'Tekan Cari kereta untuk semak ketersediaan perjalanan anda.',
-    chooseDatesPrompt: 'Pilih tarikh ambil dan pulang di atas, kemudian tekan Cari kereta.',
-    chooseTimesPrompt: 'Pilih masa ambil dan pulang — kedua-duanya diperlukan sebelum carian.',
+    searchCarsPrompt:
+      'Tekan Cari kereta untuk semak ketersediaan perjalanan anda.',
+    chooseDatesPrompt:
+      'Pilih tarikh ambil dan pulang di atas, kemudian tekan Cari kereta.',
+    chooseTimesPrompt:
+      'Pilih masa ambil dan pulang — kedua-duanya diperlukan sebelum carian.',
     searchCars: 'Cari kereta',
     bookNow: 'Tempah sekarang',
     learnMore: 'Ketahui lebih lanjut',
@@ -113,7 +117,8 @@ export const msMessages: EnMessages = {
     creatingAccount: 'Sedang mencipta akaun…',
     createAccountBtn: 'Cipta akaun',
     signInFailed: 'Log masuk gagal.',
-    staffMustUseInternal: 'Akaun pemilik dan kakitangan mesti menggunakan halaman log masuk dalaman.',
+    staffMustUseInternal:
+      'Akaun pemilik dan kakitangan mesti menggunakan halaman log masuk dalaman.',
     unableSignIn: 'Tidak dapat log masuk buat masa ini.',
     fullName: 'Nama penuh',
     name: 'Nama',
@@ -130,25 +135,33 @@ export const msMessages: EnMessages = {
     asideSloganInternal: 'Akses selamat ke ruang kerja anda.',
     passwordMismatch: 'Kata laluan tidak sepadan.',
     verifyEmailTitle: 'Semak e-mel anda',
-    verifyEmailBody: 'Kami hantar pautan pengesahan ke {email}. Buka pautan itu untuk aktifkan akaun, kemudian log masuk.',
+    verifyEmailBody:
+      'Kami hantar pautan pengesahan ke {email}. Buka pautan itu untuk aktifkan akaun, kemudian log masuk.',
     showPassword: 'Tunjuk kata laluan',
     hidePassword: 'Sembunyikan kata laluan',
-    forgotPasswordSubtitle: 'Masukkan e-mel anda dan kami akan hantar pautan set semula.',
+    forgotPasswordSubtitle:
+      'Masukkan e-mel anda dan kami akan hantar pautan set semula.',
     resetLinkSentTitle: 'Semak e-mel anda',
-    resetLinkSentBody: 'Jika {email} berdaftar dengan kami, kami telah hantar pautan set semula kata laluan.',
+    resetLinkSentBody:
+      'Jika {email} berdaftar dengan kami, kami telah hantar pautan set semula kata laluan.',
     unableSendResetLink: 'Tidak dapat hantar pautan set semula buat masa ini.',
     newPassword: 'Kata laluan baharu',
     confirmNewPassword: 'Sahkan kata laluan baharu',
     resetPasswordBtn: 'Kemas kini kata laluan',
     resettingPassword: 'Sedang mengemas kini kata laluan…',
-    passwordResetSuccess: 'Kata laluan dikemas kini. Anda boleh log masuk sekarang.',
-    passwordResetInvalid: 'Pautan set semula tidak sah atau tamat tempoh. Minta pautan baharu.',
-    emailNotVerified: 'Sila sahkan e-mel anda sebelum log masuk. Kami hantar pautan pengesahan baharu ke peti masuk anda.',
+    passwordResetSuccess:
+      'Kata laluan dikemas kini. Anda boleh log masuk sekarang.',
+    passwordResetInvalid:
+      'Pautan set semula tidak sah atau tamat tempoh. Minta pautan baharu.',
+    emailNotVerified:
+      'Sila sahkan e-mel anda sebelum log masuk. Kami hantar pautan pengesahan baharu ke peti masuk anda.',
     backToSignIn: 'Kembali ke log masuk',
     resendVerification: 'Hantar semula e-mel pengesahan',
     resendVerificationSent: 'E-mel pengesahan dihantar semula.',
-    verificationLinkExpired: 'Pautan pengesahan tamat tempoh. Log masuk untuk dapatkan pautan baharu.',
-    verificationLinkInvalid: 'Pautan pengesahan tidak sah. Log masuk untuk dapatkan pautan baharu.',
+    verificationLinkExpired:
+      'Pautan pengesahan tamat tempoh. Log masuk untuk dapatkan pautan baharu.',
+    verificationLinkInvalid:
+      'Pautan pengesahan tidak sah. Log masuk untuk dapatkan pautan baharu.',
   },
   checkout: {
     title: 'Lengkapkan tempahan anda',
@@ -186,7 +199,8 @@ export const msMessages: EnMessages = {
     unableCreateAccount: 'Tidak dapat mencipta akaun buat masa ini.',
     newAccount: 'Akaun baharu',
     createYourAccount: 'Cipta akaun anda',
-    agreeRentalAndPrivacy: 'Saya bersetuju dengan Kontrak Sewaan dan Dasar Privasi',
+    agreeRentalAndPrivacy:
+      'Saya bersetuju dengan Kontrak Sewaan dan Dasar Privasi',
     namePlaceholder: 'Seperti pada lesen memandu',
     passwordMinPlaceholder: 'Sekurang-kurangnya 8 aksara',
     stepReview: 'Semak',
@@ -195,13 +209,16 @@ export const msMessages: EnMessages = {
     step1of2: 'Langkah 1 daripada 2',
     step2of2: 'Langkah 2 daripada 2',
     reviewTitle: 'Semak sewaan anda.',
-    reviewSub: 'Sahkan butiran di bawah — kami akan e-mel resit selepas pembayaran.',
+    reviewSub:
+      'Sahkan butiran di bawah — kami akan e-mel resit selepas pembayaran.',
     addonsTitle: 'Tambahan & perlindungan',
     addonsMeta: 'Pilihan · langkau mana-mana yang tidak diperlukan',
     addonChildTitle: 'Kerusi keselamatan kanak-kanak',
-    addonChildDesc: 'Sesuai untuk umur 0–4. Dipasang untuk anda semasa ambil kereta.',
+    addonChildDesc:
+      'Sesuai untuk umur 0–4. Dipasang untuk anda semasa ambil kereta.',
     addonSecondTitle: 'Pemandu tambahan',
-    addonSecondDesc: 'Tambah rakan atau ahli keluarga. Lesen diperlukan semasa ambil kereta.',
+    addonSecondDesc:
+      'Tambah rakan atau ahli keluarga. Lesen diperlukan semasa ambil kereta.',
     oneTime: 'sekali',
     buyerInfoTitle: 'Maklumat pembeli',
     buyerInfoMeta: 'Hubungan tempahan & e-mel pengesahan · * Wajib',
@@ -219,8 +236,10 @@ export const msMessages: EnMessages = {
     country: 'Negara',
     optional: 'pilihan',
     paymentTitle: 'Pembayaran.',
-    guestPaymentSub: 'Lengkapkan pembayaran dengan butiran yang anda masukkan — tiada akaun diperlukan.',
-    accountFootnote: 'Atau teruskan pada halaman tempahan standard (tarikh sama seperti dalam pautan).',
+    guestPaymentSub:
+      'Lengkapkan pembayaran dengan butiran yang anda masukkan — tiada akaun diperlukan.',
+    accountFootnote:
+      'Atau teruskan pada halaman tempahan standard (tarikh sama seperti dalam pautan).',
     openBookingForm: 'Buka borang tempahan →',
     backToReview: 'Kembali ke semakan',
     dailyRateDays: 'Kadar harian × {nights}',
@@ -243,8 +262,10 @@ export const msMessages: EnMessages = {
     pickupTbc: 'Lokasi ambil TBC',
     errNameRequired: 'Sila masukkan nama untuk tempahan ini.',
     errEmailRequired: 'Tambah e-mel untuk hantar pengesahan tempahan.',
-    errEmailInvalid: 'E-mel tidak kelihatan betul — cuba seperti name@example.com.',
-    errPhoneRequired: 'Kami akan hubungi anda tentang ambil kereta — sila tambah nombor telefon bimbit.',
+    errEmailInvalid:
+      'E-mel tidak kelihatan betul — cuba seperti name@example.com.',
+    errPhoneRequired:
+      'Kami akan hubungi anda tentang ambil kereta — sila tambah nombor telefon bimbit.',
     errPhoneInvalid:
       'Masukkan nombor telefon bimbit sah (8–15 digit; kod negara pilihan, cth. +60 12 345 6789).',
     errAddressLine1: 'Masukkan alamat jalan, peti surat, atau nama syarikat.',
@@ -257,7 +278,8 @@ export const msMessages: EnMessages = {
     errTripDatesRequired:
       'Tarikh dan masa ambil serta pulang diperlukan. Kembali dan lengkapkan carian anda.',
     errPickValidDates: 'Pilih tarikh sah dari bar carian dahulu.',
-    errPricePreview: 'Tidak dapat mengira harga untuk tarikh ini. Semak butiran perjalanan anda.',
+    errPricePreview:
+      'Tidak dapat mengira harga untuk tarikh ini. Semak butiran perjalanan anda.',
     errCreateBooking: 'Tidak dapat mencipta tempahan.',
     errValidatePromo: 'Tidak dapat mengesahkan promo.',
     placeholderBuyerName: 'Ahmad Tan',
@@ -313,10 +335,12 @@ export const msMessages: EnMessages = {
     visitBlog: 'Lawati blog',
     attractionsEyebrow: '10 teratas penduduk tempatan',
     attractionsTitle: 'Terokai Langkawi mengikut rentak anda.',
-    attractionsSub: 'Pemanduan terpilih, hentian pantai, dan viewpoint — kejar matahari terbenam, bukan waypoint.',
+    attractionsSub:
+      'Pemanduan terpilih, hentian pantai, dan viewpoint — kejar matahari terbenam, bukan waypoint.',
     essentialEyebrow: 'Perlu tahu',
     essentialTitle: 'Lokasi penting di Langkawi.',
-    essentialSub: 'Dua titik ambil di mana kami jumpa anda, plus dua nombor yang patut disimpan.',
+    essentialSub:
+      'Dua titik ambil di mana kami jumpa anda, plus dua nombor yang patut disimpan.',
     faqSectionEyebrow: 'Semua yang perlu anda tahu',
     faqSectionTitle: 'Sewa kereta Langkawi · FAQ.',
     reelsEyebrow: 'Daripada tetamu kami · #XQCarTrips',
@@ -369,6 +393,16 @@ export const msMessages: EnMessages = {
     title: 'Jurnal & berita',
     readArticle: 'Baca artikel',
     minRead: '{minutes} min bacaan',
+  },
+  notFound: {
+    documentTitle: 'Halaman tidak dijumpai · XQCar',
+    screenLabel: 'XQ Car · Tidak dijumpai',
+    eyebrow: '404 · Di luar peta',
+    title: 'Persimpangan ini tiada pada peta pulau kami.',
+    body: 'Pautan itu mungkin lapuk, tersalah taip, atau mengarah ke halaman yang sudah digeser. Gunakan laluan di bawah untuk terus meneroka Langkawi bersama XQ Car.',
+    homeCta: 'Kembali ke laman utama',
+    journalCta: 'Lihat jurnal',
+    searchCta: 'Cari kereta',
   },
   booking: msBooking,
   carDetail: msCarDetail,

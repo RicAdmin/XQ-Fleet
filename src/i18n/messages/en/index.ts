@@ -44,7 +44,8 @@ export const enFooter = {
   contact: 'Contact',
   roadside: '24/7 roadside · +60 11 3521 5576',
   weAccept: 'We accept',
-  copyright: '© 2026 XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - Release.260626.01',
+  copyright:
+    '© 2026 XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - Release.260626.01',
   instagram: 'Instagram',
   facebook: 'Facebook',
   tiktok: 'TikTok',
@@ -64,8 +65,10 @@ export const enCommon = {
   selectDate: 'Select date',
   selectTime: 'Select time',
   searchCarsPrompt: "Tap Search cars to check what's available for your trip.",
-  chooseDatesPrompt: 'Choose pickup and return dates above, then tap Search cars to view vehicles and book.',
-  chooseTimesPrompt: 'Choose pickup and return times — both are required before you can search.',
+  chooseDatesPrompt:
+    'Choose pickup and return dates above, then tap Search cars to view vehicles and book.',
+  chooseTimesPrompt:
+    'Choose pickup and return times — both are required before you can search.',
   searchCars: 'Search cars',
   bookNow: 'Book now',
   learnMore: 'Learn more',
@@ -111,7 +114,8 @@ export const enAuth = {
   creatingAccount: 'Creating account…',
   createAccountBtn: 'Create account',
   signInFailed: 'Sign in failed.',
-  staffMustUseInternal: 'Owner and staff accounts must use the internal login page.',
+  staffMustUseInternal:
+    'Owner and staff accounts must use the internal login page.',
   unableSignIn: 'Unable to sign in right now.',
   fullName: 'Full name',
   name: 'Name',
@@ -128,25 +132,31 @@ export const enAuth = {
   asideSloganInternal: 'Secure access to your workspace.',
   passwordMismatch: 'Passwords do not match.',
   verifyEmailTitle: 'Check your email',
-  verifyEmailBody: 'We sent a verification link to {email}. Open it to activate your account, then sign in.',
+  verifyEmailBody:
+    'We sent a verification link to {email}. Open it to activate your account, then sign in.',
   showPassword: 'Show password',
   hidePassword: 'Hide password',
   forgotPasswordSubtitle: 'Enter your email and we’ll send a reset link.',
   resetLinkSentTitle: 'Check your email',
-  resetLinkSentBody: 'If {email} is registered with us, we sent a password reset link.',
+  resetLinkSentBody:
+    'If {email} is registered with us, we sent a password reset link.',
   unableSendResetLink: 'Unable to send reset link right now.',
   newPassword: 'New password',
   confirmNewPassword: 'Confirm new password',
   resetPasswordBtn: 'Update password',
   resettingPassword: 'Updating password…',
   passwordResetSuccess: 'Password updated. You can sign in now.',
-  passwordResetInvalid: 'This reset link is invalid or expired. Request a new one.',
-  emailNotVerified: 'Please verify your email before signing in. We sent a new verification link to your inbox.',
+  passwordResetInvalid:
+    'This reset link is invalid or expired. Request a new one.',
+  emailNotVerified:
+    'Please verify your email before signing in. We sent a new verification link to your inbox.',
   backToSignIn: 'Back to sign in',
   resendVerification: 'Resend verification email',
   resendVerificationSent: 'Verification email sent again.',
-  verificationLinkExpired: 'That verification link expired. Sign in to receive a new one.',
-  verificationLinkInvalid: 'That verification link is invalid. Sign in to receive a new one.',
+  verificationLinkExpired:
+    'That verification link expired. Sign in to receive a new one.',
+  verificationLinkInvalid:
+    'That verification link is invalid. Sign in to receive a new one.',
 } as const
 
 export const enCheckout = {
@@ -194,7 +204,8 @@ export const enCheckout = {
   step1of2: 'Step 1 of 2',
   step2of2: 'Step 2 of 2',
   reviewTitle: 'Review your rental.',
-  reviewSub: "Confirm the details below — we'll email your receipt after payment.",
+  reviewSub:
+    "Confirm the details below — we'll email your receipt after payment.",
   addonsTitle: 'Add-ons & protection',
   addonsMeta: "Optional · skip any you don't need",
   addonChildTitle: 'Child safety seat',
@@ -218,8 +229,10 @@ export const enCheckout = {
   country: 'Country',
   optional: 'optional',
   paymentTitle: 'Payment.',
-  guestPaymentSub: 'Complete payment with the details you entered — no account required.',
-  accountFootnote: 'Or continue on the standard booking page (same dates we passed in the link).',
+  guestPaymentSub:
+    'Complete payment with the details you entered — no account required.',
+  accountFootnote:
+    'Or continue on the standard booking page (same dates we passed in the link).',
   openBookingForm: 'Open booking form →',
   backToReview: 'Back to review',
   dailyRateDays: 'Daily rate × {nights}',
@@ -241,9 +254,12 @@ export const enCheckout = {
   payAmount: 'Pay RM {total}',
   pickupTbc: 'Pickup location TBC',
   errNameRequired: 'Please enter the name for this booking.',
-  errEmailRequired: "Add the email where you'd like your booking confirmation sent.",
-  errEmailInvalid: "That email doesn't look quite right — try something like name@example.com.",
-  errPhoneRequired: "We'll use this to reach you about pickup — please add your mobile number.",
+  errEmailRequired:
+    "Add the email where you'd like your booking confirmation sent.",
+  errEmailInvalid:
+    "That email doesn't look quite right — try something like name@example.com.",
+  errPhoneRequired:
+    "We'll use this to reach you about pickup — please add your mobile number.",
   errPhoneInvalid:
     'Enter a valid mobile number (8–15 digits; country code optional, e.g. +60 12 345 6789).',
   errAddressLine1: 'Enter street address, P.O. box, or company name.',
@@ -251,12 +267,15 @@ export const enCheckout = {
   errPostalCode: 'Enter postal or ZIP code.',
   errCountry: 'Select country.',
   errCountryInvalid: 'Select a valid country.',
-  errDriverName: "Please enter the driver's full name as shown on their license.",
-  errDriverLicense: "Please enter the driver's IC, passport, or license number.",
+  errDriverName:
+    "Please enter the driver's full name as shown on their license.",
+  errDriverLicense:
+    "Please enter the driver's IC, passport, or license number.",
   errTripDatesRequired:
     'Pickup and return dates and times are required. Go back and complete your search.',
   errPickValidDates: 'Pick valid dates from the search bar first.',
-  errPricePreview: 'Could not calculate a price for these dates. Check your trip details.',
+  errPricePreview:
+    'Could not calculate a price for these dates. Check your trip details.',
   errCreateBooking: 'Could not create booking.',
   errValidatePromo: 'Could not validate promo.',
   placeholderBuyerName: 'John Tan',
@@ -313,10 +332,12 @@ export const enLanding = {
   visitBlog: 'Visit the blog',
   attractionsEyebrow: "A local's top 10",
   attractionsTitle: 'Discover Langkawi at your own pace.',
-  attractionsSub: 'Curated drives, beach stops, and viewpoints — chase sunsets, not waypoints.',
+  attractionsSub:
+    'Curated drives, beach stops, and viewpoints — chase sunsets, not waypoints.',
   essentialEyebrow: 'Good to know',
   essentialTitle: 'Essential locations in Langkawi.',
-  essentialSub: 'Two pickup points where we meet you, plus the two numbers worth saving.',
+  essentialSub:
+    'Two pickup points where we meet you, plus the two numbers worth saving.',
   faqSectionEyebrow: 'All you need to know',
   faqSectionTitle: 'Langkawi car rental · FAQ.',
   reelsEyebrow: 'From our guests · #XQCarTrips',
@@ -379,6 +400,17 @@ export const enBlog = {
   minRead: '{minutes} min read',
 } as const
 
+export const enNotFound = {
+  documentTitle: 'Page not found · XQCar',
+  screenLabel: 'XQ Car · Not found',
+  eyebrow: '404 · Off the map',
+  title: 'This turn isn’t on our island map.',
+  body: 'That link may be outdated, mistyped, or pointing at a page we’ve moved. Use a path below to keep exploring Langkawi with XQ Car.',
+  homeCta: 'Back to home',
+  journalCta: 'Browse the journal',
+  searchCta: 'Search cars',
+} as const
+
 export const enMessages = {
   nav: enNav,
   footer: enFooter,
@@ -391,6 +423,7 @@ export const enMessages = {
   legal: enLegal,
   guides: enGuides,
   blog: enBlog,
+  notFound: enNotFound,
   booking: enBooking,
   carDetail: enCarDetail,
   payment: enPayment,

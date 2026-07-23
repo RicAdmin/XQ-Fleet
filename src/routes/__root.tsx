@@ -1,13 +1,20 @@
-import { HeadContent, Scripts, createRootRouteWithContext } from '@tanstack/react-router'
+import {
+  HeadContent,
+  Scripts,
+  createRootRouteWithContext,
+} from '@tanstack/react-router'
 import { lazy, Suspense } from 'react'
 
+import { NotFoundPage } from '#/components/NotFoundPage'
 import TanStackQueryProvider from '../integrations/tanstack-query/root-provider'
 
 import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
 
-const RootDevtools = import.meta.env.DEV ? lazy(() => import('./-RootDevtools')) : null
+const RootDevtools = import.meta.env.DEV
+  ? lazy(() => import('./-RootDevtools'))
+  : null
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -35,7 +42,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     const ref = search?.ref
     if (typeof ref === 'string' && /^[a-z0-9_-]{3,32}$/.test(ref.trim())) {
       try {
-        const { captureAffiliateRef } = await import('#/lib/affiliate-functions')
+        const { captureAffiliateRef } =
+          await import('#/lib/affiliate-functions')
         await captureAffiliateRef({
           data: {
             code: ref.trim(),
@@ -74,6 +82,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     ],
     scripts: [affiliateTrackingScript()].filter(Boolean) as { src: string }[],
   }),
+  notFoundComponent: NotFoundPage,
   shellComponent: RootDocument,
 })
 

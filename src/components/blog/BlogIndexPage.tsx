@@ -4,10 +4,17 @@ import { ArrowLeft, ArrowRight, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 import PublicMarketingShell from '#/components/shells/PublicMarketingShell'
-import { BLOG_CATEGORIES, type BlogCategory, type BlogPost } from '#/lib/blog/types'
+import { BLOG_CATEGORIES } from '#/lib/blog/types'
+import type { BlogCategory, BlogPost } from '#/lib/blog/types'
 import { formatBlogDate, getFeaturedPost } from '#/lib/blog/utils'
 
-function BlogAvatar({ name, size = 'sm' }: { name: string; size?: 'sm' | 'lg' }) {
+function BlogAvatar({
+  name,
+  size = 'sm',
+}: {
+  name: string
+  size?: 'sm' | 'lg'
+}) {
   const initials = name
     .split(' ')
     .map((w) => w[0])
@@ -45,10 +52,15 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
     })
   }, [posts, category, query])
 
-  const gridPosts = filtered.filter((p) => p.slug !== featured?.slug || category !== 'All' || query)
+  const gridPosts = filtered.filter(
+    (p) => p.slug !== featured?.slug || category !== 'All' || query,
+  )
 
   return (
-    <PublicMarketingShell screenLabel="XQ Car Journal" mainClassName="blog-page">
+    <PublicMarketingShell
+      screenLabel="XQ Car Journal"
+      mainClassName="blog-page"
+    >
       <header className="blog-header">
         <LocaleLink to="/" className="close-btn" aria-label={t('common.back')}>
           <ArrowLeft size={16} />
@@ -57,8 +69,8 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
           <span className="eyebrow">XQ Car Journal</span>
           <h1>Langkawi car rental guides &amp; island drives.</h1>
           <p>
-            Practical advice on renting, driving, and planning — written by the team that meets you at
-            Langkawi Airport Door 3 every day.
+            Practical advice on renting, driving, and planning — written by the
+            team that meets you at Langkawi Airport Door 3 every day.
           </p>
         </div>
         <div className="blog-header-stats">
@@ -81,7 +93,9 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
         <div className="blog-cats" role="tablist" aria-label="Blog categories">
           {BLOG_CATEGORIES.map((cat) => {
             const count =
-              cat === 'All' ? posts.length : posts.filter((p) => p.category === cat).length
+              cat === 'All'
+                ? posts.length
+                : posts.filter((p) => p.category === cat).length
             return (
               <button
                 key={cat}
@@ -110,7 +124,11 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
       </div>
 
       {featured && category === 'All' && !query && (
-        <LocaleLink to="/blog/$slug" params={{ slug: featured.slug }} className="blog-featured">
+        <LocaleLink
+          to="/blog/$slug"
+          params={{ slug: featured.slug }}
+          className="blog-featured"
+        >
           <div
             className="blog-featured-img"
             style={{
@@ -139,7 +157,12 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
       ) : (
         <div className="blog-grid">
           {gridPosts.map((post) => (
-            <LocaleLink key={post.slug} to="/blog/$slug" params={{ slug: post.slug }} className="blog-card">
+            <LocaleLink
+              key={post.slug}
+              to="/blog/$slug"
+              params={{ slug: post.slug }}
+              className="blog-card"
+            >
               <div
                 className="blog-card-img"
                 style={{ backgroundImage: `url(${post.heroImage})` }}

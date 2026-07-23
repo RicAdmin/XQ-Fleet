@@ -3705,6 +3705,94 @@ input[type=range] { width: 100%; accent-color: var(--brand-leaf); }
 .blog-empty p { margin: 0; color: var(--muted); font-size: 14px; }
 
 /* =====================================================
+   Not found (404)
+   ===================================================== */
+.not-found-page {
+  position: relative;
+  min-height: min(58vh, 560px);
+  display: grid;
+  place-items: center;
+  padding: 40px 24px 56px;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 0%, rgba(255, 102, 0, 0.1), transparent 70%),
+    linear-gradient(180deg, var(--canvas) 0%, #fff 55%, var(--canvas) 100%);
+}
+.not-found-page::before {
+  content: '';
+  position: absolute;
+  inset: auto 0 22% 0;
+  height: 2px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--ink) 0 18px,
+    transparent 18px 38px
+  );
+  opacity: 0.1;
+  animation: roadDash 1.2s linear infinite;
+  pointer-events: none;
+}
+.not-found-stage {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 560px);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+.not-found-mark {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin-bottom: 18px;
+  background: #fff;
+  color: var(--brand-leaf);
+  border: 1px solid color-mix(in oklab, var(--line) 80%, transparent);
+  box-shadow: 0 10px 30px rgba(20, 24, 26, 0.06);
+}
+.not-found-eyebrow {
+  margin: 0 0 10px;
+  color: var(--brand-moss);
+  font-weight: 600;
+}
+.not-found-title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: clamp(28px, 4.2vw, 44px);
+  line-height: 1.12;
+  letter-spacing: -0.028em;
+  color: #14181A;
+  text-wrap: balance;
+}
+.not-found-copy {
+  margin: 14px 0 0;
+  color: #2A2F33;
+  font-size: 16px;
+  line-height: 1.55;
+  max-width: 46ch;
+  text-wrap: pretty;
+}
+.not-found-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 28px;
+}
+.not-found-actions .btn {
+  text-decoration: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .not-found-page::before {
+    animation: none !important;
+  }
+}
+
+/* =====================================================
    Blog post (single article)
    ===================================================== */
 .blog-post-page { background: var(--canvas); padding-bottom: 60px; }

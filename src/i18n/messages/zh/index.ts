@@ -27,7 +27,8 @@ export const zhMessages: EnMessages = {
   footer: {
     tagline1:
       '2015年由一位爱上兰卡威并选择留岛的旅人创立，XQ Car Rental 是小强假期有限公司（Xiao Qiang Holidays Sdn Bhd）的专属租车部门，为持牌马来西亚旅游公司（KPK/LN: 7371 | MATTA MA4659）。',
-    tagline2: '我们大部分车队为自有车辆，精心保养、用心运营——取车时，您收获的也是安心。',
+    tagline2:
+      '我们大部分车队为自有车辆，精心保养、用心运营——取车时，您收获的也是安心。',
     signature: 'You Play, I Think.',
     planTrip: '规划行程',
     pickCar: '选对车型',
@@ -48,7 +49,8 @@ export const zhMessages: EnMessages = {
     contact: '联系',
     roadside: '24/7 道路救援 · +60 11 3521 5576',
     weAccept: '我们接受',
-    copyright: '© 2026 XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - Release.260626.01',
+    copyright:
+      '© 2026 XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - Release.260626.01',
     instagram: 'Instagram',
     facebook: 'Facebook',
     tiktok: 'TikTok',
@@ -59,7 +61,8 @@ export const zhMessages: EnMessages = {
     eyebrowShort: 'XQ Car · 兰卡威自2015年',
     titleLine1: '兰卡威租车',
     titleLine2: '开启每一段冒险。',
-    subtitle: '安全、友好、价格公道——90秒完成预订，送达兰卡威机场、渡轮码头或您的酒店。',
+    subtitle:
+      '安全、友好、价格公道——90秒完成预订，送达兰卡威机场、渡轮码头或您的酒店。',
   },
   common: {
     selectDate: '选择日期',
@@ -128,7 +131,8 @@ export const zhMessages: EnMessages = {
     asideSloganInternal: '安全进入您的工作区。',
     passwordMismatch: '两次输入的密码不一致。',
     verifyEmailTitle: '请查收邮件',
-    verifyEmailBody: '我们已向 {email} 发送验证链接。请点击链接激活账户，然后登录。',
+    verifyEmailBody:
+      '我们已向 {email} 发送验证链接。请点击链接激活账户，然后登录。',
     showPassword: '显示密码',
     hidePassword: '隐藏密码',
     forgotPasswordSubtitle: '输入电子邮箱，我们将发送重置链接。',
@@ -141,7 +145,8 @@ export const zhMessages: EnMessages = {
     resettingPassword: '正在更新密码…',
     passwordResetSuccess: '密码已更新，您现在可以登录。',
     passwordResetInvalid: '此重置链接无效或已过期，请重新申请。',
-    emailNotVerified: '请先验证电子邮箱后再登录。我们已向您的邮箱发送新的验证链接。',
+    emailNotVerified:
+      '请先验证电子邮箱后再登录。我们已向您的邮箱发送新的验证链接。',
     backToSignIn: '返回登录',
     resendVerification: '重新发送验证邮件',
     resendVerificationSent: '验证邮件已重新发送。',
@@ -172,11 +177,13 @@ export const zhMessages: EnMessages = {
     signInToContinue: '登录以继续。',
     signInToContinueSub: '我们需要您的账户来保留车辆并发送预订确认。',
     customerAccount: '客户账户',
-    signInOrCreate: '登录或创建账户以保存预订，或使用已填写的信息以访客身份继续。',
+    signInOrCreate:
+      '登录或创建账户以保存预订，或使用已填写的信息以访客身份继续。',
     continueAsGuest: '以访客身份继续',
     havePromo: '有优惠码？',
     promoPlaceholder: '输入代码',
-    secureCheckoutNote: '安全结账 — 您将在下一屏完成银行卡或网银支付（iPay88）。',
+    secureCheckoutNote:
+      '安全结账 — 您将在下一屏完成银行卡或网银支付（iPay88）。',
     agreeTermsRequired: '请同意条款以继续。',
     unableCreateAccount: '目前无法创建账户。',
     newAccount: '新账户',
@@ -240,7 +247,8 @@ export const zhMessages: EnMessages = {
     errEmailRequired: '请填写接收预订确认的邮箱。',
     errEmailInvalid: '邮箱格式似乎不正确——请尝试类似 name@example.com 的格式。',
     errPhoneRequired: '我们将用此号码联系您取车事宜——请填写手机号码。',
-    errPhoneInvalid: '请输入有效的手机号码（8–15 位数字；国家代码可选，如 +60 12 345 6789）。',
+    errPhoneInvalid:
+      '请输入有效的手机号码（8–15 位数字；国家代码可选，如 +60 12 345 6789）。',
     errAddressLine1: '请输入街道地址、邮政信箱或公司名称。',
     errCity: '请输入城市或城镇。',
     errPostalCode: '请输入邮政编码。',
@@ -269,7 +277,8 @@ export const zhMessages: EnMessages = {
   landing: {
     trustedSince: '自2015年以来深受旅客信赖',
     testimonialsTitle: '客户怎么说。',
-    testimonialsSub: '数千位客人，同一个故事：车况干净、价格透明、需要时有人帮忙。',
+    testimonialsSub:
+      '数千位客人，同一个故事：车况干净、价格透明、需要时有人帮忙。',
     reviewsFrom: '来自',
     moreStories: '更多客人故事',
     topPicksMatchedSearch: '与搜索匹配的精选车型',
@@ -284,7 +293,8 @@ export const zhMessages: EnMessages = {
     categoriesSub: '小型适合独行。舒适适合全家。冒险适合探索秘境。',
     locationsEyebrow: '取还车区域',
     locationsTitle: '兰卡威之路，随您所至。',
-    locationsSub: '从珍南海的白沙到丹绒鲁的宁静——我们在全岛送车，会合点清晰明确。',
+    locationsSub:
+      '从珍南海的白沙到丹绒鲁的宁静——我们在全岛送车，会合点清晰明确。',
     carRentalIn: '{name} 租车',
     promosEyebrow: '聪明预订 · 真实优惠',
     promosTitle: '早订。淡季订。省更多。',
@@ -306,7 +316,8 @@ export const zhMessages: EnMessages = {
     faqSectionTitle: '兰卡威租车 · 常见问题。',
     reelsEyebrow: '来自客人 · #XQCarTrips',
     reelsTitle: '真实旅程，真实座驾。',
-    reelsSub: '旅客每周与我们分享的短片和故事——在 Instagram 或 WhatsApp 标记 #XQCarTrips。',
+    reelsSub:
+      '旅客每周与我们分享的短片和故事——在 Instagram 或 WhatsApp 标记 #XQCarTrips。',
     faqEyebrow: '出发前须知',
     faqTitle: '常见问题，清晰解答。',
     faqSub: '从年龄要求到兰卡威机场取车——诚实清晰的答案，助您安心出发。',
@@ -352,6 +363,16 @@ export const zhMessages: EnMessages = {
     title: '资讯与新闻',
     readArticle: '阅读文章',
     minRead: '{minutes} 分钟阅读',
+  },
+  notFound: {
+    documentTitle: '页面未找到 · XQCar',
+    screenLabel: 'XQ Car · 未找到',
+    eyebrow: '404 · 不在地图上',
+    title: '这条路不在我们的兰卡威地图上。',
+    body: '链接可能已过期、输入有误，或页面已迁移。请用下面的入口继续探索 XQ Car 的兰卡威服务。',
+    homeCta: '返回首页',
+    journalCta: '浏览资讯',
+    searchCta: '搜索车辆',
   },
   booking: zhBooking,
   carDetail: zhCarDetail,

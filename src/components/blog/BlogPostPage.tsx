@@ -1,4 +1,3 @@
-import { Link } from '@tanstack/react-router'
 import { LocaleLink } from '#/components/i18n/LocaleLink'
 import { useLocale, useT } from '#/i18n/context'
 import { ArrowLeft, ArrowRight, Calendar, Clock, Share2 } from 'lucide-react'

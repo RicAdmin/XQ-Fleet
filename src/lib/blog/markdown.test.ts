@@ -101,4 +101,23 @@ describe('parseBlogMarkdown', () => {
       parseBlogMarkdown('airport-pickup-ms', malay),
     ).resolves.toMatchObject({ language: 'ms' })
   })
+
+  it('rejects malformed dates, invalid languages, and missing frontmatter', async () => {
+    const badDate = validPost.replace(
+      "publishedAt: '2026-07-01'",
+      "publishedAt: '07/01/2026'",
+    )
+    const badLanguage = validPost.replace('language: en', 'language: jp')
+    const missingTitle = validPost.replace('title: Airport pickup\n', '')
+
+    await expect(parseBlogMarkdown('bad-date', badDate)).rejects.toThrow(
+      /content\/blog\/bad-date\.md: invalid frontmatter/,
+    )
+    await expect(
+      parseBlogMarkdown('bad-language', badLanguage),
+    ).rejects.toThrow(/content\/blog\/bad-language\.md: invalid frontmatter/)
+    await expect(
+      parseBlogMarkdown('missing-title', missingTitle),
+    ).rejects.toThrow(/content\/blog\/missing-title\.md: invalid frontmatter/)
+  })
 })
