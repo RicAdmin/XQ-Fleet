@@ -1,26 +1,24 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { LegalDocumentPage } from '#/components/legal/LegalDocumentPage'
+import type { Locale } from '#/i18n/locales'
 import { getLegalDocument } from '#/lib/legal'
-import { publicSitePath } from '#/lib/brand'
-import { SEO_OG_LOGO, socialImageMeta } from '#/lib/seo-meta'
+import { seoMeta } from '#/lib/seo-locale-meta'
+import { SEO_OG_LOGO } from '#/lib/seo-meta'
 
 const document = getLegalDocument('refund-policy')
 
 export const Route = createFileRoute('/$locale/refund-policy')({
   component: RefundPolicyPage,
-  head: () => ({
-    meta: [
-      { title: document.metaTitle },
-      { name: 'description', content: document.metaDescription },
-      { property: 'og:title', content: document.metaTitle },
-      { property: 'og:description', content: document.metaDescription },
-      { property: 'og:type', content: 'website' },
-      { property: 'og:url', content: publicSitePath('/refund-policy') },
-      ...socialImageMeta(SEO_OG_LOGO, 'summary'),
-    ],
-    links: [{ rel: 'canonical', href: publicSitePath('/refund-policy') }],
-  }),
+  head: ({ params }) =>
+    seoMeta({
+      locale: params.locale as Locale,
+      path: '/refund-policy',
+      title: document.metaTitle,
+      description: document.metaDescription,
+      imagePath: SEO_OG_LOGO,
+      card: 'summary',
+    }),
 })
 
 function RefundPolicyPage() {

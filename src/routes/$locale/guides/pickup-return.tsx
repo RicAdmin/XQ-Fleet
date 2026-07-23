@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { PickupReturnGuide } from '#/components/guides/pickup-return-guide'
-import { publicSitePath } from '#/lib/brand'
-import { socialImageMeta } from '#/lib/seo-meta'
+import type { Locale } from '#/i18n/locales'
+import { seoMeta } from '#/lib/seo-locale-meta'
 
 const title = 'Car Pickup & Return Guide · Langkawi Airport & Jetty · XQ Car'
 const description =
@@ -10,18 +10,13 @@ const description =
 
 export const Route = createFileRoute('/$locale/guides/pickup-return')({
   component: GuidesPickupReturnPage,
-  head: () => ({
-    meta: [
-      { title },
-      { name: 'description', content: description },
-      { property: 'og:title', content: title },
-      { property: 'og:description', content: description },
-      { property: 'og:type', content: 'website' },
-      { property: 'og:url', content: publicSitePath('/guides/pickup-return') },
-      ...socialImageMeta(),
-    ],
-    links: [{ rel: 'canonical', href: publicSitePath('/guides/pickup-return') }],
-  }),
+  head: ({ params }) =>
+    seoMeta({
+      locale: params.locale as Locale,
+      path: '/guides/pickup-return',
+      title,
+      description,
+    }),
 })
 
 function GuidesPickupReturnPage() {

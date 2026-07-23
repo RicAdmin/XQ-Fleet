@@ -3,7 +3,7 @@ import { HTML_LANG } from '#/i18n/locales'
 import { getLandingContent } from '#/i18n/content'
 import { LEGAL_COMPANY } from '#/lib/legal/company'
 import { BRAND_NAME, BRAND_NAME_PROSE, brandLogoUrl, publicSitePath, publicSiteUrl } from '#/lib/brand'
-import { SEO_OG_IMAGE } from '#/lib/seo-meta'
+import { BRAND_SAME_AS, SEO_OG_IMAGE } from '#/lib/seo-meta'
 
 /** JSON-LD for homepage — AutoRental + FAQPage. */
 export function buildHomeStructuredData(locale: Locale = 'en') {
@@ -85,6 +85,7 @@ export function buildHomeStructuredData(locale: Locale = 'en') {
       ],
     },
     legalName: LEGAL_COMPANY.name,
+    sameAs: [...BRAND_SAME_AS],
   }
 
   const webSite = {

@@ -14,6 +14,7 @@ type SeoMetaInput = {
   ogDescription?: string
   ogType?: 'website' | 'article'
   imagePath?: string
+  card?: 'summary_large_image' | 'summary'
 }
 
 function hreflangLinks(path: string) {
@@ -40,6 +41,7 @@ export function seoMeta({
   ogDescription,
   ogType = 'website',
   imagePath,
+  card,
 }: SeoMetaInput) {
   const canonical = publicLocalePath(path, locale)
   return {
@@ -51,7 +53,7 @@ export function seoMeta({
       { property: 'og:type', content: ogType },
       { property: 'og:url', content: canonical },
       { property: 'og:locale', content: OG_LOCALE[locale] },
-      ...socialImageMeta(imagePath),
+      ...socialImageMeta(imagePath, card),
     ],
     links: [{ rel: 'canonical', href: canonical }, ...hreflangLinks(path)],
   }

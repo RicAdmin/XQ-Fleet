@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { PlanDriveGuide } from '#/components/guides/plan-drive-guide'
-import { publicSitePath } from '#/lib/brand'
-import { socialImageMeta } from '#/lib/seo-meta'
+import type { Locale } from '#/i18n/locales'
+import { seoMeta } from '#/lib/seo-locale-meta'
 
 const title = 'Plan Your Langkawi Drive · Attractions & Routes · XQ Car'
 const description =
@@ -10,18 +10,13 @@ const description =
 
 export const Route = createFileRoute('/$locale/guides/plan-drive')({
   component: GuidesPlanDrivePage,
-  head: () => ({
-    meta: [
-      { title },
-      { name: 'description', content: description },
-      { property: 'og:title', content: title },
-      { property: 'og:description', content: description },
-      { property: 'og:type', content: 'website' },
-      { property: 'og:url', content: publicSitePath('/guides/plan-drive') },
-      ...socialImageMeta(),
-    ],
-    links: [{ rel: 'canonical', href: publicSitePath('/guides/plan-drive') }],
-  }),
+  head: ({ params }) =>
+    seoMeta({
+      locale: params.locale as Locale,
+      path: '/guides/plan-drive',
+      title,
+      description,
+    }),
 })
 
 function GuidesPlanDrivePage() {

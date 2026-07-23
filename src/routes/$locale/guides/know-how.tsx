@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { KnowHowGuide } from '#/components/guides/know-how-guide'
-import { publicSitePath } from '#/lib/brand'
-import { socialImageMeta } from '#/lib/seo-meta'
+import type { Locale } from '#/i18n/locales'
+import { seoMeta } from '#/lib/seo-locale-meta'
 
 const title = 'Driving Know-How in Langkawi · Parking, Fines & Fuel · XQ Car'
 const description =
@@ -10,18 +10,13 @@ const description =
 
 export const Route = createFileRoute('/$locale/guides/know-how')({
   component: GuidesKnowHowPage,
-  head: () => ({
-    meta: [
-      { title },
-      { name: 'description', content: description },
-      { property: 'og:title', content: title },
-      { property: 'og:description', content: description },
-      { property: 'og:type', content: 'website' },
-      { property: 'og:url', content: publicSitePath('/guides/know-how') },
-      ...socialImageMeta(),
-    ],
-    links: [{ rel: 'canonical', href: publicSitePath('/guides/know-how') }],
-  }),
+  head: ({ params }) =>
+    seoMeta({
+      locale: params.locale as Locale,
+      path: '/guides/know-how',
+      title,
+      description,
+    }),
 })
 
 function GuidesKnowHowPage() {

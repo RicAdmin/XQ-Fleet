@@ -20,6 +20,7 @@ export const Route = createFileRoute('/')({
           })
         }
         const locale = negotiateLocale(request.headers.get('Accept-Language') ?? undefined)
+        // 302: Accept-Language negotiation must not be cached as a permanent locale.
         return withAgentDiscoveryLinkHeader(
           new Response(null, {
             status: 302,

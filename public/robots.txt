@@ -9,7 +9,8 @@ Disallow: /book
 Disallow: /checkout
 Disallow: /internal
 
-# AI search crawlers — allow indexing for discovery (adjust per policy)
+# AI search crawlers — allow indexing for citation/discovery
+# Training preference is expressed via Content-Signal (ai-train=no) above.
 User-agent: GPTBot
 Allow: /
 Disallow: /admin
@@ -31,6 +32,15 @@ Disallow: /book
 Disallow: /checkout
 Disallow: /internal
 
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /app
+Disallow: /book
+Disallow: /checkout
+Disallow: /internal
+
 User-agent: ClaudeBot
 Allow: /
 
@@ -40,4 +50,8 @@ Allow: /
 User-agent: Google-Extended
 Allow: /
 
-Sitemap: https://carxq.com/sitemap.xml
+# Common Crawl training corpus — blocked to match Content-Signal ai-train=no
+User-agent: CCBot
+Disallow: /
+
+Sitemap: https://car.xqholidays.com.my/sitemap.xml

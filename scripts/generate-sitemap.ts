@@ -1,11 +1,16 @@
-import { writeFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
 
 import { LOCALES, DEFAULT_LOCALE } from '../src/i18n/locales'
 import { localePath } from '../src/i18n/link'
-import { getBlogPosts } from '../src/lib/blog/posts'
+import { parseBlogMarkdown } from '../src/lib/blog/markdown'
+import type { BlogPost } from '../src/lib/blog/types'
 
-const SITE = 'https://carxq.com'
+const SITE = (
+  process.env.SITE_URL ||
+  process.env.BETTER_AUTH_URL ||
+  'https://car.xqholidays.com.my'
+).replace(/\/$/, '')
 
 type Entry = {
   path: string
@@ -29,43 +34,73 @@ const staticPages: Entry[] = [
   { path: '/refund-policy', changefreq: 'yearly', priority: '0.4' },
 ]
 
-const blogPages: Entry[] = getBlogPosts().map((post) => ({
-  path: `/blog/${post.slug}`,
-  changefreq: 'monthly',
-  priority: post.featured ? '0.9' : post.slug.includes('airport') || post.slug.includes('cheap') ? '0.85' : '0.75',
-  lastmod: post.updatedAt,
-}))
+async function loadBlogPosts(): Promise<BlogPost[]> {
+  const dir = resolve(process.cwd(), 'content/blog')
+  const files = readdirSync(dir).filter((name) => name.endsWith('.md'))
+  return Promise.all(
+    files.map((name) => {
+      const slug = name.replace(/\.md$/, '')
+      return parseBlogMarkdown(slug, readFileSync(join(dir, name), 'utf8'))
+    }),
+  )
+}
 
 function hreflangAlternates(barePath: string): string {
   return LOCALES.map((loc) => {
     const hreflang = loc === 'zh' ? 'zh-Hans' : loc
     const href = `${SITE}${localePath(loc, barePath)}`
     return `\n    <xhtml:link rel="alternate" hreflang="${hreflang}" href="${href}" />`
-  }).concat(
-    `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE}${localePath(DEFAULT_LOCALE, barePath)}" />`,
-  ).join('')
+  })
+    .concat(
+      `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE}${localePath(DEFAULT_LOCALE, barePath)}" />`,
+    )
+    .join('')
 }
 
-function urlEntry({ path, changefreq, priority, lastmod }: Entry, locale: typeof LOCALES[number]): string {
-  const barePath = path
-  const loc = `${SITE}${localePath(locale, barePath)}`
+function urlEntry(
+  { path, changefreq, priority, lastmod }: Entry,
+  locale: (typeof LOCALES)[number],
+): string {
+  const loc = `${SITE}${localePath(locale, path)}`
   const lastmodTag = lastmod ? `\n    <lastmod>${lastmod}</lastmod>` : ''
   return `  <url>
     <loc>${loc}</loc>${lastmodTag}
     <changefreq>${changefreq}</changefreq>
-    <priority>${priority}</priority>${hreflangAlternates(barePath)}
+    <priority>${priority}</priority>${hreflangAlternates(path)}
   </url>`
 }
 
-const allEntries = [...staticPages, ...blogPages]
-const urls = LOCALES.flatMap((locale) => allEntries.map((entry) => urlEntry(entry, locale)))
+async function main() {
+  const blogPages: Entry[] = (await loadBlogPosts()).map((post) => ({
+    path: `/blog/${post.slug}`,
+    changefreq: 'monthly',
+    priority: post.featured
+      ? '0.9'
+      : post.slug.includes('airport') || post.slug.includes('cheap')
+        ? '0.85'
+        : '0.75',
+    lastmod: post.updatedAt,
+  }))
 
-const xml = `<?xml version="1.0" encoding="UTF-8"?>
+  const allEntries = [...staticPages, ...blogPages]
+  const urls = LOCALES.flatMap((locale) =>
+    allEntries.map((entry) => urlEntry(entry, locale)),
+  )
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${urls.join('\n')}
 </urlset>
 `
 
-const outPath = resolve(process.cwd(), 'public/sitemap.xml')
-writeFileSync(outPath, xml, 'utf8')
-console.log(`Wrote ${urls.length} URLs (${allEntries.length} paths × ${LOCALES.length} locales) to ${outPath}`)
+  const outPath = resolve(process.cwd(), 'public/sitemap.xml')
+  writeFileSync(outPath, xml, 'utf8')
+  console.log(
+    `Wrote ${urls.length} URLs (${allEntries.length} paths × ${LOCALES.length} locales) to ${outPath} using ${SITE}`,
+  )
+}
+
+main().catch((error) => {
+  console.error(error)
+  process.exit(1)
+})

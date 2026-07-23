@@ -2,40 +2,41 @@
 
 > Family-owned car rental in Langkawi, Malaysia since 2015. Book online from RM 70/day with free delivery to Langkawi International Airport (LGK) Door 3, Kuah Ferry Jetty, or your hotel.
 
+Canonical origin: https://car.xqholidays.com.my (locales: /en, /ms, /zh)
+
 ## Book & fleet
 
-- [Home — car rental Langkawi](https://carxq.com/): Search dates, browse fleet, book in ~90 seconds
-- [About XQ Car](https://carxq.com/about): Licensed operator since 2015, owned fleet, OKU-friendly vehicles, island-wide delivery
+- [Home — car rental Langkawi](https://car.xqholidays.com.my/en): Search dates, browse fleet, book in ~90 seconds
+- [About XQ Car](https://car.xqholidays.com.my/en/about): Licensed operator since 2015, owned fleet, OKU-friendly vehicles, island-wide delivery
 
 ## Blog — Langkawi car rental guides
 
-- [XQ Car Journal](https://carxq.com/blog): 20+ guides on renting and driving in Langkawi
-- [Complete car rental guide](https://carxq.com/blog/car-rental-langkawi-complete-guide): Pillar guide — prices, pickup, documents, tips
-- [Airport car rental pickup](https://carxq.com/blog/langkawi-airport-car-rental-pickup): LGK Door 3 meet point
-- [Cheap car rental tips](https://carxq.com/blog/cheap-car-rental-langkawi-tips): Save on daily rates
-- [Rent a car requirements](https://carxq.com/blog/rent-a-car-langkawi-requirements): Documents and age rules
-- [Ferry jetty car rental](https://carxq.com/blog/langkawi-ferry-jetty-car-rental): Kuah Jetty pickup
-- [Best car for family trips](https://carxq.com/blog/best-car-langkawi-family-trip): MPV and luggage guidance
-- [Driving Langkawi first time](https://carxq.com/blog/driving-langkawi-first-time): Rules, roads, parking
-- [3-day itinerary by car](https://carxq.com/blog/langkawi-3-day-itinerary-by-car): Island route plan
-- [Monsoon season rental](https://carxq.com/blog/langkawi-monsoon-season-car-rental): Wet-season driving tips
-- [Car rental vs taxi & Grab](https://carxq.com/blog/langkawi-car-rental-vs-taxi-grab): Cost comparison
-- [Car rental insurance](https://carxq.com/blog/langkawi-car-rental-insurance): Coverage basics
-- [Pantai Cenang guide](https://carxq.com/blog/pantai-cenang-car-rental-guide): Beach-area parking and routes
-- [Kuah Town guide](https://carxq.com/blog/kuah-town-langkawi-car-rental): Town parking and shopping runs
-- [Sky Bridge by car](https://carxq.com/blog/langkawi-sky-bridge-by-car): Cable car and Oriental Village access
-- [Kilim Geoforest road trip](https://carxq.com/blog/kilim-geoforest-park-road-trip): Mangrove park drive
-- [Tanjung Rhu beach drive](https://carxq.com/blog/tanjung-rhu-beach-drive-langkawi): North-island route
-- [Hotel car delivery](https://carxq.com/blog/langkawi-hotel-car-delivery): Resort meet points
-- [Weekly & monthly rental](https://carxq.com/blog/langkawi-weekly-monthly-car-rental): Long-stay discounts
-- [Child seat rental](https://carxq.com/blog/langkawi-car-rental-child-seat): Family add-ons
+- [XQ Car Journal](https://car.xqholidays.com.my/en/blog): Guides on renting and driving in Langkawi
+- [Complete car rental guide](https://car.xqholidays.com.my/en/blog/car-rental-langkawi-complete-guide): Pillar guide — prices, pickup, documents, tips
+- [Airport car rental pickup](https://car.xqholidays.com.my/en/blog/langkawi-airport-car-rental-pickup): LGK Door 3 meet point
+- [Cheap car rental tips](https://car.xqholidays.com.my/en/blog/cheap-car-rental-langkawi-tips): Save on daily rates
+- [Rent a car requirements](https://car.xqholidays.com.my/en/blog/rent-a-car-langkawi-requirements): Documents and age rules
+- [Ferry jetty car rental](https://car.xqholidays.com.my/en/blog/langkawi-ferry-jetty-car-rental): Kuah Jetty pickup
+- [Ferry cashback + car rental](https://car.xqholidays.com.my/en/blog/langkawi-ferry-cashback-car-rental): RoRo ferry cashback with a rental car
+- [Best car for family trips](https://car.xqholidays.com.my/en/blog/best-car-langkawi-family-trip): MPV and luggage guidance
+- [Driving Langkawi first time](https://car.xqholidays.com.my/en/blog/driving-langkawi-first-time): Rules, roads, parking
+- [3-day itinerary by car](https://car.xqholidays.com.my/en/blog/langkawi-3-day-itinerary-by-car): Island route plan
+- [Monsoon season rental](https://car.xqholidays.com.my/en/blog/langkawi-monsoon-season-car-rental): Wet-season driving tips
+- [Car rental vs taxi & Grab](https://car.xqholidays.com.my/en/blog/langkawi-car-rental-vs-taxi-grab): Cost comparison
+- [Car rental insurance](https://car.xqholidays.com.my/en/blog/langkawi-car-rental-insurance): Coverage basics
+- [Pantai Cenang guide](https://car.xqholidays.com.my/en/blog/pantai-cenang-car-rental-guide): Beach-area parking and routes
+- [Petrol stations guide](https://car.xqholidays.com.my/en/blog/langkawi-petrol-stations-rental-guide): Where to refuel on the island
+- [Hotel car delivery](https://car.xqholidays.com.my/en/blog/langkawi-hotel-car-delivery): Resort meet points
+- [Weekly & monthly rental](https://car.xqholidays.com.my/en/blog/langkawi-weekly-monthly-car-rental): Long-stay discounts
+- [Child seat rental](https://car.xqholidays.com.my/en/blog/langkawi-car-rental-child-seat): Family add-ons
+- [Telaga Tujuh / Temurun by car](https://car.xqholidays.com.my/en/blog/telaga-tujuh-temurun-waterfall-by-car): Waterfall drive and parking notes
 
 ## Trip planning guides
 
-- [Pick the right car](https://carxq.com/guides/pick-car): Fleet categories for Langkawi trips
-- [Pickup & return guide](https://carxq.com/guides/pickup-return): Airport, jetty, and hotel meet points
-- [Plan my drive](https://carxq.com/guides/plan-drive): Island route planner
-- [Know-how — driving in Langkawi](https://carxq.com/guides/know-how): Parking, fuel, fines, accidents
+- [Pick the right car](https://car.xqholidays.com.my/en/guides/pick-car): Fleet categories for Langkawi trips
+- [Pickup & return guide](https://car.xqholidays.com.my/en/guides/pickup-return): Airport, jetty, and hotel meet points
+- [Plan my drive](https://car.xqholidays.com.my/en/guides/plan-drive): Island route planner
+- [Know-how — driving in Langkawi](https://car.xqholidays.com.my/en/guides/know-how): Parking, fuel, fines, accidents
 
 ## Contact
 
@@ -47,10 +48,10 @@
 
 ## Policies
 
-- [Terms & Conditions](https://carxq.com/terms): Website booking terms
-- [Vehicle Rental Contract](https://carxq.com/rental-agreement): Handover agreement and usage rules
-- [Privacy Policy](https://carxq.com/privacy): How we collect and use personal data
-- [PDPA Notice](https://carxq.com/pdpa): Personal Data Protection Act 2010 notice
-- [Cancellation & Refund Policy](https://carxq.com/refund-policy): Refund schedule and no-show rules
+- [Terms & Conditions](https://car.xqholidays.com.my/en/terms): Website booking terms
+- [Vehicle Rental Contract](https://car.xqholidays.com.my/en/rental-agreement): Handover agreement and usage rules
+- [Privacy Policy](https://car.xqholidays.com.my/en/privacy): How we collect and use personal data
+- [PDPA Notice](https://car.xqholidays.com.my/en/pdpa): Personal Data Protection Act 2010 notice
+- [Cancellation & Refund Policy](https://car.xqholidays.com.my/en/refund-policy): Refund schedule and no-show rules
 - Minimum driver age 21, valid driving licence held 1+ year
 - Rates from RM 70/day; weekly and monthly discounts available

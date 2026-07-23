@@ -205,7 +205,8 @@ export function BlogPostPage({ post, allPosts }: BlogPostPageProps) {
 }
 
 export function BlogArticleStructuredData({ post }: { post: BlogPost }) {
-  const url = publicSitePath(`/blog/${post.slug}`)
+  const locale = useLocale()
+  const url = publicLocalePath(`/blog/${post.slug}`, locale)
   const blogPosting = {
     '@type': 'BlogPosting',
     headline: post.title,
@@ -218,7 +219,7 @@ export function BlogArticleStructuredData({ post }: { post: BlogPost }) {
     author: {
       '@type': 'Person',
       name: post.author.name,
-      url: publicSitePath('/about'),
+      url: publicLocalePath('/about', locale),
     },
     publisher: {
       '@type': 'Organization',
@@ -237,11 +238,14 @@ export function BlogArticleStructuredData({ post }: { post: BlogPost }) {
     '@context': 'https://schema.org',
     '@graph': [
       blogPosting,
-      breadcrumbSchema([
-        { name: 'Home', path: '/' },
-        { name: 'Blog', path: '/blog' },
-        { name: post.title, path: `/blog/${post.slug}` },
-      ]),
+      breadcrumbSchema(
+        [
+          { name: 'Home', path: '/' },
+          { name: 'Blog', path: '/blog' },
+          { name: post.title, path: `/blog/${post.slug}` },
+        ],
+        locale,
+      ),
     ],
   }
 
