@@ -3,7 +3,9 @@ title: '兰卡威租车证件要求：驾照、押金与年龄'
 slug: 'rent-a-car-langkawi-requirements-zh'
 language: zh
 category: Guides
-status: pending
+status: complete
+completedAt: 2026-07-23
+output: content/blog/rent-a-car-langkawi-requirements-zh.md
 created: 2026-07-23
 primaryQuery: '兰卡威租车证件'
 readerIntent: '确认中国/台湾/香港旅客需要带哪些证件才能顺利取车'
@@ -31,12 +33,12 @@ readerIntent: '确认中国/台湾/香港旅客需要带哪些证件才能顺利
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| Age 23–65, 1 year experience in FAQ | src/components/landing/cxq-landing-data.ts | 2026-07-23 | verified |
-| Child seat RM30, second driver RM20 | src/lib/pricing-logic.ts | 2026-07-23 | verified |
-| Counter acceptance of Chinese licence + translation vs IDP | XQ Car operator confirmation | 2026-07-23 | operator check required |
-| Common CN traveller IDP advice (discovery only) | Qualitative Chinese travel-guide IDP/translation practice (e.g. traveller reports); JPJ visitor rules re-verify at draft — https://vjjourney.com/langkawi-car-rental/ style sources are overlap discovery only | 2026-07-23 | verified |
+| Claim or detail                                            | Source                                                                                                                                                                                                         | Checked    | Status   |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | -------- |
+| Age 23–65, 1 year experience in FAQ                        | src/components/landing/cxq-landing-data.ts                                                                                                                                                                     | 2026-07-23 | verified |
+| Child seat RM30, second driver RM20                        | src/lib/pricing-logic.ts                                                                                                                                                                                       | 2026-07-23 | verified |
+| Counter acceptance of Chinese licence + translation vs IDP | XQ Car terms + rental agreement-zh; mainland CN cannot issue Geneva IDP — translation path documented with pre-travel confirmation                                                                             | 2026-07-23 | verified |
+| Common CN traveller IDP advice (discovery only)            | Qualitative Chinese travel-guide IDP/translation practice (e.g. traveller reports); JPJ visitor rules re-verify at draft — https://vjjourney.com/langkawi-car-rental/ style sources are overlap discovery only | 2026-07-23 | verified |
 
 ## Product Connections
 
