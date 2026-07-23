@@ -3,7 +3,9 @@ title: '兰卡威租车省钱：7个务实办法'
 slug: 'cheap-car-rental-langkawi-tips-zh'
 language: zh
 category: Pricing
-status: pending
+status: complete
+completedAt: 2026-07-23
+output: content/blog/cheap-car-rental-langkawi-tips-zh.md
 created: 2026-07-23
 primaryQuery: '兰卡威租车便宜'
 readerIntent: '在不牺牲保障的前提下压低日租'
@@ -33,11 +35,11 @@ readerIntent: '在不牺牲保障的前提下压低日租'
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| Axia/Bezza/Jimny seasonal prices | data/Car.csv | 2026-07-23 | verified |
-| No automatic weekly % in pricing-logic | src/lib/pricing-logic.ts | 2026-07-23 | verified |
-| Custom delivery hotel fee RM50 seed | src/lib/pricing-logic.ts; data/Car.csv | 2026-07-23 | verified |
+| Claim or detail                        | Source                                 | Checked    | Status   |
+| -------------------------------------- | -------------------------------------- | ---------- | -------- |
+| Axia/Bezza/Jimny seasonal prices       | data/Car.csv                           | 2026-07-23 | verified |
+| No automatic weekly % in pricing-logic | src/lib/pricing-logic.ts               | 2026-07-23 | verified |
+| Custom delivery hotel fee RM50 seed    | src/lib/pricing-logic.ts; data/Car.csv | 2026-07-23 | verified |
 
 ## Product Connections
 
