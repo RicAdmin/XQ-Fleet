@@ -1,7 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { LocaleLink } from '#/components/i18n/LocaleLink'
-import { useLocale } from '#/i18n/context'
-import { useT } from '#/i18n/context'
+import { useLocale, useT } from '#/i18n/context'
 import { ArrowLeft, ArrowRight, Calendar, Clock, Share2 } from 'lucide-react'
 
 import { BlogPostContent } from '#/components/blog/BlogPostContent'
@@ -11,7 +10,13 @@ import { formatBlogDate, getRelatedPosts } from '#/lib/blog/utils'
 import { publicLocalePath, publicSitePath } from '#/lib/brand'
 import { breadcrumbSchema } from '#/lib/seo-meta'
 
-function BlogAvatar({ name, size = 'sm' }: { name: string; size?: 'sm' | 'lg' }) {
+function BlogAvatar({
+  name,
+  size = 'sm',
+}: {
+  name: string
+  size?: 'sm' | 'lg'
+}) {
   const initials = name
     .split(' ')
     .map((w) => w[0])
@@ -37,15 +42,22 @@ export function BlogPostPage({ post, allPosts }: BlogPostPageProps) {
   const shareUrl = publicLocalePath(`/blog/${post.slug}`, locale)
 
   function shareNative() {
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      void navigator.share({ title: post.title, url: shareUrl })
-    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      void navigator.clipboard.writeText(shareUrl)
+    const browserNavigator: {
+      share?: Navigator['share']
+      clipboard?: Navigator['clipboard']
+    } = navigator
+    if (browserNavigator.share) {
+      void browserNavigator.share({ title: post.title, url: shareUrl })
+    } else if (browserNavigator.clipboard) {
+      void browserNavigator.clipboard.writeText(shareUrl)
     }
   }
 
   return (
-    <PublicMarketingShell screenLabel={`Blog · ${post.title}`} mainClassName="blog-post-page">
+    <PublicMarketingShell
+      screenLabel={`Blog · ${post.title}`}
+      mainClassName="blog-post-page"
+    >
       <article>
         <header
           className="post-hero"
@@ -53,7 +65,11 @@ export function BlogPostPage({ post, allPosts }: BlogPostPageProps) {
             backgroundImage: `linear-gradient(180deg, rgba(14,18,20,.35) 0%, rgba(14,18,20,.85) 100%), url(${post.heroImage})`,
           }}
         >
-          <LocaleLink to="/blog" className="close-btn" aria-label={t('blog.title')}>
+          <LocaleLink
+            to="/blog"
+            className="close-btn"
+            aria-label={t('blog.title')}
+          >
             <ArrowLeft size={16} />
           </LocaleLink>
           <div className="post-hero-inner">
@@ -85,7 +101,12 @@ export function BlogPostPage({ post, allPosts }: BlogPostPageProps) {
             <div className="post-side-card">
               <strong style={{ fontSize: 13, fontWeight: 600 }}>Share</strong>
               <div className="post-share">
-                <button type="button" className="post-share-btn" onClick={shareNative} aria-label="Share article">
+                <button
+                  type="button"
+                  className="post-share-btn"
+                  onClick={shareNative}
+                  aria-label="Share article"
+                >
                   <Share2 size={15} />
                 </button>
               </div>
@@ -108,12 +129,18 @@ export function BlogPostPage({ post, allPosts }: BlogPostPageProps) {
 
           <div className="post-body">
             <p className="post-lead">{post.lead}</p>
-            <BlogPostContent sections={post.sections} />
+            <BlogPostContent body={post.body} />
 
             <div className="post-cta">
               <div>
                 <strong>Ready to explore Langkawi?</strong>
-                <p style={{ margin: '4px 0 0', fontSize: 14, color: 'var(--muted)' }}>
+                <p
+                  style={{
+                    margin: '4px 0 0',
+                    fontSize: 14,
+                    color: 'var(--muted)',
+                  }}
+                >
                   Book from RM 70/day · free airport delivery
                 </p>
               </div>
@@ -144,12 +171,21 @@ export function BlogPostPage({ post, allPosts }: BlogPostPageProps) {
 
       {related.length > 0 && (
         <section className="post-more" aria-labelledby="related-posts-heading">
-          <h2 id="related-posts-heading" className="h-section" style={{ marginBottom: 16 }}>
+          <h2
+            id="related-posts-heading"
+            className="h-section"
+            style={{ marginBottom: 16 }}
+          >
             Related guides
           </h2>
           <div className="blog-grid" style={{ padding: 0 }}>
             {related.map((r) => (
-              <LocaleLink key={r.slug} to="/blog/$slug" params={{ slug: r.slug }} className="blog-card">
+              <LocaleLink
+                key={r.slug}
+                to="/blog/$slug"
+                params={{ slug: r.slug }}
+                className="blog-card"
+              >
                 <div
                   className="blog-card-img"
                   style={{ backgroundImage: `url(${r.heroImage})` }}
@@ -175,7 +211,9 @@ export function BlogArticleStructuredData({ post }: { post: BlogPost }) {
     '@type': 'BlogPosting',
     headline: post.title,
     description: post.metaDescription,
-    image: post.heroImage.startsWith('http') ? post.heroImage : publicSitePath(post.heroImage),
+    image: post.heroImage.startsWith('http')
+      ? post.heroImage
+      : publicSitePath(post.heroImage),
     datePublished: post.publishedAt,
     dateModified: post.updatedAt,
     author: {
@@ -192,6 +230,7 @@ export function BlogArticleStructuredData({ post }: { post: BlogPost }) {
       },
     },
     mainEntityOfPage: url,
+    inLanguage: post.language,
     keywords: post.keywords.join(', '),
   }
 

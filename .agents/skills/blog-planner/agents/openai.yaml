@@ -1,0 +1,6 @@
+interface:
+  display_name: 'XQ Car Blog Planner'
+  short_description: 'Plan evidence-led XQ Car blog posts'
+  default_prompt: 'Use $blog-planner to research and plan the next XQ Car blog post.'
+policy:
+  allow_implicit_invocation: true

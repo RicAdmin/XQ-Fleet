@@ -2,13 +2,13 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { BlogIndexPage } from '#/components/blog/BlogIndexPage'
 import type { Locale } from '#/i18n/locales'
-import { getBlogPosts } from '#/lib/blog/posts'
+import { getBlogPostsFn } from '#/lib/blog/functions'
 import { getAllPosts } from '#/lib/blog/utils'
 import { blogSeoMeta } from '#/lib/seo-locale-meta'
 
 export const Route = createFileRoute('/$locale/blog/')({
-  loader: () => {
-    const posts = getAllPosts(getBlogPosts())
+  loader: async () => {
+    const posts = getAllPosts(await getBlogPostsFn())
     return { posts }
   },
   head: ({ params }) => blogSeoMeta(params.locale as Locale),
