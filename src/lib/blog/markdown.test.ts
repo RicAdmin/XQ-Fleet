@@ -79,6 +79,18 @@ describe('parseBlogMarkdown', () => {
     )
   })
 
+  it('wraps markdown tables for horizontal scroll styling', async () => {
+    const withTable = validPost.replace(
+      'Walk into the arrivals hall and follow the Door 3 signs.',
+      '| Origin | Notes |\n| --- | --- |\n| Malaysia | Bring MyKad |',
+    )
+
+    const post = await parseBlogMarkdown('with-table', withTable)
+
+    expect(post.body).toContain('<div class="post-table-wrap"><table>')
+    expect(post.body).toContain('</table></div>')
+  })
+
   it('sanitizes unsafe HTML from the Markdown body', async () => {
     const unsafe = validPost.replace(
       'Walk into the arrivals hall and follow the Door 3 signs.',

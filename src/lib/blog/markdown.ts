@@ -56,6 +56,12 @@ function splitLead(
   return { lead, body: normalized.slice(boundary).trim() }
 }
 
+function wrapTables(html: string): string {
+  return html
+    .replace(/<table(\s[^>]*)?>/gi, '<div class="post-table-wrap"><table$1>')
+    .replace(/<\/table>/gi, '</table></div>')
+}
+
 export async function parseBlogMarkdown(
   slug: string,
   raw: string,
@@ -81,7 +87,9 @@ export async function parseBlogMarkdown(
   }
 
   const { lead, body } = splitLead(content, source)
-  const renderedBody = sanitizeHtml(await marked.parse(body), SANITIZE_OPTIONS)
+  const renderedBody = wrapTables(
+    sanitizeHtml(await marked.parse(body), SANITIZE_OPTIONS),
+  )
 
   return {
     slug,

@@ -3911,6 +3911,38 @@ input[type=range] { width: 100%; accent-color: var(--brand-leaf); }
   line-height: 1.7;
   color: var(--ink-soft);
 }
+.post-table-wrap {
+  overflow-x: auto;
+  margin: 20px 0;
+  -webkit-overflow-scrolling: touch;
+}
+.post-body table {
+  width: 100%;
+  min-width: 28rem;
+  border-collapse: collapse;
+  font-size: 15px;
+  line-height: 1.55;
+}
+.post-body th,
+.post-body td {
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.post-body th {
+  background: var(--canvas-2);
+  font-weight: 600;
+  color: var(--ink);
+}
+.post-body td {
+  color: var(--ink-soft);
+}
+.post-body th:first-child,
+.post-body td:first-child {
+  width: 1%;
+  white-space: nowrap;
+}
 .post-cta {
   margin: 32px 0 0;
   padding: 24px;
