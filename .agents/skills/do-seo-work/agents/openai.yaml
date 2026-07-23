@@ -1,0 +1,4 @@
+interface:
+  display_name: "Do SEO Work"
+  short_description: "Deliver one ready SEO work package"
+  default_prompt: "Use $do-seo-work to deliver the next ready SEO work package."
