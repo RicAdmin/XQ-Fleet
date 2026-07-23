@@ -1,63 +1,63 @@
 ---
-title: 'Cara Pandu ke Langkawi Sky Bridge & SkyCab'
+title: 'Pandu ke Langkawi Sky Bridge & SkyCab'
 slug: 'langkawi-sky-bridge-by-car-ms'
 language: ms
 category: Driving
 status: pending
 created: 2026-07-23
-primaryQuery: 'sky bridge langkawi kereta'
-readerIntent: 'Rancang masa tiba, parkir dan combo dengan atraksi berdekatan'
+primaryQuery: 'sky bridge langkawi naik kereta'
+readerIntent: 'Tentukan masa berangkat, parking, dan sama ada air terjun boleh digabung hari sama'
 ---
 
 ## Editorial Thesis
 
-Kereta standard sampai Oriental Village; tip berguna ialah slot awal, parkir, dan jangan gabung terlalu banyak utara pada hari yang sama.
+Kereta sewa automatik biasa cukup ke Oriental Village; kejayaan hari bergantung slot pagi dan parking, bukan 4×4.
 
 ## Answer-First Promise
 
-Pergi awal untuk slot SkyCab, parkir di Oriental Village, dan gabung Temurun/Telaga hanya jika kaki dan masa masih ada.
+Berangkat awal dari Cenang (~40+ minit), parkir sekali, buat SkyCab dulu — tambah Telaga Tujuh hanya jika baki tenaga dan cuaca.
 
 ## Reader
 
-Pelawat pertama yang jadikan SkyCab highlight trip.
+Keluarga dan pasangan yang jadikan SkyCab highlight trip.
 
 ## Outline
 
-1. Laluan dari Cenang / Kuah / lapangan terbang
-2. Parkir & tiket
-3. Combo bijak vs overpack
-4. Cuaca & visibility
-5. Kereta yang sesuai
+1. Masa dari Cenang/Kuah
+2. Parking Oriental Village
+3. Slot pagi vs petang
+4. Gabung air terjun?
+5. Kelas kereta
 
 ## Evidence Ledger
 
 | Claim or detail | Source | Checked | Status |
 | --- | --- | --- | --- |
-| Artikel EN Sky Bridge overlap | content/blog/langkawi-sky-bridge-by-car.md | 2026-07-23 | verified |
-| Imej projek Sky bridge / Skycab | `/image/Attractions/Sky bridge.png` | 2026-07-23 | verified |
-| Waktu operasi & harga tiket semasa | Sumber rasmi Oriental Village / LADA semasa draft | 2026-07-23 | operator check required |
+| EN sky bridge post overlap only | content/blog-archive/langkawi-sky-bridge-by-car.md (archived stub; overlap only) | 2026-07-23 | verified |
+| Standard cars reach Oriental Village — Jimny not required | data/Car.csv | 2026-07-23 | verified |
+| Current SkyCab ticket/slot rules | Official SkyCab / Oriental Village source at draft | 2026-07-23 | operator check required |
 
 ## Product Connections
 
 - Vehicle slugs: perodua-axia, perodua-bezza, perodua-alza
-- Internal links: /ms/blog/telaga-tujuh-temurun-waterfall-by-car-ms, /ms/blog/langkawi-3-day-itinerary-by-car-ms
+- Internal links: /en/blog/langkawi-3-day-itinerary-by-car, /en/blog/driving-langkawi-first-time
 
 ## Search Language
 
-- Primary query: sky bridge langkawi kereta
-- Natural variants: skycab langkawi kereta, oriental village parkir, cara ke sky bridge
-- Questions to answer: Boleh pandu ke Sky Bridge?; Di mana parkir?; Pagi atau petang?
+- Primary query: sky bridge langkawi naik kereta
+- Natural variants: cara ke sky cab langkawi kereta, parking oriental village langkawi, skybridge langkawi pandu sendiri
+- Questions to answer: Berapa lama dari Cenang ke Sky Bridge?; Perlu 4×4 ke SkyCab?
 
 ## Image Brief
 
 - Project-owned candidates: `/image/Attractions/Sky bridge.png`, `/image/Attractions/Skycab.png`
-- Generated fallback: Ilustrasi Oriental Village + kereta parkir, palet XQ Car
+- Generated fallback: Editorial approach road to cable-car base, not documentary ticket proof
 
 ## Voice Notes
 
-Jawab parkir dan timing; jangan jual tiket atraksi.
+Fokus masa dan parking; tiket — paut sumber rasmi bertarikh.
 
 ## Freshness and Operator Checks
 
-- Semak harga/waktu tiket sebelum publish
-- Sahkan keadaan parkir hujung minggu
+- Semak harga/slot SkyCab semasa draf
+- Sahkan corak parking hujung minggu dengan operator

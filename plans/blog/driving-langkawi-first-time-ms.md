@@ -1,63 +1,65 @@
 ---
-title: 'Pandu di Langkawi Kali Pertama: 10 Tips Praktikal'
+title: 'Memandu di Langkawi Kali Pertama: 10 Tip'
 slug: 'driving-langkawi-first-time-ms'
 language: ms
 category: Driving
 status: pending
 created: 2026-07-23
-primaryQuery: 'tips pandu langkawi'
-readerIntent: 'Kurangkan stres hari pertama memandu di pulau'
+primaryQuery: 'tip memandu di langkawi'
+readerIntent: 'Elak kesilapan hari pertama: bundaran, minyak, hujan, dan jalan utara malam'
 ---
 
 ## Editorial Thesis
 
-Langkawi mesra pemandu baru pulau: jalan utama jelas, tetapi parkir Cenang, hidupan liar barat laut, dan minyak sebelum loop utara perlu diingat.
+Langkawi mesra pemandu baru jika anda kekal kiri, isi minyak sebelum gelung utara, dan pulangkan tangki same-to-same.
 
 ## Answer-First Promise
 
-Ambil automatic, isi minyak sebelum Datai/Tanjung Rhu, elak cruise strip Cenang waktu petang, dan pandu perlahan di zon hutan.
+Sepuluh tip konkrit: bundaran, kamera, stesen minyak, parking Cenang, monyet, hujan, dan pemeriksaan serahan.
 
 ## Reader
 
-Pemandu Malaysia yang biasa bandar besar tetapi baru self-drive Langkawi.
+Pemandu Malaysia dari bandar besar atau pemandu antarabangsa yang kurang biasa pulau.
 
 ## Outline
 
-1. Automatic vs manual (Urvan)
-2. Parkir Cenang
-3. Minyak sebelum utara/barat
-4. Hidupan liar & jalan hujan
-5. Navigasi offline / SIM
+1. Kiri & bundaran
+2. Had laju
+3. Strategi minyak
+4. Parking Cenang
+5. Haiwan & hujan
+6. Jalan malam utara
+7. Pemeriksaan kereta
 
 ## Evidence Ledger
 
 | Claim or detail | Source | Checked | Status |
 | --- | --- | --- | --- |
-| Kebanyakan armada auto; Urvan manual | data/Car.csv | 2026-07-23 | verified |
-| Same-to-same fuel | data/Car.csv | 2026-07-23 | verified |
-| Hotspot parkir Cenang semasa sunset | XQ Car operator notes | 2026-07-23 | operator check required |
+| Fuel policy Same-to-Same in Car.csv | data/Car.csv | 2026-07-23 | verified |
+| EN driving tips overlap only | content/blog/driving-langkawi-first-time.md (overlap only) | 2026-07-23 | verified |
+| Camera locations / enforcement detail | Named local or JPJ source at draft | 2026-07-23 | operator check required |
 
 ## Product Connections
 
 - Vehicle slugs: perodua-axia, perodua-bezza
-- Internal links: /ms/blog/langkawi-petrol-stations-rental-guide-ms, /ms/blog/pantai-cenang-car-rental-guide-ms
+- Internal links: /en/blog/driving-langkawi-first-time, /en/blog/pantai-cenang-car-rental-guide, /ms/blog/car-rental-langkawi-complete-guide-ms
 
 ## Search Language
 
-- Primary query: tips pandu langkawi
-- Natural variants: pandu sendiri langkawi, tips memandu langkawi, jalan raya langkawi
-- Questions to answer: Susah ke pandu di Langkawi?; Perlukah 4x4?; Di mana isi minyak?
+- Primary query: tip memandu di langkawi
+- Natural variants: pandu sendiri langkawi tip, memandu kali pertama langkawi, peraturan jalan langkawi pelancong
+- Questions to answer: Susah ke pandu di Langkawi?; Di mana isi minyak sebelum pergi Datai?
 
 ## Image Brief
 
-- Project-owned candidates: `/image/hero-langkawi-adventure-768.jpg`
-- Generated fallback: Ilustrasi jalan pulau + hatchback automatic, palet XQ Car
+- Project-owned candidates: `/image/Attractions/Skycab.png`
+- Generated fallback: Left-hand island road editorial with compact automatic, XQ Car palette
 
 ## Voice Notes
 
-Tenang dan konkret; elak 'adventure language'.
+Senarai tip berguna; elak bahasa risalah "syurga memandu".
 
 ## Freshness and Operator Checks
 
-- Sahkan tip parkir Cenang dengan operator
-- Semak amaran jalan jika ada penutupan
+- Sahkan same-to-same masih dasar aktif
+- Sumber kamera had laju bertarikh semasa draf

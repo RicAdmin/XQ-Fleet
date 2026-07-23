@@ -40,7 +40,7 @@ Families and couples combining shopping with a Kuah base or day trip from Cenang
 ## Product Connections
 
 - Vehicle slugs: perodua-bezza, toyota-vios-3g, honda-city-5g
-- Internal links: /en/blog/langkawi-ferry-jetty-car-rental, /en/blog/cheap-car-rental-langkawi-tips, /en/blog/axia-vs-bezza-langkawi-rental
+- Internal links: /en/blog/langkawi-ferry-jetty-car-rental, /en/blog/cheap-car-rental-langkawi-tips
 
 ## Search Language
 

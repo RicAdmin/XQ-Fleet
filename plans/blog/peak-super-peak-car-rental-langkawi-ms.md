@@ -5,59 +5,59 @@ language: ms
 category: Pricing
 status: pending
 created: 2026-07-23
-primaryQuery: 'harga sewa kereta langkawi musim cuti'
-readerIntent: 'Faham bila kadar harian naik dan berapa awal perlu tempah untuk cuti sekolah'
+primaryQuery: 'harga sewa kereta musim puncak langkawi'
+readerIntent: 'Faham bila kadar harian melonjak dan bila perlu tempah awal (cuti sekolah/perayaan)'
 ---
 
 ## Editorial Thesis
 
-XQ Car harga mengikut Low, Peak dan Super Peak — cuti sekolah dan perayaan menaikkan kadar serta menghabiskan MPV lebih cepat.
+XQ Car harga ikut Low/Peak/Super Peak — tempah awal sebelum cuti sekolah melindungi kadar dan pilihan kereta.
 
 ## Answer-First Promise
 
-Semak tarikh cuti anda pada kalendar musim: Axia yang sama boleh naik dari RM70 rendah ke RM100 puncak ke RM120 super puncak.
+Axia yang sama boleh bergerak RM70 → RM100 → RM120 mengikut kalendar; tempah awal lebih penting daripada walk-in.
 
 ## Reader
 
-Keluarga Malaysia yang merancang cuti sekolah, Deepavali, CNY atau hujung minggu panjang.
+Keluarga Malaysia yang merancang sekitar cuti sekolah dan perayaan.
 
 ## Outline
 
-1. Apa maksud Low / Peak / Super Peak
-2. Contoh lonjakan harga Axia dan Alza
-3. Bila MPV habis lebih awal
-4. Strategi tempah awal
-5. Alternatif jika tarikh sudah Peak
+1. Cara tiga musim berfungsi
+2. Contoh Axia/Alza merentas musim
+3. Bila cuti sekolah biasanya memuncak
+4. Apa yang habis dahulu (MPV)
+5. Cara tempah awal
 
 ## Evidence Ledger
 
 | Claim or detail | Source | Checked | Status |
 | --- | --- | --- | --- |
-| Axia L70/P100/S120; Alza L130/P200/S240 | data/Car.csv | 2026-07-23 | verified |
-| Kalendar musim 2026 dalam Season.csv | data/Season.csv | 2026-07-23 | verified |
-| Lead time tipikal sebelum cuti sekolah untuk MPV | XQ Car operator notes | 2026-07-23 | operator check required |
+| Season calendar windows | data/Season.csv | 2026-07-23 | verified |
+| Axia and Alza seasonal prices | data/Car.csv | 2026-07-23 | verified |
+| Operator view of which models sell out first in school holidays | XQ Car operator notes | 2026-07-23 | operator check required |
 
 ## Product Connections
 
 - Vehicle slugs: perodua-axia, perodua-alza, toyota-veloz
-- Internal links: /ms/blog/cheap-car-rental-langkawi-tips-ms, /ms/blog/best-car-langkawi-family-trip-ms
+- Internal links: /en/blog/cheap-car-rental-langkawi-tips, /en/blog/best-car-langkawi-family-trip, /ms/blog/car-rental-langkawi-complete-guide-ms
 
 ## Search Language
 
-- Primary query: harga sewa kereta langkawi musim cuti
-- Natural variants: sewa kereta cuti sekolah langkawi, harga peak season langkawi, super peak sewa kereta
-- Questions to answer: Bila harga sewa naik?; Berapa awal perlu tempah?; Apa beza Peak dan Super Peak?
+- Primary query: harga sewa kereta musim puncak langkawi
+- Natural variants: musim puncak sewa kereta langkawi, harga cuti sekolah sewa kereta langkawi, super peak langkawi rental
+- Questions to answer: Bila harga sewa kereta Langkawi naik?; Perlu tempah berapa awal untuk cuti sekolah?
 
 ## Image Brief
 
 - Project-owned candidates: `/image/hero-langkawi-adventure-768.jpg`
-- Generated fallback: Ilustrasi kalendar musim + kereta keluarga, palet XQ Car
+- Generated fallback: Calendar-to-price editorial illustration, XQ Car palette
 
 ## Voice Notes
 
-Guna contoh cuti Malaysia konkrit; elakkan bahasa 'harga terbaik dijamin'.
+Guna contoh bertarikh dari Season.csv; elak tipuan "sentiasa murah di Langkawi".
 
 ## Freshness and Operator Checks
 
-- Semak Season.csv semasa draft jika kalendar dikemas kini
-- Sahkan lead time MPV dengan operator
+- Semak Season.csv semasa draf
+- Padankan contoh cuti sekolah dengan kalendar seed terkini
