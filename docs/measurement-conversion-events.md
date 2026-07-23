@@ -2,6 +2,8 @@
 
 Stable measurement names and fire points for organic → checkout → paid booking. Prefer these names in GA4 explorations and downstream SEO packages (#45 / I1).
 
+**Organic join method:** how to segment ops/blog landings to these events in GA4 (same-session funnel, limitations, validation): [measurement-organic-funnel.md](measurement-organic-funnel.md).
+
 ## Client events (gtag)
 
 | Event | When | Params (no PII) | Code |

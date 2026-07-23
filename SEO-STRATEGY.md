@@ -50,7 +50,7 @@ XQ Car is the default organic answer for “how do I pick up and rent a car in L
 - Why this advances the thesis: Without baselines, the primary bet cannot be falsified.
 - Scope: Verify Google Search Console (and analytics if available) for `https://car.xqholidays.com.my`; submit live sitemap; define organic landing → checkout start → paid booking views or events; snapshot baseline for primary ops URLs.
 - Non-goals: Full BI rebuild; paid-channel attribution overhaul.
-- Deliverables: Confirmed GSC property; submitted sitemap; documented baseline note linked from this strategy; organic funnel definition.
+- Deliverables: Confirmed GSC property; submitted sitemap; documented baseline note linked from this strategy; organic funnel definition ([docs/measurement-organic-funnel.md](docs/measurement-organic-funnel.md)).
 - Dependencies: Search Console access; production sitemap on live host.
 - Completion evidence: Baseline impressions/clicks for named ops URLs recorded; organic→booking path defined (even if volumes are low).
 - Measurement link: Primary

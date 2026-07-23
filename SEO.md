@@ -49,4 +49,5 @@ Locales: `en`, `ms`, `zh` (`zh-Hans` hreflang).
 - Deployed URL confirmed 2026-07-24: `https://car.xqholidays.com.my` (not carxq.com).
 - AI crawler policy: allow search/citation bots; `Content-Signal: ai-train=no` + `CCBot` Disallow for training corpora; GPTBot/ClaudeBot remain Allow for product crawlers that also power answers.
 - Conversion events (`begin_checkout`, `purchase`) + durable paid signal: [docs/measurement-conversion-events.md](docs/measurement-conversion-events.md).
+- Organic landing → conversion join (GA4 funnel, validation): [docs/measurement-organic-funnel.md](docs/measurement-organic-funnel.md).
 )
