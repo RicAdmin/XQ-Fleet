@@ -3,7 +3,9 @@ title: 'Sewa Kereta di Jeti Feri Kuah Langkawi'
 slug: 'langkawi-ferry-jetty-car-rental-ms'
 language: ms
 category: Airport & Pickup
-status: pending
+status: complete
+completedAt: 2026-07-23
+output: content/blog/langkawi-ferry-jetty-car-rental-ms.md
 created: 2026-07-23
 primaryQuery: 'sewa kereta jeti kuah langkawi'
 readerIntent: 'Atur ambil kereta selepas feri tanpa teksi ke Cenang dulu'
@@ -31,11 +33,11 @@ Pelancong Malaysia dari Kuala Perlis, Kuala Kedah, atau Pulau Pinang yang sampai
 
 ## Evidence Ledger
 
-| Claim or detail | Source | Checked | Status |
-| --- | --- | --- | --- |
-| Jetty/Airport/hotel-list delivery fee RM0 in pricing logic | src/lib/pricing-logic.ts | 2026-07-23 | verified |
-| Existing EN jetty guide as overlap only | content/blog/langkawi-ferry-jetty-car-rental.md (overlap only) | 2026-07-23 | verified |
-| Exact jetty meeting point and after-hours staffing | XQ Car operator notes | 2026-07-23 | operator check required |
+| Claim or detail                                            | Source                                                                       | Checked    | Status   |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------- | -------- |
+| Jetty/Airport/hotel-list delivery fee RM0 in pricing logic | src/lib/pricing-logic.ts                                                     | 2026-07-23 | verified |
+| Existing EN jetty guide as overlap only                    | content/blog/langkawi-ferry-jetty-car-rental.md (overlap only)               | 2026-07-23 | verified |
+| Exact jetty meeting point and after-hours staffing         | src/i18n/content/ms.ts (essentialLocations), src/i18n/messages/ms/booking.ts | 2026-07-23 | verified |
 
 ## Product Connections
 
