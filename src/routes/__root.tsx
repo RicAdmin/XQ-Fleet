@@ -5,7 +5,9 @@ import {
 } from '@tanstack/react-router'
 import { lazy, Suspense } from 'react'
 
+import { GaPageViews } from '#/components/GaPageViews'
 import { NotFoundPage } from '#/components/NotFoundPage'
+import { gaConfigScript, gaMeasurementId } from '#/lib/ga'
 import TanStackQueryProvider from '../integrations/tanstack-query/root-provider'
 
 import appCss from '../styles.css?url'
@@ -80,11 +82,28 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         href: '/image/xqCarLogo-96.png',
       },
     ],
-    scripts: [affiliateTrackingScript()].filter(Boolean) as { src: string }[],
+    scripts: [
+      ...gaHeadScripts(),
+      ...([affiliateTrackingScript()].filter(Boolean) as { src: string }[]),
+    ],
   }),
   notFoundComponent: NotFoundPage,
   shellComponent: RootDocument,
 })
+
+function gaHeadScripts(): Array<
+  { src: string; async?: boolean } | { children: string }
+> {
+  const id = gaMeasurementId()
+  if (!id) return []
+  return [
+    {
+      src: `https://www.googletagmanager.com/gtag/js?id=${id}`,
+      async: true,
+    },
+    { children: gaConfigScript(id) },
+  ]
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
@@ -96,6 +115,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(196,120,10,0.18)]">
         <TanStackQueryProvider>
           {children}
+          <GaPageViews />
           {RootDevtools ? (
             <Suspense fallback={null}>
               <RootDevtools />
