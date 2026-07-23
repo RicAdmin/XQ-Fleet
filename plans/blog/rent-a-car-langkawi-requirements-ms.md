@@ -3,7 +3,9 @@ title: 'Cara Sewa Kereta di Langkawi: Keperluan & Dokumen'
 slug: 'rent-a-car-langkawi-requirements-ms'
 language: ms
 category: Guides
-status: pending
+status: complete
+completedAt: 2026-07-24
+output: content/blog/rent-a-car-langkawi-requirements-ms.md
 created: 2026-07-23
 primaryQuery: 'keperluan sewa kereta langkawi'
 readerIntent: 'Pastikan umur, lesen, MyKad/pasport, dan deposit cukup sebelum tempah'

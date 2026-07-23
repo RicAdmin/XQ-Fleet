@@ -3,7 +3,9 @@ title: 'Sewa Kereta Murah di Langkawi: 7 Cara Jimat'
 slug: 'cheap-car-rental-langkawi-tips-ms'
 language: ms
 category: Pricing
-status: pending
+status: complete
+completedAt: 2026-07-24
+output: content/blog/cheap-car-rental-langkawi-tips-ms.md
 created: 2026-07-23
 primaryQuery: 'sewa kereta murah langkawi'
 readerIntent: 'Turunkan kos sewa tanpa mengorbankan keselamatan atau sokongan'

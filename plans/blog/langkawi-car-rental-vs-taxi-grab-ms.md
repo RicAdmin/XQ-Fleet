@@ -3,7 +3,9 @@ title: 'Sewa Kereta vs Teksi vs Grab di Langkawi'
 slug: 'langkawi-car-rental-vs-taxi-grab-ms'
 language: ms
 category: Pricing
-status: pending
+status: complete
+completedAt: 2026-07-24
+output: content/blog/langkawi-car-rental-vs-taxi-grab-ms.md
 created: 2026-07-23
 primaryQuery: 'sewa kereta atau grab langkawi'
 readerIntent: 'Pilih e-hailing atau sewa berdasarkan bilangan hari dan corak pergerakan'
