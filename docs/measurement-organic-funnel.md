@@ -86,7 +86,7 @@ Optional automated check: `pnpm test src/lib/ga.test.ts` (unit coverage for even
 3. In **Realtime** or **DebugView**, confirm all three event names appear in one session.
 4. After 24–48 hours, open a **Funnel exploration** (7-day range) with Organic Search segment and ops/blog step-1 filter; confirm non-zero `begin_checkout` / `purchase` if test traffic was the only source, or compare to known booking days.
 
-GSC impression/click baselines for ops URLs are tracked separately ([#48](https://github.com/kenlck/xq-car-fleet-v2/issues/48)); this doc covers analytics join only.
+GSC impression/click baselines for ops URLs: [seo-strategy/baselines/2026-07-24-ops-gsc-baseline.md](../seo-strategy/baselines/2026-07-24-ops-gsc-baseline.md) ([#48](https://github.com/kenlck/xq-car-fleet-v2/issues/48)). This doc covers the GA4 analytics join only.
 
 ## Related
 
