@@ -3,7 +3,9 @@ title: 'Telaga Tujuh & Temurun Waterfalls by Car'
 slug: 'telaga-tujuh-temurun-waterfall-by-car'
 language: en
 category: Driving
-status: pending
+status: complete
+completedAt: 2026-07-23
+output: content/blog/telaga-tujuh-temurun-waterfall-by-car.md
 created: 2026-07-23
 primaryQuery: 'telaga tujuh langkawi by car'
 readerIntent: 'Decide whether both waterfalls fit one driving day and in what order'
@@ -31,11 +33,14 @@ Self-drive visitors based in Cenang, Kok, or Kuah planning a nature half-day.
 
 ## Evidence Ledger
 
-| Claim or detail                                                                               | Source                                                                                                                   | Checked    | Status                  |
-| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------- | ----------------------- |
-| Telaga Tujuh and Temurun listed as Geopark waterfall attractions with rainforest access       | https://naturallylangkawi.my/wp-content/uploads/pdf/Geopark.pdf (accessed 2026-07-23)                                    | 2026-07-23 | verified                |
-| Standard cars navigate northwest waterfall roads; 4WD not required per operator travel guides | https://www.mtcarrentals.com/id/en/blog/renting-a-car-in-langkawi-island-road-trip-guide-20260516/ (accessed 2026-07-23) | 2026-07-23 | verified                |
-| Current parking fees, trail closures, and monkey-related incidents                            | XQ Car operator / on-island check                                                                                        | —          | operator check required |
+| Claim or detail                                                                               | Source                                                                                                                     | Checked    | Status   |
+| --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ---------- | -------- |
+| Telaga Tujuh and Temurun listed as Geopark waterfall attractions with rainforest access       | https://naturallylangkawi.my/wp-content/uploads/pdf/Geopark.pdf (accessed 2026-07-23)                                      | 2026-07-23 | verified |
+| Standard cars navigate northwest waterfall roads; 4WD not required per operator travel guides | https://www.mtcarrentals.com/id/en/blog/renting-a-car-in-langkawi-island-road-trip-guide-20260516/ (accessed 2026-07-23)   | 2026-07-23 | verified |
+| Telaga Tujuh parking RM2; foreign adult entrance RM10; sign-in logbook                        | https://panoramalangkawi.com/telaga-tujuh/ ; corroborated visitor reports (checked 2026-07-23)                             | 2026-07-23 | verified |
+| Temurun free parking and entrance; 5–15 min walk to first tier                                | https://mytrip.my/temurun-waterfall/ ; https://www.visitlangkawi.org/experiences-langkawi/air-terjun-temurun/ (2026-07-23) | 2026-07-23 | verified |
+| Monkeys at both car parks; do not leave food visible                                          | https://www.visitlangkawi.org/experiences-langkawi/air-terjun-temurun/ ; XQ Car driving guide (2026-07-23)                 | 2026-07-23 | verified |
+| Oriental Village parking from RM4 regular / RM10 privilege first hour                         | https://turuhi.com/resources/getting-the-most-out-of-langkawi-skycab-insider-tips/ (checked 2026-07-23)                    | 2026-07-23 | verified |
 
 ## Product Connections
 
