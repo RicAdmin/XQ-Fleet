@@ -1,10 +1,16 @@
-import { useState, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Link } from '@tanstack/react-router'
-import { Pencil, Plus, Search, Trash2, Users } from 'lucide-react'
+import { Pencil, Plus, Users } from 'lucide-react'
 
 import { DataTable, useSortState, type Column } from '#/components/ui/DataTable'
+import { AdminListFilterBar } from '#/components/ui/AdminListFilterBar'
+import { ConfirmActionDialog } from '#/components/ui/ConfirmActionDialog'
+import { ErrorPanel } from '#/components/ui/ErrorPanel'
 import { PageHeader } from '#/components/ui/PageHeader'
+import { RowActionsMenu } from '#/components/ui/RowActionsMenu'
+import { StatusFilterSelect } from '#/components/ui/StatusFilterSelect'
+import { TableSkeleton } from '#/components/ui/TableSkeleton'
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
 import { Button } from '#/components/ui/button'
 import {
@@ -17,8 +23,13 @@ import {
 import {
   createCustomer,
   deleteCustomer,
+  listCustomers,
   updateCustomer,
+  type CustomerListResult,
 } from '#/lib/customer-functions'
+
+const PAGE_SIZE = 25
+const SEARCH_DEBOUNCE_MS = 300
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -43,6 +54,13 @@ type CustomerFormData = {
 }
 
 type SortKey = 'fullName' | 'icOrPassport' | 'phone' | 'email' | 'createdAt'
+type AccountFilter = 'all' | 'linked' | 'walk-in'
+
+const ACCOUNT_FILTER_OPTIONS: { value: AccountFilter; label: string }[] = [
+  { value: 'all', label: 'All customers' },
+  { value: 'linked', label: 'Linked account' },
+  { value: 'walk-in', label: 'Walk-in' },
+]
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -60,32 +78,12 @@ function rowToForm(c: CustomerRow): CustomerFormData {
   }
 }
 
-function sortCustomers(rows: CustomerRow[], key: SortKey, dir: 'asc' | 'desc'): CustomerRow[] {
-  return [...rows].sort((a, b) => {
-    const av =
-      key === 'createdAt'
-        ? (a.createdAt instanceof Date ? a.createdAt : new Date(String(a.createdAt))).getTime()
-        : (a[key] ?? '')
-    const bv =
-      key === 'createdAt'
-        ? (b.createdAt instanceof Date ? b.createdAt : new Date(String(b.createdAt))).getTime()
-        : (b[key] ?? '')
-    const cmp = typeof av === 'number' && typeof bv === 'number'
-      ? av - bv
-      : String(av).localeCompare(String(bv))
-    return dir === 'asc' ? cmp : -cmp
-  })
-}
-
 function formatDate(d: Date | string) {
   const date = d instanceof Date ? d : new Date(String(d))
   return date.toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-import { UI_BTN_XS, UI_BTN_XS_DANGER } from '#/lib/admin-ui-classes'
-
 type CustomersListProps = {
-  initialCustomers: CustomerRow[]
   session: { user: { name: string; email: string; role: string } }
   basePath: string
   canDelete: boolean
@@ -94,13 +92,18 @@ type CustomersListProps = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function CustomersList({
-  initialCustomers,
   session,
   basePath,
   canDelete,
 }: CustomersListProps) {
-  const [customers, setCustomers] = useState<CustomerRow[]>(initialCustomers)
+  const [result, setResult] = useState<CustomerListResult | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [searchInput, setSearchInput] = useState('')
   const [search, setSearch] = useState('')
+  const [accountFilter, setAccountFilter] = useState<AccountFilter>('all')
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const { sortKey, sortDir, handleSort } = useSortState<SortKey>('createdAt', 'desc')
 
   // Form
@@ -115,20 +118,47 @@ export default function CustomersList({
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  // ── Derived data ──────────────────────────────────────────────────────────
+  async function load(p = page) {
+    setLoading(true)
+    setLoadError(null)
+    try {
+      const res = await listCustomers({
+        data: {
+          page: p,
+          pageSize: PAGE_SIZE,
+          accountFilter,
+          search: search || undefined,
+          sortKey,
+          sortDir,
+        },
+      })
+      setResult(res)
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : 'Failed to load customers.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  const filteredSorted = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    const filtered = q
-      ? customers.filter(
-          (c) =>
-            (c.fullName ?? '').toLowerCase().includes(q) ||
-            (c.icOrPassport ?? '').toLowerCase().includes(q) ||
-            (c.phone ?? '').toLowerCase().includes(q),
-        )
-      : customers
-    return sortCustomers(filtered, sortKey, sortDir)
-  }, [customers, search, sortKey, sortDir])
+  useEffect(() => {
+    setPage(1)
+    void load(1)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accountFilter, search, sortKey, sortDir])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const next = searchInput.trim()
+      setSearch((prev) => (prev === next ? prev : next))
+    }, SEARCH_DEBOUNCE_MS)
+    return () => clearTimeout(timer)
+  }, [searchInput])
+
+  const totalPages = result ? Math.max(1, Math.ceil(result.total / result.pageSize)) : 1
+  const accountCounts = result?.accountCounts ?? { all: 0, linked: 0, 'walk-in': 0 }
+  const activeFilterCount = accountFilter !== 'all' ? 1 : 0
+  const hasActiveFilters =
+    accountFilter !== 'all' || searchInput.trim().length > 0 || search.length > 0
 
   // ── Form handlers ─────────────────────────────────────────────────────────
 
@@ -162,7 +192,7 @@ export default function CustomersList({
     setIsSubmitting(true)
     try {
       if (editingCustomer) {
-        const updated = await updateCustomer({
+        await updateCustomer({
           data: {
             customerId: editingCustomer.id,
             fullName: formData.fullName,
@@ -172,11 +202,9 @@ export default function CustomersList({
             address: formData.address || undefined,
           },
         })
-        setCustomers((prev) =>
-          prev.map((c) => (c.id === updated!.id ? (updated as CustomerRow) : c)),
-        )
+        await load(page)
       } else {
-        const created = await createCustomer({
+        await createCustomer({
           data: {
             fullName: formData.fullName,
             icOrPassport: formData.icOrPassport,
@@ -185,7 +213,8 @@ export default function CustomersList({
             address: formData.address || undefined,
           },
         })
-        setCustomers((prev) => [created as CustomerRow, ...prev])
+        setPage(1)
+        await load(1)
       }
       closeForm()
     } catch (err) {
@@ -203,8 +232,8 @@ export default function CustomersList({
     setIsDeleting(true)
     try {
       await deleteCustomer({ data: { customerId: confirmingDelete.id } })
-      setCustomers((prev) => prev.filter((c) => c.id !== confirmingDelete.id))
       setConfirmingDelete(null)
+      await load(page)
     } catch (err) {
       setDeleteError(err instanceof Error ? err.message : 'Delete failed.')
     } finally {
@@ -259,25 +288,25 @@ export default function CustomersList({
       headerClassName: 'text-right',
       cellClassName: 'text-right whitespace-nowrap',
       render: (c) => (
-        <>
-          <button type="button" className={`${UI_BTN_XS} mr-1.5`} onClick={() => openEdit(c)}>
-            <Pencil size={11} />
-            Edit
-          </button>
-          {canDelete && (
-            <button
-              type="button"
-              className={UI_BTN_XS_DANGER}
-              onClick={() => {
-                setConfirmingDelete(c)
-                setDeleteError(null)
-              }}
-            >
-              <Trash2 size={11} />
-              Delete
-            </button>
-          )}
-        </>
+        <RowActionsMenu
+          label={`Actions for ${c.fullName ?? 'customer'}`}
+          actions={[
+            { label: 'Edit', icon: <Pencil />, onSelect: () => openEdit(c) },
+            ...(canDelete
+              ? [
+                  {
+                    label: 'Delete',
+                    variant: 'destructive' as const,
+                    separatorBefore: true,
+                    onSelect: () => {
+                      setConfirmingDelete(c)
+                      setDeleteError(null)
+                    },
+                  },
+                ]
+              : []),
+          ]}
+        />
       ),
     },
   ]
@@ -289,7 +318,11 @@ export default function CustomersList({
       {/* Page header */}
       <PageHeader
         title="Customers"
-        description={`${customers.length} customer${customers.length !== 1 ? 's' : ''} total`}
+        description={
+          result
+            ? `${result.total.toLocaleString()} customer${result.total !== 1 ? 's' : ''} total`
+            : 'Loading…'
+        }
         actions={
           <button type="button" className="button-primary flex items-center gap-2" onClick={openAdd}>
             <Plus size={15} />
@@ -298,33 +331,45 @@ export default function CustomersList({
         }
       />
 
-      {/* Search bar */}
-      <div className="mb-4 flex items-center gap-2">
-        <div className="relative max-w-xs flex-1">
-          <Search
-            size={14}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--sea-ink-soft)]"
-          />
-          <input
-            type="search"
-            className="field-input pl-8"
-            placeholder="Search name, IC, or phone…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        {search && (
-          <span className="text-xs text-[var(--sea-ink-soft)]">
-            {filteredSorted.length} result{filteredSorted.length !== 1 ? 's' : ''}
-          </span>
-        )}
-      </div>
+      {loadError && (
+        <ErrorPanel title="Failed to load customers" message={loadError} onRetry={() => load()} />
+      )}
 
-      {/* Table */}
+      {loading && !result && <TableSkeleton rows={8} columns={6} />}
+
+      {result && (
+      <div className="space-y-3">
       <article className="workspace-panel island-shell overflow-x-auto p-0">
+        <AdminListFilterBar
+          searchValue={searchInput}
+          onSearchChange={setSearchInput}
+          onSearchClear={() => setSearch('')}
+          searchPlaceholder="Name, IC, phone, email…"
+          searchAriaLabel="Search customers"
+          filtersOpen={filtersOpen}
+          onFiltersOpenChange={setFiltersOpen}
+          activeFilterCount={activeFilterCount}
+          hasActiveFilters={hasActiveFilters}
+          onClearFilters={() => {
+            setAccountFilter('all')
+            setSearchInput('')
+            setSearch('')
+          }}
+        >
+          <StatusFilterSelect
+            aria-label="Filter customers by account"
+            value={accountFilter}
+            options={ACCOUNT_FILTER_OPTIONS.map((opt) => ({
+              value: opt.value,
+              label: `${opt.label} (${accountCounts[opt.value]})`,
+            }))}
+            onValueChange={setAccountFilter}
+          />
+        </AdminListFilterBar>
+
         <DataTable
           columns={columns}
-          data={filteredSorted}
+          data={result.rows}
           getKey={(c) => c.id}
           sortKey={sortKey}
           sortDir={sortDir}
@@ -333,12 +378,43 @@ export default function CustomersList({
             <div className="hub-empty-state m-6">
               <Users size={28} className="text-[var(--sea-ink-soft)]" />
               <p className="text-sm text-[var(--sea-ink-soft)]">
-                {search ? 'No customers match your search.' : 'No customers yet.'}
+                {hasActiveFilters ? 'No customers match your filter.' : 'No customers yet.'}
               </p>
             </div>
           }
         />
       </article>
+      <div className="admin-pagination">
+        <span>
+          Page {result.page} of {totalPages} · {result.total.toLocaleString()} total
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="button-secondary"
+            disabled={result.page <= 1 || loading}
+            onClick={() => {
+              setPage(result.page - 1)
+              void load(result.page - 1)
+            }}
+          >
+            Previous
+          </button>
+          <button
+            type="button"
+            className="button-secondary"
+            disabled={result.page >= totalPages || loading}
+            onClick={() => {
+              setPage(result.page + 1)
+              void load(result.page + 1)
+            }}
+          >
+            Next
+          </button>
+        </div>
+      </div>
+      </div>
+      )}
 
       {/* ── Add / Edit Sheet ── */}
       <Sheet open={formOpen} onOpenChange={(open) => { if (!open) closeForm() }}>
@@ -436,43 +512,36 @@ export default function CustomersList({
         </SheetContent>
       </Sheet>
 
-      {/* ── Confirm delete overlay ── */}
-      {canDelete && confirmingDelete && (
-        <div className="confirm-overlay" role="dialog" aria-modal="true">
-          <div className="confirm-dialog island-shell">
-            <p className="island-kicker mb-2">Delete customer</p>
-            <h3 className="mb-2 text-lg font-semibold text-[var(--sea-ink)]">
-              Delete {confirmingDelete.fullName ?? 'this customer'}?
-            </h3>
-            <p className="mb-5 text-sm leading-6 text-[var(--sea-ink-soft)]">
+      {/* ── Confirm delete ── */}
+      <ConfirmActionDialog
+        open={canDelete && confirmingDelete != null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setConfirmingDelete(null)
+            setDeleteError(null)
+          }
+        }}
+        title={
+          confirmingDelete
+            ? `Delete ${confirmingDelete.fullName ?? 'this customer'}?`
+            : 'Delete customer?'
+        }
+        description={
+          confirmingDelete ? (
+            <>
               This will permanently remove{' '}
               <strong>{confirmingDelete.fullName ?? 'this customer'}</strong> and all their
               associated data. This action cannot be undone.
-            </p>
-            {deleteError && <p className="form-error mb-4">{deleteError}</p>}
-            <div className="flex gap-3">
-              <button
-                type="button"
-                className="button-danger"
-                onClick={handleDeleteConfirm}
-                disabled={isDeleting}
-              >
-                {isDeleting ? 'Deleting…' : 'Delete customer'}
-              </button>
-              <button
-                type="button"
-                className="button-secondary"
-                onClick={() => {
-                  setConfirmingDelete(null)
-                  setDeleteError(null)
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+              {deleteError ? (
+                <span className="mt-2 block text-[var(--error)]">{deleteError}</span>
+              ) : null}
+            </>
+          ) : null
+        }
+        confirmLabel="Delete customer"
+        confirming={isDeleting}
+        onConfirm={handleDeleteConfirm}
+      />
     </AdminSidebarShell>
   )
 }

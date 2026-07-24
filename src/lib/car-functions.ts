@@ -1,10 +1,23 @@
 import { createServerFn } from '@tanstack/react-start'
-import { and, desc, eq, ne, or, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, ilike, inArray, ne, notInArray, or, sql } from 'drizzle-orm'
+import { z } from 'zod'
 
 import { carPhotos, cars, rentals } from '#/db/schema'
-import type { CarCategory, CarColor } from '#/db/schema'
+import type { CarCategory, CarColor, CarStatus } from '#/db/schema'
 import { requireRole } from '#/lib/auth-functions'
 import { fleetOpsRoles, fullAdminRoles } from '#/lib/auth-model'
+import {
+  deriveCarDisplayStatus,
+  getOverdueCarBuckets,
+  type CarDisplayStatus,
+  type OverdueCarBuckets,
+} from '#/lib/car-display-status'
+import {
+  adminInputValidator,
+  carCategoryFilterSchema,
+  paginationSchema,
+  sortDirSchema,
+} from '#/lib/validation/admin-schemas'
 
 type CreateCarInput = {
   plateNumber: string
@@ -78,6 +91,191 @@ export const getCars = createServerFn({ method: 'GET' }).handler(async () => {
   const { db } = await import('#/db')
   return db.select().from(cars).orderBy(desc(cars.createdAt))
 })
+
+const carStatusValues = [
+  'available',
+  'reserved',
+  'payment-pending',
+  'rented',
+  'maintenance',
+  'damaged',
+  'retired',
+] as const satisfies readonly CarStatus[]
+
+export type CarListRow = {
+  id: string
+  plateNumber: string
+  make: string
+  model: string
+  year: number
+  color: CarColor
+  category: CarCategory
+  status: CarStatus
+  /** UI badge status — may be `overdue` without changing DB `status`. */
+  displayStatus: CarDisplayStatus
+  dailyRateSen: number
+  notes: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type CarListResult = {
+  rows: CarListRow[]
+  total: number
+  page: number
+  pageSize: number
+  statusCounts: Record<string, number>
+}
+
+const carStatusFilterValues = [...carStatusValues, 'overdue'] as const
+
+const listCarsSchema = paginationSchema.extend({
+  status: z.enum(carStatusFilterValues).optional(),
+  category: carCategoryFilterSchema,
+  search: z.string().trim().max(120).optional(),
+  sortKey: z
+    .enum(['plateNumber', 'make', 'year', 'status', 'category', 'dailyRateSen', 'createdAt'])
+    .default('plateNumber'),
+  sortDir: sortDirSchema,
+})
+
+async function getCarStatusCounts(overdue: OverdueCarBuckets) {
+  const { db } = await import('#/db')
+  const rows = await db
+    .select({ status: cars.status, count: sql<number>`count(*)::int` })
+    .from(cars)
+    .groupBy(cars.status)
+
+  const statusCounts: Record<string, number> = { all: 0, overdue: overdue.ids.length }
+  for (const row of rows) {
+    const n = Number(row.count)
+    statusCounts[row.status] = n
+    statusCounts.all += n
+  }
+
+  // Overdue is display-only — pull those cars out of reserved/rented counts.
+  statusCounts.reserved = Math.max(
+    0,
+    (statusCounts.reserved ?? 0) - overdue.reservedIds.length,
+  )
+  statusCounts.rented = Math.max(0, (statusCounts.rented ?? 0) - overdue.rentedIds.length)
+
+  return statusCounts
+}
+
+export const listCars = createServerFn({ method: 'GET' })
+  .inputValidator(adminInputValidator(listCarsSchema))
+  .handler(async ({ data }): Promise<CarListResult> => {
+    await requireRole(fleetOpsRoles)
+    const { db } = await import('#/db')
+
+    // One overdue bucket fetch for both filter + status counts.
+    const overdue = await getOverdueCarBuckets()
+
+    const filters = []
+    if (data.status === 'overdue') {
+      if (overdue.ids.length === 0) {
+        return {
+          rows: [],
+          total: 0,
+          page: data.page,
+          pageSize: data.pageSize,
+          statusCounts: await getCarStatusCounts(overdue),
+        }
+      }
+      filters.push(inArray(cars.id, overdue.ids))
+    } else if (data.status === 'reserved' || data.status === 'rented') {
+      // Match display buckets: exclude cars that show as overdue.
+      filters.push(eq(cars.status, data.status))
+      if (overdue.ids.length > 0) filters.push(notInArray(cars.id, overdue.ids))
+    } else if (data.status) {
+      filters.push(eq(cars.status, data.status))
+    }
+    if (data.category) filters.push(eq(cars.category, data.category))
+    if (data.search) {
+      const needle = `%${data.search}%`
+      filters.push(
+        or(
+          ilike(cars.plateNumber, needle),
+          ilike(cars.make, needle),
+          ilike(cars.model, needle),
+        )!,
+      )
+    }
+    const whereClause = filters.length ? and(...filters) : undefined
+
+    const sortColumn = {
+      plateNumber: cars.plateNumber,
+      make: cars.make,
+      year: cars.year,
+      status: cars.status,
+      category: cars.category,
+      dailyRateSen: cars.dailyRateSen,
+      createdAt: cars.createdAt,
+    }[data.sortKey]
+
+    const orderBy = data.sortDir === 'asc' ? asc(sortColumn) : desc(sortColumn)
+    const offset = (data.page - 1) * data.pageSize
+
+    const baseQuery = db.select().from(cars)
+    const rowsPromise = whereClause
+      ? baseQuery.where(whereClause).orderBy(orderBy).limit(data.pageSize).offset(offset)
+      : baseQuery.orderBy(orderBy).limit(data.pageSize).offset(offset)
+
+    const countBase = db.select({ count: sql<number>`count(*)::int` }).from(cars)
+    const countPromise = whereClause ? countBase.where(whereClause) : countBase
+
+    const [rows, countResult, statusCounts] = await Promise.all([
+      rowsPromise,
+      countPromise,
+      getCarStatusCounts(overdue),
+    ])
+
+    const carIds = rows.map((row) => row.id)
+    const openRentals =
+      carIds.length === 0
+        ? []
+        : await db
+            .select({
+              carId: rentals.carId,
+              status: rentals.status,
+              startDate: rentals.startDate,
+              endDate: rentals.endDate,
+            })
+            .from(rentals)
+            .where(
+              and(
+                inArray(rentals.carId, carIds),
+                inArray(rentals.status, ['pending', 'active']),
+              ),
+            )
+
+    const openByCarId = new Map<
+      string,
+      { status: string; startDate: Date; endDate: Date }
+    >()
+    for (const rental of openRentals) {
+      const existing = openByCarId.get(rental.carId)
+      // Prefer active over pending when both somehow exist for one car.
+      if (!existing || (existing.status !== 'active' && rental.status === 'active')) {
+        openByCarId.set(rental.carId, rental)
+      }
+    }
+
+    const now = new Date()
+    const enrichedRows: CarListRow[] = rows.map((row) => ({
+      ...row,
+      displayStatus: deriveCarDisplayStatus(row.status, openByCarId.get(row.id), now),
+    }))
+
+    return {
+      rows: enrichedRows,
+      total: Number(countResult[0]?.count ?? 0),
+      page: data.page,
+      pageSize: data.pageSize,
+      statusCounts,
+    }
+  })
 
 export const getCarById = createServerFn({ method: 'GET' })
   .inputValidator((input: GetCarByIdInput) => input)

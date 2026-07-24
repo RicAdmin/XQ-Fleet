@@ -1,10 +1,18 @@
 import { useState } from 'react'
 
-import { Link } from '@tanstack/react-router'
-import { ArrowLeft, Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
 import { Button } from '#/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '#/components/ui/card'
+import { ConfirmActionDialog } from '#/components/ui/ConfirmActionDialog'
+import { PageHeader } from '#/components/ui/PageHeader'
 import {
   Sheet,
   SheetContent,
@@ -122,91 +130,96 @@ export default function CustomerProfile({
 
   return (
     <AdminSidebarShell user={session.user} pageTitle="Customer profile">
-      {/* Back link */}
-      <div className="mb-5">
-        <Link
-          to={listPath as never}
-          className="inline-flex items-center gap-1.5 text-sm text-[var(--sea-ink-soft)] hover:text-[var(--sea-ink)]"
-        >
-          <ArrowLeft size={14} />
-          Back to customers
-        </Link>
-      </div>
-
-      {/* Header */}
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <p className="island-kicker mb-1">Customer profile</p>
-          <h2 className="text-2xl font-semibold text-[var(--sea-ink)]">
-            {customer.fullName ?? '—'}
-          </h2>
-          <p className="font-mono mt-1 text-sm font-semibold text-[var(--lagoon-deep)]">
-            {customer.icOrPassport ?? '—'}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="button-secondary inline-flex items-center gap-1.5"
-            onClick={openEdit}
-          >
-            <Pencil size={13} />
-            Edit
-          </button>
-          {canDelete && (
+      <PageHeader
+        variant="detail"
+        backLink={{ to: listPath, label: 'Back to customers' }}
+        title={customer.fullName ?? '—'}
+        description={
+          <>
+            <span className="island-kicker">Customer profile</span>
+            <span className="ui-meta-sep" aria-hidden>
+              ·
+            </span>
+            <span className="font-mono text-xs font-semibold text-[var(--lagoon-deep)]">
+              {customer.icOrPassport ?? '—'}
+            </span>
+          </>
+        }
+        actions={
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              className="button-danger inline-flex items-center gap-1.5"
-              onClick={() => {
-                setConfirmDelete(true)
-                setDeleteError(null)
-              }}
+              className="button-secondary inline-flex items-center gap-1.5"
+              onClick={openEdit}
             >
-              <Trash2 size={13} />
-              Delete
+              <Pencil size={13} />
+              Edit
             </button>
-          )}
-        </div>
-      </div>
+            {canDelete && (
+              <button
+                type="button"
+                className="button-danger inline-flex items-center gap-1.5"
+                onClick={() => {
+                  setConfirmDelete(true)
+                  setDeleteError(null)
+                }}
+              >
+                <Trash2 size={13} />
+                Delete
+              </button>
+            )}
+          </div>
+        }
+      />
 
       {/* Detail grid */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <article className="workspace-panel island-shell">
-          <p className="island-kicker mb-3">Customer details</p>
-          <dl className="space-y-3">
-            {[
-              { label: 'Full name', value: customer.fullName },
-              { label: 'IC / Passport', value: customer.icOrPassport },
-              { label: 'Phone', value: customer.phone },
-              { label: 'Email', value: customer.email },
-              {
-                label: 'Address',
-                value: customer.address
-                  ? customer.address.split('\n').map((line, i) => (
-                      <span key={i} className="block">{line}</span>
-                    ))
-                  : null,
-              },
-              { label: 'Customer since', value: formatDate(customer.createdAt) },
-            ].map(({ label, value }) => (
-              <div key={label} className="summary-row">
-                <dt className="text-sm text-[var(--sea-ink-soft)]">{label}</dt>
-                <dd className="text-sm font-medium text-[var(--sea-ink)]">
-                  {value ?? <span className="font-normal opacity-40">—</span>}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </article>
+        <Card>
+          <CardHeader>
+            <CardDescription className="island-kicker">Customer details</CardDescription>
+            <CardTitle className="sr-only">Customer details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <dl className="flex flex-col gap-3">
+              {[
+                { label: 'Full name', value: customer.fullName },
+                { label: 'IC / Passport', value: customer.icOrPassport },
+                { label: 'Phone', value: customer.phone },
+                { label: 'Email', value: customer.email },
+                {
+                  label: 'Address',
+                  value: customer.address
+                    ? customer.address.split('\n').map((line, i) => (
+                        <span key={i} className="block">{line}</span>
+                      ))
+                    : null,
+                },
+                { label: 'Customer since', value: formatDate(customer.createdAt) },
+              ].map(({ label, value }) => (
+                <div key={label} className="summary-row">
+                  <dt className="text-sm text-[var(--sea-ink-soft)]">{label}</dt>
+                  <dd className="text-sm font-medium text-[var(--sea-ink)]">
+                    {value ?? <span className="font-normal opacity-40">—</span>}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </CardContent>
+        </Card>
 
-        <article className="workspace-panel island-shell">
-          <p className="island-kicker mb-3">Rental history</p>
-          <div className="hub-empty-state">
-            <p className="text-sm text-[var(--sea-ink-soft)]">
-              Rental history will appear here once Stage 4 is complete.
-            </p>
-          </div>
-        </article>
+        <Card>
+          <CardHeader>
+            <CardDescription className="island-kicker">Rental history</CardDescription>
+            <CardTitle className="sr-only">Rental history</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="hub-empty-state">
+              <p className="text-sm text-[var(--sea-ink-soft)]">
+                Rental history will appear here once Stage 4 is complete.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* ── Edit Sheet ── */}
@@ -298,43 +311,30 @@ export default function CustomerProfile({
         </SheetContent>
       </Sheet>
 
-      {/* ── Confirm delete overlay ── */}
-      {canDelete && confirmDelete && (
-        <div className="confirm-overlay" role="dialog" aria-modal="true">
-          <div className="confirm-dialog island-shell">
-            <p className="island-kicker mb-2">Delete customer</p>
-            <h3 className="mb-2 text-lg font-semibold text-[var(--sea-ink)]">
-              Delete {customer.fullName ?? 'this customer'}?
-            </h3>
-            <p className="mb-5 text-sm leading-6 text-[var(--sea-ink-soft)]">
-              This will permanently remove{' '}
-              <strong>{customer.fullName ?? 'this customer'}</strong> and all their associated
-              data. This action cannot be undone.
-            </p>
-            {deleteError && <p className="form-error mb-4">{deleteError}</p>}
-            <div className="flex gap-3">
-              <button
-                type="button"
-                className="button-danger"
-                onClick={handleDeleteConfirm}
-                disabled={isDeleting}
-              >
-                {isDeleting ? 'Deleting…' : 'Delete customer'}
-              </button>
-              <button
-                type="button"
-                className="button-secondary"
-                onClick={() => {
-                  setConfirmDelete(false)
-                  setDeleteError(null)
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ── Confirm delete ── */}
+      <ConfirmActionDialog
+        open={canDelete && confirmDelete}
+        onOpenChange={(open) => {
+          if (!open) {
+            setConfirmDelete(false)
+            setDeleteError(null)
+          }
+        }}
+        title={`Delete ${customer.fullName ?? 'this customer'}?`}
+        description={
+          <>
+            This will permanently remove{' '}
+            <strong>{customer.fullName ?? 'this customer'}</strong> and all their associated
+            data. This action cannot be undone.
+            {deleteError ? (
+              <span className="mt-2 block text-[var(--error)]">{deleteError}</span>
+            ) : null}
+          </>
+        }
+        confirmLabel="Delete customer"
+        confirming={isDeleting}
+        onConfirm={handleDeleteConfirm}
+      />
     </AdminSidebarShell>
   )
 }

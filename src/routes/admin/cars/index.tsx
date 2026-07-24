@@ -1,10 +1,16 @@
-import { useState, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ChevronDown, Plus, Pencil, CarFront } from 'lucide-react'
 
 import { DataTable, useSortState, type Column } from '#/components/ui/DataTable'
+import { AdminListFilterBar } from '#/components/ui/AdminListFilterBar'
+import { ConfirmActionDialog } from '#/components/ui/ConfirmActionDialog'
+import { ErrorPanel } from '#/components/ui/ErrorPanel'
 import { PageHeader } from '#/components/ui/PageHeader'
+import { RowActionsMenu } from '#/components/ui/RowActionsMenu'
+import { StatusFilterSelect } from '#/components/ui/StatusFilterSelect'
+import { TableSkeleton } from '#/components/ui/TableSkeleton'
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
 import { Button } from '#/components/ui/button'
 import {
@@ -15,32 +21,39 @@ import {
   SheetFooter,
 } from '#/components/ui/sheet'
 import { StatusBadge } from '#/components/ui/StatusBadge'
-import type { CarCategory, CarColor, CarStatus } from '#/db/schema'
+import type { CarCategory, CarColor } from '#/db/schema'
 import { isFullAdminRole, type AppRole } from '#/lib/auth-model'
+import type { CarDisplayStatus } from '#/lib/car-display-status'
+import {
+  CAR_CATEGORY_FILTER_OPTIONS,
+  type CarCategoryFilter,
+} from '#/lib/car-category-options'
 import {
   createCar,
-  getCars,
+  listCars,
   retireCar,
   updateCar,
   updateCarStatus,
+  type CarListResult,
+  type CarListRow,
 } from '#/lib/car-functions'
 
+const PAGE_SIZE = 25
+const SEARCH_DEBOUNCE_MS = 300
+
 export const Route = createFileRoute('/admin/cars/')({
-  beforeLoad: async () => {
-    const cars = await getCars()
-    return { cars }
-  },
   component: CarsPage,
 })
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const CAR_STATUS_TABS: { value: CarStatus | 'all'; label: string }[] = [
-  { value: 'all', label: 'All' },
+const CAR_STATUS_OPTIONS: { value: CarDisplayStatus | 'all'; label: string }[] = [
+  { value: 'all', label: 'All statuses' },
   { value: 'available', label: 'Available' },
   { value: 'reserved', label: 'Reserved' },
   { value: 'payment-pending', label: 'Awaiting payment' },
   { value: 'rented', label: 'Rented' },
+  { value: 'overdue', label: 'Overdue' },
   { value: 'maintenance', label: 'Maintenance' },
   { value: 'damaged', label: 'Damaged' },
   { value: 'retired', label: 'Retired' },
@@ -108,22 +121,9 @@ function currentYear() {
   return new Date().getFullYear()
 }
 
-// ─── Car row type (from DB) ───────────────────────────────────────────────────
+// ─── Car row type (from server) ───────────────────────────────────────────────
 
-type CarRow = {
-  id: string
-  plateNumber: string
-  make: string
-  model: string
-  year: number
-  color: CarColor
-  category: CarCategory
-  status: CarStatus
-  dailyRateSen: number
-  notes: string | null
-  createdAt: Date
-  updatedAt: Date
-}
+type CarRow = CarListRow
 
 // ─── Form state ───────────────────────────────────────────────────────────────
 
@@ -164,31 +164,25 @@ function carToForm(car: CarRow): CarFormData {
   }
 }
 
-// ─── Sort ─────────────────────────────────────────────────────────────────────
-
-type SortKey = 'plateNumber' | 'make' | 'year' | 'status' | 'category' | 'dailyRateSen'
-
-function sortCars(cars: CarRow[], key: SortKey, dir: 'asc' | 'desc'): CarRow[] {
-  return [...cars].sort((a, b) => {
-    const av = a[key]
-    const bv = b[key]
-    const cmp = typeof av === 'number' && typeof bv === 'number' ? av - bv : String(av).localeCompare(String(bv))
-    return dir === 'asc' ? cmp : -cmp
-  })
-}
-
-import { UI_BTN_XS, UI_BTN_XS_DANGER } from '#/lib/admin-ui-classes'
+type SortKey = 'plateNumber' | 'make' | 'year' | 'status' | 'category' | 'dailyRateSen' | 'createdAt'
 
 function CarsPage() {
-  const { session, cars: initialCars } = Route.useRouteContext() as unknown as {
+  const navigate = useNavigate()
+  const { session } = Route.useRouteContext() as unknown as {
     session: { user: { name: string; email: string; role: string } }
-    cars: CarRow[]
   }
 
   const isOwner = isFullAdminRole(session.user.role as AppRole)
 
-  const [cars, setCars] = useState<CarRow[]>(initialCars)
-  const [activeTab, setActiveTab] = useState<CarStatus | 'all'>('all')
+  const [result, setResult] = useState<CarListResult | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [activeTab, setActiveTab] = useState<CarDisplayStatus | 'all'>('all')
+  const [categoryFilter, setCategoryFilter] = useState<CarCategoryFilter>('all')
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [searchInput, setSearchInput] = useState('')
+  const [search, setSearch] = useState('')
   const { sortKey, sortDir, handleSort } = useSortState<SortKey>('plateNumber')
 
   // Form panel
@@ -207,20 +201,52 @@ function CarsPage() {
   const [statusChangingId, setStatusChangingId] = useState<string | null>(null)
   const [statusError, setStatusError] = useState<string | null>(null)
 
-  // ── Derived data ──────────────────────────────────────────────────────────
-
-  const tabCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: cars.length }
-    for (const car of cars) {
-      counts[car.status] = (counts[car.status] ?? 0) + 1
+  async function load(p = page) {
+    setLoading(true)
+    setLoadError(null)
+    try {
+      const res = await listCars({
+        data: {
+          page: p,
+          pageSize: PAGE_SIZE,
+          status: activeTab === 'all' ? undefined : activeTab,
+          category: categoryFilter === 'all' ? undefined : categoryFilter,
+          search: search || undefined,
+          sortKey,
+          sortDir,
+        },
+      })
+      setResult(res)
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : 'Failed to load vehicles.')
+    } finally {
+      setLoading(false)
     }
-    return counts
-  }, [cars])
+  }
 
-  const filteredSortedCars = useMemo(() => {
-    const filtered = activeTab === 'all' ? cars : cars.filter((c) => c.status === activeTab)
-    return sortCars(filtered, sortKey, sortDir)
-  }, [cars, activeTab, sortKey, sortDir])
+  useEffect(() => {
+    setPage(1)
+    void load(1)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, categoryFilter, search, sortKey, sortDir])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const next = searchInput.trim()
+      setSearch((prev) => (prev === next ? prev : next))
+    }, SEARCH_DEBOUNCE_MS)
+    return () => clearTimeout(timer)
+  }, [searchInput])
+
+  const totalPages = result ? Math.max(1, Math.ceil(result.total / result.pageSize)) : 1
+  const tabCounts = result?.statusCounts ?? { all: 0 }
+  const activeFilterCount =
+    (activeTab !== 'all' ? 1 : 0) + (categoryFilter !== 'all' ? 1 : 0)
+  const hasActiveFilters =
+    activeTab !== 'all' ||
+    categoryFilter !== 'all' ||
+    searchInput.trim().length > 0 ||
+    search.length > 0
 
   // ── Form handlers ─────────────────────────────────────────────────────────
 
@@ -258,7 +284,7 @@ function CarsPage() {
 
     try {
       if (editingCar) {
-        const updated = await updateCar({
+        await updateCar({
           data: {
             carId: editingCar.id,
             plateNumber: formData.plateNumber,
@@ -271,9 +297,9 @@ function CarsPage() {
             notes: formData.notes || undefined,
           },
         })
-        setCars((prev) => prev.map((c) => (c.id === updated.id ? (updated as CarRow) : c)))
+        await load(page)
       } else {
-        const created = await createCar({
+        await createCar({
           data: {
             plateNumber: formData.plateNumber,
             make: formData.make,
@@ -285,7 +311,8 @@ function CarsPage() {
             notes: formData.notes || undefined,
           },
         })
-        setCars((prev) => [created as CarRow, ...prev])
+        setPage(1)
+        await load(1)
       }
       closeForm()
     } catch (err) {
@@ -301,8 +328,8 @@ function CarsPage() {
     setStatusChangingId(carId)
     setStatusError(null)
     try {
-      const updated = await updateCarStatus({ data: { carId, status } })
-      setCars((prev) => prev.map((c) => (c.id === updated.id ? (updated as CarRow) : c)))
+      await updateCarStatus({ data: { carId, status } })
+      await load(page)
     } catch (err) {
       setStatusError(err instanceof Error ? err.message : 'Status update failed.')
     } finally {
@@ -317,8 +344,8 @@ function CarsPage() {
     setRetireError(null)
     setIsRetiring(true)
     try {
-      const updated = await retireCar({ data: { carId: confirmingRetire.id } })
-      setCars((prev) => prev.map((c) => (c.id === updated.id ? (updated as CarRow) : c)))
+      await retireCar({ data: { carId: confirmingRetire.id } })
+      await load(page)
       setConfirmingRetire(null)
     } catch (err) {
       setRetireError(err instanceof Error ? err.message : 'Unable to retire vehicle.')
@@ -388,7 +415,11 @@ function CarsPage() {
         car.status !== 'rented' &&
         car.status !== 'reserved' &&
         car.status !== 'payment-pending' ? (
-          <span className="relative inline-flex items-center">
+          <span
+            className="relative inline-flex items-center"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
             <select
               className={`status-badge status-badge--${car.status} cursor-pointer appearance-none border-0 pr-[1.1rem] transition-shadow hover:ring-1 hover:ring-current/30 disabled:cursor-not-allowed disabled:opacity-60`}
               value={car.status}
@@ -408,7 +439,7 @@ function CarsPage() {
             <ChevronDown size={9} className="pointer-events-none absolute right-[0.3rem] opacity-60" strokeWidth={2.5} />
           </span>
         ) : (
-          <StatusBadge status={car.status} />
+          <StatusBadge status={car.displayStatus} />
         ),
     },
     {
@@ -425,27 +456,27 @@ function CarsPage() {
             headerClassName: 'text-right',
             cellClassName: 'text-right whitespace-nowrap',
             render: (car: CarRow) => (
-              <>
-                <button
-                  type="button"
-                  className={`${UI_BTN_XS} mr-1.5`}
-                  onClick={() => openEdit(car)}
-                  disabled={car.status === 'retired'}
-                  title={car.status === 'retired' ? 'Retired vehicles cannot be edited' : 'Edit vehicle'}
-                >
-                  <Pencil size={11} />
-                  Edit
-                </button>
-                {car.status !== 'retired' && (
-                  <button
-                    type="button"
-                    className={UI_BTN_XS_DANGER}
-                    onClick={() => setConfirmingRetire(car)}
-                  >
-                    Retire
-                  </button>
-                )}
-              </>
+              <RowActionsMenu
+                label={`Actions for ${car.plateNumber}`}
+                actions={[
+                  {
+                    label: 'Edit',
+                    icon: <Pencil />,
+                    disabled: car.status === 'retired',
+                    onSelect: () => openEdit(car),
+                  },
+                  ...(car.status !== 'retired'
+                    ? [
+                        {
+                          label: 'Retire',
+                          variant: 'destructive' as const,
+                          separatorBefore: true,
+                          onSelect: () => setConfirmingRetire(car),
+                        },
+                      ]
+                    : []),
+                ]}
+              />
             ),
           } satisfies Column<CarRow>,
         ]
@@ -459,7 +490,11 @@ function CarsPage() {
       {/* Page header */}
       <PageHeader
         title="Vehicle Inventory"
-        description={`${cars.length} vehicle${cars.length !== 1 ? 's' : ''} total`}
+        description={
+          result
+            ? `${result.total.toLocaleString()} vehicle${result.total !== 1 ? 's' : ''} total`
+            : 'Loading…'
+        }
         actions={
           isOwner && (
             <button type="button" className="button-primary flex items-center gap-2" onClick={openAdd}>
@@ -470,46 +505,114 @@ function CarsPage() {
         }
       />
 
-      {/* Status tabs */}
-      <div className="status-tabs mb-4">
-        {CAR_STATUS_TABS.map((tab) => (
-          <button
-            key={tab.value}
-            type="button"
-            className={`status-tab ${activeTab === tab.value ? 'is-active' : ''}`}
-            onClick={() => setActiveTab(tab.value)}
-          >
-            {tab.label}
-            {tabCounts[tab.value] != null && (
-              <span className="tab-count">{tabCounts[tab.value]}</span>
-            )}
-          </button>
-        ))}
-      </div>
+      {/* Status tabs removed — search + status live in table toolbar */}
 
       {statusError && (
         <p className="form-error mb-3">{statusError}</p>
       )}
 
-      {/* Table */}
+      {loadError && (
+        <ErrorPanel title="Failed to load vehicles" message={loadError} onRetry={() => load()} />
+      )}
+
+      {loading && !result && <TableSkeleton rows={8} columns={7} />}
+
+      {result && (
+      <div className="space-y-3">
       <article className="workspace-panel island-shell overflow-x-auto p-0">
+        <AdminListFilterBar
+          searchValue={searchInput}
+          onSearchChange={setSearchInput}
+          onSearchClear={() => setSearch('')}
+          searchPlaceholder="Plate, make, model…"
+          searchAriaLabel="Search vehicles"
+          filtersOpen={filtersOpen}
+          onFiltersOpenChange={setFiltersOpen}
+          activeFilterCount={activeFilterCount}
+          hasActiveFilters={hasActiveFilters}
+          onClearFilters={() => {
+            setActiveTab('all')
+            setCategoryFilter('all')
+            setSearchInput('')
+            setSearch('')
+          }}
+        >
+          <StatusFilterSelect
+            aria-label="Filter vehicles by status"
+            value={activeTab}
+            options={CAR_STATUS_OPTIONS.map((tab) => {
+              const count =
+                tab.value === 'all' ? (tabCounts.all ?? 0) : tabCounts[tab.value]
+              const countLabel =
+                typeof count === 'number' && count > 0 ? ` (${count})` : ''
+              return {
+                value: tab.value,
+                label: `${tab.label}${countLabel}`,
+              }
+            })}
+            onValueChange={setActiveTab}
+          />
+          <StatusFilterSelect
+            aria-label="Filter vehicles by type"
+            value={categoryFilter}
+            options={CAR_CATEGORY_FILTER_OPTIONS}
+            onValueChange={setCategoryFilter}
+          />
+        </AdminListFilterBar>
+
         <DataTable
           columns={columns}
-          data={filteredSortedCars}
+          data={result.rows}
           getKey={(c) => c.id}
           sortKey={sortKey}
           sortDir={sortDir}
           onSort={handleSort as (key: string) => void}
+          onRowClick={(car) =>
+            void navigate({ to: '/admin/cars/$carId', params: { carId: car.id } })
+          }
           emptyState={
             <div className="hub-empty-state m-6">
               <CarFront size={28} className="text-[var(--sea-ink-soft)]" />
               <p className="text-sm text-[var(--sea-ink-soft)]">
-                {activeTab === 'all' ? 'No vehicles yet.' : `No ${activeTab} vehicles.`}
+                {hasActiveFilters
+                  ? 'No vehicles match these filters.'
+                  : 'No vehicles yet.'}
               </p>
             </div>
           }
         />
       </article>
+      <div className="admin-pagination">
+        <span>
+          Page {result.page} of {totalPages} · {result.total.toLocaleString()} total
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="button-secondary"
+            disabled={result.page <= 1 || loading}
+            onClick={() => {
+              setPage(result.page - 1)
+              void load(result.page - 1)
+            }}
+          >
+            Previous
+          </button>
+          <button
+            type="button"
+            className="button-secondary"
+            disabled={result.page >= totalPages || loading}
+            onClick={() => {
+              setPage(result.page + 1)
+              void load(result.page + 1)
+            }}
+          >
+            Next
+          </button>
+        </div>
+      </div>
+      </div>
+      )}
 
       {/* ── Add / Edit Sheet ── */}
       {isOwner && (
@@ -658,45 +761,39 @@ function CarsPage() {
         </Sheet>
       )}
 
-      {/* ── Confirm retire overlay ── */}
-      {isOwner && confirmingRetire && (
-        <div className="confirm-overlay" role="dialog" aria-modal="true">
-          <div className="confirm-dialog island-shell">
-            <p className="island-kicker mb-2">Retire vehicle</p>
-            <h3 className="mb-2 text-lg font-semibold text-[var(--sea-ink)]">
-              Retire {confirmingRetire.plateNumber}?
-            </h3>
-            <p className="mb-5 text-sm leading-6 text-[var(--sea-ink-soft)]">
+      {/* ── Confirm retire ── */}
+      <ConfirmActionDialog
+        open={isOwner && confirmingRetire != null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setConfirmingRetire(null)
+            setRetireError(null)
+          }
+        }}
+        title={
+          confirmingRetire
+            ? `Retire ${confirmingRetire.plateNumber}?`
+            : 'Retire vehicle?'
+        }
+        description={
+          confirmingRetire ? (
+            <>
               This will mark{' '}
               <strong>
                 {confirmingRetire.make} {confirmingRetire.model}
               </strong>{' '}
-              as retired. The vehicle will no longer appear in active inventory but its record is preserved.
-            </p>
-            {retireError && <p className="form-error mb-4">{retireError}</p>}
-            <div className="flex gap-3">
-              <button
-                type="button"
-                className="button-primary"
-                onClick={handleRetireConfirm}
-                disabled={isRetiring}
-              >
-                {isRetiring ? 'Retiring…' : 'Confirm retire'}
-              </button>
-              <button
-                type="button"
-                className="button-secondary"
-                onClick={() => {
-                  setConfirmingRetire(null)
-                  setRetireError(null)
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+              as retired. The vehicle will no longer appear in active inventory
+              but its record is preserved.
+              {retireError ? (
+                <span className="mt-2 block text-[var(--error)]">{retireError}</span>
+              ) : null}
+            </>
+          ) : null
+        }
+        confirmLabel="Confirm retire"
+        confirming={isRetiring}
+        onConfirm={handleRetireConfirm}
+      />
     </AdminSidebarShell>
   )
 }

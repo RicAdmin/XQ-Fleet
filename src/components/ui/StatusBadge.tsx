@@ -3,6 +3,7 @@ const STATUS_LABELS: Record<string, string> = {
   reserved: 'Reserved',
   'payment-pending': 'Pmt. Pending',
   rented: 'Rented',
+  overdue: 'Overdue',
   maintenance: 'Maintenance',
   damaged: 'Damaged',
   retired: 'Retired',

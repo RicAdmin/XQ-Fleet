@@ -1,10 +1,12 @@
 import { useState } from 'react'
 
-import { Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Trash2 } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
 
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
 import { Button } from '#/components/ui/button'
+import { ConfirmActionDialog } from '#/components/ui/ConfirmActionDialog'
+import { Card, CardContent, CardDescription, CardHeader } from '#/components/ui/card'
+import { PageHeader } from '#/components/ui/PageHeader'
 import {
   Sheet,
   SheetContent,
@@ -34,23 +36,6 @@ function formatDate(d: Date | null | undefined) {
 
 function toDateInput(d: Date): string {
   return d.toISOString().split('T')[0]
-}
-
-// ─── Section: read-only detail grid ──────────────────────────────────────────
-
-function DetailGrid({ rows }: { rows: { label: string; value: React.ReactNode }[] }) {
-  return (
-    <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3">
-      {rows.map(({ label, value }) => (
-        <div key={label}>
-          <dt className="text-xs font-medium text-[var(--sea-ink-soft)] uppercase tracking-wide">
-            {label}
-          </dt>
-          <dd className="mt-0.5 text-sm text-[var(--sea-ink)]">{value}</dd>
-        </div>
-      ))}
-    </dl>
-  )
 }
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
@@ -248,162 +233,282 @@ export default function RentalDetail({
     }
   }
 
-  // ── Core rental info ──────────────────────────────────────────────────────
+  // ── Derived ───────────────────────────────────────────────────────────────
 
-  const rentalInfo = [
-    { label: 'Car', value: <><span className="font-mono font-semibold">{rental.carPlateNumber ?? '—'}</span><span className="ml-1.5 text-xs text-[var(--sea-ink-soft)]">{rental.carMake} {rental.carModel}</span></> },
-    { label: 'Customer', value: rental.customerFullName ?? '—' },
-    { label: 'IC / Passport', value: rental.customerIcOrPassport ?? '—' },
-    { label: 'Phone', value: rental.customerPhone ?? '—' },
-    { label: 'Type', value: rental.type === 'walk-in' ? 'Walk-in' : 'Advance booking' },
-    { label: 'Start date', value: formatDate(rental.startDate) },
-    { label: 'End date', value: formatDate(rental.endDate) },
-    { label: 'Daily rate', value: formatMYR(rental.dailyRateSen) },
-    { label: 'Total', value: <span className="font-semibold">{formatMYR(rental.totalAmountSen)}</span> },
-    { label: 'Deposit', value: formatMYR(rental.depositAmountSen) },
-    { label: 'Payment', value: <PaymentBadge status={rental.paymentStatus} /> },
-    { label: 'Created', value: formatDate(rental.createdAt) },
-  ]
+  const rentalDays = Math.max(
+    1,
+    Math.ceil(
+      (new Date(rental.endDate).getTime() - new Date(rental.startDate).getTime()) /
+        (1000 * 60 * 60 * 24),
+    ),
+  )
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  const balanceSen = Math.max(0, rental.totalAmountSen - rental.paidAmountSen)
 
   return (
     <AdminSidebarShell user={session.user} pageTitle="Rental detail">
-      {/* Back link */}
-      <Link
-        to={listPath as never}
-        className="mb-5 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--sea-ink-soft)] hover:text-[var(--sea-ink)] transition-colors"
-      >
-        <ArrowLeft size={13} />
-        All rentals
-      </Link>
-
-      {/* Page header */}
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <h2 className="text-xl font-semibold text-[var(--sea-ink)]">
-            {rental.carPlateNumber ?? 'Rental'} — {rental.customerFullName ?? 'Customer'}
-          </h2>
-          <RentalStatusBadge status={rental.status} />
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Status-driven actions */}
-          {rental.status === 'pending' && (
-            <>
-              <button type="button" className="button-primary text-sm" onClick={() => setHandoverOpen(true)}>
-                Confirm handover
-              </button>
-              <button type="button" className="button-secondary text-sm" onClick={() => { setConfirmCancelOpen(true); setCancelError(null) }}>
-                Cancel booking
-              </button>
-            </>
-          )}
-          {rental.status === 'active' && (
-            <>
-              <button type="button" className="button-primary text-sm" onClick={() => { setPaidAmountRM(''); setReturnOpen(true) }}>
-                Close return
-              </button>
-              {session.user.role === 'owner' && (
-                <button type="button" className="button-secondary text-sm" onClick={() => { setNewEndDate(toDateInput(rental.endDate)); setExtendOpen(true) }}>
-                  Extend rental
-                </button>
-              )}
-            </>
-          )}
-          {canDelete && (rental.status === 'closed' || rental.status === 'cancelled') && (
-            <button type="button" className="button-danger flex items-center gap-2 text-sm" onClick={() => { setConfirmDeleteOpen(true); setDeleteError(null) }}>
-              <Trash2 size={13} />
-              Delete record
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Main rental info card */}
-      <section className="workspace-panel island-shell mb-4 p-5">
-        <p className="island-kicker mb-3">Rental info</p>
-        <DetailGrid rows={rentalInfo} />
-      </section>
-
-      {/* Handover card (visible once active or closed) */}
-      {(rental.status === 'active' || rental.status === 'closed') && (
-        <section className="workspace-panel island-shell mb-4 p-5">
-          <p className="island-kicker mb-3">Vehicle handover</p>
-          <DetailGrid
-            rows={[
-              { label: 'Start mileage (km)', value: rental.startMileage != null ? rental.startMileage.toLocaleString() : '—' },
-              { label: 'Condition at start', value: rental.startConditionNote || '—' },
-            ]}
-          />
-        </section>
-      )}
-
-      {/* Return card (visible once closed) */}
-      {rental.status === 'closed' && (
-        <section className="workspace-panel island-shell mb-4 p-5">
-          <p className="island-kicker mb-3">Vehicle return</p>
-          <DetailGrid
-            rows={[
-              { label: 'Return date', value: formatDate(rental.actualReturnDate) },
-              { label: 'End mileage (km)', value: rental.endMileage != null ? rental.endMileage.toLocaleString() : '—' },
-              { label: 'Condition at return', value: rental.endConditionNote || '—' },
-              { label: 'Amount paid', value: <span className="font-semibold">{formatMYR(rental.paidAmountSen)}</span> },
-            ]}
-          />
-        </section>
-      )}
-
-      {/* Documents */}
-      {(rental.status === 'active' || rental.status === 'closed') && (
-        <section className="workspace-panel island-shell mb-4 p-5">
-          <p className="island-kicker mb-3">Documents</p>
-          <div className="flex flex-wrap gap-3">
-            <div className="flex items-center gap-2">
-              <a
-                href={`/api/documents/agreement/${rental.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="button-secondary text-sm"
-              >
-                View agreement
-              </a>
-              <a
-                href={`/api/documents/agreement/${rental.id}?download=1`}
-                className="button-secondary text-sm"
-              >
-                ↓ Download
-              </a>
-            </div>
-            {rental.status === 'closed' && (
+      <PageHeader
+        variant="detail"
+        backLink={{ to: listPath, label: 'Back' }}
+        title={rental.carPlateNumber ?? 'Rental'}
+        description={
+          <>
+            <span>{rental.customerFullName ?? 'Customer'}</span>
+            <span className="ui-meta-sep" aria-hidden>
+              ·
+            </span>
+            <span>{rental.type === 'walk-in' ? 'Walk-in' : 'Booking'}</span>
+            <span className="ui-meta-sep" aria-hidden>
+              ·
+            </span>
+            <span>
+              {rentalDays} day{rentalDays !== 1 ? 's' : ''}
+            </span>
+            <span className="ui-meta-sep" aria-hidden>
+              ·
+            </span>
+            <span className="tabular-nums">
+              {formatDate(rental.startDate)} → {formatDate(rental.endDate)}
+            </span>
+          </>
+        }
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <RentalStatusBadge status={rental.status} />
+            {rental.status === 'pending' ? (
               <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="button-primary text-sm"
+                  onClick={() => setHandoverOpen(true)}
+                >
+                  Confirm handover
+                </button>
+                <button
+                  type="button"
+                  className="button-danger text-sm"
+                  onClick={() => {
+                    setConfirmCancelOpen(true)
+                    setCancelError(null)
+                  }}
+                >
+                  Cancel booking
+                </button>
+              </div>
+            ) : null}
+            {rental.status === 'active' ? (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="button-primary text-sm"
+                  onClick={() => {
+                    setPaidAmountRM('')
+                    setReturnOpen(true)
+                  }}
+                >
+                  Close return
+                </button>
+                {session.user.role === 'owner' ? (
+                  <button
+                    type="button"
+                    className="button-secondary text-sm"
+                    onClick={() => {
+                      setNewEndDate(toDateInput(rental.endDate))
+                      setExtendOpen(true)
+                    }}
+                  >
+                    Extend rental
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+            {canDelete && (rental.status === 'closed' || rental.status === 'cancelled') ? (
+              <button
+                type="button"
+                className="button-danger text-sm"
+                onClick={() => {
+                  setConfirmDeleteOpen(true)
+                  setDeleteError(null)
+                }}
+              >
+                Delete record
+              </button>
+            ) : null}
+          </div>
+        }
+      />
+
+      {rental.status === 'cancelled' ? (
+        <p className="mb-4 text-sm text-[var(--sea-ink-soft)]">
+          This rental was cancelled. No charges apply.
+        </p>
+      ) : null}
+
+      <div className="mb-4 grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription className="island-kicker">Vehicle</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <dl className="flex flex-col gap-2">
+              <div className="summary-row">
+                <dt className="text-sm text-[var(--sea-ink-soft)]">Plate</dt>
+                <dd className="font-mono text-sm font-semibold text-[var(--lagoon-deep)]">
+                  {rental.carPlateNumber ?? '—'}
+                </dd>
+              </div>
+              <div className="summary-row">
+                <dt className="text-sm text-[var(--sea-ink-soft)]">Model</dt>
+                <dd className="text-sm font-medium text-[var(--sea-ink)]">
+                  {[rental.carMake, rental.carModel].filter(Boolean).join(' ') || '—'}
+                </dd>
+              </div>
+            </dl>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription className="island-kicker">Customer</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <dl className="flex flex-col gap-2">
+              <div className="summary-row">
+                <dt className="text-sm text-[var(--sea-ink-soft)]">Name</dt>
+                <dd className="text-sm font-medium text-[var(--sea-ink)]">
+                  {rental.customerFullName ?? '—'}
+                </dd>
+              </div>
+              <div className="summary-row">
+                <dt className="text-sm text-[var(--sea-ink-soft)]">Phone</dt>
+                <dd className="text-sm font-medium text-[var(--sea-ink)]">
+                  {rental.customerPhone ?? '—'}
+                </dd>
+              </div>
+              <div className="summary-row">
+                <dt className="text-sm text-[var(--sea-ink-soft)]">IC / Passport</dt>
+                <dd className="text-sm font-medium text-[var(--sea-ink)]">
+                  {rental.customerIcOrPassport ?? '—'}
+                </dd>
+              </div>
+            </dl>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription className="island-kicker">Booking</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <dl className="flex flex-col gap-2">
+              <div className="summary-row">
+                <dt className="text-sm text-[var(--sea-ink-soft)]">Type</dt>
+                <dd className="text-sm font-medium text-[var(--sea-ink)]">
+                  {rental.type === 'walk-in' ? 'Walk-in' : 'Advance booking'}
+                </dd>
+              </div>
+              <div className="summary-row">
+                <dt className="text-sm text-[var(--sea-ink-soft)]">Dates</dt>
+                <dd className="text-sm font-medium text-[var(--sea-ink)]">
+                  {formatDate(rental.startDate)} → {formatDate(rental.endDate)}
+                </dd>
+              </div>
+              <div className="summary-row">
+                <dt className="text-sm text-[var(--sea-ink-soft)]">Duration</dt>
+                <dd className="text-sm font-medium text-[var(--sea-ink)]">
+                  {rentalDays} day{rentalDays !== 1 ? 's' : ''}
+                </dd>
+              </div>
+              {(rental.status === 'active' || rental.status === 'closed') && (
+                <div className="summary-row">
+                  <dt className="text-sm text-[var(--sea-ink-soft)]">Mileage</dt>
+                  <dd className="text-sm font-medium text-[var(--sea-ink)]">
+                    {rental.startMileage != null
+                      ? `${rental.startMileage.toLocaleString()} km`
+                      : '—'}
+                    {' → '}
+                    {rental.status === 'closed' && rental.endMileage != null
+                      ? `${rental.endMileage.toLocaleString()} km`
+                      : 'out'}
+                  </dd>
+                </div>
+              )}
+            </dl>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription className="island-kicker">Payment</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <dl className="flex flex-col gap-2">
+              <div className="summary-row">
+                <dt className="text-sm text-[var(--sea-ink-soft)]">Total</dt>
+                <dd className="text-sm font-semibold text-[var(--sea-ink)]">
+                  {formatMYR(rental.totalAmountSen)}
+                </dd>
+              </div>
+              <div className="summary-row">
+                <dt className="text-sm text-[var(--sea-ink-soft)]">Paid</dt>
+                <dd className="text-sm font-medium text-[var(--sea-ink)]">
+                  {formatMYR(rental.paidAmountSen)}
+                </dd>
+              </div>
+              <div className="summary-row">
+                <dt className="text-sm text-[var(--sea-ink-soft)]">Balance</dt>
+                <dd
+                  className={`text-sm font-medium ${balanceSen > 0 ? 'text-amber-700' : 'text-[var(--sea-ink)]'}`}
+                >
+                  {formatMYR(balanceSen)}
+                </dd>
+              </div>
+              <div className="summary-row">
+                <dt className="text-sm text-[var(--sea-ink-soft)]">Status</dt>
+                <dd>
+                  <PaymentBadge status={rental.paymentStatus} />
+                </dd>
+              </div>
+            </dl>
+            {(rental.status === 'active' || rental.status === 'closed') && (
+              <div className="mt-3 flex flex-wrap gap-2 border-t border-[var(--line)] pt-3">
                 <a
-                  href={`/api/documents/invoice/${rental.id}`}
+                  href={`/api/documents/agreement/${rental.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="button-secondary text-sm"
                 >
-                  View invoice
+                  Agreement
                 </a>
                 <a
-                  href={`/api/documents/invoice/${rental.id}?download=1`}
+                  href={`/api/documents/agreement/${rental.id}?download=1`}
                   className="button-secondary text-sm"
                 >
-                  ↓ Download
+                  Download
                 </a>
+                {rental.status === 'closed' ? (
+                  <>
+                    <a
+                      href={`/api/documents/invoice/${rental.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="button-secondary text-sm"
+                    >
+                      Invoice
+                    </a>
+                    <a
+                      href={`/api/documents/invoice/${rental.id}?download=1`}
+                      className="button-secondary text-sm"
+                    >
+                      Download
+                    </a>
+                  </>
+                ) : null}
               </div>
             )}
-          </div>
-        </section>
-      )}
-
-      {/* Cancelled notice */}
-      {rental.status === 'cancelled' && (
-        <section className="workspace-panel island-shell mb-4 p-4">
-          <p className="text-sm text-[var(--sea-ink-soft)]">
-            This rental was cancelled. No charges apply.
-          </p>
-        </section>
-      )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* ── Confirm Handover Sheet ── */}
       <Sheet open={handoverOpen} onOpenChange={(open) => { if (!open) { setHandoverOpen(false); setHandoverError(null) } }}>
@@ -579,54 +684,55 @@ export default function RentalDetail({
         </SheetContent>
       </Sheet>
 
-      {/* ── Confirm cancel overlay ── */}
-      {confirmCancelOpen && (
-        <div className="confirm-overlay" role="dialog" aria-modal="true">
-          <div className="confirm-dialog island-shell">
-            <p className="island-kicker mb-2">Cancel booking</p>
-            <h3 className="mb-2 text-lg font-semibold text-[var(--sea-ink)]">
-              Cancel this booking?
-            </h3>
-            <p className="mb-5 text-sm leading-6 text-[var(--sea-ink-soft)]">
-              The booking for <strong>{rental.carPlateNumber}</strong> will be cancelled and the car released back to available.
-            </p>
-            {cancelError && <p className="form-error mb-4">{cancelError}</p>}
-            <div className="flex gap-3">
-              <button type="button" className="button-danger" onClick={handleCancelConfirm} disabled={isCancelling}>
-                {isCancelling ? 'Cancelling…' : 'Cancel booking'}
-              </button>
-              <button type="button" className="button-secondary" onClick={() => { setConfirmCancelOpen(false); setCancelError(null) }}>
-                Keep
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ── Confirm cancel ── */}
+      <ConfirmActionDialog
+        open={confirmCancelOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setConfirmCancelOpen(false)
+            setCancelError(null)
+          }
+        }}
+        title="Cancel this booking?"
+        description={
+          <>
+            The booking for <strong>{rental.carPlateNumber}</strong> will be cancelled and the car released back to available.
+            {cancelError ? (
+              <span className="mt-2 block text-[var(--error)]">{cancelError}</span>
+            ) : null}
+          </>
+        }
+        confirmLabel="Cancel booking"
+        cancelLabel="Keep"
+        variant="destructive"
+        confirming={isCancelling}
+        onConfirm={handleCancelConfirm}
+      />
 
-      {/* ── Confirm delete overlay ── */}
-      {confirmDeleteOpen && (
-        <div className="confirm-overlay" role="dialog" aria-modal="true">
-          <div className="confirm-dialog island-shell">
-            <p className="island-kicker mb-2">Delete record</p>
-            <h3 className="mb-2 text-lg font-semibold text-[var(--sea-ink)]">
-              Delete this rental?
-            </h3>
-            <p className="mb-5 text-sm leading-6 text-[var(--sea-ink-soft)]">
-              This will permanently remove the rental record for{' '}
-              <strong>{rental.carPlateNumber}</strong>. This cannot be undone.
-            </p>
-            {deleteError && <p className="form-error mb-4">{deleteError}</p>}
-            <div className="flex gap-3">
-              <button type="button" className="button-danger" onClick={handleDeleteConfirm} disabled={isDeleting}>
-                {isDeleting ? 'Deleting…' : 'Delete'}
-              </button>
-              <button type="button" className="button-secondary" onClick={() => { setConfirmDeleteOpen(false); setDeleteError(null) }}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ── Confirm delete ── */}
+      <ConfirmActionDialog
+        open={confirmDeleteOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setConfirmDeleteOpen(false)
+            setDeleteError(null)
+          }
+        }}
+        title="Delete this rental?"
+        description={
+          <>
+            This will permanently remove the rental record for{' '}
+            <strong>{rental.carPlateNumber}</strong>. This cannot be undone.
+            {deleteError ? (
+              <span className="mt-2 block text-[var(--error)]">{deleteError}</span>
+            ) : null}
+          </>
+        }
+        confirmLabel="Delete"
+        variant="destructive"
+        confirming={isDeleting}
+        onConfirm={handleDeleteConfirm}
+      />
     </AdminSidebarShell>
   )
 }

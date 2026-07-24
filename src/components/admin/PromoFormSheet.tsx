@@ -8,6 +8,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '#/components/ui/sheet'
+import { Button } from '#/components/ui/button'
 import { LoadingSpinner } from '#/components/ui/LoadingSpinner'
 import { createPromo, updatePromo } from '#/lib/promo-functions'
 import type { AdminPromoListRow } from '#/lib/promo-functions'
@@ -43,7 +44,6 @@ export function PromoFormSheet({ open, onClose, initial, onSaved }: PromoFormShe
     initial?.endsAt ? new Date(initial.endsAt).toISOString().slice(0, 16) : '',
   )
   const [isActive, setIsActive] = useState(initial?.isActive ?? true)
-  const [stackableWithAffiliate, setStackableWithAffiliate] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -95,7 +95,7 @@ export function PromoFormSheet({ open, onClose, initial, onSaved }: PromoFormShe
         startsAt: startsAt ? new Date(startsAt).toISOString() : null,
         endsAt: endsAt ? new Date(endsAt).toISOString() : null,
         isActive,
-        stackableWithAffiliate,
+        stackableWithAffiliate: false,
       }
       if (isEdit && initial) {
         await updatePromo({ data: { id: initial.id, patch: payload } })
@@ -252,27 +252,19 @@ export function PromoFormSheet({ open, onClose, initial, onSaved }: PromoFormShe
               />
               Active
             </label>
-            <label className="inline-flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={stackableWithAffiliate}
-                onChange={(e) => setStackableWithAffiliate(e.target.checked)}
-              />
-              Stackable with affiliate commissions
-            </label>
           </div>
 
           {error && <p className="form-error">{error}</p>}
 
           <SheetFooter className="-mx-4">
             <div className="flex items-center justify-end gap-2 px-4">
-              <button type="button" className="button-secondary" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
-              </button>
-              <button type="submit" className="button-primary inline-flex items-center gap-1.5" disabled={submitting}>
+              </Button>
+              <Button type="submit" disabled={submitting}>
                 {submitting && <LoadingSpinner size={12} />}
                 {isEdit ? 'Save changes' : 'Create promo'}
-              </button>
+              </Button>
             </div>
           </SheetFooter>
         </form>

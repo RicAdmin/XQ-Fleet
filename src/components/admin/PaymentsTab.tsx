@@ -1,11 +1,18 @@
-import { useEffect, useState } from 'react'
-
-import { Search } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { StatusBadge } from '#/components/ui/StatusBadge'
+import { AdminListFilterBar } from '#/components/ui/AdminListFilterBar'
+import { AdminTablePagination } from '#/components/ui/AdminTablePagination'
 import { CsvDownloadButton } from '#/components/ui/CsvDownloadButton'
+import { type Column, DataTable } from '#/components/ui/DataTable'
+import { DateRangeFilter, DateRangeQuickPresets } from '#/components/ui/DateRangeFilter'
 import { ErrorPanel } from '#/components/ui/ErrorPanel'
+import { StatusFilterSelect } from '#/components/ui/StatusFilterSelect'
 import { TableSkeleton } from '#/components/ui/TableSkeleton'
+import {
+  CAR_CATEGORY_FILTER_OPTIONS,
+  type CarCategoryFilter,
+} from '#/lib/car-category-options'
 import type {
   AdminPaymentRow,
   AdminPaymentsInput,
@@ -29,9 +36,21 @@ function formatDateTime(d: Date | null): string {
 }
 
 const PAGE_SIZE = 25
+const SEARCH_DEBOUNCE_MS = 300
+
+type StatusFilter = NonNullable<AdminPaymentsInput['status']> | 'all'
+
+const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
+  { value: 'all', label: 'All statuses' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'successful', label: 'Successful' },
+  { value: 'failed', label: 'Failed' },
+  { value: 'voided', label: 'Voided' },
+]
 
 type Filters = {
   status: AdminPaymentsInput['status']
+  category?: AdminPaymentsInput['category']
   from?: string
   to?: string
   search?: string
@@ -61,6 +80,8 @@ export function PaymentsTab() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchInput, setSearchInput] = useState('')
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [categoryTab, setCategoryTab] = useState<CarCategoryFilter>('all')
 
   async function load(p = page, f = filters) {
     setLoading(true)
@@ -71,6 +92,7 @@ export function PaymentsTab() {
           page: p,
           pageSize: PAGE_SIZE,
           status: f.status,
+          category: f.category,
           from: f.from,
           to: f.to,
           search: f.search,
@@ -87,148 +109,194 @@ export function PaymentsTab() {
   useEffect(() => {
     void load(1, filters)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.status, filters.from, filters.to, filters.search])
+  }, [filters.status, filters.category, filters.from, filters.to, filters.search])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const next = searchInput.trim() || undefined
+      setFilters((prev) => {
+        if (prev.search === next) return prev
+        setPage(1)
+        return { ...prev, search: next }
+      })
+    }, SEARCH_DEBOUNCE_MS)
+    return () => clearTimeout(timer)
+  }, [searchInput])
 
   function applyFilters(next: Filters) {
     setPage(1)
     setFilters(next)
   }
 
-  function submitSearch(e: React.FormEvent) {
-    e.preventDefault()
-    applyFilters({ ...filters, search: searchInput.trim() || undefined })
+  function clearFilters() {
+    setSearchInput('')
+    setCategoryTab('all')
+    applyFilters({ status: undefined, category: undefined })
   }
 
+  const activeFilterCount =
+    (filters.status ? 1 : 0) + (filters.category ? 1 : 0)
+  const hasActiveFilters = Boolean(
+    filters.status ||
+      filters.category ||
+      filters.from ||
+      filters.to ||
+      filters.search ||
+      searchInput.trim(),
+  )
+
+  const statusTab: StatusFilter = filters.status ?? 'all'
   const totalPages = result ? Math.max(1, Math.ceil(result.total / result.pageSize)) : 1
 
-  return (
-    <div className="admin-tab-panel">
-      <div className="admin-filter-bar">
-        <select
-          className="field-input"
-          value={filters.status ?? ''}
-          onChange={(e) =>
-            applyFilters({
-              ...filters,
-              status: (e.target.value || undefined) as Filters['status'],
-            })
-          }
-        >
-          <option value="">All statuses</option>
-          <option value="pending">Pending</option>
-          <option value="successful">Successful</option>
-          <option value="failed">Failed</option>
-          <option value="voided">Voided</option>
-        </select>
-        <input
-          type="date"
-          className="field-input"
-          value={filters.from ?? ''}
-          onChange={(e) => applyFilters({ ...filters, from: e.target.value || undefined })}
-        />
-        <input
-          type="date"
-          className="field-input"
-          value={filters.to ?? ''}
-          onChange={(e) => applyFilters({ ...filters, to: e.target.value || undefined })}
-        />
-        <form onSubmit={submitSearch} className="flex items-center gap-2">
-          <div className="relative">
-            <Search
-              size={14}
-              className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-[var(--sea-ink-soft)]"
-            />
-            <input
-              type="search"
-              className="field-input pl-7"
-              placeholder="External ref, car, customer…"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-            />
+  const columns = useMemo<Column<AdminPaymentRow>[]>(
+    () => [
+      {
+        key: 'createdAt',
+        header: 'Created',
+        cellClassName: 'text-xs',
+        render: (r) => formatDateTime(r.createdAt),
+      },
+      {
+        key: 'status',
+        header: 'Status',
+        render: (r) => <StatusBadge status={r.status} size="sm" />,
+      },
+      {
+        key: 'method',
+        header: 'Method',
+        cellClassName: 'text-sm',
+        render: (r) => r.paymentMethod ?? r.provider,
+      },
+      {
+        key: 'reference',
+        header: 'Reference',
+        cellClassName: 'max-w-[14rem] truncate font-mono text-xs',
+        render: (r) => r.externalRef ?? '—',
+      },
+      {
+        key: 'rental',
+        header: 'Rental',
+        cellClassName: 'whitespace-normal',
+        render: (r) => (
+          <div>
+            <div className="font-mono">{r.rentalCarPlateNumber ?? '—'}</div>
+            <div className="text-xs text-[var(--sea-ink-soft)]">
+              {r.rentalCustomerFullName ?? '—'}
+            </div>
           </div>
-          <button type="submit" className="button-secondary">
-            Search
-          </button>
-        </form>
-        <div className="filter-spacer" />
+        ),
+      },
+      {
+        key: 'amount',
+        header: 'Amount',
+        headerClassName: 'text-right',
+        cellClassName: 'text-right font-semibold tabular-nums',
+        render: (r) => formatMYR(r.amountSen, r.currency),
+      },
+    ],
+    [],
+  )
+
+  const toolbar = (
+    <AdminListFilterBar
+      searchValue={searchInput}
+      onSearchChange={setSearchInput}
+      searchPlaceholder="External ref, car, customer…"
+      searchAriaLabel="Search payments"
+      filtersOpen={filtersOpen}
+      onFiltersOpenChange={setFiltersOpen}
+      activeFilterCount={activeFilterCount}
+      hasActiveFilters={hasActiveFilters}
+      onClearFilters={clearFilters}
+      inlineControls={
+        <DateRangeQuickPresets
+          from={filters.from}
+          to={filters.to}
+          onRangeChange={(from, to) => applyFilters({ ...filters, from, to })}
+        />
+      }
+      actions={
         <CsvDownloadButton
           filename={csvFilename('payments-page')}
           rows={result ? toRows(result.rows) : []}
           label="CSV (page)"
         />
-      </div>
+      }
+    >
+      <StatusFilterSelect
+        aria-label="Filter payments by status"
+        value={statusTab}
+        options={STATUS_OPTIONS}
+        onValueChange={(value) =>
+          applyFilters({
+            ...filters,
+            status: value === 'all' ? undefined : value,
+          })
+        }
+      />
+      <StatusFilterSelect
+        aria-label="Filter payments by vehicle type"
+        value={categoryTab}
+        options={CAR_CATEGORY_FILTER_OPTIONS}
+        onValueChange={(value) => {
+          setCategoryTab(value)
+          applyFilters({
+            ...filters,
+            category: value === 'all' ? undefined : value,
+          })
+        }}
+      />
+      <DateRangeFilter
+        from={filters.from}
+        to={filters.to}
+        onFromChange={(from) => applyFilters({ ...filters, from })}
+        onToChange={(to) => applyFilters({ ...filters, to })}
+        onRangeChange={(from, to) => applyFilters({ ...filters, from, to })}
+      />
+    </AdminListFilterBar>
+  )
 
-      {error && <ErrorPanel title="Failed to load payments" message={error} onRetry={() => load()} />}
-      {loading && !result && <TableSkeleton rows={8} columns={6} />}
+  return (
+    <div className="flex flex-col gap-3">
+      {error && (
+        <ErrorPanel
+          title="Failed to load payments"
+          message={error}
+          onRetry={() => load()}
+        />
+      )}
+      {loading && !result && (
+        <article className="workspace-panel island-shell overflow-hidden p-0">
+          {toolbar}
+          <TableSkeleton rows={8} columns={6} />
+        </article>
+      )}
 
       {result && (
-        <div className="ui-table-wrap">
-          <table className="ui-table">
-            <thead>
-              <tr>
-                <th>Created</th>
-                <th>Status</th>
-                <th>Method</th>
-                <th>Reference</th>
-                <th>Rental</th>
-                <th className="text-right">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {result.rows.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="text-center text-sm text-[var(--sea-ink-soft)] py-6">
-                    No payments match these filters.
-                  </td>
-                </tr>
-              ) : (
-                result.rows.map((r) => (
-                  <tr key={r.id}>
-                    <td className="text-xs">{formatDateTime(r.createdAt)}</td>
-                    <td><StatusBadge status={r.status} size="sm" /></td>
-                    <td className="text-sm">{r.paymentMethod ?? r.provider}</td>
-                    <td className="text-xs font-mono break-all">{r.externalRef ?? '—'}</td>
-                    <td className="text-sm">
-                      <div className="font-mono">{r.rentalCarPlateNumber ?? '—'}</div>
-                      <div className="text-xs text-[var(--sea-ink-soft)]">
-                        {r.rentalCustomerFullName ?? '—'}
-                      </div>
-                    </td>
-                    <td className="text-right font-semibold">{formatMYR(r.amountSen, r.currency)}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-          <div className="admin-pagination">
-            <span>
-              Page {result.page} of {totalPages} · {result.total.toLocaleString()} total
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                className="button-secondary"
-                disabled={result.page <= 1 || loading}
-                onClick={() => {
-                  setPage(result.page - 1)
-                  void load(result.page - 1)
-                }}
-              >
-                Previous
-              </button>
-              <button
-                type="button"
-                className="button-secondary"
-                disabled={result.page >= totalPages || loading}
-                onClick={() => {
-                  setPage(result.page + 1)
-                  void load(result.page + 1)
-                }}
-              >
-                Next
-              </button>
-            </div>
-          </div>
+        <div className="space-y-3">
+          <article className="workspace-panel island-shell overflow-hidden p-0">
+            {toolbar}
+            <DataTable
+              columns={columns}
+              data={[...result.rows]}
+              getKey={(r) => r.id}
+              emptyState={
+                <div className="text-center text-sm text-muted-foreground">
+                  No payments match these filters.
+                </div>
+              }
+            />
+          </article>
+          <AdminTablePagination
+            page={result.page}
+            totalPages={totalPages}
+            total={result.total}
+            loading={loading}
+            onPageChange={(p) => {
+              setPage(p)
+              void load(p)
+            }}
+          />
         </div>
       )}
     </div>

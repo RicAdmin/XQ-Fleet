@@ -4,7 +4,11 @@ import { Link, createFileRoute, redirect } from '@tanstack/react-router'
 import { AlertTriangle, Car, ChevronRight, Plus, Trash2, Wrench } from 'lucide-react'
 
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
+import { type Column, DataTable } from '#/components/ui/DataTable'
+import { ConfirmActionDialog } from '#/components/ui/ConfirmActionDialog'
 import { PageHeader } from '#/components/ui/PageHeader'
+import { RowActionsMenu } from '#/components/ui/RowActionsMenu'
+import { StatusFilterTabs } from '#/components/ui/StatusFilterTabs'
 import { Button } from '#/components/ui/button'
 import {
   Combobox,
@@ -234,6 +238,89 @@ function AdminMaintenancePage() {
 
   const closeSheetEvent = closeSheetId ? events.find((e) => e.id === closeSheetId) : null
 
+  // ── Table columns ──
+
+  const eventColumns: Column<MaintenanceEventRow>[] = [
+    {
+      key: 'openedAt',
+      header: 'Date',
+      cellClassName: 'text-xs tabular-nums text-[var(--sea-ink-soft)]',
+      render: (ev) => formatDate(ev.openedAt),
+    },
+    {
+      key: 'carPlateNumber',
+      header: 'Vehicle',
+      render: (ev) => (
+        <Link
+          to="/admin/cars/$carId"
+          params={{ carId: ev.carId }}
+          className="flex items-center gap-1 font-mono text-xs font-semibold text-[var(--lagoon-deep)] hover:underline"
+        >
+          <Car size={11} />
+          {ev.carPlateNumber ?? '—'}
+        </Link>
+      ),
+    },
+    {
+      key: 'type',
+      header: 'Type',
+      cellClassName: 'text-xs capitalize',
+      render: (ev) => ev.type,
+    },
+    {
+      key: 'description',
+      header: 'Description',
+      cellClassName: 'text-sm',
+      render: (ev) => ev.description,
+    },
+    {
+      key: 'costSen',
+      header: 'Cost',
+      cellClassName: 'text-xs tabular-nums',
+      render: (ev) => (ev.costSen > 0 ? formatMYR(ev.costSen) : '—'),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (ev) => (
+        <span className={`maint-status-badge maint-status-badge--${ev.status}`}>
+          {ev.status === 'open' ? 'Open' : 'Done'}
+        </span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      headerClassName: 'text-right',
+      cellClassName: 'text-right whitespace-nowrap',
+      render: (ev) => (
+        <RowActionsMenu
+          label={`Actions for ${ev.carPlateNumber ?? 'event'}`}
+          actions={[
+            ...(ev.status === 'open'
+              ? [{ label: 'Close event', onSelect: () => openCloseSheet(ev) }]
+              : []),
+            ...(isOwner
+              ? [
+                  {
+                    label: 'Delete',
+                    icon: <Trash2 />,
+                    variant: 'destructive' as const,
+                    separatorBefore: ev.status === 'open',
+                    disabled: deletingId === ev.id,
+                    onSelect: () => {
+                      setDeleteError(null)
+                      setConfirmDelete(ev)
+                    },
+                  },
+                ]
+              : []),
+          ]}
+        />
+      ),
+    },
+  ]
+
   // ─── Render ──
 
   return (
@@ -295,84 +382,31 @@ function AdminMaintenancePage() {
       )}
 
       {/* ── Event log ── */}
-      <section className="workspace-panel island-shell p-4">
-        <div className="mb-4 flex items-center gap-3">
-          <p className="island-kicker">Event log</p>
-          <div className="ml-auto flex gap-1">
-            {(['open', 'completed', 'all'] as EventFilter[]).map((f) => (
-              <button
-                key={f}
-                type="button"
-                className={`status-tab${filter === f ? ' is-active' : ''}`}
-                onClick={() => setFilter(f)}
-              >
-                {f === 'open' ? 'Open' : f === 'completed' ? 'Completed' : 'All'}
-              </button>
-            ))}
-          </div>
-        </div>
+      <StatusFilterTabs
+        className="mb-4"
+        aria-label="Filter maintenance events by status"
+        value={filter}
+        onValueChange={setFilter}
+        tabs={[
+          { value: 'open', label: 'Open', count: openEvents.length },
+          { value: 'completed', label: 'Completed', count: events.length - openEvents.length },
+          { value: 'all', label: 'All', count: events.length },
+        ]}
+      />
 
-        {filteredEvents.length === 0 ? (
-          <div className="hub-empty-state">
-            <Wrench size={22} />
-            <p>No {filter !== 'all' ? filter : ''} maintenance events.</p>
-          </div>
-        ) : (
-          <div className="maint-event-table">
-            <div className="maint-event-table-header">
-              <span>Date</span>
-              <span>Vehicle</span>
-              <span>Type</span>
-              <span>Description</span>
-              <span>Cost</span>
-              <span>Status</span>
-              <span className="text-right">Actions</span>
+      <article className="workspace-panel island-shell overflow-x-auto p-0">
+        <DataTable
+          columns={eventColumns}
+          data={filteredEvents}
+          getKey={(ev) => ev.id}
+          emptyState={
+            <div className="hub-empty-state">
+              <Wrench size={22} />
+              <p>No {filter !== 'all' ? filter : ''} maintenance events.</p>
             </div>
-            {filteredEvents.map((ev) => (
-              <div key={ev.id} className="maint-event-row">
-                <span className="text-xs tabular-nums text-[var(--sea-ink-soft)]">{formatDate(ev.openedAt)}</span>
-                <Link
-                  to="/admin/cars/$carId"
-                  params={{ carId: ev.carId }}
-                  className="flex items-center gap-1 font-mono text-xs font-semibold text-[var(--lagoon-deep)] hover:underline"
-                >
-                  <Car size={11} />
-                  {ev.carPlateNumber ?? '—'}
-                </Link>
-                <span className="text-xs capitalize">{ev.type}</span>
-                <span className="text-sm">{ev.description}</span>
-                <span className="text-xs tabular-nums">{ev.costSen > 0 ? formatMYR(ev.costSen) : '—'}</span>
-                <span className={`maint-status-badge maint-status-badge--${ev.status}`}>
-                  {ev.status === 'open' ? 'Open' : 'Done'}
-                </span>
-                <div className="flex items-center justify-end gap-1.5">
-                  {ev.status === 'open' && (
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-1 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-2.5 py-1 text-xs font-semibold text-[var(--sea-ink)] shadow-[var(--shadow-xs)] transition-transform hover:-translate-y-px"
-                      onClick={() => openCloseSheet(ev)}
-                    >
-                      Close
-                    </button>
-                  )}
-                  {isOwner && (
-                    <button
-                      type="button"
-                      className="inline-flex size-6 items-center justify-center rounded-full text-[var(--sea-ink-soft)] transition-colors hover:bg-[var(--error-wash)] hover:text-[var(--error)] disabled:cursor-not-allowed disabled:opacity-50"
-                      onClick={() => { setDeleteError(null); setConfirmDelete(ev) }}
-                      disabled={deletingId === ev.id}
-                      title="Delete event"
-                      aria-label={`Delete maintenance event for ${ev.carPlateNumber ?? 'vehicle'}`}
-                    >
-                      <Trash2 size={12} />
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+          }
+        />
+      </article>
 
       {/* ── Log new event sheet ── */}
       <Sheet open={logOpen} onOpenChange={setLogOpen}>
@@ -619,37 +653,35 @@ function AdminMaintenancePage() {
       </Sheet>
 
       {/* ── Delete confirm dialog ── */}
-      {confirmDelete && (
-        <div className="confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="delete-confirm-title">
-          <div className="confirm-dialog island-shell">
-            <p className="island-kicker mb-1">Delete event</p>
-            <h3 id="delete-confirm-title" className="mb-3 text-lg font-semibold text-[var(--sea-ink)]">
-              Delete this maintenance record?
-            </h3>
-            <p className="mb-1 text-sm text-[var(--sea-ink-soft)]">
+      <ConfirmActionDialog
+        open={confirmDelete != null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setConfirmDelete(null)
+            setDeleteError(null)
+          }
+        }}
+        title="Delete this maintenance record?"
+        description={
+          confirmDelete ? (
+            <>
               <span className="font-medium text-[var(--sea-ink)]">{confirmDelete.carPlateNumber ?? 'Vehicle'}</span>
               {' · '}{confirmDelete.type}{' · '}{formatDate(confirmDelete.openedAt)}
-            </p>
-            <p className="mb-5 text-sm leading-6 text-[var(--sea-ink-soft)]">
+              <br />
               This action cannot be undone.
               {confirmDelete.status === 'open' && ' If no other open events remain, the vehicle will be set back to Available.'}
-            </p>
-            {deleteError && <p className="form-error mb-4">{deleteError}</p>}
-            <div className="flex gap-3">
-              <Button
-                variant="destructive"
-                onClick={() => handleDelete(confirmDelete)}
-                disabled={deletingId === confirmDelete.id}
-              >
-                {deletingId === confirmDelete.id ? 'Deleting…' : 'Delete'}
-              </Button>
-              <Button variant="outline" onClick={() => setConfirmDelete(null)}>
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+              {deleteError ? (
+                <span className="mt-2 block text-[var(--error)]">{deleteError}</span>
+              ) : null}
+            </>
+          ) : null
+        }
+        confirmLabel="Delete"
+        confirming={confirmDelete != null && deletingId === confirmDelete.id}
+        onConfirm={() => {
+          if (confirmDelete) return handleDelete(confirmDelete)
+        }}
+      />
     </AdminSidebarShell>
   )
 }

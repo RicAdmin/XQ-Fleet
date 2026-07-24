@@ -2,9 +2,11 @@ import { useState } from 'react'
 
 import { Download } from 'lucide-react'
 
+import { Button } from '#/components/ui/button'
 import { LoadingSpinner } from '#/components/ui/LoadingSpinner'
 import type { CsvRow } from '#/lib/csv-export'
 import { downloadCsv } from '#/lib/csv-export'
+import { cn } from '#/lib/utils'
 
 type CsvDownloadButtonProps = {
   filename: string
@@ -49,17 +51,17 @@ export function CsvDownloadButton({
 
   return (
     <div className="inline-flex flex-col items-end gap-1">
-      <button
+      <Button
         type="button"
-        className={['button-secondary inline-flex items-center gap-1.5', className]
-          .filter(Boolean)
-          .join(' ')}
+        variant="outline"
+        size="sm"
+        className={cn('h-8', className)}
         onClick={handleClick}
         disabled={disabled || loading}
       >
-        {loading ? <LoadingSpinner size={13} /> : <Download size={13} />}
+        {loading ? <LoadingSpinner size={13} /> : <Download data-icon="inline-start" />}
         {label}
-      </button>
+      </Button>
       {error && <p className="csv-error">{error}</p>}
     </div>
   )

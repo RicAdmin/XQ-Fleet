@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import { createFileRoute, redirect } from '@tanstack/react-router'
+import { CalendarDays, Car, CreditCard } from 'lucide-react'
 
 import { AdminKpiGrid } from '#/components/admin/AdminKpiGrid'
 import { BookingsTab } from '#/components/admin/BookingsTab'
@@ -9,6 +10,7 @@ import { PaymentsTab } from '#/components/admin/PaymentsTab'
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
 import { ErrorPanel } from '#/components/ui/ErrorPanel'
 import { KpiSkeleton } from '#/components/ui/KpiSkeleton'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '#/components/ui/tabs'
 import type { AdminDashboardKpis } from '#/lib/admin-dashboard-functions'
 import { getAdminDashboardKpis } from '#/lib/admin-dashboard-functions'
 
@@ -39,11 +41,6 @@ export const Route = createFileRoute('/admin/')({
 })
 
 type TabKey = 'bookings' | 'payments' | 'cars'
-const TABS: { key: TabKey; label: string }[] = [
-  { key: 'bookings', label: 'Bookings' },
-  { key: 'payments', label: 'Payments' },
-  { key: 'cars', label: 'Cars' },
-]
 
 function AdminIndexPage() {
   const { session, kpis } = Route.useRouteContext() as unknown as {
@@ -56,22 +53,35 @@ function AdminIndexPage() {
     <AdminSidebarShell user={session.user} pageTitle="Dashboard">
       <AdminKpiGrid kpis={kpis} />
 
-      <div className="status-tabs mb-3">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            type="button"
-            className={`status-tab${tab === t.key ? ' is-active' : ''}`}
-            onClick={() => setTab(t.key)}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {tab === 'bookings' && <BookingsTab />}
-      {tab === 'payments' && <PaymentsTab />}
-      {tab === 'cars' && <CarsTab />}
+      <Tabs
+        value={tab}
+        onValueChange={(value) => setTab(value as TabKey)}
+        className="gap-3"
+      >
+        <TabsList variant="pill">
+          <TabsTrigger value="bookings">
+            <CalendarDays size={17} />
+            Bookings
+          </TabsTrigger>
+          <TabsTrigger value="payments">
+            <CreditCard size={17} />
+            Payments
+          </TabsTrigger>
+          <TabsTrigger value="cars">
+            <Car size={17} />
+            Cars
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="bookings" className="mt-0">
+          <BookingsTab />
+        </TabsContent>
+        <TabsContent value="payments" className="mt-0">
+          <PaymentsTab />
+        </TabsContent>
+        <TabsContent value="cars" className="mt-0">
+          <CarsTab />
+        </TabsContent>
+      </Tabs>
     </AdminSidebarShell>
   )
 }

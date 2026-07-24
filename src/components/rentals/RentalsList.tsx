@@ -1,13 +1,18 @@
-import { useState, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
-import { Link } from '@tanstack/react-router'
-import { Eye, Plus, Trash2, X } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
+import { KeyRound, Plus, Trash2, X } from 'lucide-react'
 
 import { DataTable, useSortState, type Column } from '#/components/ui/DataTable'
+import { AdminListFilterBar } from '#/components/ui/AdminListFilterBar'
+import { ConfirmActionDialog } from '#/components/ui/ConfirmActionDialog'
+import { ErrorPanel } from '#/components/ui/ErrorPanel'
 import { PageHeader } from '#/components/ui/PageHeader'
+import { RowActionsMenu, type RowActionItem } from '#/components/ui/RowActionsMenu'
 import { StatusBadge } from '#/components/ui/StatusBadge'
+import { StatusFilterSelect } from '#/components/ui/StatusFilterSelect'
+import { TableSkeleton } from '#/components/ui/TableSkeleton'
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
-import { UI_BTN_XS, UI_BTN_XS_DANGER } from '#/lib/admin-ui-classes'
 import {
   Combobox,
   ComboboxContent,
@@ -25,9 +30,16 @@ import {
   SheetTitle,
 } from '#/components/ui/sheet'
 import type { CustomerRow } from '#/components/customers/CustomersList'
-import type { AvailableCarOption, RentalListRow } from '#/lib/rental-functions'
-import { cancelRental, createRental, deleteRental } from '#/lib/rental-functions'
+import type { AvailableCarOption, RentalListResult, RentalListRow } from '#/lib/rental-functions'
+import { cancelRental, confirmHandover, createRental, deleteRental, listRentals } from '#/lib/rental-functions'
+import {
+  CAR_CATEGORY_FILTER_OPTIONS,
+  type CarCategoryFilter,
+} from '#/lib/car-category-options'
 import type { RentalStatus, RentalType } from '#/db/schema'
+
+const PAGE_SIZE = 25
+const SEARCH_DEBOUNCE_MS = 300
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -58,8 +70,8 @@ function today(): string {
 
 // ─── Status tabs ──────────────────────────────────────────────────────────────
 
-const RENTAL_STATUS_TABS: { value: RentalStatus | 'all'; label: string }[] = [
-  { value: 'all', label: 'All' },
+const RENTAL_STATUS_OPTIONS: { value: RentalStatus | 'all'; label: string }[] = [
+  { value: 'all', label: 'All statuses' },
   { value: 'pending', label: 'Pending' },
   { value: 'active', label: 'Active' },
   { value: 'closed', label: 'Closed' },
@@ -68,16 +80,14 @@ const RENTAL_STATUS_TABS: { value: RentalStatus | 'all'; label: string }[] = [
 
 // ─── Sort ─────────────────────────────────────────────────────────────────────
 
-type SortKey = 'startDate' | 'endDate' | 'totalAmountSen' | 'status' | 'carPlateNumber' | 'customerFullName'
-
-function sortRentals(rows: RentalListRow[], key: SortKey, dir: 'asc' | 'desc'): RentalListRow[] {
-  return [...rows].sort((a, b) => {
-    const av = key === 'startDate' || key === 'endDate' ? a[key].getTime() : (a[key] ?? '')
-    const bv = key === 'startDate' || key === 'endDate' ? b[key].getTime() : (b[key] ?? '')
-    const cmp = typeof av === 'number' && typeof bv === 'number' ? av - bv : String(av).localeCompare(String(bv))
-    return dir === 'asc' ? cmp : -cmp
-  })
-}
+type SortKey =
+  | 'startDate'
+  | 'endDate'
+  | 'totalAmountSen'
+  | 'status'
+  | 'carPlateNumber'
+  | 'customerFullName'
+  | 'createdAt'
 
 // ─── Sort ─────────────────────────────────────────────────────────────────────
 
@@ -108,7 +118,6 @@ function emptyForm(): RentalFormData {
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 type RentalsListProps = {
-  initialRentals: RentalListRow[]
   availableCars: AvailableCarOption[]
   allCustomers: CustomerRow[]
   session: { user: { name: string; email: string; role: string } }
@@ -119,15 +128,21 @@ type RentalsListProps = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function RentalsList({
-  initialRentals,
   availableCars,
   allCustomers,
   session,
   basePath,
   canDelete,
 }: RentalsListProps) {
-  const [rentalsList, setRentalsList] = useState<RentalListRow[]>(initialRentals)
+  const navigate = useNavigate()
+  const [result, setResult] = useState<RentalListResult | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
   const [activeTab, setActiveTab] = useState<RentalStatus | 'all'>('all')
+  const [categoryFilter, setCategoryFilter] = useState<CarCategoryFilter>('all')
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [searchInput, setSearchInput] = useState('')
   const [search, setSearch] = useState('')
   const { sortKey, sortDir, handleSort } = useSortState<SortKey>('startDate', 'desc')
 
@@ -147,26 +162,85 @@ export default function RentalsList({
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  // ── Derived data ──────────────────────────────────────────────────────────
+  // Confirm handover
+  const [handoverRental, setHandoverRental] = useState<RentalListRow | null>(null)
+  const [startMileage, setStartMileage] = useState('')
+  const [startCondition, setStartCondition] = useState('')
+  const [handoverError, setHandoverError] = useState<string | null>(null)
+  const [isSubmittingHandover, setIsSubmittingHandover] = useState(false)
 
-  const tabCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: rentalsList.length }
-    for (const r of rentalsList) counts[r.status] = (counts[r.status] ?? 0) + 1
-    return counts
-  }, [rentalsList])
+  async function load(p = page) {
+    setLoading(true)
+    setLoadError(null)
+    try {
+      const res = await listRentals({
+        data: {
+          page: p,
+          pageSize: PAGE_SIZE,
+          status: activeTab === 'all' ? undefined : activeTab,
+          category: categoryFilter === 'all' ? undefined : categoryFilter,
+          search: search || undefined,
+          sortKey,
+          sortDir,
+        },
+      })
+      setResult(res)
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : 'Failed to load rentals.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  const filteredSorted = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    const byTab = activeTab === 'all' ? rentalsList : rentalsList.filter((r) => r.status === activeTab)
-    const filtered = q
-      ? byTab.filter(
-          (r) =>
-            (r.customerFullName ?? '').toLowerCase().includes(q) ||
-            (r.carPlateNumber ?? '').toLowerCase().includes(q),
-        )
-      : byTab
-    return sortRentals(filtered, sortKey, sortDir)
-  }, [rentalsList, activeTab, search, sortKey, sortDir])
+  useEffect(() => {
+    setPage(1)
+    void load(1)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, categoryFilter, search, sortKey, sortDir])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const next = searchInput.trim()
+      setSearch((prev) => (prev === next ? prev : next))
+    }, SEARCH_DEBOUNCE_MS)
+    return () => clearTimeout(timer)
+  }, [searchInput])
+
+  const totalPages = result ? Math.max(1, Math.ceil(result.total / result.pageSize)) : 1
+  const tabCounts = result?.statusCounts ?? { all: 0 }
+  const activeFilterCount =
+    (activeTab !== 'all' ? 1 : 0) + (categoryFilter !== 'all' ? 1 : 0)
+  const hasActiveFilters =
+    activeTab !== 'all' ||
+    categoryFilter !== 'all' ||
+    searchInput.trim().length > 0 ||
+    search.length > 0
+
+  type SelectOption = { value: string; label: string }
+
+  const carItems = useMemo<SelectOption[]>(
+    () =>
+      availableCars.map((c) => ({
+        value: c.id,
+        label: `${c.plateNumber} · ${c.make} ${c.model}`,
+      })),
+    [availableCars],
+  )
+
+  const customerItems = useMemo<SelectOption[]>(
+    () =>
+      allCustomers.map((c) => ({
+        value: c.id,
+        label: c.icOrPassport
+          ? `${c.fullName ?? '—'} · ${c.icOrPassport}`
+          : (c.fullName ?? '—'),
+      })),
+    [allCustomers],
+  )
+
+  const selectedCarItem = carItems.find((i) => i.value === formData.carId) ?? null
+  const selectedCustomerItem =
+    customerItems.find((i) => i.value === formData.customerId) ?? null
 
   // ── Auto-calc total ───────────────────────────────────────────────────────
 
@@ -229,8 +303,9 @@ export default function RentalsList({
           depositAmountSen,
         },
       })
-      // Reload page to refresh list (simplest approach — avoids stale JOIN data)
-      window.location.reload()
+      closeForm()
+      setPage(1)
+      await load(1)
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Something went wrong.')
     } finally {
@@ -246,10 +321,8 @@ export default function RentalsList({
     setIsCancelling(true)
     try {
       await cancelRental({ data: { rentalId: confirmingCancel.id } })
-      setRentalsList((prev) =>
-        prev.map((r) => (r.id === confirmingCancel.id ? { ...r, status: 'cancelled' } : r)),
-      )
       setConfirmingCancel(null)
+      await load(page)
     } catch (err) {
       setCancelError(err instanceof Error ? err.message : 'Cancel failed.')
     } finally {
@@ -265,12 +338,43 @@ export default function RentalsList({
     setIsDeleting(true)
     try {
       await deleteRental({ data: { rentalId: confirmingDelete.id } })
-      setRentalsList((prev) => prev.filter((r) => r.id !== confirmingDelete.id))
       setConfirmingDelete(null)
+      await load(page)
     } catch (err) {
       setDeleteError(err instanceof Error ? err.message : 'Delete failed.')
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  // ── Handover handler ──────────────────────────────────────────────────────
+
+  function openHandover(r: RentalListRow) {
+    setHandoverRental(r)
+    setStartMileage('')
+    setStartCondition('')
+    setHandoverError(null)
+  }
+
+  async function handleHandoverSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!handoverRental) return
+    setHandoverError(null)
+    setIsSubmittingHandover(true)
+    try {
+      await confirmHandover({
+        data: {
+          rentalId: handoverRental.id,
+          startMileage: Number(startMileage),
+          startConditionNote: startCondition || undefined,
+        },
+      })
+      setHandoverRental(null)
+      await load(page)
+    } catch (err) {
+      setHandoverError(err instanceof Error ? err.message : 'Failed to confirm handover.')
+    } finally {
+      setIsSubmittingHandover(false)
     }
   }
 
@@ -283,10 +387,12 @@ export default function RentalsList({
       sortable: true,
       render: (r) => (
         <>
-          <Link to={`${basePath}/$rentalId` as never} params={{ rentalId: r.id } as never} className="plate-link">
+          <span className="font-mono font-semibold text-[var(--lagoon-deep)]">
             {r.carPlateNumber ?? '—'}
-          </Link>
-          <span className="ml-1.5 text-xs text-[var(--sea-ink-soft)]">{r.carMake} {r.carModel}</span>
+          </span>
+          <span className="ml-1.5 text-xs text-[var(--sea-ink-soft)]">
+            {r.carMake} {r.carModel}
+          </span>
         </>
       ),
     },
@@ -338,26 +444,49 @@ export default function RentalsList({
       header: 'Actions',
       headerClassName: 'text-right',
       cellClassName: 'text-right whitespace-nowrap',
-      render: (r) => (
-        <>
-          <Link to={`${basePath}/$rentalId` as never} params={{ rentalId: r.id } as never} className={`${UI_BTN_XS} mr-1.5`}>
-            <Eye size={11} />
-            View
-          </Link>
-          {r.status === 'pending' && (
-            <button type="button" className={`${UI_BTN_XS} mr-1.5`} onClick={() => { setConfirmingCancel(r); setCancelError(null) }}>
-              <X size={11} />
-              Cancel
-            </button>
-          )}
-          {canDelete && (r.status === 'closed' || r.status === 'cancelled') && (
-            <button type="button" className={UI_BTN_XS_DANGER} onClick={() => { setConfirmingDelete(r); setDeleteError(null) }}>
-              <Trash2 size={11} />
-              Delete
-            </button>
-          )}
-        </>
-      ),
+      render: (r) => {
+        const rowActions: RowActionItem[] = []
+        if (r.status === 'pending') {
+          rowActions.push({
+            label: 'Confirm handover',
+            icon: <KeyRound />,
+            onSelect: () => openHandover(r),
+          })
+          rowActions.push({
+            label: 'Cancel',
+            icon: <X />,
+            onSelect: () => {
+              setConfirmingCancel(r)
+              setCancelError(null)
+            },
+          })
+        }
+        if (canDelete && (r.status === 'closed' || r.status === 'cancelled')) {
+          rowActions.push({
+            label: 'Delete',
+            icon: <Trash2 />,
+            variant: 'destructive',
+            separatorBefore: rowActions.length > 0,
+            onSelect: () => {
+              setConfirmingDelete(r)
+              setDeleteError(null)
+            },
+          })
+        }
+        if (rowActions.length === 0) return null
+        return (
+          <div
+            className="flex items-center justify-end"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
+            <RowActionsMenu
+              label={`Actions for ${r.carPlateNumber ?? 'rental'}`}
+              actions={rowActions}
+            />
+          </div>
+        )
+      },
     },
   ]
 
@@ -368,7 +497,11 @@ export default function RentalsList({
       {/* Page header */}
       <PageHeader
         title="Rentals"
-        description={`${rentalsList.length} rental${rentalsList.length !== 1 ? 's' : ''} total`}
+        description={
+          result
+            ? `${result.total.toLocaleString()} rental${result.total !== 1 ? 's' : ''} total`
+            : 'Loading…'
+        }
         actions={
           <button type="button" className="button-primary flex items-center gap-2" onClick={openAdd}>
             <Plus size={15} />
@@ -377,59 +510,105 @@ export default function RentalsList({
         }
       />
 
-      {/* Status tabs */}
-      <div className="status-tabs mb-4">
-        {RENTAL_STATUS_TABS.map((tab) => (
-          <button
-            key={tab.value}
-            type="button"
-            className={`status-tab ${activeTab === tab.value ? 'is-active' : ''}`}
-            onClick={() => setActiveTab(tab.value)}
-          >
-            {tab.label}
-            {tabCounts[tab.value] != null && (
-              <span className="tab-count">{tabCounts[tab.value]}</span>
-            )}
-          </button>
-        ))}
-      </div>
+      {loadError && (
+        <ErrorPanel title="Failed to load rentals" message={loadError} onRetry={() => load()} />
+      )}
 
-      {/* Search */}
-      <div className="mb-4 flex items-center gap-2">
-        <div className="relative max-w-xs flex-1">
-          <input
-            type="search"
-            className="field-input pl-3"
-            placeholder="Search customer or plate…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        {search && (
-          <span className="text-xs text-[var(--sea-ink-soft)]">
-            {filteredSorted.length} result{filteredSorted.length !== 1 ? 's' : ''}
-          </span>
-        )}
-      </div>
+      {loading && !result && <TableSkeleton rows={8} columns={7} />}
 
-      {/* Table */}
+      {result && (
+      <div className="space-y-3">
       <article className="workspace-panel island-shell overflow-x-auto p-0">
+        <AdminListFilterBar
+          searchValue={searchInput}
+          onSearchChange={setSearchInput}
+          onSearchClear={() => setSearch('')}
+          searchPlaceholder="Customer or plate…"
+          searchAriaLabel="Search rentals"
+          filtersOpen={filtersOpen}
+          onFiltersOpenChange={setFiltersOpen}
+          activeFilterCount={activeFilterCount}
+          hasActiveFilters={hasActiveFilters}
+          onClearFilters={() => {
+            setActiveTab('all')
+            setCategoryFilter('all')
+            setSearchInput('')
+            setSearch('')
+          }}
+        >
+          <StatusFilterSelect
+            aria-label="Filter rentals by status"
+            value={activeTab}
+            options={RENTAL_STATUS_OPTIONS.map((tab) => ({
+              value: tab.value,
+              label:
+                tab.value === 'all'
+                  ? `${tab.label} (${tabCounts.all ?? 0})`
+                  : `${tab.label}${typeof tabCounts[tab.value] === 'number' ? ` (${tabCounts[tab.value]})` : ''}`,
+            }))}
+            onValueChange={setActiveTab}
+          />
+          <StatusFilterSelect
+            aria-label="Filter rentals by vehicle type"
+            value={categoryFilter}
+            options={CAR_CATEGORY_FILTER_OPTIONS}
+            onValueChange={setCategoryFilter}
+          />
+        </AdminListFilterBar>
+
         <DataTable
           columns={columns}
-          data={filteredSorted}
+          data={result.rows}
           getKey={(r) => r.id}
           sortKey={sortKey}
           sortDir={sortDir}
           onSort={handleSort as (key: string) => void}
+          onRowClick={(r) =>
+            void navigate({
+              to: `${basePath}/$rentalId` as never,
+              params: { rentalId: r.id } as never,
+            })
+          }
           emptyState={
             <div className="hub-empty-state m-6">
               <p className="text-sm text-[var(--sea-ink-soft)]">
-                {search || activeTab !== 'all' ? 'No rentals match your filter.' : 'No rentals yet.'}
+                {hasActiveFilters ? 'No rentals match your filter.' : 'No rentals yet.'}
               </p>
             </div>
           }
         />
       </article>
+      <div className="admin-pagination">
+        <span>
+          Page {result.page} of {totalPages} · {result.total.toLocaleString()} total
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="button-secondary"
+            disabled={result.page <= 1 || loading}
+            onClick={() => {
+              setPage(result.page - 1)
+              void load(result.page - 1)
+            }}
+          >
+            Previous
+          </button>
+          <button
+            type="button"
+            className="button-secondary"
+            disabled={result.page >= totalPages || loading}
+            onClick={() => {
+              setPage(result.page + 1)
+              void load(result.page + 1)
+            }}
+          >
+            Next
+          </button>
+        </div>
+      </div>
+      </div>
+      )}
 
       {/* ── New Rental Sheet ── */}
       <Sheet open={formOpen} onOpenChange={(open) => { if (!open) closeForm() }}>
@@ -469,27 +648,26 @@ export default function RentalsList({
               <div>
                 <label className="field-label" htmlFor="rf-car">Car</label>
                 <Combobox
-                  value={formData.carId}
-                  onValueChange={(v) => setField('carId', v ?? '')}
+                  items={carItems}
+                  value={selectedCarItem}
+                  onValueChange={(item) => setField('carId', item?.value ?? '')}
+                  itemToStringLabel={(item) => item.label}
                 >
                   <ComboboxInput
                     id="rf-car"
                     placeholder="Search by plate or model…"
                     className="w-full"
-                    showClear={!!formData.carId}
+                    showClear={!!selectedCarItem}
                   />
                   <ComboboxContent>
-                    <ComboboxList>
-                      {availableCars.map((car) => (
-                        <ComboboxItem key={car.id} value={car.id}>
-                          <span className="font-mono font-semibold">{car.plateNumber}</span>
-                          <span className="ml-2 text-xs opacity-60">
-                            {car.make} {car.model}
-                          </span>
-                        </ComboboxItem>
-                      ))}
-                    </ComboboxList>
                     <ComboboxEmpty>No available cars found.</ComboboxEmpty>
+                    <ComboboxList>
+                      {(item) => (
+                        <ComboboxItem key={item.value} value={item}>
+                          {item.label}
+                        </ComboboxItem>
+                      )}
+                    </ComboboxList>
                   </ComboboxContent>
                 </Combobox>
               </div>
@@ -498,29 +676,26 @@ export default function RentalsList({
               <div>
                 <label className="field-label" htmlFor="rf-customer">Customer</label>
                 <Combobox
-                  value={formData.customerId}
-                  onValueChange={(v) => setField('customerId', v ?? '')}
+                  items={customerItems}
+                  value={selectedCustomerItem}
+                  onValueChange={(item) => setField('customerId', item?.value ?? '')}
+                  itemToStringLabel={(item) => item.label}
                 >
                   <ComboboxInput
                     id="rf-customer"
                     placeholder="Search by name or IC…"
                     className="w-full"
-                    showClear={!!formData.customerId}
+                    showClear={!!selectedCustomerItem}
                   />
                   <ComboboxContent>
-                    <ComboboxList>
-                      {allCustomers.map((c) => (
-                        <ComboboxItem key={c.id} value={c.id}>
-                          {c.fullName ?? '—'}
-                          {c.icOrPassport && (
-                            <span className="ml-2 font-mono text-xs opacity-60">
-                              {c.icOrPassport}
-                            </span>
-                          )}
-                        </ComboboxItem>
-                      ))}
-                    </ComboboxList>
                     <ComboboxEmpty>No customers found.</ComboboxEmpty>
+                    <ComboboxList>
+                      {(item) => (
+                        <ComboboxItem key={item.value} value={item}>
+                          {item.label}
+                        </ComboboxItem>
+                      )}
+                    </ComboboxList>
                   </ComboboxContent>
                 </Combobox>
               </div>
@@ -553,10 +728,12 @@ export default function RentalsList({
                 </div>
               </div>
 
-              {/* Amounts */}
+              {/* Amounts — equal columns, short labels so they stay one line */}
               <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="field-label" htmlFor="rf-rate">Daily rate (RM)</label>
+                <div className="min-w-0">
+                  <label className="field-label whitespace-nowrap" htmlFor="rf-rate">
+                    Rate (RM)
+                  </label>
                   <input
                     id="rf-rate"
                     type="number"
@@ -569,8 +746,10 @@ export default function RentalsList({
                     required
                   />
                 </div>
-                <div>
-                  <label className="field-label" htmlFor="rf-total">Total (RM)</label>
+                <div className="min-w-0">
+                  <label className="field-label whitespace-nowrap" htmlFor="rf-total">
+                    Total (RM)
+                  </label>
                   <input
                     id="rf-total"
                     type="number"
@@ -583,8 +762,10 @@ export default function RentalsList({
                     required
                   />
                 </div>
-                <div>
-                  <label className="field-label" htmlFor="rf-deposit">Deposit (RM)</label>
+                <div className="min-w-0">
+                  <label className="field-label whitespace-nowrap" htmlFor="rf-deposit">
+                    Deposit (RM)
+                  </label>
                   <input
                     id="rf-deposit"
                     type="number"
@@ -620,55 +801,127 @@ export default function RentalsList({
         </SheetContent>
       </Sheet>
 
-      {/* ── Confirm cancel overlay ── */}
-      {confirmingCancel && (
-        <div className="confirm-overlay" role="dialog" aria-modal="true">
-          <div className="confirm-dialog island-shell">
-            <p className="island-kicker mb-2">Cancel booking</p>
-            <h3 className="mb-2 text-lg font-semibold text-[var(--sea-ink)]">
-              Cancel this booking?
-            </h3>
-            <p className="mb-5 text-sm leading-6 text-[var(--sea-ink-soft)]">
+      {/* ── Confirm cancel ── */}
+      <ConfirmActionDialog
+        open={confirmingCancel != null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setConfirmingCancel(null)
+            setCancelError(null)
+          }
+        }}
+        title="Cancel this booking?"
+        description={
+          confirmingCancel ? (
+            <>
               This will cancel the booking for{' '}
               <strong>{confirmingCancel.carPlateNumber}</strong> and release the car back to available.
-            </p>
-            {cancelError && <p className="form-error mb-4">{cancelError}</p>}
-            <div className="flex gap-3">
-              <button type="button" className="button-danger" onClick={handleCancelConfirm} disabled={isCancelling}>
-                {isCancelling ? 'Cancelling…' : 'Cancel booking'}
-              </button>
-              <button type="button" className="button-secondary" onClick={() => { setConfirmingCancel(null); setCancelError(null) }}>
-                Keep
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+              {cancelError ? (
+                <span className="mt-2 block text-[var(--error)]">{cancelError}</span>
+              ) : null}
+            </>
+          ) : null
+        }
+        confirmLabel="Cancel booking"
+        cancelLabel="Keep"
+        variant="destructive"
+        confirming={isCancelling}
+        onConfirm={handleCancelConfirm}
+      />
 
-      {/* ── Confirm delete overlay ── */}
-      {canDelete && confirmingDelete && (
-        <div className="confirm-overlay" role="dialog" aria-modal="true">
-          <div className="confirm-dialog island-shell">
-            <p className="island-kicker mb-2">Delete rental</p>
-            <h3 className="mb-2 text-lg font-semibold text-[var(--sea-ink)]">
-              Delete this rental?
-            </h3>
-            <p className="mb-5 text-sm leading-6 text-[var(--sea-ink-soft)]">
+      {/* ── Confirm delete ── */}
+      <ConfirmActionDialog
+        open={canDelete && confirmingDelete != null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setConfirmingDelete(null)
+            setDeleteError(null)
+          }
+        }}
+        title="Delete this rental?"
+        description={
+          confirmingDelete ? (
+            <>
               Permanently remove the rental record for{' '}
               <strong>{confirmingDelete.carPlateNumber}</strong>. This cannot be undone.
-            </p>
-            {deleteError && <p className="form-error mb-4">{deleteError}</p>}
-            <div className="flex gap-3">
-              <button type="button" className="button-danger" onClick={handleDeleteConfirm} disabled={isDeleting}>
-                {isDeleting ? 'Deleting…' : 'Delete'}
-              </button>
-              <button type="button" className="button-secondary" onClick={() => { setConfirmingDelete(null); setDeleteError(null) }}>
-                Cancel
-              </button>
-            </div>
+              {deleteError ? (
+                <span className="mt-2 block text-[var(--error)]">{deleteError}</span>
+              ) : null}
+            </>
+          ) : null
+        }
+        confirmLabel="Delete"
+        variant="destructive"
+        confirming={isDeleting}
+        onConfirm={handleDeleteConfirm}
+      />
+
+      {/* ── Confirm handover Sheet ── */}
+      <Sheet
+        open={handoverRental != null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setHandoverRental(null)
+            setHandoverError(null)
+          }
+        }}
+      >
+        <SheetContent side="right" className="flex flex-col gap-0 p-0 sm:max-w-[28rem]">
+          <SheetHeader className="border-b border-[var(--line)] px-5 pb-4 pt-5">
+            <p className="island-kicker mb-1">Handover</p>
+            <SheetTitle className="text-lg font-semibold text-[var(--sea-ink)]">
+              {handoverRental?.carPlateNumber ?? 'Rental'} — Confirm handover
+            </SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 overflow-y-auto px-5 py-4">
+            <form id="list-handover-form" className="space-y-4" onSubmit={handleHandoverSubmit}>
+              <div>
+                <label className="field-label" htmlFor="list-ho-mileage">
+                  Start mileage (km)
+                </label>
+                <input
+                  id="list-ho-mileage"
+                  type="number"
+                  className="field-input"
+                  value={startMileage}
+                  onChange={(e) => setStartMileage(e.target.value)}
+                  min={0}
+                  required
+                />
+              </div>
+              <div>
+                <label className="field-label" htmlFor="list-ho-condition">
+                  Condition notes{' '}
+                  <span className="font-normal text-[var(--sea-ink-soft)]">(optional)</span>
+                </label>
+                <textarea
+                  id="list-ho-condition"
+                  className="field-input min-h-[80px]"
+                  value={startCondition}
+                  onChange={(e) => setStartCondition(e.target.value)}
+                  placeholder="e.g. Minor scratches on rear bumper…"
+                />
+              </div>
+              {handoverError ? <p className="form-error">{handoverError}</p> : null}
+            </form>
           </div>
-        </div>
-      )}
+          <SheetFooter className="flex-row gap-2 border-t border-[var(--line)] px-5 py-4">
+            <Button type="submit" form="list-handover-form" disabled={isSubmittingHandover}>
+              {isSubmittingHandover ? 'Confirming…' : 'Confirm handover'}
+            </Button>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => {
+                setHandoverRental(null)
+                setHandoverError(null)
+              }}
+            >
+              Cancel
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
     </AdminSidebarShell>
   )
 }

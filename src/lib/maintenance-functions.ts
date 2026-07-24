@@ -4,6 +4,7 @@ import { and, asc, desc, eq, lt, sql } from 'drizzle-orm'
 import { carServiceConfig, cars, maintenanceEvents } from '#/db/schema'
 import type { MaintenanceEventStatus, MaintenanceEventType } from '#/db/schema'
 import { requireRole } from '#/lib/auth-functions'
+import { fleetOpsRoles } from '#/lib/auth-model'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -75,7 +76,7 @@ export type MaintenanceReport = {
 export const getCarMaintenanceEvents = createServerFn({ method: 'GET' })
   .inputValidator((data: { carId: string }) => data)
   .handler(async ({ data }): Promise<MaintenanceEventRow[]> => {
-    await requireRole(['owner', 'staff'])
+    await requireRole(fleetOpsRoles)
     const { db } = await import('#/db')
 
     const rows = await db
@@ -107,7 +108,7 @@ export const getCarMaintenanceEvents = createServerFn({ method: 'GET' })
 export const getCarServiceConfig = createServerFn({ method: 'GET' })
   .inputValidator((data: { carId: string }) => data)
   .handler(async ({ data }): Promise<CarServiceConfigRow | null> => {
-    await requireRole(['owner', 'staff'])
+    await requireRole(fleetOpsRoles)
     const { db } = await import('#/db')
 
     const [row] = await db
@@ -136,7 +137,7 @@ export const upsertCarServiceConfig = createServerFn({ method: 'POST' })
     }) => data,
   )
   .handler(async ({ data }) => {
-    await requireRole(['owner', 'staff'])
+    await requireRole(fleetOpsRoles)
     const { db } = await import('#/db')
 
     const values = {
@@ -176,7 +177,7 @@ export const createMaintenanceEvent = createServerFn({ method: 'POST' })
     }) => data,
   )
   .handler(async ({ data }) => {
-    await requireRole(['owner', 'staff'])
+    await requireRole(fleetOpsRoles)
     const { db } = await import('#/db')
 
     const [event] = await db
@@ -220,7 +221,7 @@ export const closeMaintenanceEvent = createServerFn({ method: 'POST' })
     }) => data,
   )
   .handler(async ({ data }) => {
-    await requireRole(['owner', 'staff'])
+    await requireRole(fleetOpsRoles)
     const { db } = await import('#/db')
 
     // Load event to get carId
@@ -275,7 +276,7 @@ export const getAllMaintenanceEvents = createServerFn({ method: 'GET' })
     (data: { statusFilter?: MaintenanceEventStatus | 'all' }) => data,
   )
   .handler(async ({ data }): Promise<MaintenanceEventRow[]> => {
-    await requireRole(['owner', 'staff'])
+    await requireRole(fleetOpsRoles)
     const { db } = await import('#/db')
 
     const where =
@@ -311,7 +312,7 @@ export const getAllMaintenanceEvents = createServerFn({ method: 'GET' })
 
 export const getMaintenanceDashboardAlerts = createServerFn({ method: 'GET' }).handler(
   async (): Promise<MaintenanceAlertRow[]> => {
-    await requireRole(['owner', 'staff'])
+    await requireRole(fleetOpsRoles)
     const { db } = await import('#/db')
 
     const alerts: MaintenanceAlertRow[] = []

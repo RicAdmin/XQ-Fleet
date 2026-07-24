@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { and, desc, eq, gte, ilike, lt, or, sql } from 'drizzle-orm'
+import { and, desc, eq, gte, ilike, inArray, lt, notInArray, or, sql } from 'drizzle-orm'
 import { z } from 'zod'
 
 import {
@@ -18,7 +18,13 @@ import type {
 } from '#/db/schema'
 import { requireAdmin } from '#/lib/auth-functions'
 import {
+  deriveCarDisplayStatus,
+  getOverdueCarIds,
+  type CarDisplayStatus,
+} from '#/lib/car-display-status'
+import {
   adminInputValidator,
+  carCategoryFilterSchema,
   dateOnlyString,
   paginationSchema,
   sortDirSchema,
@@ -179,6 +185,7 @@ const rentalStatusValues = [
 
 const adminBookingsInputSchema = paginationSchema.extend({
   status: z.enum(rentalStatusValues).optional(),
+  category: carCategoryFilterSchema,
   from: dateOnlyString.optional(),
   to: dateOnlyString.optional(),
   search: z.string().trim().max(120).optional(),
@@ -198,6 +205,7 @@ export const getAdminBookings = createServerFn({ method: 'GET' })
 
     const filters = [] as Array<ReturnType<typeof eq>>
     if (data.status) filters.push(eq(rentals.status, data.status))
+    if (data.category) filters.push(eq(cars.category, data.category))
     if (data.from) {
       filters.push(gte(rentals.startDate, new Date(`${data.from}T00:00:00.000Z`)))
     }
@@ -322,6 +330,7 @@ const adminPaymentsInputSchema = paginationSchema.extend({
   status: z
     .enum(['pending', 'successful', 'failed', 'voided'])
     .optional(),
+  category: carCategoryFilterSchema,
   from: dateOnlyString.optional(),
   to: dateOnlyString.optional(),
   search: z.string().trim().max(120).optional(),
@@ -337,6 +346,7 @@ export const getAdminPayments = createServerFn({ method: 'GET' })
 
     const filters = []
     if (data.status) filters.push(eq(payments.status, data.status))
+    if (data.category) filters.push(eq(cars.category, data.category))
     if (data.from) {
       filters.push(gte(payments.createdAt, new Date(`${data.from}T00:00:00.000Z`)))
     }
@@ -423,6 +433,7 @@ export type AdminCarRow = {
   year: number
   category: CarCategory
   status: CarStatus
+  displayStatus: CarDisplayStatus
   dailyRateSen: number
   lifetimeRevenueSen: number
   lifetimeRentals: number
@@ -442,11 +453,13 @@ const adminCarsInputSchema = paginationSchema.extend({
       'reserved',
       'payment-pending',
       'rented',
+      'overdue',
       'maintenance',
       'damaged',
       'retired',
     ])
     .optional(),
+  category: carCategoryFilterSchema,
   search: z.string().trim().max(120).optional(),
 })
 
@@ -459,7 +472,25 @@ export const getAdminCarsForAdmin = createServerFn({ method: 'GET' })
     const { db } = await import('#/db')
 
     const filters = []
-    if (data.status) filters.push(eq(cars.status, data.status))
+    if (data.status === 'overdue') {
+      const overdueIds = await getOverdueCarIds()
+      if (overdueIds.length === 0) {
+        return {
+          rows: [],
+          total: 0,
+          page: data.page,
+          pageSize: data.pageSize,
+        }
+      }
+      filters.push(inArray(cars.id, overdueIds))
+    } else if (data.status === 'reserved' || data.status === 'rented') {
+      filters.push(eq(cars.status, data.status))
+      const overdueIds = await getOverdueCarIds()
+      if (overdueIds.length > 0) filters.push(notInArray(cars.id, overdueIds))
+    } else if (data.status) {
+      filters.push(eq(cars.status, data.status))
+    }
+    if (data.category) filters.push(eq(cars.category, data.category))
     if (data.search) {
       const needle = `%${data.search}%`
       filters.push(
@@ -500,8 +531,44 @@ export const getAdminCarsForAdmin = createServerFn({ method: 'GET' })
 
     const [rows, countResult] = await Promise.all([rowsPromise, countPromise])
 
+    const carIds = rows.map((row) => row.id)
+    const openRentals =
+      carIds.length === 0
+        ? []
+        : await db
+            .select({
+              carId: rentals.carId,
+              status: rentals.status,
+              startDate: rentals.startDate,
+              endDate: rentals.endDate,
+            })
+            .from(rentals)
+            .where(
+              and(
+                inArray(rentals.carId, carIds),
+                inArray(rentals.status, ['pending', 'active']),
+              ),
+            )
+
+    const openByCarId = new Map<
+      string,
+      { status: string; startDate: Date; endDate: Date }
+    >()
+    for (const rental of openRentals) {
+      const existing = openByCarId.get(rental.carId)
+      if (!existing || (existing.status !== 'active' && rental.status === 'active')) {
+        openByCarId.set(rental.carId, rental)
+      }
+    }
+
+    const now = new Date()
+    const enrichedRows: AdminCarRow[] = rows.map((row) => ({
+      ...(row as Omit<AdminCarRow, 'displayStatus'>),
+      displayStatus: deriveCarDisplayStatus(row.status, openByCarId.get(row.id), now),
+    }))
+
     return {
-      rows: rows as AdminCarRow[],
+      rows: enrichedRows,
       total: Number(countResult[0]?.count ?? 0),
       page: data.page,
       pageSize: data.pageSize,

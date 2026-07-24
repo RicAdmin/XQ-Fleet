@@ -50,6 +50,7 @@ import { Route as BookCarIdRouteImport } from './routes/book/$carId'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 import { Route as ApiMcpRouteImport } from './routes/api/mcp'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
+import { Route as AdminProtoCarDetailsRouteImport } from './routes/admin/proto-car-details'
 import { Route as AccountRentalsRouteImport } from './routes/account/rentals'
 import { Route as AccountProfileRouteImport } from './routes/account/profile'
 import { Route as AccountNotificationsRouteImport } from './routes/account/notifications'
@@ -75,7 +76,6 @@ import { Route as AdminPromosIndexRouteImport } from './routes/admin/promos/inde
 import { Route as AdminMaintenanceIndexRouteImport } from './routes/admin/maintenance/index'
 import { Route as AdminCustomersIndexRouteImport } from './routes/admin/customers/index'
 import { Route as AdminCarsIndexRouteImport } from './routes/admin/cars/index'
-import { Route as AdminAffiliatesIndexRouteImport } from './routes/admin/affiliates/index'
 import { Route as AccountBookingsIndexRouteImport } from './routes/account/bookings/index'
 import { Route as LocaleBlogIndexRouteImport } from './routes/$locale/blog/index'
 import { Route as WellKnownMcpServerCardDotjsonRouteImport } from './routes/well-known/mcp/server-card[.]json'
@@ -96,8 +96,6 @@ import { Route as AdminRentalsRentalIdRouteImport } from './routes/admin/rentals
 import { Route as AdminPromosPromoIdRouteImport } from './routes/admin/promos/$promoId'
 import { Route as AdminCustomersCustomerIdRouteImport } from './routes/admin/customers/$customerId'
 import { Route as AdminCarsCarIdRouteImport } from './routes/admin/cars/$carId'
-import { Route as AdminAffiliatesPayoutsRouteImport } from './routes/admin/affiliates/payouts'
-import { Route as AdminAffiliatesAffiliateIdRouteImport } from './routes/admin/affiliates/$affiliateId'
 import { Route as AccountBookingsRentalIdRouteImport } from './routes/account/bookings/$rentalId'
 import { Route as LocalePayRentalIdRouteImport } from './routes/$locale/pay/$rentalId'
 import { Route as LocaleGuidesPlanDriveRouteImport } from './routes/$locale/guides/plan-drive'
@@ -320,6 +318,11 @@ const ApiHealthRoute = ApiHealthRouteImport.update({
   path: '/api/health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminProtoCarDetailsRoute = AdminProtoCarDetailsRouteImport.update({
+  id: '/proto-car-details',
+  path: '/proto-car-details',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AccountRentalsRoute = AccountRentalsRouteImport.update({
   id: '/rentals',
   path: '/rentals',
@@ -445,11 +448,6 @@ const AdminCarsIndexRoute = AdminCarsIndexRouteImport.update({
   path: '/cars/',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminAffiliatesIndexRoute = AdminAffiliatesIndexRouteImport.update({
-  id: '/affiliates/',
-  path: '/affiliates/',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AccountBookingsIndexRoute = AccountBookingsIndexRouteImport.update({
   id: '/bookings/',
   path: '/bookings/',
@@ -558,17 +556,6 @@ const AdminCarsCarIdRoute = AdminCarsCarIdRouteImport.update({
   path: '/cars/$carId',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminAffiliatesPayoutsRoute = AdminAffiliatesPayoutsRouteImport.update({
-  id: '/affiliates/payouts',
-  path: '/affiliates/payouts',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminAffiliatesAffiliateIdRoute =
-  AdminAffiliatesAffiliateIdRouteImport.update({
-    id: '/affiliates/$affiliateId',
-    path: '/affiliates/$affiliateId',
-    getParentRoute: () => AdminRoute,
-  } as any)
 const AccountBookingsRentalIdRoute = AccountBookingsRentalIdRouteImport.update({
   id: '/bookings/$rentalId',
   path: '/bookings/$rentalId',
@@ -672,6 +659,7 @@ export interface FileRoutesByFullPath {
   '/account/notifications': typeof AccountNotificationsRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/rentals': typeof AccountRentalsRoute
+  '/admin/proto-car-details': typeof AdminProtoCarDetailsRoute
   '/api/health': typeof ApiHealthRoute
   '/api/mcp': typeof ApiMcpRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -705,8 +693,6 @@ export interface FileRoutesByFullPath {
   '/$locale/guides/plan-drive': typeof LocaleGuidesPlanDriveRoute
   '/$locale/pay/$rentalId': typeof LocalePayRentalIdRoute
   '/account/bookings/$rentalId': typeof AccountBookingsRentalIdRoute
-  '/admin/affiliates/$affiliateId': typeof AdminAffiliatesAffiliateIdRoute
-  '/admin/affiliates/payouts': typeof AdminAffiliatesPayoutsRoute
   '/admin/cars/$carId': typeof AdminCarsCarIdRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/promos/$promoId': typeof AdminPromosPromoIdRoute
@@ -727,7 +713,6 @@ export interface FileRoutesByFullPath {
   '/well-known/mcp/server-card.json': typeof WellKnownMcpServerCardDotjsonRoute
   '/$locale/blog/': typeof LocaleBlogIndexRoute
   '/account/bookings/': typeof AccountBookingsIndexRoute
-  '/admin/affiliates/': typeof AdminAffiliatesIndexRoute
   '/admin/cars/': typeof AdminCarsIndexRoute
   '/admin/customers/': typeof AdminCustomersIndexRoute
   '/admin/maintenance/': typeof AdminMaintenanceIndexRoute
@@ -772,6 +757,7 @@ export interface FileRoutesByTo {
   '/account/notifications': typeof AccountNotificationsRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/rentals': typeof AccountRentalsRoute
+  '/admin/proto-car-details': typeof AdminProtoCarDetailsRoute
   '/api/health': typeof ApiHealthRoute
   '/api/mcp': typeof ApiMcpRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -805,8 +791,6 @@ export interface FileRoutesByTo {
   '/$locale/guides/plan-drive': typeof LocaleGuidesPlanDriveRoute
   '/$locale/pay/$rentalId': typeof LocalePayRentalIdRoute
   '/account/bookings/$rentalId': typeof AccountBookingsRentalIdRoute
-  '/admin/affiliates/$affiliateId': typeof AdminAffiliatesAffiliateIdRoute
-  '/admin/affiliates/payouts': typeof AdminAffiliatesPayoutsRoute
   '/admin/cars/$carId': typeof AdminCarsCarIdRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/promos/$promoId': typeof AdminPromosPromoIdRoute
@@ -827,7 +811,6 @@ export interface FileRoutesByTo {
   '/well-known/mcp/server-card.json': typeof WellKnownMcpServerCardDotjsonRoute
   '/$locale/blog': typeof LocaleBlogIndexRoute
   '/account/bookings': typeof AccountBookingsIndexRoute
-  '/admin/affiliates': typeof AdminAffiliatesIndexRoute
   '/admin/cars': typeof AdminCarsIndexRoute
   '/admin/customers': typeof AdminCustomersIndexRoute
   '/admin/maintenance': typeof AdminMaintenanceIndexRoute
@@ -877,6 +860,7 @@ export interface FileRoutesById {
   '/account/notifications': typeof AccountNotificationsRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/rentals': typeof AccountRentalsRoute
+  '/admin/proto-car-details': typeof AdminProtoCarDetailsRoute
   '/api/health': typeof ApiHealthRoute
   '/api/mcp': typeof ApiMcpRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -910,8 +894,6 @@ export interface FileRoutesById {
   '/$locale/guides/plan-drive': typeof LocaleGuidesPlanDriveRoute
   '/$locale/pay/$rentalId': typeof LocalePayRentalIdRoute
   '/account/bookings/$rentalId': typeof AccountBookingsRentalIdRoute
-  '/admin/affiliates/$affiliateId': typeof AdminAffiliatesAffiliateIdRoute
-  '/admin/affiliates/payouts': typeof AdminAffiliatesPayoutsRoute
   '/admin/cars/$carId': typeof AdminCarsCarIdRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/promos/$promoId': typeof AdminPromosPromoIdRoute
@@ -932,7 +914,6 @@ export interface FileRoutesById {
   '/well-known/mcp/server-card.json': typeof WellKnownMcpServerCardDotjsonRoute
   '/$locale/blog/': typeof LocaleBlogIndexRoute
   '/account/bookings/': typeof AccountBookingsIndexRoute
-  '/admin/affiliates/': typeof AdminAffiliatesIndexRoute
   '/admin/cars/': typeof AdminCarsIndexRoute
   '/admin/customers/': typeof AdminCustomersIndexRoute
   '/admin/maintenance/': typeof AdminMaintenanceIndexRoute
@@ -983,6 +964,7 @@ export interface FileRouteTypes {
     | '/account/notifications'
     | '/account/profile'
     | '/account/rentals'
+    | '/admin/proto-car-details'
     | '/api/health'
     | '/api/mcp'
     | '/blog/$slug'
@@ -1016,8 +998,6 @@ export interface FileRouteTypes {
     | '/$locale/guides/plan-drive'
     | '/$locale/pay/$rentalId'
     | '/account/bookings/$rentalId'
-    | '/admin/affiliates/$affiliateId'
-    | '/admin/affiliates/payouts'
     | '/admin/cars/$carId'
     | '/admin/customers/$customerId'
     | '/admin/promos/$promoId'
@@ -1038,7 +1018,6 @@ export interface FileRouteTypes {
     | '/well-known/mcp/server-card.json'
     | '/$locale/blog/'
     | '/account/bookings/'
-    | '/admin/affiliates/'
     | '/admin/cars/'
     | '/admin/customers/'
     | '/admin/maintenance/'
@@ -1083,6 +1062,7 @@ export interface FileRouteTypes {
     | '/account/notifications'
     | '/account/profile'
     | '/account/rentals'
+    | '/admin/proto-car-details'
     | '/api/health'
     | '/api/mcp'
     | '/blog/$slug'
@@ -1116,8 +1096,6 @@ export interface FileRouteTypes {
     | '/$locale/guides/plan-drive'
     | '/$locale/pay/$rentalId'
     | '/account/bookings/$rentalId'
-    | '/admin/affiliates/$affiliateId'
-    | '/admin/affiliates/payouts'
     | '/admin/cars/$carId'
     | '/admin/customers/$customerId'
     | '/admin/promos/$promoId'
@@ -1138,7 +1116,6 @@ export interface FileRouteTypes {
     | '/well-known/mcp/server-card.json'
     | '/$locale/blog'
     | '/account/bookings'
-    | '/admin/affiliates'
     | '/admin/cars'
     | '/admin/customers'
     | '/admin/maintenance'
@@ -1187,6 +1164,7 @@ export interface FileRouteTypes {
     | '/account/notifications'
     | '/account/profile'
     | '/account/rentals'
+    | '/admin/proto-car-details'
     | '/api/health'
     | '/api/mcp'
     | '/blog/$slug'
@@ -1220,8 +1198,6 @@ export interface FileRouteTypes {
     | '/$locale/guides/plan-drive'
     | '/$locale/pay/$rentalId'
     | '/account/bookings/$rentalId'
-    | '/admin/affiliates/$affiliateId'
-    | '/admin/affiliates/payouts'
     | '/admin/cars/$carId'
     | '/admin/customers/$customerId'
     | '/admin/promos/$promoId'
@@ -1242,7 +1218,6 @@ export interface FileRouteTypes {
     | '/well-known/mcp/server-card.json'
     | '/$locale/blog/'
     | '/account/bookings/'
-    | '/admin/affiliates/'
     | '/admin/cars/'
     | '/admin/customers/'
     | '/admin/maintenance/'
@@ -1604,6 +1579,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/proto-car-details': {
+      id: '/admin/proto-car-details'
+      path: '/proto-car-details'
+      fullPath: '/admin/proto-car-details'
+      preLoaderRoute: typeof AdminProtoCarDetailsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/account/rentals': {
       id: '/account/rentals'
       path: '/rentals'
@@ -1779,13 +1761,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCarsIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/affiliates/': {
-      id: '/admin/affiliates/'
-      path: '/affiliates'
-      fullPath: '/admin/affiliates/'
-      preLoaderRoute: typeof AdminAffiliatesIndexRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/account/bookings/': {
       id: '/account/bookings/'
       path: '/bookings'
@@ -1924,20 +1899,6 @@ declare module '@tanstack/react-router' {
       path: '/cars/$carId'
       fullPath: '/admin/cars/$carId'
       preLoaderRoute: typeof AdminCarsCarIdRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/affiliates/payouts': {
-      id: '/admin/affiliates/payouts'
-      path: '/affiliates/payouts'
-      fullPath: '/admin/affiliates/payouts'
-      preLoaderRoute: typeof AdminAffiliatesPayoutsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/affiliates/$affiliateId': {
-      id: '/admin/affiliates/$affiliateId'
-      path: '/affiliates/$affiliateId'
-      fullPath: '/admin/affiliates/$affiliateId'
-      preLoaderRoute: typeof AdminAffiliatesAffiliateIdRouteImport
       parentRoute: typeof AdminRoute
     }
     '/account/bookings/$rentalId': {
@@ -2112,14 +2073,12 @@ const AccountRouteWithChildren =
   AccountRoute._addFileChildren(AccountRouteChildren)
 
 interface AdminRouteChildren {
+  AdminProtoCarDetailsRoute: typeof AdminProtoCarDetailsRoute
   AdminIndexRoute: typeof AdminIndexRoute
-  AdminAffiliatesAffiliateIdRoute: typeof AdminAffiliatesAffiliateIdRoute
-  AdminAffiliatesPayoutsRoute: typeof AdminAffiliatesPayoutsRoute
   AdminCarsCarIdRoute: typeof AdminCarsCarIdRoute
   AdminCustomersCustomerIdRoute: typeof AdminCustomersCustomerIdRoute
   AdminPromosPromoIdRoute: typeof AdminPromosPromoIdRoute
   AdminRentalsRentalIdRoute: typeof AdminRentalsRentalIdRoute
-  AdminAffiliatesIndexRoute: typeof AdminAffiliatesIndexRoute
   AdminCarsIndexRoute: typeof AdminCarsIndexRoute
   AdminCustomersIndexRoute: typeof AdminCustomersIndexRoute
   AdminMaintenanceIndexRoute: typeof AdminMaintenanceIndexRoute
@@ -2130,14 +2089,12 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminProtoCarDetailsRoute: AdminProtoCarDetailsRoute,
   AdminIndexRoute: AdminIndexRoute,
-  AdminAffiliatesAffiliateIdRoute: AdminAffiliatesAffiliateIdRoute,
-  AdminAffiliatesPayoutsRoute: AdminAffiliatesPayoutsRoute,
   AdminCarsCarIdRoute: AdminCarsCarIdRoute,
   AdminCustomersCustomerIdRoute: AdminCustomersCustomerIdRoute,
   AdminPromosPromoIdRoute: AdminPromosPromoIdRoute,
   AdminRentalsRentalIdRoute: AdminRentalsRentalIdRoute,
-  AdminAffiliatesIndexRoute: AdminAffiliatesIndexRoute,
   AdminCarsIndexRoute: AdminCarsIndexRoute,
   AdminCustomersIndexRoute: AdminCustomersIndexRoute,
   AdminMaintenanceIndexRoute: AdminMaintenanceIndexRoute,

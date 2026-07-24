@@ -16,6 +16,7 @@ import { applyPromoV2 } from '#/lib/pricing-logic'
 import {
   adminInputValidator,
   affiliateCodeSchema as _affiliateCodeSchema,
+  carCategoryFilterSchema,
   optionalTrimmedString,
   paginationSchema,
   percentInt,
@@ -423,6 +424,7 @@ export const deactivatePromo = createServerFn({ method: 'POST' })
 
 const listPromosSchema = paginationSchema.extend({
   filter: z.enum(['all', 'active', 'expired', 'exhausted', 'inactive']).default('all'),
+  category: carCategoryFilterSchema,
   search: z.string().trim().max(120).optional(),
 })
 
@@ -471,6 +473,14 @@ export const listPromos = createServerFn({ method: 'GET' })
     if (data.search) {
       const needle = `%${data.search}%`
       filters.push(ilike(promos.code, needle))
+    }
+    if (data.category) {
+      filters.push(
+        or(
+          sql`cardinality(${promos.applicableCarCategories}) = 0`,
+          sql`${data.category} = ANY(${promos.applicableCarCategories})`,
+        )!,
+      )
     }
     const whereClause = filters.length ? and(...filters) : undefined
 

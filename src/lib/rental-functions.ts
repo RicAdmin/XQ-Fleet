@@ -1,10 +1,17 @@
 import { createServerFn } from '@tanstack/react-start'
-import { and, desc, eq, gt, inArray, lt, ne } from 'drizzle-orm'
+import { and, asc, desc, eq, gt, ilike, inArray, lt, ne, or, sql } from 'drizzle-orm'
+import { z } from 'zod'
 
 import { cars, customers, payments, rentals } from '#/db/schema'
 import type { PaymentStatus, RentalStatus, RentalType } from '#/db/schema'
 import { requireRole } from '#/lib/auth-functions'
 import { fleetOpsRoles, fullAdminRoles } from '#/lib/auth-model'
+import {
+  adminInputValidator,
+  carCategoryFilterSchema,
+  paginationSchema,
+  sortDirSchema,
+} from '#/lib/validation/admin-schemas'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -143,6 +150,173 @@ export const getRentals = createServerFn({ method: 'GET' }).handler(async () => 
     .leftJoin(customers, eq(rentals.customerId, customers.id))
     .orderBy(desc(rentals.startDate))
 })
+
+const rentalStatusValues = [
+  'pending',
+  'active',
+  'closed',
+  'cancelled',
+] as const satisfies readonly RentalStatus[]
+
+export type RentalListResult = {
+  rows: RentalListRow[]
+  total: number
+  page: number
+  pageSize: number
+  statusCounts: Record<string, number>
+}
+
+const listRentalsSchema = paginationSchema.extend({
+  status: z.enum(rentalStatusValues).optional(),
+  category: carCategoryFilterSchema,
+  search: z.string().trim().max(120).optional(),
+  sortKey: z
+    .enum([
+      'startDate',
+      'endDate',
+      'totalAmountSen',
+      'status',
+      'carPlateNumber',
+      'customerFullName',
+      'createdAt',
+    ])
+    .default('startDate'),
+  sortDir: sortDirSchema,
+})
+
+async function getRentalStatusCounts() {
+  const { db } = await import('#/db')
+  const rows = await db
+    .select({ status: rentals.status, count: sql<number>`count(*)::int` })
+    .from(rentals)
+    .groupBy(rentals.status)
+
+  const statusCounts: Record<string, number> = { all: 0 }
+  for (const row of rows) {
+    const n = Number(row.count)
+    statusCounts[row.status] = n
+    statusCounts.all += n
+  }
+  return statusCounts
+}
+
+export const listRentals = createServerFn({ method: 'GET' })
+  .inputValidator(adminInputValidator(listRentalsSchema))
+  .handler(async ({ data }): Promise<RentalListResult> => {
+    await requireRole(fleetOpsRoles)
+    const { db } = await import('#/db')
+
+    const filters = []
+    if (data.status) filters.push(eq(rentals.status, data.status))
+    if (data.category) filters.push(eq(cars.category, data.category))
+    if (data.search) {
+      const needle = `%${data.search}%`
+      filters.push(
+        or(
+          ilike(customers.fullName, needle),
+          ilike(cars.plateNumber, needle),
+        )!,
+      )
+    }
+    const whereClause = filters.length ? and(...filters) : undefined
+
+    const sortColumn = {
+      startDate: rentals.startDate,
+      endDate: rentals.endDate,
+      totalAmountSen: rentals.totalAmountSen,
+      status: rentals.status,
+      carPlateNumber: cars.plateNumber,
+      customerFullName: customers.fullName,
+      createdAt: rentals.createdAt,
+    }[data.sortKey]
+
+    const orderBy = data.sortDir === 'asc' ? asc(sortColumn) : desc(sortColumn)
+    const offset = (data.page - 1) * data.pageSize
+
+    const baseQuery = db
+      .select({
+        id: rentals.id,
+        carId: rentals.carId,
+        customerId: rentals.customerId,
+        type: rentals.type,
+        status: rentals.status,
+        paymentStatus: rentals.paymentStatus,
+        startDate: rentals.startDate,
+        endDate: rentals.endDate,
+        dailyRateSen: rentals.dailyRateSen,
+        totalAmountSen: rentals.totalAmountSen,
+        depositAmountSen: rentals.depositAmountSen,
+        paidAmountSen: rentals.paidAmountSen,
+        createdAt: rentals.createdAt,
+        updatedAt: rentals.updatedAt,
+        customerFullName: customers.fullName,
+        carPlateNumber: cars.plateNumber,
+        carMake: cars.make,
+        carModel: cars.model,
+      })
+      .from(rentals)
+      .leftJoin(cars, eq(rentals.carId, cars.id))
+      .leftJoin(customers, eq(rentals.customerId, customers.id))
+
+    const rowsPromise = whereClause
+      ? baseQuery.where(whereClause).orderBy(orderBy).limit(data.pageSize).offset(offset)
+      : baseQuery.orderBy(orderBy).limit(data.pageSize).offset(offset)
+
+    const countBase = db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(rentals)
+      .leftJoin(cars, eq(rentals.carId, cars.id))
+      .leftJoin(customers, eq(rentals.customerId, customers.id))
+
+    const countPromise = whereClause ? countBase.where(whereClause) : countBase
+
+    const [rows, countResult, statusCounts] = await Promise.all([
+      rowsPromise,
+      countPromise,
+      getRentalStatusCounts(),
+    ])
+
+    return {
+      rows,
+      total: Number(countResult[0]?.count ?? 0),
+      page: data.page,
+      pageSize: data.pageSize,
+      statusCounts,
+    }
+  })
+
+export const getRentalsByCarId = createServerFn({ method: 'GET' })
+  .inputValidator((data: { carId: string }) => data)
+  .handler(async ({ data }) => {
+    await requireRole(fleetOpsRoles)
+    const { db } = await import('#/db')
+    return db
+      .select({
+        id: rentals.id,
+        carId: rentals.carId,
+        customerId: rentals.customerId,
+        type: rentals.type,
+        status: rentals.status,
+        paymentStatus: rentals.paymentStatus,
+        startDate: rentals.startDate,
+        endDate: rentals.endDate,
+        dailyRateSen: rentals.dailyRateSen,
+        totalAmountSen: rentals.totalAmountSen,
+        depositAmountSen: rentals.depositAmountSen,
+        paidAmountSen: rentals.paidAmountSen,
+        createdAt: rentals.createdAt,
+        updatedAt: rentals.updatedAt,
+        customerFullName: customers.fullName,
+        carPlateNumber: cars.plateNumber,
+        carMake: cars.make,
+        carModel: cars.model,
+      })
+      .from(rentals)
+      .leftJoin(cars, eq(rentals.carId, cars.id))
+      .leftJoin(customers, eq(rentals.customerId, customers.id))
+      .where(eq(rentals.carId, data.carId))
+      .orderBy(desc(rentals.startDate))
+  })
 
 export const getRentalById = createServerFn({ method: 'GET' })
   .inputValidator((input: GetRentalByIdInput) => input)

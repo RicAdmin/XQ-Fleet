@@ -1,14 +1,29 @@
 import { useMemo, useState } from 'react'
 
 import { Link } from '@tanstack/react-router'
-import { AlertTriangle, Download, Printer, RefreshCw } from 'lucide-react'
+import {
+  AlertTriangle,
+  BarChart3,
+  Clock,
+  Download,
+  History,
+  Printer,
+  RefreshCw,
+  TrendingUp,
+  Wrench,
+} from 'lucide-react'
 
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
+import { type Column, DataTable } from '#/components/ui/DataTable'
+import { PageHeader } from '#/components/ui/PageHeader'
+import { StatusFilterTabs } from '#/components/ui/StatusFilterTabs'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card'
 import type {
   CarSelectRow,
   OverdueReportRow,
   RentalHistoryReport,
   RevenueReport,
+  RevenueRow,
   UtilizationReport,
 } from '#/lib/report-functions'
 import {
@@ -113,18 +128,12 @@ function DatePresetBar({
 
   return (
     <div className="report-date-bar">
-      <div className="status-tabs">
-        {presets.map((p) => (
-          <button
-            key={p.key}
-            type="button"
-            className={`status-tab${selected === p.key ? ' is-active' : ''}`}
-            onClick={() => applyPreset(p.key)}
-          >
-            {p.label}
-          </button>
-        ))}
-      </div>
+      <StatusFilterTabs
+        aria-label="Date range preset"
+        value={selected}
+        onValueChange={(key) => applyPreset(key)}
+        tabs={presets.map((p) => ({ value: p.key, label: p.label }))}
+      />
       {selected === 'custom' && (
         <div className="report-date-custom">
           <input
@@ -207,6 +216,70 @@ function ExportBar({ onCsv }: { onCsv: () => void }) {
   )
 }
 
+// ─── Report stat card ─────────────────────────────────────────────────────────
+
+function ReportStatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <Card
+      size="sm"
+      className="rounded-[var(--radius-xl,1rem)] shadow-[var(--shadow-md)] ring-1 ring-[var(--border,rgba(17,17,16,0.10))]"
+    >
+      <CardHeader className="pb-0">
+        <CardDescription className="text-[0.7rem] font-semibold tracking-[0.08em] text-[var(--sea-ink-soft)] uppercase">
+          {label}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="pt-1">
+        <CardTitle className="font-[family-name:var(--font-display)] text-2xl font-semibold text-[var(--sea-ink)]">
+          {value}
+        </CardTitle>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ─── Revenue table columns ────────────────────────────────────────────────────
+
+const REVENUE_COLUMNS: Column<RevenueRow>[] = [
+  {
+    key: 'actualReturnDate',
+    header: 'Date closed',
+    render: (r) => formatDate(r.actualReturnDate),
+  },
+  {
+    key: 'car',
+    header: 'Car',
+    render: (r) => (
+      <>
+        <Link to="/admin/rentals/$rentalId" params={{ rentalId: r.id }} className="plate-link">
+          {r.carPlateNumber ?? '—'}
+        </Link>
+        <span className="vehicle-model">{r.carMake} {r.carModel}</span>
+      </>
+    ),
+  },
+  {
+    key: 'customerFullName',
+    header: 'Customer',
+    cellClassName: 'text-sm',
+    render: (r) => r.customerFullName ?? '—',
+  },
+  {
+    key: 'totalAmountSen',
+    header: 'Total',
+    headerClassName: 'text-right',
+    cellClassName: 'text-right text-sm',
+    render: (r) => formatMYR(r.totalAmountSen),
+  },
+  {
+    key: 'paidAmountSen',
+    header: 'Collected',
+    headerClassName: 'text-right',
+    cellClassName: 'text-right font-semibold',
+    render: (r) => formatMYR(r.paidAmountSen),
+  },
+]
+
 // ─── Revenue tab ──────────────────────────────────────────────────────────────
 
 function RevenueTab({
@@ -272,19 +345,10 @@ function RevenueTab({
       <DatePresetBar range={[from, to]} loading={loading} onApply={load} />
 
       {/* Summary cards */}
-      <div className="report-summary-cards">
-        <div className="report-stat-card">
-          <p className="island-kicker">Revenue collected</p>
-          <p className="report-stat-value">{formatMYR(totalCollected)}</p>
-        </div>
-        <div className="report-stat-card">
-          <p className="island-kicker">Total billed</p>
-          <p className="report-stat-value">{formatMYR(totalBilled)}</p>
-        </div>
-        <div className="report-stat-card">
-          <p className="island-kicker">Closed rentals</p>
-          <p className="report-stat-value">{data.rows.length}</p>
-        </div>
+      <div className="mb-6 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
+        <ReportStatCard label="Revenue collected" value={formatMYR(totalCollected)} />
+        <ReportStatCard label="Total billed" value={formatMYR(totalBilled)} />
+        <ReportStatCard label="Closed rentals" value={String(data.rows.length)} />
       </div>
 
       {/* Category breakdown */}
@@ -309,48 +373,21 @@ function RevenueTab({
       )}
 
       {/* Rental rows */}
-      <section className="workspace-panel island-shell mb-4">
+      <section className="mb-4">
         <div className="mb-3 flex items-center justify-between">
           <p className="island-kicker">Closed rentals</p>
-          <ExportBar onCsv={exportCsv} />
+          {data.rows.length > 0 && <ExportBar onCsv={exportCsv} />}
         </div>
-        {data.rows.length === 0 ? (
-          <p className="text-sm text-[var(--sea-ink-soft)]">No closed rentals in this period.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="cars-table">
-              <thead>
-                <tr>
-                  <th>Date closed</th>
-                  <th>Car</th>
-                  <th>Customer</th>
-                  <th className="text-right">Total</th>
-                  <th className="text-right">Collected</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.rows.map((r) => (
-                  <tr key={r.id}>
-                    <td>{formatDate(r.actualReturnDate)}</td>
-                    <td>
-                      <Link
-                        to="/admin/rentals/$rentalId"
-                        params={{ rentalId: r.id }}
-                        className="plate-link"
-                      >
-                        {r.carPlateNumber ?? '—'}
-                      </Link>
-                      <span className="vehicle-model">{r.carMake} {r.carModel}</span>
-                    </td>
-                    <td className="text-sm">{r.customerFullName ?? '—'}</td>
-                    <td className="text-right text-sm">{formatMYR(r.totalAmountSen)}</td>
-                    <td className="text-right font-semibold">{formatMYR(r.paidAmountSen)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <article className="workspace-panel island-shell overflow-x-auto p-0">
+          <DataTable
+            columns={REVENUE_COLUMNS}
+            data={data.rows}
+            getKey={(r) => r.id}
+            emptyState={
+              <p className="text-sm text-[var(--sea-ink-soft)]">No closed rentals in this period.</p>
+            }
+          />
+        </article>
       </section>
 
       {/* Outstanding balances */}
@@ -432,21 +469,13 @@ function UtilizationTab() {
 
       {data && (
         <>
-          <div className="report-summary-cards">
-            <div className="report-stat-card">
-              <p className="island-kicker">Period days</p>
-              <p className="report-stat-value">{data.periodDays}</p>
-            </div>
-            <div className="report-stat-card">
-              <p className="island-kicker">Total rentals</p>
-              <p className="report-stat-value">
-                {data.rows.reduce((s, r) => s + r.rentalCount, 0)}
-              </p>
-            </div>
-            <div className="report-stat-card">
-              <p className="island-kicker">Fleet size</p>
-              <p className="report-stat-value">{data.rows.length}</p>
-            </div>
+          <div className="mb-6 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
+            <ReportStatCard label="Period days" value={String(data.periodDays)} />
+            <ReportStatCard
+              label="Total rentals"
+              value={String(data.rows.reduce((s, r) => s + r.rentalCount, 0))}
+            />
+            <ReportStatCard label="Fleet size" value={String(data.rows.length)} />
           </div>
 
           <section className="workspace-panel island-shell">
@@ -914,12 +943,16 @@ function MaintenanceTab() {
 
 type ReportTab = 'revenue' | 'utilization' | 'overdue' | 'history' | 'maintenance'
 
-const TABS: { key: ReportTab; label: string }[] = [
-  { key: 'revenue', label: 'Revenue' },
-  { key: 'utilization', label: 'Utilization' },
-  { key: 'overdue', label: 'Overdue' },
-  { key: 'history', label: 'Rental History' },
-  { key: 'maintenance', label: 'Maintenance' },
+const TABS: {
+  key: ReportTab
+  label: string
+  icon: typeof TrendingUp
+}[] = [
+  { key: 'revenue', label: 'Revenue', icon: TrendingUp },
+  { key: 'utilization', label: 'Utilization', icon: BarChart3 },
+  { key: 'overdue', label: 'Overdue', icon: Clock },
+  { key: 'history', label: 'Rental History', icon: History },
+  { key: 'maintenance', label: 'Maintenance', icon: Wrench },
 ]
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -937,26 +970,20 @@ export default function AdminReports({ session, initialRevenue, allCars }: Admin
 
   return (
     <AdminSidebarShell user={session.user} pageTitle="Reports">
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-[var(--sea-ink)]">Reports</h2>
-        <p className="mt-1 text-sm text-[var(--sea-ink-soft)]">
-          Owner-only analytics and export tools.
-        </p>
-      </div>
+      <PageHeader title="Reports" description="Owner-only analytics and export tools." />
 
       {/* Tab switcher */}
-      <div className="status-tabs mb-6 print:hidden">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            type="button"
-            className={`status-tab${activeTab === t.key ? ' is-active' : ''}`}
-            onClick={() => setActiveTab(t.key)}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <StatusFilterTabs
+        className="mb-6 print:hidden"
+        aria-label="Report type"
+        value={activeTab}
+        onValueChange={setActiveTab}
+        tabs={TABS.map((t) => ({
+          value: t.key,
+          label: t.label,
+          icon: t.icon,
+        }))}
+      />
 
       {/* Tab panels */}
       {activeTab === 'revenue' && <RevenueTab initialData={initialRevenue} />}

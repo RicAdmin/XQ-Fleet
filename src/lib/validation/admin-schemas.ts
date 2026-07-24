@@ -61,6 +61,13 @@ export const senAmount = z.number().int().nonnegative()
 /** Whole percent 0–100 (used by promos discount_value_sen for percent type). */
 export const percentInt = z.number().int().min(0).max(100)
 
+/** Car category values for list filters. */
+export const carCategoryValues = ['economy', 'mpv', 'suv', 'other'] as const
+
+export const carCategoryFilterSchema = z.enum(carCategoryValues).optional()
+
+export type CarCategoryFilterValue = z.infer<typeof carCategoryFilterSchema>
+
 /** Promo code format: 3-32 chars, A-Z 0-9 - _. */
 export const promoCodeSchema = z
   .string()

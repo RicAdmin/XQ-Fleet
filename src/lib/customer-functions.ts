@@ -1,9 +1,15 @@
 import { createServerFn } from '@tanstack/react-start'
-import { and, desc, eq, ne } from 'drizzle-orm'
+import { and, asc, desc, eq, ilike, isNotNull, isNull, ne, or, sql } from 'drizzle-orm'
+import { z } from 'zod'
 
 import { customers } from '#/db/schema'
 import { requireRole } from '#/lib/auth-functions'
 import { fleetOpsRoles, fullAdminRoles } from '#/lib/auth-model'
+import {
+  adminInputValidator,
+  paginationSchema,
+  sortDirSchema,
+} from '#/lib/validation/admin-schemas'
 
 type CreateCustomerInput = {
   fullName: string
@@ -57,6 +63,112 @@ export const getCustomers = createServerFn({ method: 'GET' }).handler(async () =
   const { db } = await import('#/db')
   return db.select().from(customers).orderBy(desc(customers.createdAt))
 })
+
+export type CustomerListRow = {
+  id: string
+  authUserId: string | null
+  fullName: string | null
+  email: string | null
+  icOrPassport: string | null
+  phone: string | null
+  address: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type CustomerListResult = {
+  rows: CustomerListRow[]
+  total: number
+  page: number
+  pageSize: number
+  accountCounts: Record<'all' | 'linked' | 'walk-in', number>
+}
+
+const listCustomersSchema = paginationSchema.extend({
+  accountFilter: z.enum(['all', 'linked', 'walk-in']).default('all'),
+  search: z.string().trim().max(120).optional(),
+  sortKey: z
+    .enum(['fullName', 'icOrPassport', 'phone', 'email', 'createdAt'])
+    .default('createdAt'),
+  sortDir: sortDirSchema,
+})
+
+async function getCustomerAccountCounts() {
+  const { db } = await import('#/db')
+  const [totalRow, linkedRow, walkInRow] = await Promise.all([
+    db.select({ count: sql<number>`count(*)::int` }).from(customers),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(customers)
+      .where(isNotNull(customers.authUserId)),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(customers)
+      .where(isNull(customers.authUserId)),
+  ])
+
+  return {
+    all: Number(totalRow[0]?.count ?? 0),
+    linked: Number(linkedRow[0]?.count ?? 0),
+    'walk-in': Number(walkInRow[0]?.count ?? 0),
+  }
+}
+
+export const listCustomers = createServerFn({ method: 'GET' })
+  .inputValidator(adminInputValidator(listCustomersSchema))
+  .handler(async ({ data }): Promise<CustomerListResult> => {
+    await requireRole(fleetOpsRoles)
+    const { db } = await import('#/db')
+
+    const filters = []
+    if (data.accountFilter === 'linked') filters.push(isNotNull(customers.authUserId))
+    if (data.accountFilter === 'walk-in') filters.push(isNull(customers.authUserId))
+    if (data.search) {
+      const needle = `%${data.search}%`
+      filters.push(
+        or(
+          ilike(customers.fullName, needle),
+          ilike(customers.icOrPassport, needle),
+          ilike(customers.phone, needle),
+          ilike(customers.email, needle),
+        )!,
+      )
+    }
+    const whereClause = filters.length ? and(...filters) : undefined
+
+    const sortColumn = {
+      fullName: customers.fullName,
+      icOrPassport: customers.icOrPassport,
+      phone: customers.phone,
+      email: customers.email,
+      createdAt: customers.createdAt,
+    }[data.sortKey]
+
+    const orderBy = data.sortDir === 'asc' ? asc(sortColumn) : desc(sortColumn)
+    const offset = (data.page - 1) * data.pageSize
+
+    const baseQuery = db.select().from(customers)
+    const rowsPromise = whereClause
+      ? baseQuery.where(whereClause).orderBy(orderBy).limit(data.pageSize).offset(offset)
+      : baseQuery.orderBy(orderBy).limit(data.pageSize).offset(offset)
+
+    const countBase = db.select({ count: sql<number>`count(*)::int` }).from(customers)
+    const countPromise = whereClause ? countBase.where(whereClause) : countBase
+
+    const [rows, countResult, accountCounts] = await Promise.all([
+      rowsPromise,
+      countPromise,
+      getCustomerAccountCounts(),
+    ])
+
+    return {
+      rows,
+      total: Number(countResult[0]?.count ?? 0),
+      page: data.page,
+      pageSize: data.pageSize,
+      accountCounts,
+    }
+  })
 
 export const getCustomerById = createServerFn({ method: 'GET' })
   .inputValidator((input: GetCustomerByIdInput) => input)

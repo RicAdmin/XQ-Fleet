@@ -7,7 +7,15 @@ import {
   Wallet,
 } from 'lucide-react'
 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '#/components/ui/card'
 import type { AdminDashboardKpis } from '#/lib/admin-dashboard-functions'
+import { cn } from '#/lib/utils'
 
 function formatMYR(sen: number): string {
   return `RM ${(sen / 100).toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -16,23 +24,20 @@ function formatMYR(sen: number): string {
 function formatDelta(pct: number | null): {
   label: string
   cls: 'is-up' | 'is-down' | 'is-flat'
-  icon: typeof TrendingUp
 } {
-  if (pct == null) return { label: 'n/a vs last month', cls: 'is-flat', icon: TrendingUp }
+  if (pct == null) return { label: 'n/a vs last month', cls: 'is-flat' }
   const rounded = Math.round(pct * 10) / 10
   if (rounded > 0)
     return {
       label: `▲ ${rounded.toFixed(1)}% vs last month`,
       cls: 'is-up',
-      icon: TrendingUp,
     }
   if (rounded < 0)
     return {
       label: `▼ ${Math.abs(rounded).toFixed(1)}% vs last month`,
       cls: 'is-down',
-      icon: TrendingDown,
     }
-  return { label: '— flat vs last month', cls: 'is-flat', icon: TrendingUp }
+  return { label: '— flat vs last month', cls: 'is-flat' }
 }
 
 type KpiCardProps = {
@@ -44,14 +49,44 @@ type KpiCardProps = {
 
 function KpiCard({ label, value, icon, delta }: KpiCardProps) {
   return (
-    <div className="kpi-card">
-      <div className="flex items-center justify-between">
-        <span className="kpi-card-label">{label}</span>
+    <Card
+      size="sm"
+      className={cn(
+        'rounded-[var(--radius-xl,1rem)] shadow-[var(--shadow-md)] ring-1 ring-[var(--border,rgba(17,17,16,0.10))] transition-[transform,box-shadow] duration-200 ease-out',
+        'hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]',
+        'motion-reduce:transition-none motion-reduce:hover:translate-y-0',
+      )}
+    >
+      <CardHeader className="flex flex-row items-center justify-between gap-2 pb-0">
+        <CardDescription className="text-[0.7rem] font-semibold tracking-[0.08em] text-[var(--sea-ink-soft)] uppercase">
+          {label}
+        </CardDescription>
         <span className="text-[var(--sea-ink-soft)] opacity-60">{icon}</span>
-      </div>
-      <span className="kpi-card-value">{value}</span>
-      {delta && <span className={`kpi-card-delta ${delta.cls}`}>{delta.label}</span>}
-    </div>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-1 pt-1">
+        <CardTitle className="font-[family-name:var(--font-display)] text-2xl font-semibold text-[var(--sea-ink)]">
+          {value}
+        </CardTitle>
+        {delta ? (
+          <span
+            className={cn(
+              'inline-flex items-center gap-1 text-xs',
+              delta.cls === 'is-up' && 'text-[var(--success)]',
+              delta.cls === 'is-down' && 'text-[var(--error)]',
+              delta.cls === 'is-flat' && 'text-[var(--sea-ink-soft)]',
+            )}
+          >
+            {delta.cls === 'is-up' ? (
+              <TrendingUp className="size-3" aria-hidden />
+            ) : null}
+            {delta.cls === 'is-down' ? (
+              <TrendingDown className="size-3" aria-hidden />
+            ) : null}
+            {delta.label}
+          </span>
+        ) : null}
+      </CardContent>
+    </Card>
   )
 }
 
@@ -63,7 +98,7 @@ export function AdminKpiGrid({ kpis }: AdminKpiGridProps) {
   const delta = formatDelta(kpis.mtdRevenueMomDeltaPct)
 
   return (
-    <div className="kpi-grid">
+    <div className="mb-5 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
       <KpiCard
         label="Bookings today"
         value={String(kpis.bookingsToday)}

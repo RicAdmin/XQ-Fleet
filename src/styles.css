@@ -66,6 +66,8 @@
   --status-payment-pending-text: #5b3ea8;
   --status-rented-bg: rgba(26, 25, 22, 0.08);
   --status-rented-text: var(--sea-ink);
+  --status-overdue-bg: rgba(220, 60, 60, 0.12);
+  --status-overdue-text: #b91c1c;
   --status-maintenance-bg: rgba(255, 102, 0, 0.1);
   --status-maintenance-text: #e55a00;
   --status-damaged-bg: rgba(220, 60, 60, 0.10);
@@ -190,6 +192,8 @@
   --status-payment-pending-text: #c4b5fd;
   --status-rented-bg: rgba(240, 237, 232, 0.08);
   --status-rented-text: var(--sea-ink);
+  --status-overdue-bg: rgba(220, 85, 85, 0.18);
+  --status-overdue-text: #fca5a5;
   --status-maintenance-bg: rgba(224, 146, 26, 0.15);
   --status-maintenance-text: #fbbf24;
   --status-damaged-bg: rgba(220, 85, 85, 0.15);
@@ -250,6 +254,8 @@
     --status-payment-pending-text: #c4b5fd;
     --status-rented-bg: rgba(240, 237, 232, 0.08);
     --status-rented-text: var(--sea-ink);
+    --status-overdue-bg: rgba(220, 85, 85, 0.18);
+    --status-overdue-text: #fca5a5;
     --status-maintenance-bg: rgba(224, 146, 26, 0.15);
     --status-maintenance-text: #fbbf24;
     --status-damaged-bg: rgba(220, 85, 85, 0.15);
@@ -311,6 +317,18 @@ a {
 
 a:hover {
   color: var(--lagoon-deep);
+}
+
+/* Admin shadcn sidebar links must stay ink — global `a` color is brand orange. */
+[data-slot="sidebar-wrapper"] a[data-slot="sidebar-menu-button"],
+[data-slot="sidebar-wrapper"] a[data-sidebar="menu-button"] {
+  color: var(--sea-ink);
+  text-decoration: none;
+}
+
+[data-slot="sidebar-wrapper"] a[data-slot="sidebar-menu-button"]:hover,
+[data-slot="sidebar-wrapper"] a[data-sidebar="menu-button"]:hover {
+  color: var(--sea-ink);
 }
 
 ::selection {
@@ -1549,6 +1567,7 @@ html.dark .cxq-light-surface {
 .status-badge--reserved       { background: var(--status-reserved-bg);        color: var(--status-reserved-text); }
 .status-badge--payment-pending{ background: var(--status-payment-pending-bg); color: var(--status-payment-pending-text); }
 .status-badge--rented         { background: var(--status-rented-bg);          color: var(--status-rented-text); }
+.status-badge--overdue        { background: var(--status-overdue-bg);         color: var(--status-overdue-text); }
 .status-badge--maintenance    { background: var(--status-maintenance-bg);     color: var(--status-maintenance-text); }
 .status-badge--damaged        { background: var(--status-damaged-bg);         color: var(--status-damaged-text); }
 .status-badge--retired        { background: var(--status-retired-bg);         color: var(--status-retired-text); }
@@ -1560,6 +1579,9 @@ html.dark .cxq-light-surface {
 .status-badge--unpaid    { background: var(--status-damaged-bg);     color: var(--status-damaged-text); }
 .status-badge--partial   { background: var(--status-maintenance-bg); color: var(--status-maintenance-text); }
 .status-badge--paid      { background: var(--status-available-bg);   color: var(--status-available-text); }
+.status-badge--successful { background: var(--status-available-bg);  color: var(--status-available-text); }
+.status-badge--failed     { background: var(--status-damaged-bg);    color: var(--status-damaged-text); }
+.status-badge--voided     { background: var(--status-retired-bg);    color: var(--status-retired-text); }
 
 /* ============================================================
    CATEGORY PILL
@@ -1864,6 +1886,15 @@ select.field-input {
   }
   html {
     @apply font-sans;
+  }
+  input[type="search"]::-webkit-search-cancel-button,
+  input[type="search"]::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+    display: none;
+  }
+  input[type="search"]::-ms-clear {
+    display: none;
   }
 }
 /* ─── Reports ────────────────────────────────────────────────────────────────── */
@@ -3281,6 +3312,25 @@ select.field-input {
   font-size: 0.72rem;
   color: var(--sea-ink-soft);
   margin-top: 0.15rem;
+}
+
+.maint-sample-input:disabled,
+.maint-sample-input[disabled] {
+  opacity: 1;
+  cursor: default;
+  background: color-mix(in oklab, var(--surface-strong) 70%, transparent);
+  border-style: dashed;
+  border-color: color-mix(in oklab, var(--line) 85%, transparent);
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  box-shadow: none;
+}
+
+.maint-sample-input:disabled::placeholder,
+.maint-sample-input[disabled]::placeholder {
+  color: var(--sea-ink-soft);
+  opacity: 0.45;
+  -webkit-text-fill-color: var(--sea-ink-soft);
 }
 
 /* ─── Type badge (inline event type chip) ────────────────────────────────── */
@@ -5480,3 +5530,21 @@ select.field-input {
 .mini-chart-dot { fill: var(--lagoon-deep); }
 .mini-chart-axis { stroke: var(--line); stroke-width: 1; }
 .mini-chart-label { font-size: 10px; fill: var(--sea-ink-soft); }
+
+/* Sheet portal sits outside .admin-layout — match Button rounded-lg inputs */
+[data-slot="sheet-content"] .field-input,
+[data-slot="sheet-content"] select.field-input,
+[data-slot="sheet-content"] textarea.field-input {
+  border-radius: 0.5rem;
+  min-height: 2.25rem;
+  padding: 0.45rem 0.75rem;
+  box-shadow: none;
+}
+
+[data-slot="sheet-content"] .button-primary,
+[data-slot="sheet-content"] .button-secondary {
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  min-height: 2.25rem;
+  font-size: 0.875rem;
+}

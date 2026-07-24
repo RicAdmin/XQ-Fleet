@@ -1,15 +1,22 @@
 import { useEffect, useState } from 'react'
 
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { Plus, Sparkles } from 'lucide-react'
+import { Pencil, Plus, Sparkles } from 'lucide-react'
 
 import { PromoBulkGenerateSheet } from '#/components/admin/PromoBulkGenerateSheet'
 import { PromoFormSheet } from '#/components/admin/PromoFormSheet'
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
-import { PageHeader } from '#/components/ui/PageHeader'
-import { StatusBadge } from '#/components/ui/StatusBadge'
-import { UI_BTN_XS } from '#/lib/admin-ui-classes'
+import { AdminListFilterBar } from '#/components/ui/AdminListFilterBar'
+import { DataTable, type Column } from '#/components/ui/DataTable'
 import { ErrorPanel } from '#/components/ui/ErrorPanel'
+import {
+  CAR_CATEGORY_FILTER_OPTIONS,
+  type CarCategoryFilter,
+} from '#/lib/car-category-options'
+import { PageHeader } from '#/components/ui/PageHeader'
+import { RowActionsMenu } from '#/components/ui/RowActionsMenu'
+import { StatusBadge } from '#/components/ui/StatusBadge'
+import { StatusFilterSelect } from '#/components/ui/StatusFilterSelect'
 import { TableSkeleton } from '#/components/ui/TableSkeleton'
 import { requireFullAdminAccess } from '#/lib/route-guards'
 import type {
@@ -31,13 +38,16 @@ export const Route = createFileRoute('/admin/promos/')({
 })
 
 type Filter = 'all' | 'active' | 'expired' | 'exhausted' | 'inactive'
-const FILTERS: { key: Filter; label: string }[] = [
-  { key: 'all', label: 'All' },
-  { key: 'active', label: 'Active' },
-  { key: 'expired', label: 'Expired' },
-  { key: 'exhausted', label: 'Exhausted' },
-  { key: 'inactive', label: 'Inactive' },
+
+const FILTER_OPTIONS: { value: Filter; label: string }[] = [
+  { value: 'all', label: 'All statuses' },
+  { value: 'active', label: 'Active' },
+  { value: 'expired', label: 'Expired' },
+  { value: 'exhausted', label: 'Exhausted' },
+  { value: 'inactive', label: 'Inactive' },
 ]
+
+const SEARCH_DEBOUNCE_MS = 300
 
 function formatDate(d: Date | null): string {
   if (!d) return '—'
@@ -55,6 +65,8 @@ function AdminPromosPage() {
   }
 
   const [filter, setFilter] = useState<Filter>('all')
+  const [categoryFilter, setCategoryFilter] = useState<CarCategoryFilter>('all')
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [searchInput, setSearchInput] = useState('')
   const [page, setPage] = useState(1)
@@ -74,6 +86,7 @@ function AdminPromosPage() {
           page: p,
           pageSize: 25,
           filter,
+          category: categoryFilter === 'all' ? undefined : categoryFilter,
           search: search || undefined,
         },
       })
@@ -89,9 +102,81 @@ function AdminPromosPage() {
     setPage(1)
     void load(1)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, search])
+  }, [filter, categoryFilter, search])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const next = searchInput.trim()
+      setSearch((prev) => (prev === next ? prev : next))
+    }, SEARCH_DEBOUNCE_MS)
+    return () => clearTimeout(timer)
+  }, [searchInput])
 
   const totalPages = result ? Math.max(1, Math.ceil(result.total / result.pageSize)) : 1
+  const activeFilterCount =
+    (filter !== 'all' ? 1 : 0) + (categoryFilter !== 'all' ? 1 : 0)
+  const hasActiveFilters =
+    filter !== 'all' ||
+    categoryFilter !== 'all' ||
+    searchInput.trim().length > 0 ||
+    search.length > 0
+
+  const promoColumns: Column<AdminPromoListRow>[] = [
+    {
+      key: 'code',
+      header: 'Code',
+      render: (p) => (
+        <Link
+          to="/admin/promos/$promoId"
+          params={{ promoId: p.id }}
+          className="plate-link font-mono"
+        >
+          {p.code}
+        </Link>
+      ),
+    },
+    {
+      key: 'discount',
+      header: 'Discount',
+      render: (p) => formatDiscount(p),
+    },
+    {
+      key: 'redemptions',
+      header: 'Used / Max',
+      render: (p) => `${p.redemptionsUsed} / ${p.maxRedemptions ?? '∞'}`,
+    },
+    {
+      key: 'active',
+      header: 'Active',
+      render: (p) => <StatusBadge status={p.isActive ? 'active' : 'inactive'} size="sm" />,
+    },
+    {
+      key: 'schedule',
+      header: 'Schedule',
+      render: (p) => `${formatDate(p.startsAt)} → ${formatDate(p.endsAt)}`,
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      headerClassName: 'text-right',
+      cellClassName: 'text-right whitespace-nowrap',
+      render: (p) => (
+        <RowActionsMenu
+          label={`Actions for ${p.code}`}
+          actions={[
+            {
+              label: 'Edit',
+              icon: <Pencil />,
+              onSelect: () => {
+                setEditing(p)
+                setFormOpen(true)
+              },
+            },
+          ]}
+        />
+      ),
+    },
+  ]
 
   return (
     <AdminSidebarShell user={session.user} pageTitle="Promo codes">
@@ -121,101 +206,52 @@ function AdminPromosPage() {
         }
       />
 
-      <div className="admin-filter-bar">
-        <div className="status-tabs">
-          {FILTERS.map((f) => (
-            <button
-              key={f.key}
-              type="button"
-              className={`status-tab${filter === f.key ? ' is-active' : ''}`}
-              onClick={() => setFilter(f.key)}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-        <form
-          className="flex items-center gap-2"
-          onSubmit={(e) => {
-            e.preventDefault()
-            setSearch(searchInput.trim())
-          }}
-        >
-          <input
-            type="search"
-            className="field-input"
-            placeholder="Search code…"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-          />
-          <button type="submit" className="button-secondary">
-            Search
-          </button>
-        </form>
-      </div>
-
       {error && <ErrorPanel title="Failed to load promos" message={error} onRetry={() => load()} />}
       {loading && !result && <TableSkeleton rows={8} columns={6} />}
 
       {result && (
-        <div className="ui-table-wrap">
-          <table className="ui-table">
-            <thead>
-              <tr>
-                <th>Code</th>
-                <th>Discount</th>
-                <th>Used / Max</th>
-                <th>Active</th>
-                <th>Schedule</th>
-                <th className="text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {result.rows.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="text-center text-sm text-[var(--sea-ink-soft)] py-6">
-                    No promos found.
-                  </td>
-                </tr>
-              ) : (
-                result.rows.map((p) => (
-                  <tr key={p.id}>
-                    <td>
-                      <Link
-                        to="/admin/promos/$promoId"
-                        params={{ promoId: p.id }}
-                        className="plate-link font-mono"
-                      >
-                        {p.code}
-                      </Link>
-                    </td>
-                    <td className="text-sm">{formatDiscount(p)}</td>
-                    <td className="text-sm">
-                      {p.redemptionsUsed} / {p.maxRedemptions ?? '∞'}
-                    </td>
-                    <td>
-                      <StatusBadge status={p.isActive ? 'active' : 'inactive'} size="sm" />
-                    </td>
-                    <td className="text-sm">
-                      {formatDate(p.startsAt)} → {formatDate(p.endsAt)}
-                    </td>
-                    <td className="text-right">
-                      <button
-                        type="button"
-                        className={UI_BTN_XS}
-                        onClick={() => {
-                          setEditing(p)
-                          setFormOpen(true)
-                        }}
-                      >
-                        Edit
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+        <div className="space-y-3">
+          <article className="workspace-panel island-shell overflow-x-auto p-0">
+            <AdminListFilterBar
+              searchValue={searchInput}
+              onSearchChange={setSearchInput}
+              onSearchClear={() => setSearch('')}
+              searchPlaceholder="Search code…"
+              searchAriaLabel="Search promo codes"
+              filtersOpen={filtersOpen}
+              onFiltersOpenChange={setFiltersOpen}
+              activeFilterCount={activeFilterCount}
+              hasActiveFilters={hasActiveFilters}
+              onClearFilters={() => {
+                setFilter('all')
+                setCategoryFilter('all')
+                setSearchInput('')
+                setSearch('')
+              }}
+            >
+              <StatusFilterSelect
+                aria-label="Filter promos by status"
+                value={filter}
+                options={FILTER_OPTIONS}
+                onValueChange={setFilter}
+              />
+              <StatusFilterSelect
+                aria-label="Filter promos by vehicle type"
+                value={categoryFilter}
+                options={CAR_CATEGORY_FILTER_OPTIONS}
+                onValueChange={setCategoryFilter}
+              />
+            </AdminListFilterBar>
+
+            <DataTable
+              columns={promoColumns}
+              data={result.rows}
+              getKey={(p) => p.id}
+              emptyState={
+                <p className="text-sm text-[var(--sea-ink-soft)]">No promos found.</p>
+              }
+            />
+          </article>
           <div className="admin-pagination">
             <span>
               Page {result.page} of {totalPages} · {result.total.toLocaleString()} total

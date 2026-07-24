@@ -1,12 +1,21 @@
 import { useState } from 'react'
 
-import { Link, createFileRoute, notFound } from '@tanstack/react-router'
-import { ArrowLeft, Pencil, Plus, X } from 'lucide-react'
+import { createFileRoute, notFound } from '@tanstack/react-router'
+import { History, LayoutGrid, Pencil, Plus, Wrench } from 'lucide-react'
 
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
 import { isFullAdminRole, type AppRole } from '#/lib/auth-model'
-import { CarPhotoManager } from '#/components/cars/CarPhotoManager'
+import { PageHeader } from '#/components/ui/PageHeader'
 import { StatusBadge } from '#/components/ui/StatusBadge'
+import { Button } from '#/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '#/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '#/components/ui/tabs'
 import {
   Sheet,
   SheetContent,
@@ -15,7 +24,11 @@ import {
   SheetTitle,
 } from '#/components/ui/sheet'
 import type { CarCategory, CarColor, CarStatus, MaintenanceEventType } from '#/db/schema'
-import { getCarById, getCarPhotos, updateCar } from '#/lib/car-functions'
+import { getCarById, updateCar } from '#/lib/car-functions'
+import {
+  deriveCarDisplayStatus,
+  pickOpenRentalForDisplay,
+} from '#/lib/car-display-status'
 import type { CarServiceConfigRow, MaintenanceEventRow } from '#/lib/maintenance-functions'
 import {
   closeMaintenanceEvent,
@@ -24,20 +37,77 @@ import {
   getCarServiceConfig,
   upsertCarServiceConfig,
 } from '#/lib/maintenance-functions'
+import { getRentalsByCarId, type RentalListRow } from '#/lib/rental-functions'
 
 export const Route = createFileRoute('/admin/cars/$carId')({
   beforeLoad: async ({ params }) => {
     const car = await getCarById({ data: { carId: params.carId } })
     if (!car) throw notFound()
-    const [photos, maintenanceEvents, serviceConfig] = await Promise.all([
-      getCarPhotos({ data: { carId: params.carId } }),
+    const [maintenanceEvents, serviceConfig, rentalHistory] = await Promise.all([
       getCarMaintenanceEvents({ data: { carId: params.carId } }),
       getCarServiceConfig({ data: { carId: params.carId } }),
+      getRentalsByCarId({ data: { carId: params.carId } }),
     ])
-    return { car, photos, maintenanceEvents, serviceConfig }
+    return { car, maintenanceEvents, serviceConfig, rentalHistory }
   },
   component: CarDetailPage,
 })
+
+const DETAIL_TABS = [
+  { value: 'overview', label: 'Overview', icon: LayoutGrid },
+  { value: 'maintenance', label: 'Maintenance', icon: Wrench },
+  { value: 'history', label: 'History', icon: History },
+] as const
+
+function ConfigValueField({
+  label,
+  value,
+  placeholder,
+  remark,
+  remarkPlaceholder,
+}: {
+  label: string
+  value: string | null
+  placeholder: string
+  remark?: string | null
+  remarkPlaceholder?: string
+}) {
+  if (!value) {
+    return (
+      <div className="maint-config-card">
+        <label className="maint-config-label">{label}</label>
+        <input
+          type="text"
+          className="field-input maint-sample-input"
+          disabled
+          readOnly
+          value=""
+          placeholder={placeholder}
+          aria-label={`${label} sample`}
+        />
+        {remarkPlaceholder ? (
+          <input
+            type="text"
+            className="field-input maint-sample-input mt-2"
+            disabled
+            readOnly
+            value=""
+            placeholder={remarkPlaceholder}
+            aria-label={`${label} remark sample`}
+          />
+        ) : null}
+      </div>
+    )
+  }
+
+  return (
+    <div className="maint-config-card">
+      <p className="maint-config-label">{label}</p>
+      <p className="maint-config-value">{value}</p>
+      {remark ? <p className="maint-config-ref">{remark}</p> : null}
+    </div>
+  )
+}
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -148,21 +218,33 @@ function maintenanceEventTypeBadge(type: MaintenanceEventType): string {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 function CarDetailPage() {
-  const { session, car: initialCar, photos: initialPhotos, maintenanceEvents: initialEvents, serviceConfig: initialConfig } = Route.useRouteContext() as unknown as {
+  const {
+    session,
+    car: initialCar,
+    maintenanceEvents: initialEvents,
+    serviceConfig: initialConfig,
+    rentalHistory,
+  } = Route.useRouteContext() as unknown as {
     session: { user: { name: string; email: string; role: string } }
     car: CarRow
-    photos: import('#/lib/car-functions').CarPhotoRow[]
     maintenanceEvents: MaintenanceEventRow[]
     serviceConfig: CarServiceConfigRow | null
+    rentalHistory: RentalListRow[]
   }
 
   const isOwner = isFullAdminRole(session.user.role as AppRole)
 
+  const [activeTab, setActiveTab] = useState('overview')
   const [car, setCar] = useState<CarRow>(initialCar)
   const [editOpen, setEditOpen] = useState(false)
   const [formData, setFormData] = useState<CarFormData>(carToForm(initialCar))
   const [formError, setFormError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const displayStatus = deriveCarDisplayStatus(
+    car.status,
+    pickOpenRentalForDisplay(rentalHistory),
+  )
 
   // Maintenance state
   const [events, setEvents] = useState<MaintenanceEventRow[]>(initialEvents)
@@ -345,374 +427,462 @@ function CarDetailPage() {
 
   return (
     <AdminSidebarShell user={session.user} pageTitle="Vehicle profile">
-      {/* Back link */}
-      <div className="mb-5">
-        <Link
-          to="/admin/cars"
-          className="inline-flex items-center gap-1.5 text-sm text-[var(--sea-ink-soft)] hover:text-[var(--sea-ink)]"
-        >
-          <ArrowLeft size={14} />
-          Back to fleet
-        </Link>
-      </div>
-
-      {/* Car header */}
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <p className="island-kicker mb-1">
-            {car.category.toUpperCase()} · {car.year}
-          </p>
-          <h2 className="text-2xl font-semibold text-[var(--sea-ink)]">
-            {car.make} {car.model}
-          </h2>
-          <p className="font-mono mt-1 text-sm font-semibold text-[var(--lagoon-deep)]">
-            {car.plateNumber}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <StatusBadge status={car.status} size="md" />
-          {isOwner && car.status !== 'retired' && (
-            <button
-              type="button"
-              className="button-secondary inline-flex items-center gap-1.5"
-              onClick={openEdit}
-            >
-              <Pencil size={13} />
-              Edit
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Detail grid */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        <article className="workspace-panel island-shell">
-          <p className="island-kicker mb-3">Vehicle details</p>
-          <dl className="space-y-3">
-            {[
-              { label: 'Plate number', value: car.plateNumber },
-              { label: 'Make', value: car.make },
-              { label: 'Model', value: car.model },
-              { label: 'Year', value: car.year },
-              { label: 'Color', value: COLOR_LABEL[car.color] },
-              {
-                label: 'Category',
-                value: (
-                  <span className={`category-pill category-pill--${car.category}`}>
-                    {CATEGORY_LABEL[car.category]}
-                  </span>
-                ),
-              },
-              { label: 'Daily rate', value: formatMYR(car.dailyRateSen) },
-            ].map(({ label, value }) => (
-              <div key={label} className="summary-row">
-                <dt className="text-sm text-[var(--sea-ink-soft)]">{label}</dt>
-                <dd className="text-sm font-medium text-[var(--sea-ink)]">{value}</dd>
-              </div>
-            ))}
-          </dl>
-          {car.notes && (
-            <div className="mt-4 border-t border-[var(--line)] pt-4">
-              <p className="mb-1 text-xs font-medium uppercase tracking-wide text-[var(--sea-ink-soft)]">Notes</p>
-              <p className="text-sm text-[var(--sea-ink)]">{car.notes}</p>
-            </div>
-          )}
-        </article>
-
-        <article className="workspace-panel island-shell">
-          <p className="island-kicker mb-3">Current status</p>
-          <div className="flex items-center gap-3">
-            <StatusBadge status={car.status} size="md" />
-            <span className="text-sm text-[var(--sea-ink-soft)]">
-              Last updated {car.updatedAt.toLocaleDateString()}
+      <PageHeader
+        variant="detail"
+        backLink={{ to: '/admin/cars', label: 'Back' }}
+        title={`${car.make} ${car.model}`}
+        description={
+          <>
+            <span className="island-kicker">
+              {car.category.toUpperCase()} · {car.year}
             </span>
+            <span className="ui-meta-sep" aria-hidden>
+              ·
+            </span>
+            <span className="font-mono text-xs font-semibold text-[var(--lagoon-deep)]">
+              {car.plateNumber}
+            </span>
+          </>
+        }
+        actions={
+          <div className="flex items-center gap-3">
+            <StatusBadge status={displayStatus} size="md" />
+            {isOwner && car.status !== 'retired' ? (
+              <button
+                type="button"
+                className="button-secondary inline-flex items-center gap-1.5"
+                onClick={openEdit}
+              >
+                <Pencil size={13} />
+                Edit
+              </button>
+            ) : null}
           </div>
+        }
+      />
 
-          <hr className="my-4 border-[var(--line)]" />
+      {/* Detail tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-4">
+        <TabsList variant="pill">
+          {DETAIL_TABS.map((t) => {
+            const Icon = t.icon
+            return (
+              <TabsTrigger key={t.value} value={t.value}>
+                <Icon size={17} />
+                {t.label}
+              </TabsTrigger>
+            )
+          })}
+        </TabsList>
 
-          <p className="island-kicker mb-3">Rental history</p>
-          <div className="hub-empty-state">
-            <p className="text-sm text-[var(--sea-ink-soft)]">
-              Rental history will appear here once Stage 4 is complete.
-            </p>
-          </div>
-        </article>
-      </div>
-
-      {/* Photos */}
-      {isOwner && (
-        <section className="workspace-panel island-shell mt-4 p-5">
-          <CarPhotoManager carId={car.id} initialPhotos={initialPhotos} />
-        </section>
-      )}
-
-      {/* ── Service & Documents ── */}
-      <section className="workspace-panel island-shell mt-4 p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <p className="island-kicker mb-0.5">Service & Documents</p>
-            <h3 className="text-base font-semibold text-[var(--sea-ink)]">Vehicle configuration</h3>
-          </div>
-          <button
-            type="button"
-            className="button-secondary inline-flex items-center gap-1.5 text-sm"
-            onClick={() => setConfigOpen(true)}
-          >
-            <Pencil size={13} />
-            {config ? 'Edit config' : 'Set up config'}
-          </button>
-        </div>
-
-        {config ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="maint-config-card">
-              <p className="maint-config-label">Service interval</p>
-              <p className="maint-config-value">
-                {config.serviceIntervalKm ? `${config.serviceIntervalKm.toLocaleString()} km` : '—'}
-                {config.serviceIntervalKm && config.serviceIntervalDays ? ' / ' : ''}
-                {config.serviceIntervalDays ? `${config.serviceIntervalDays} days` : ''}
-              </p>
-            </div>
-            <div className="maint-config-card">
-              <p className="maint-config-label">Alert before service</p>
-              <p className="maint-config-value">{config.alertBeforeKm} km / {config.alertBeforeDays} days</p>
-            </div>
-            <div className="maint-config-card">
-              <p className="maint-config-label">Current mileage</p>
-              <p className="maint-config-value">{car.currentMileage != null ? `${car.currentMileage.toLocaleString()} km` : '—'}</p>
-            </div>
-            <div className="maint-config-card">
-              <p className="maint-config-label">Road tax expiry</p>
-              <p className="maint-config-value">{formatDate(config.roadTaxExpiryDate)}</p>
-              {config.roadTaxPolicyRef && <p className="maint-config-ref">{config.roadTaxPolicyRef}</p>}
-            </div>
-            <div className="maint-config-card">
-              <p className="maint-config-label">Insurance expiry</p>
-              <p className="maint-config-value">{formatDate(config.insuranceExpiryDate)}</p>
-              {config.insurancePolicyRef && <p className="maint-config-ref">{config.insurancePolicyRef}</p>}
-            </div>
-          </div>
-        ) : (
-          <p className="text-sm text-[var(--sea-ink-soft)]">No service configuration set. Click "Set up config" to add service intervals and document expiry dates.</p>
-        )}
-      </section>
-
-      {/* ── Maintenance events ── */}
-      <section className="workspace-panel island-shell mt-4 p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <p className="island-kicker mb-0.5">Maintenance Events</p>
-            <h3 className="text-base font-semibold text-[var(--sea-ink)]">
-              {openEvents.length > 0 ? (
-                <span className="text-amber-600">{openEvents.length} open event{openEvents.length !== 1 ? 's' : ''}</span>
-              ) : (
-                <span>No open events</span>
-              )}
-            </h3>
-          </div>
-          <button
-            type="button"
-            className="button-secondary inline-flex items-center gap-1.5 text-sm"
-            onClick={() => setNewEventOpen(true)}
-          >
-            <Plus size={13} />
-            Log event
-          </button>
-        </div>
-
-        {events.length === 0 ? (
-          <p className="text-sm text-[var(--sea-ink-soft)]">No maintenance events recorded for this vehicle.</p>
-        ) : (
-          <div className="maint-event-table">
-            <div className="maint-event-table-header">
-              <span>Date</span>
-              <span>Type</span>
-              <span>Description</span>
-              <span>Mileage</span>
-              <span>Cost</span>
-              <span>Status</span>
-              <span></span>
-            </div>
-            {events.map((ev) => (
-              <div key={ev.id} className="maint-event-row">
-                <span className="text-xs tabular-nums">{formatDate(ev.openedAt)}</span>
-                <span className="maint-type-badge maint-type-badge--{ev.type}">{maintenanceEventTypeBadge(ev.type)}</span>
-                <span className="text-sm">{ev.description}{ev.workshopVendor ? ` · ${ev.workshopVendor}` : ''}</span>
-                <span className="text-xs tabular-nums text-[var(--sea-ink-soft)]">
-                  {ev.mileageAtService != null ? `${ev.mileageAtService.toLocaleString()} km` : '—'}
-                </span>
-                <span className="text-xs tabular-nums">
-                  {ev.costSen > 0 ? formatMYR(ev.costSen) : '—'}
-                </span>
-                <span className={`maint-status-badge maint-status-badge--${ev.status}`}>
-                  {ev.status === 'open' ? 'Open' : 'Done'}
-                </span>
-                {ev.status === 'open' && (
-                  <button
-                    type="button"
-                    className="button-secondary text-xs py-1 px-2"
-                    onClick={() => {
-                      setCloseEventOpen(ev.id)
-                      setCloseCost(String(ev.costSen / 100))
-                      setCloseVendor(ev.workshopVendor ?? '')
-                    }}
-                  >
-                    Close
-                  </button>
+        <TabsContent value="overview" className="flex flex-col gap-4">
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardDescription className="island-kicker">Vehicle details</CardDescription>
+                <CardTitle className="sr-only">Vehicle details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="flex flex-col gap-3">
+                  {[
+                    { label: 'Plate number', value: car.plateNumber },
+                    { label: 'Make', value: car.make },
+                    { label: 'Model', value: car.model },
+                    { label: 'Year', value: car.year },
+                    { label: 'Color', value: COLOR_LABEL[car.color] },
+                    {
+                      label: 'Category',
+                      value: (
+                        <span className={`category-pill category-pill--${car.category}`}>
+                          {CATEGORY_LABEL[car.category]}
+                        </span>
+                      ),
+                    },
+                    { label: 'Daily rate', value: formatMYR(car.dailyRateSen) },
+                  ].map(({ label, value }) => (
+                    <div key={label} className="summary-row">
+                      <dt className="text-sm text-[var(--sea-ink-soft)]">{label}</dt>
+                      <dd className="text-sm font-medium text-[var(--sea-ink)]">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+                {car.notes && (
+                  <div className="mt-4 border-t border-[var(--line)] pt-4">
+                    <p className="mb-1 text-xs font-medium uppercase tracking-wide text-[var(--sea-ink-soft)]">
+                      Notes
+                    </p>
+                    <p className="text-sm text-[var(--sea-ink)]">{car.notes}</p>
+                  </div>
                 )}
-                {ev.status === 'completed' && <span />}
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+              </CardContent>
+            </Card>
 
-      {/* ── Edit form overlay ── */}
-      {isOwner && editOpen && (
-        <div className="form-overlay" role="dialog" aria-modal="true">
-          <div className="form-panel island-shell">
-            <div className="mb-5 flex items-center justify-between">
+            <Card>
+              <CardHeader>
+                <CardDescription className="island-kicker">Current status</CardDescription>
+                <CardTitle className="sr-only">Current status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-3">
+                  <StatusBadge status={displayStatus} size="md" />
+                  <span className="text-sm text-[var(--sea-ink-soft)]">
+                    Last updated {car.updatedAt.toLocaleDateString()}
+                  </span>
+                </div>
+                <hr className="my-4 border-[var(--line)]" />
+                <p className="island-kicker mb-2">Current mileage</p>
+                <p className="text-2xl font-semibold text-[var(--sea-ink)]">
+                  {car.currentMileage != null
+                    ? `${car.currentMileage.toLocaleString()} km`
+                    : '—'}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="maintenance" className="flex flex-col gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between gap-3">
               <div>
-                <p className="island-kicker mb-1">Edit vehicle</p>
-                <h3 className="text-xl font-semibold text-[var(--sea-ink)]">
-                  {car.make} {car.model}
-                </h3>
+                <CardDescription className="island-kicker">Service config</CardDescription>
+                <CardTitle>Vehicle configuration</CardTitle>
               </div>
               <button
                 type="button"
-                onClick={() => setEditOpen(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-[rgba(26,25,22,0.06)]"
-                aria-label="Close"
+                className="button-secondary inline-flex items-center gap-1.5 text-sm"
+                onClick={() => setConfigOpen(true)}
               >
-                <X size={16} />
+                <Pencil size={13} />
+                {config ? 'Edit config' : 'Set up config'}
               </button>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <ConfigValueField
+                  label="Service interval"
+                  value={
+                    config?.serviceIntervalKm || config?.serviceIntervalDays
+                      ? [
+                          config.serviceIntervalKm
+                            ? `${config.serviceIntervalKm.toLocaleString()} km`
+                            : null,
+                          config.serviceIntervalDays
+                            ? `${config.serviceIntervalDays} days`
+                            : null,
+                        ]
+                          .filter(Boolean)
+                          .join(' / ')
+                      : null
+                  }
+                  placeholder="e.g. 5,000 km / 180 days"
+                />
+                <ConfigValueField
+                  label="Alert before service"
+                  value={
+                    config
+                      ? `${config.alertBeforeKm} km / ${config.alertBeforeDays} days`
+                      : null
+                  }
+                  placeholder="e.g. 500 km / 7 days"
+                />
+                <ConfigValueField
+                  label="Current mileage"
+                  value={
+                    car.currentMileage != null
+                      ? `${car.currentMileage.toLocaleString()} km`
+                      : null
+                  }
+                  placeholder="e.g. 18,420 km"
+                />
+                <ConfigValueField
+                  label="Road tax"
+                  value={
+                    config?.roadTaxExpiryDate
+                      ? `Expires ${formatDate(config.roadTaxExpiryDate)}`
+                      : null
+                  }
+                  placeholder="e.g. Expires 2 Nov 2026"
+                  remark={config?.roadTaxPolicyRef}
+                  remarkPlaceholder="e.g. RT-88213"
+                />
+                <ConfigValueField
+                  label="Insurance"
+                  value={
+                    config?.insuranceExpiryDate
+                      ? `Expires ${formatDate(config.insuranceExpiryDate)}`
+                      : null
+                  }
+                  placeholder="e.g. Expires 15 Sep 2026"
+                  remark={config?.insurancePolicyRef}
+                  remarkPlaceholder="e.g. INS-XQ-4471"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between gap-3">
+              <div>
+                <CardDescription className="island-kicker">Maintenance Events</CardDescription>
+                <CardTitle>
+                  {openEvents.length > 0 ? (
+                    <span className="text-amber-600">
+                      {openEvents.length} open event{openEvents.length !== 1 ? 's' : ''}
+                    </span>
+                  ) : (
+                    <span>0 open event</span>
+                  )}
+                </CardTitle>
+              </div>
+              <button
+                type="button"
+                className="button-secondary inline-flex items-center gap-1.5 text-sm"
+                onClick={() => setNewEventOpen(true)}
+              >
+                <Plus size={13} />
+                Log event
+              </button>
+            </CardHeader>
+            <CardContent>
+              {events.length === 0 ? (
+                <p className="text-sm text-[var(--sea-ink-soft)]">
+                  No maintenance events recorded for this vehicle.
+                </p>
+              ) : (
+                <div className="maint-event-table">
+                  <div className="maint-event-table-header">
+                    <span>Date</span>
+                    <span>Type</span>
+                    <span>Description</span>
+                    <span>Mileage</span>
+                    <span>Cost</span>
+                    <span>Status</span>
+                    <span></span>
+                  </div>
+                  {events.map((ev) => (
+                    <div key={ev.id} className="maint-event-row">
+                      <span className="text-xs tabular-nums">{formatDate(ev.openedAt)}</span>
+                      <span className="maint-type-badge">
+                        {maintenanceEventTypeBadge(ev.type)}
+                      </span>
+                      <span className="text-sm">
+                        {ev.description}
+                        {ev.workshopVendor ? ` · ${ev.workshopVendor}` : ''}
+                      </span>
+                      <span className="text-xs tabular-nums text-[var(--sea-ink-soft)]">
+                        {ev.mileageAtService != null
+                          ? `${ev.mileageAtService.toLocaleString()} km`
+                          : '—'}
+                      </span>
+                      <span className="text-xs tabular-nums">
+                        {ev.costSen > 0 ? formatMYR(ev.costSen) : '—'}
+                      </span>
+                      <span className={`maint-status-badge maint-status-badge--${ev.status}`}>
+                        {ev.status === 'open' ? 'Open' : 'Done'}
+                      </span>
+                      {ev.status === 'open' ? (
+                        <button
+                          type="button"
+                          className="button-secondary px-2 py-1 text-xs"
+                          onClick={() => {
+                            setCloseEventOpen(ev.id)
+                            setCloseCost(String(ev.costSen / 100))
+                            setCloseVendor(ev.workshopVendor ?? '')
+                          }}
+                        >
+                          Close
+                        </button>
+                      ) : (
+                        <span />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="history" className="flex flex-col gap-4">
+          <Card>
+            <CardHeader>
+              <CardDescription className="island-kicker">Rental history</CardDescription>
+              <CardTitle className="sr-only">Rental history</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {rentalHistory.length === 0 ? (
+                <p className="text-sm text-[var(--sea-ink-soft)]">
+                  No rentals recorded for this vehicle yet.
+                </p>
+              ) : (
+                <div className="maint-event-table">
+                  <div className="maint-event-table-header">
+                    <span>Customer</span>
+                    <span>Dates</span>
+                    <span>Total</span>
+                    <span>Status</span>
+                  </div>
+                  {rentalHistory.map((r) => (
+                    <div key={r.id} className="maint-event-row">
+                      <span className="text-sm">{r.customerFullName ?? '—'}</span>
+                      <span className="text-xs text-[var(--sea-ink-soft)]">
+                        {formatDate(r.startDate)} → {formatDate(r.endDate)}
+                      </span>
+                      <span className="text-xs tabular-nums">{formatMYR(r.totalAmountSen)}</span>
+                      <StatusBadge status={r.status} size="sm" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* ── Edit Sheet (matches fleet list) ── */}
+      {isOwner && (
+        <Sheet open={editOpen} onOpenChange={(open) => { if (!open) setEditOpen(false) }}>
+          <SheetContent
+            side="right"
+            className="flex flex-col gap-0 p-0 sm:max-w-[28rem]"
+          >
+            <SheetHeader className="border-b border-[var(--line)] px-5 pt-5 pb-4">
+              <p className="island-kicker mb-1">Edit vehicle</p>
+              <SheetTitle className="text-lg font-semibold text-[var(--sea-ink)]">
+                {car.make} {car.model}
+              </SheetTitle>
+            </SheetHeader>
+
+            <div className="flex-1 overflow-y-auto px-5 py-4">
+              <form id="car-detail-form" className="space-y-3" onSubmit={handleFormSubmit}>
+                <div>
+                  <label className="field-label" htmlFor="cd-plate">Plate number</label>
+                  <input
+                    id="cd-plate"
+                    type="text"
+                    className="field-input uppercase"
+                    value={formData.plateNumber}
+                    onChange={(e) => setField('plateNumber', e.target.value.toUpperCase())}
+                    placeholder="e.g. ABC 1234"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="field-label" htmlFor="cd-make">Make</label>
+                    <input
+                      id="cd-make"
+                      type="text"
+                      className="field-input"
+                      value={formData.make}
+                      onChange={(e) => setField('make', e.target.value)}
+                      placeholder="e.g. Perodua"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="field-label" htmlFor="cd-model">Model</label>
+                    <input
+                      id="cd-model"
+                      type="text"
+                      className="field-input"
+                      value={formData.model}
+                      onChange={(e) => setField('model', e.target.value)}
+                      placeholder="e.g. Myvi"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="field-label" htmlFor="cd-year">Year</label>
+                    <input
+                      id="cd-year"
+                      type="number"
+                      className="field-input"
+                      value={formData.year}
+                      onChange={(e) => setField('year', e.target.value)}
+                      min={1960}
+                      max={currentYear() + 1}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="field-label" htmlFor="cd-color">Color</label>
+                    <select
+                      id="cd-color"
+                      className="field-input"
+                      value={formData.color}
+                      onChange={(e) => setField('color', e.target.value as CarColor)}
+                      required
+                    >
+                      {COLOR_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="field-label" htmlFor="cd-category">Category</label>
+                    <select
+                      id="cd-category"
+                      className="field-input"
+                      value={formData.category}
+                      onChange={(e) => setField('category', e.target.value as CarCategory)}
+                      required
+                    >
+                      {CATEGORY_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="field-label" htmlFor="cd-rate">Daily rate (RM)</label>
+                    <input
+                      id="cd-rate"
+                      type="number"
+                      className="field-input"
+                      value={formData.dailyRateRM}
+                      onChange={(e) => setField('dailyRateRM', e.target.value)}
+                      min={0}
+                      step={0.01}
+                      placeholder="0.00"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="field-label" htmlFor="cd-notes">Notes (optional)</label>
+                  <textarea
+                    id="cd-notes"
+                    className="field-input"
+                    rows={3}
+                    value={formData.notes}
+                    onChange={(e) => setField('notes', e.target.value)}
+                    placeholder="Any additional notes about this vehicle…"
+                  />
+                </div>
+
+                {formError && <p className="form-error">{formError}</p>}
+              </form>
             </div>
 
-            <form className="space-y-4" onSubmit={handleFormSubmit}>
-              <div>
-                <label className="field-label" htmlFor="cd-plate">Plate number</label>
-                <input
-                  id="cd-plate"
-                  type="text"
-                  className="field-input uppercase"
-                  value={formData.plateNumber}
-                  onChange={(e) => setField('plateNumber', e.target.value.toUpperCase())}
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="field-label" htmlFor="cd-make">Make</label>
-                  <input
-                    id="cd-make"
-                    type="text"
-                    className="field-input"
-                    value={formData.make}
-                    onChange={(e) => setField('make', e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="field-label" htmlFor="cd-model">Model</label>
-                  <input
-                    id="cd-model"
-                    type="text"
-                    className="field-input"
-                    value={formData.model}
-                    onChange={(e) => setField('model', e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="field-label" htmlFor="cd-year">Year</label>
-                  <input
-                    id="cd-year"
-                    type="number"
-                    className="field-input"
-                    value={formData.year}
-                    onChange={(e) => setField('year', e.target.value)}
-                    min={1960}
-                    max={currentYear() + 1}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="field-label" htmlFor="cd-color">Color</label>
-                  <select
-                    id="cd-color"
-                    className="field-input"
-                    value={formData.color}
-                    onChange={(e) => setField('color', e.target.value as CarColor)}
-                  >
-                    {COLOR_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="field-label" htmlFor="cd-category">Category</label>
-                  <select
-                    id="cd-category"
-                    className="field-input"
-                    value={formData.category}
-                    onChange={(e) => setField('category', e.target.value as CarCategory)}
-                  >
-                    {CATEGORY_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="field-label" htmlFor="cd-rate">Daily rate (RM)</label>
-                  <input
-                    id="cd-rate"
-                    type="number"
-                    className="field-input"
-                    value={formData.dailyRateRM}
-                    onChange={(e) => setField('dailyRateRM', e.target.value)}
-                    min={0}
-                    step={0.01}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="field-label" htmlFor="cd-notes">Notes (optional)</label>
-                <textarea
-                  id="cd-notes"
-                  className="field-input"
-                  rows={3}
-                  value={formData.notes}
-                  onChange={(e) => setField('notes', e.target.value)}
-                  placeholder="Any additional notes about this vehicle…"
-                />
-              </div>
-
-              {formError && <p className="form-error">{formError}</p>}
-
-              <div className="flex gap-3 pt-2">
-                <button type="submit" className="button-primary" disabled={isSubmitting}>
-                  {isSubmitting ? 'Saving…' : 'Save changes'}
-                </button>
-                <button
-                  type="button"
-                  className="button-secondary"
-                  onClick={() => setEditOpen(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+            <SheetFooter className="flex-row gap-2 border-t border-[var(--line)] px-5 py-4">
+              <Button type="submit" form="car-detail-form" disabled={isSubmitting}>
+                {isSubmitting ? 'Saving…' : 'Save changes'}
+              </Button>
+              <Button variant="outline" type="button" onClick={() => setEditOpen(false)}>
+                Cancel
+              </Button>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
       )}
 
       {/* ── New event Sheet ── */}
@@ -917,11 +1087,11 @@ function CarDetailPage() {
 
       {/* ── Service config Sheet ── */}
       <Sheet open={configOpen} onOpenChange={(open) => { if (!open) setConfigOpen(false) }}>
-        <SheetContent side="right" className="flex flex-col gap-0 p-0 sm:max-w-[30rem]">
+        <SheetContent side="right" className="flex flex-col gap-0 p-0 sm:min-w-md">
           <SheetHeader className="border-b border-[var(--line)] px-5 pb-4 pt-5">
             <p className="island-kicker mb-0.5">Service config</p>
             <SheetTitle className="text-lg font-semibold text-[var(--sea-ink)]">
-              {car.plateNumber} — Service & Documents
+              {car.plateNumber} — Service config
             </SheetTitle>
           </SheetHeader>
           <form className="flex flex-1 flex-col overflow-y-auto" onSubmit={handleSaveConfig}>
@@ -952,6 +1122,8 @@ function CarDetailPage() {
                     placeholder="e.g. 180"
                   />
                 </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="field-label" htmlFor="cfg-alert-km">Alert before (km)</label>
                   <input
@@ -961,6 +1133,7 @@ function CarDetailPage() {
                     value={cfgAlertKm}
                     onChange={(e) => setCfgAlertKm(e.target.value)}
                     min={0}
+                    placeholder="e.g. 500"
                   />
                 </div>
                 <div>
@@ -972,6 +1145,7 @@ function CarDetailPage() {
                     value={cfgAlertDays}
                     onChange={(e) => setCfgAlertDays(e.target.value)}
                     min={0}
+                    placeholder="e.g. 7"
                   />
                 </div>
               </div>
@@ -999,19 +1173,20 @@ function CarDetailPage() {
                     onChange={(e) => setCfgRoadTaxCost(e.target.value)}
                     min={0}
                     step={0.01}
+                    placeholder="e.g. 350.00"
                   />
                 </div>
-              </div>
-              <div>
-                <label className="field-label" htmlFor="cfg-rt-ref">Policy / reference</label>
-                <input
-                  id="cfg-rt-ref"
-                  type="text"
-                  className="field-input"
-                  value={cfgRoadTaxRef}
-                  onChange={(e) => setCfgRoadTaxRef(e.target.value)}
-                  placeholder="optional"
-                />
+                <div className="col-span-2">
+                  <label className="field-label" htmlFor="cfg-rt-ref">Remark</label>
+                  <input
+                    id="cfg-rt-ref"
+                    type="text"
+                    className="field-input"
+                    value={cfgRoadTaxRef}
+                    onChange={(e) => setCfgRoadTaxRef(e.target.value)}
+                    placeholder="e.g. RT-88213"
+                  />
+                </div>
               </div>
 
               <hr className="border-[var(--line)]" />
@@ -1037,19 +1212,20 @@ function CarDetailPage() {
                     onChange={(e) => setCfgInsuranceCost(e.target.value)}
                     min={0}
                     step={0.01}
+                    placeholder="e.g. 1200.00"
                   />
                 </div>
-              </div>
-              <div>
-                <label className="field-label" htmlFor="cfg-ins-ref">Policy / reference</label>
-                <input
-                  id="cfg-ins-ref"
-                  type="text"
-                  className="field-input"
-                  value={cfgInsuranceRef}
-                  onChange={(e) => setCfgInsuranceRef(e.target.value)}
-                  placeholder="optional"
-                />
+                <div className="col-span-2">
+                  <label className="field-label" htmlFor="cfg-ins-ref">Remark</label>
+                  <input
+                    id="cfg-ins-ref"
+                    type="text"
+                    className="field-input"
+                    value={cfgInsuranceRef}
+                    onChange={(e) => setCfgInsuranceRef(e.target.value)}
+                    placeholder="e.g. INS-XQ-4471"
+                  />
+                </div>
               </div>
               {maintError && <p className="form-error">{maintError}</p>}
             </div>

@@ -1,5 +1,15 @@
-import { useState, useCallback } from 'react'
-import { ArrowUpDown, ChevronUp, ChevronDown } from 'lucide-react'
+import { useCallback, useState } from 'react'
+import { ArrowUpDown, ChevronDown, ChevronUp } from 'lucide-react'
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '#/components/ui/table'
+import { cn } from '#/lib/utils'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -51,11 +61,12 @@ export function useSortState<K extends string>(
 // ─── SortIcon ─────────────────────────────────────────────────────────────────
 
 function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
-  if (!active) return <ArrowUpDown size={11} className="ml-1 inline opacity-35" />
+  if (!active)
+    return <ArrowUpDown className="ml-1 inline size-[11px] opacity-35" />
   return dir === 'asc' ? (
-    <ChevronUp size={11} className="ml-1 inline" />
+    <ChevronUp className="ml-1 inline size-[11px] text-[var(--ember)]" />
   ) : (
-    <ChevronDown size={11} className="ml-1 inline" />
+    <ChevronDown className="ml-1 inline size-[11px] text-[var(--ember)]" />
   )
 }
 
@@ -73,48 +84,65 @@ export function DataTable<T>({
   className,
 }: DataTableProps<T>) {
   return (
-    <table className={`ui-table cars-table ${className ?? ''}`}>
-      <thead>
-        <tr>
-          {columns.map((col) => (
-            <th
-              key={col.key}
-              className={[
-                'px-3 py-2',
-                col.sortable ? 'sortable' : '',
-                col.headerClassName ?? '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              onClick={col.sortable && onSort ? () => onSort(col.key) : undefined}
-            >
-              {col.sortable ? (
-                <span className="sort-indicator">
-                  {col.header}
-                  <SortIcon active={sortKey === col.key} dir={sortDir} />
-                </span>
-              ) : (
-                col.header
-              )}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
+    <Table className={cn('ui-table cars-table', className)}>
+      <TableHeader>
+        <TableRow className="hover:bg-transparent">
+          {columns.map((col) => {
+            const ariaSort =
+              col.sortable && sortKey === col.key
+                ? sortDir === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : col.sortable
+                  ? 'none'
+                  : undefined
+
+            return (
+              <TableHead
+                key={col.key}
+                aria-sort={ariaSort}
+                className={cn(
+                  'h-10 bg-[var(--muted,#F5F4F2)] px-3 py-2 text-xs font-bold tracking-[0.08em] text-[var(--ink-muted,var(--sea-ink-soft))] uppercase',
+                  col.sortable && 'cursor-pointer select-none',
+                  col.headerClassName,
+                )}
+                onClick={
+                  col.sortable && onSort ? () => onSort(col.key) : undefined
+                }
+              >
+                {col.sortable ? (
+                  <span className="inline-flex items-center">
+                    {col.header}
+                    <SortIcon active={sortKey === col.key} dir={sortDir} />
+                  </span>
+                ) : (
+                  col.header
+                )}
+              </TableHead>
+            )
+          })}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
         {data.length === 0 ? (
           emptyState ? (
-            <tr>
-              <td colSpan={columns.length} className="p-0">
-                {emptyState}
-              </td>
-            </tr>
+            <TableRow className="hover:bg-transparent">
+              <TableCell colSpan={columns.length} className="p-0">
+                <div className="flex min-h-[240px] flex-col items-center justify-center gap-3 p-8 text-center">
+                  {emptyState}
+                </div>
+              </TableCell>
+            </TableRow>
           ) : null
         ) : (
           data.map((row) => (
-            <tr
+            <TableRow
               key={getKey(row)}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
-              style={onRowClick ? { cursor: 'pointer' } : undefined}
+              className={cn(
+                'h-10 hover:bg-[var(--muted,#F5F4F2)]',
+                onRowClick && 'cursor-pointer',
+              )}
             >
               {columns.map((col) => {
                 const cellCls =
@@ -122,18 +150,18 @@ export function DataTable<T>({
                     ? col.cellClassName(row)
                     : col.cellClassName
                 return (
-                  <td
+                  <TableCell
                     key={col.key}
-                    className={['px-3 py-[0.42rem]', cellCls ?? ''].filter(Boolean).join(' ')}
+                    className={cn('px-3 py-[0.42rem] text-sm', cellCls)}
                   >
                     {col.render(row)}
-                  </td>
+                  </TableCell>
                 )
               })}
-            </tr>
+            </TableRow>
           ))
         )}
-      </tbody>
-    </table>
+      </TableBody>
+    </Table>
   )
 }
