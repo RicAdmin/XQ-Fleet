@@ -4,7 +4,7 @@ import {
   hasTripDates,
   sanitizeBookingDates,
   type BookingState,
-} from '#/components/landing/CarDetailDialog'
+} from '#/lib/booking-state'
 import { parseLocalYmd, toLocalYmd } from '#/lib/booking-datetime'
 import { loadTripSearch } from '#/lib/trip-search-storage'
 

@@ -34,7 +34,7 @@ export const msLandingContent: LandingContent = {
       title: '10 tip penting memandu di Langkawi',
       excerpt:
         'Dari adab berpandu kiri hingga merempuh Pantai Cenang menjelang petang — asas penting setiap pengunjung perlu kenali.',
-      img: '/image/Attractions/Sky%20bridge.png',
+      img: '/image/Attractions/Sky%20bridge.webp',
     },
     {
       id: 'rent-car-requirements',
@@ -52,7 +52,7 @@ export const msLandingContent: LandingContent = {
       title: 'Mengapa musim tengkujuh masa yang paling sunyi untuk menjelajah',
       excerpt:
         'Kurang sesak, lereng lagi hijau, dan kadar di luar pancaran utama — apa yang anda boleh jangka jika lawatan jatuh antara Mei dengan Jun.',
-      img: '/image/Attractions/Kilim%20Geoforest%20Park.png',
+      img: '/image/Attractions/Kilim%20Geoforest%20Park.webp',
     },
   ],
   attractions: [
@@ -68,7 +68,7 @@ export const msLandingContent: LandingContent = {
       time: 'Pemanduan kira‑kira 32 minit',
       mapsUrl:
         'https://www.google.com/maps/place/Langkawi+Sky+Bridge/@6.3860,99.6622,17z',
-      img: '/image/Attractions/Sky%20bridge.png',
+      img: '/image/Attractions/Sky%20bridge.webp',
     },
     {
       n: '02',
@@ -82,7 +82,7 @@ export const msLandingContent: LandingContent = {
       time: 'Pemanduan kira‑kira 28 minit',
       mapsUrl:
         'https://www.google.com/maps/place/Langkawi+Cable+Car/@6.3710,99.6719,17z',
-      img: '/image/Attractions/Skycab.png',
+      img: '/image/Attractions/Skycab.webp',
     },
     {
       n: '03',
@@ -96,7 +96,7 @@ export const msLandingContent: LandingContent = {
       time: 'Pemanduan kira‑kira 9 minit',
       mapsUrl:
         'https://www.google.com/maps/place/Pantai+Cenang/@6.2913,99.7289,17z',
-      img: '/image/Attractions/pantai%20cenang.png',
+      img: '/image/Attractions/pantai%20cenang.webp',
     },
     {
       n: '04',
@@ -110,7 +110,7 @@ export const msLandingContent: LandingContent = {
       time: 'Pemanduan kira‑kira 28 minit',
       mapsUrl:
         'https://www.google.com/maps/place/Kilim+Karst+Geoforest+Park/@6.4050,99.8582,17z',
-      img: '/image/Attractions/Kilim%20Geoforest%20Park.png',
+      img: '/image/Attractions/Kilim%20Geoforest%20Park.webp',
     },
     {
       n: '05',
@@ -124,7 +124,7 @@ export const msLandingContent: LandingContent = {
       time: 'Pemanduan kira‑kira 31 minit',
       mapsUrl:
         'https://www.google.com/maps/place/Pantai+Tanjung+Rhu/@6.4581,99.8249,17z',
-      img: '/image/Attractions/Tanjung%20Rhu.png',
+      img: '/image/Attractions/Tanjung%20Rhu.webp',
     },
     {
       n: '06',
@@ -138,7 +138,7 @@ export const msLandingContent: LandingContent = {
       time: 'Pemanduan kira‑kira 10 minit',
       mapsUrl:
         'https://www.google.com/maps/place/Underwater+World+Langkawi/@6.2878,99.7286,17z',
-      img: '/image/Attractions/Underwater%20World.png',
+      img: '/image/Attractions/Underwater%20World.webp',
     },
     {
       n: '07',
@@ -152,7 +152,7 @@ export const msLandingContent: LandingContent = {
       time: 'Pemanduan kira‑kira 21 minit',
       mapsUrl:
         'https://www.google.com/maps/place/Eagle+Square+Langkawi/@6.3083,99.8520,17z',
-      img: '/image/Attractions/Eagle%20Square.png',
+      img: '/image/Attractions/Eagle%20Square.webp',
     },
     {
       n: '08',
@@ -166,7 +166,7 @@ export const msLandingContent: LandingContent = {
       time: 'Pemanduan kira‑kira 28 minit',
       mapsUrl:
         'https://www.google.com/maps/place/Air+Terjun+Telaga+Tujuh/@6.3818,99.6729,17z',
-      img: '/image/Attractions/Telaga%20Tujuh%20Waterfall.png',
+      img: '/image/Attractions/Telaga%20Tujuh%20Waterfall.webp',
     },
     {
       n: '09',
@@ -180,7 +180,7 @@ export const msLandingContent: LandingContent = {
       time: 'Pemanduan kira‑kira 26 minit',
       mapsUrl:
         'https://www.google.com/maps/place/Langkawi+Wildlife+Park/@6.3873,99.8619,17z',
-      img: '/image/Attractions/Wildlife%20Park.png',
+      img: '/image/Attractions/Wildlife%20Park.webp',
     },
     {
       n: '10',
@@ -194,7 +194,7 @@ export const msLandingContent: LandingContent = {
       time: 'Perjalanan feri kira‑kira 45 minit',
       mapsUrl:
         'https://www.google.com/maps/place/Pulau+Payar+Marine+Park/@6.0740,100.0562,17z',
-      img: '/image/Attractions/Pulau%20Payar%20Marine%20Park.png',
+      img: '/image/Attractions/Pulau%20Payar%20Marine%20Park.webp',
     },
   ],
   essentialLocations: [
@@ -324,7 +324,7 @@ export const msLandingContent: LandingContent = {
       title: 'Tempah lebih awal',
       pct: 10,
       body: 'Tempahkan sekurang-kurangnya satu bulan lebih awal dan dapatkan diskaun 10% untuk kenderaan terpilih — pastikan model yang anda mahukan masih ada sebelum kemuncak musim sibuk.',
-      image: '/image/Langkawi Car Rental - Pick This Car.png',
+      image: '/image/Langkawi Car Rental - Pick This Car.webp',
     },
     {
       cls: 'p1',
@@ -333,7 +333,7 @@ export const msLandingContent: LandingContent = {
       title: 'Melancong di luar pancaran utama',
       pct: 20,
       body: 'Struktur harga penyewaan mengikut empat zon musim. Nikmat kadar lebih rendah semasa luar musim puncak — pantai lebih sepi, jalan lebih lancar, dan ruang meneroka lebih besar.',
-      image: '/image/Attractions/pantai cenang.png',
+      image: '/image/Attractions/pantai cenang.webp',
     },
     {
       cls: 'p3',
@@ -342,7 +342,7 @@ export const msLandingContent: LandingContent = {
       title: 'Tinggal lebih lama',
       pct: 30,
       body: 'Merancang penginapan panjang di Pulau Langkawi? Selepas tujuh hari pertama, kadar bagi hari sewa berikutnya boleh layak kepada diskaun sehingga 30%, sesuai bagi cuti seminggu dan pengembaraan santai di pulau ini.',
-      image: '/image/Attractions/Tanjung Rhu.png',
+      image: '/image/Attractions/Tanjung Rhu.webp',
     },
   ],
   categories: [

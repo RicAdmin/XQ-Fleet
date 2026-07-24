@@ -33,7 +33,7 @@ export const zhLandingContent: LandingContent = {
       tag: '驾车',
       title: '兰卡威自驾十个必备要点',
       excerpt: '从左舵礼仪到傍晚行经珍南海滩——每位游客都值得了解的基础要点。',
-      img: '/image/Attractions/Sky%20bridge.png',
+      img: '/image/Attractions/Sky%20bridge.webp',
     },
     {
       id: 'rent-car-requirements',
@@ -51,7 +51,7 @@ export const zhLandingContent: LandingContent = {
       title: '为何雨季往往是最宁静的探索时机',
       excerpt:
         '人流更少、山峦更苍翠，还有淡季价格——若行程落在五月至六月可参考这些体验。',
-      img: '/image/Attractions/Kilim%20Geoforest%20Park.png',
+      img: '/image/Attractions/Kilim%20Geoforest%20Park.webp',
     },
   ],
   attractions: [
@@ -67,7 +67,7 @@ export const zhLandingContent: LandingContent = {
       time: '车程约 32 分钟',
       mapsUrl:
         'https://www.google.com/maps/place/Langkawi+Sky+Bridge/@6.3860,99.6622,17z',
-      img: '/image/Attractions/Sky%20bridge.png',
+      img: '/image/Attractions/Sky%20bridge.webp',
     },
     {
       n: '02',
@@ -81,7 +81,7 @@ export const zhLandingContent: LandingContent = {
       time: '车程约 28 分钟',
       mapsUrl:
         'https://www.google.com/maps/place/Langkawi+Cable+Car/@6.3710,99.6719,17z',
-      img: '/image/Attractions/Skycab.png',
+      img: '/image/Attractions/Skycab.webp',
     },
     {
       n: '03',
@@ -95,7 +95,7 @@ export const zhLandingContent: LandingContent = {
       time: '车程约 9 分钟',
       mapsUrl:
         'https://www.google.com/maps/place/Pantai+Cenang/@6.2913,99.7289,17z',
-      img: '/image/Attractions/pantai%20cenang.png',
+      img: '/image/Attractions/pantai%20cenang.webp',
     },
     {
       n: '04',
@@ -109,7 +109,7 @@ export const zhLandingContent: LandingContent = {
       time: '车程约 28 分钟',
       mapsUrl:
         'https://www.google.com/maps/place/Kilim+Karst+Geoforest+Park/@6.4050,99.8582,17z',
-      img: '/image/Attractions/Kilim%20Geoforest%20Park.png',
+      img: '/image/Attractions/Kilim%20Geoforest%20Park.webp',
     },
     {
       n: '05',
@@ -123,7 +123,7 @@ export const zhLandingContent: LandingContent = {
       time: '车程约 31 分钟',
       mapsUrl:
         'https://www.google.com/maps/place/Pantai+Tanjung+Rhu/@6.4581,99.8249,17z',
-      img: '/image/Attractions/Tanjung%20Rhu.png',
+      img: '/image/Attractions/Tanjung%20Rhu.webp',
     },
     {
       n: '06',
@@ -137,7 +137,7 @@ export const zhLandingContent: LandingContent = {
       time: '车程约 10 分钟',
       mapsUrl:
         'https://www.google.com/maps/place/Underwater+World+Langkawi/@6.2878,99.7286,17z',
-      img: '/image/Attractions/Underwater%20World.png',
+      img: '/image/Attractions/Underwater%20World.webp',
     },
     {
       n: '07',
@@ -151,7 +151,7 @@ export const zhLandingContent: LandingContent = {
       time: '车程约 21 分钟',
       mapsUrl:
         'https://www.google.com/maps/place/Eagle+Square+Langkawi/@6.3083,99.8520,17z',
-      img: '/image/Attractions/Eagle%20Square.png',
+      img: '/image/Attractions/Eagle%20Square.webp',
     },
     {
       n: '08',
@@ -165,7 +165,7 @@ export const zhLandingContent: LandingContent = {
       time: '车程约 28 分钟',
       mapsUrl:
         'https://www.google.com/maps/place/Air+Terjun+Telaga+Tujuh/@6.3818,99.6729,17z',
-      img: '/image/Attractions/Telaga%20Tujuh%20Waterfall.png',
+      img: '/image/Attractions/Telaga%20Tujuh%20Waterfall.webp',
     },
     {
       n: '09',
@@ -179,7 +179,7 @@ export const zhLandingContent: LandingContent = {
       time: '车程约 26 分钟',
       mapsUrl:
         'https://www.google.com/maps/place/Langkawi+Wildlife+Park/@6.3873,99.8619,17z',
-      img: '/image/Attractions/Wildlife%20Park.png',
+      img: '/image/Attractions/Wildlife%20Park.webp',
     },
     {
       n: '10',
@@ -193,7 +193,7 @@ export const zhLandingContent: LandingContent = {
       time: '渡轮约 45 分钟',
       mapsUrl:
         'https://www.google.com/maps/place/Pulau+Payar+Marine+Park/@6.0740,100.0562,17z',
-      img: '/image/Attractions/Pulau%20Payar%20Marine%20Park.png',
+      img: '/image/Attractions/Pulau%20Payar%20Marine%20Park.webp',
     },
   ],
   essentialLocations: [
@@ -323,7 +323,7 @@ export const zhLandingContent: LandingContent = {
       title: '越早预订越多优惠',
       pct: 10,
       body: '至少在出行前一月完成预订可享精选车型九折优惠——旺季车源紧俏，尽早锁定中意座驾。',
-      image: '/image/Langkawi Car Rental - Pick This Car.png',
+      image: '/image/Langkawi Car Rental - Pick This Car.webp',
     },
     {
       cls: 'p1',
@@ -332,7 +332,7 @@ export const zhLandingContent: LandingContent = {
       title: '淡季自驾更划算',
       pct: 20,
       body: '兰卡威租车价格按四套季节梯度浮动。在低峰时段出行，人少海静、车流更稀疏，同时也能享受更友善的费率。',
-      image: '/image/Attractions/pantai cenang.png',
+      image: '/image/Attractions/pantai cenang.webp',
     },
     {
       cls: 'p3',
@@ -341,7 +341,7 @@ export const zhLandingContent: LandingContent = {
       title: '住得更久，省得更多',
       pct: 30,
       body: '若在兰卡威旅居超过七天，延展租期日均可享最高约七折的优惠，非常适合一周以上的慢旅行与沉浸式度假。',
-      image: '/image/Attractions/Tanjung Rhu.png',
+      image: '/image/Attractions/Tanjung Rhu.webp',
     },
   ],
   categories: [

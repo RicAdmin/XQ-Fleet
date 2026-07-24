@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "build": "tsx scripts/generate-well-known-static.ts && vite build",
+    "check:asset-budget": "tsx scripts/check-asset-budget.ts",
+    "optimize:images": "tsx scripts/optimize-images.ts",
     "preview": "vite preview",
     "test": "vitest run",
     "lint": "eslint",

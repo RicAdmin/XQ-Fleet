@@ -25,13 +25,14 @@ export type LandingContent = {
 }
 
 const HERO_IMAGES = {
-  promo1: '/image/Langkawi Car Rental - Pick This Car.png',
-  promo2: '/image/Attractions/pantai cenang.png',
-  promo3: '/image/Attractions/Tanjung Rhu.png',
+  promo1: '/image/Langkawi Car Rental - Pick This Car.webp',
+  promo2: '/image/Attractions/pantai cenang.webp',
+  promo3: '/image/Attractions/Tanjung Rhu.webp',
 } as const
 
 function attractionImage(filename: string): string {
-  return `/image/Attractions/${encodeURIComponent(filename)}`
+  const webp = filename.replace(/\.png$/i, '.webp')
+  return `/image/Attractions/${encodeURIComponent(webp)}`
 }
 
 export const enLandingContent: LandingContent = {
@@ -44,7 +45,7 @@ export const enLandingContent: LandingContent = {
       title: '10 essential tips for driving in Langkawi',
       excerpt:
         'From left-hand-drive etiquette to navigating Pantai Cenang on a Friday evening — the basics every tourist needs.',
-      img: '/image/Attractions/Sky%20bridge.png',
+      img: '/image/Attractions/Sky%20bridge.webp',
     },
     {
       id: 'rent-car-requirements',
@@ -62,7 +63,7 @@ export const enLandingContent: LandingContent = {
       title: 'Why monsoon season is the quietest time to explore',
       excerpt:
         'Fewer crowds, greener hills, and off-peak rates — what to expect if you visit between May and June.',
-      img: '/image/Attractions/Kilim%20Geoforest%20Park.png',
+      img: '/image/Attractions/Kilim%20Geoforest%20Park.webp',
     },
   ],
   attractions: [

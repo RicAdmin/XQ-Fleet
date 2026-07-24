@@ -155,6 +155,8 @@ export function AboutPage() {
               alt="MATTA — Malaysia Association of Tour and Travel Agents"
               loading="lazy"
               decoding="async"
+              width={57}
+              height={44}
             />
           </div>
         </section>

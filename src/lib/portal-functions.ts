@@ -127,6 +127,57 @@ const publicCarListSelect = {
   ...publicCarCatalogSelect,
 } as const
 
+/** Homepage cards omit SEO/detail prose to shrink SSR HTML + hydration payload. */
+const publicCarHomepageSelect = {
+  id: cars.id,
+  make: cars.make,
+  model: cars.model,
+  year: cars.year,
+  category: cars.category,
+  dailyRateSen: cars.dailyRateSen,
+  priceLowSeasonSen: cars.priceLowSeasonSen,
+  pricePeakSeasonSen: cars.pricePeakSeasonSen,
+  priceSuperPeakSeasonSen: cars.priceSuperPeakSeasonSen,
+  extHourLowSen: cars.extHourLowSen,
+  extHourPeakAndSuperPeakSen: cars.extHourPeakAndSuperPeakSen,
+  coverPhotoUrl: carPhotos.url,
+  coverPhotoAlt: carPhotos.altText,
+  notes: cars.notes,
+  slug: cars.slug,
+  featured: cars.featured,
+  passengers: cars.passengers,
+  doors: cars.doors,
+  bodyType: cars.bodyType,
+  transmission: cars.transmission,
+  fuelType: cars.fuelType,
+  appleCarPlay: cars.appleCarPlay,
+  androidAuto: cars.androidAuto,
+  bootCapacityL: cars.bootCapacityL,
+  bootCapacityLabel: cars.bootCapacityLabel,
+  largeSuitcasesCount: cars.largeSuitcasesCount,
+  smallCarryonsCount: cars.smallCarryonsCount,
+  combinedCapacityL: cars.combinedCapacityL,
+  combinedCapacityLabel: cars.combinedCapacityLabel,
+  tagFunAdventure: cars.tagFunAdventure,
+  tagFamilyComfort: cars.tagFamilyComfort,
+  tagSmallOku: cars.tagSmallOku,
+  fuelPolicy: cars.fuelPolicy,
+  carLocations: cars.carLocations,
+  promotionalPriceSen: cars.promotionalPriceSen,
+} as const
+
+function withHomepageCatalogDefaults(
+  row: Omit<PublicCarRow, 'longDescription' | 'highlights' | 'metaTitle' | 'metaDescription'>,
+): PublicCarRow {
+  return {
+    ...row,
+    longDescription: null,
+    highlights: null,
+    metaTitle: null,
+    metaDescription: null,
+  }
+}
+
 // ─── Season calendar (public) ─────────────────────────────────────────────────
 
 export const getPublicSeasonCalendar = createServerFn({ method: 'GET' }).handler(
@@ -158,6 +209,25 @@ export const getPublicCars = createServerFn({ method: 'GET' }).handler(async ():
 
   return rows
 })
+
+/** Slimmer listing for homepage SSR — omits longDescription / highlights / meta fields. */
+export const getPublicCarsForHomepage = createServerFn({ method: 'GET' }).handler(
+  async (): Promise<PublicCarRow[]> => {
+    const { db } = await import('#/db')
+
+    const rows = await db
+      .select(publicCarHomepageSelect)
+      .from(cars)
+      .leftJoin(
+        carPhotos,
+        and(eq(carPhotos.carId, cars.id), eq(carPhotos.isCover, true)),
+      )
+      .where(and(eq(cars.status, 'available')))
+      .orderBy(cars.make, cars.model)
+
+    return rows.map(withHomepageCatalogDefaults)
+  },
+)
 
 // ─── Filtered public listing ──────────────────────────────────────────────────
 

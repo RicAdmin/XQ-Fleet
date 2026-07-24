@@ -1,9 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { lazy, Suspense } from 'react'
 import { z } from 'zod'
 
 import { CxqLandingPage } from '#/components/landing/CxqLandingPage'
-import { WebMcpTools } from '#/components/landing/WebMcpTools'
-import { HERO_BG, HERO_BG_768 } from '#/components/landing/cxq-landing-data'
+import {
+  HERO_BG_768_AVIF,
+  HERO_BG_1280_AVIF,
+} from '#/components/landing/cxq-landing-data'
 import { HomeStructuredData } from '#/components/seo/HomeStructuredData'
 import {
   acceptsMarkdown,
@@ -13,9 +16,17 @@ import {
   markdownNegotiationResponse,
 } from '#/lib/agent-discovery'
 import type { Locale } from '#/i18n/locales'
-import { getPublicCars, type PublicCarRow } from '#/lib/portal-functions'
+import {
+  getPublicCarsForHomepage,
+  getPublicSeasonCalendar,
+  type PublicCarRow,
+} from '#/lib/portal-functions'
 import type { SeasonRange } from '#/lib/pricing-logic'
 import { homeSeoMeta } from '#/lib/seo-locale-meta'
+
+const WebMcpToolsLazy = lazy(() =>
+  import('#/components/landing/WebMcpTools').then((m) => ({ default: m.WebMcpTools })),
+)
 
 const indexSearchSchema = z.object({
   model: z.string().optional(),
@@ -41,17 +52,20 @@ export const Route = createFileRoute('/$locale/')({
       ...seo,
       links: [
         ...(seo.links ?? []),
+        // Single preferred-format preload per viewport — avoids multi-format duplicate fetches.
         {
           rel: 'preload',
           as: 'image',
-          href: HERO_BG_768,
+          type: 'image/avif',
+          href: HERO_BG_768_AVIF,
           fetchPriority: 'high',
           media: '(max-width: 768px)',
         },
         {
           rel: 'preload',
           as: 'image',
-          href: HERO_BG,
+          type: 'image/avif',
+          href: HERO_BG_1280_AVIF,
           fetchPriority: 'high',
           media: '(min-width: 769px)',
         },
@@ -59,8 +73,11 @@ export const Route = createFileRoute('/$locale/')({
     }
   },
   beforeLoad: async () => {
-    const cars = await getPublicCars()
-    return { cars, seasonCalendar: [] as SeasonRange[] }
+    const [cars, seasonCalendar] = await Promise.all([
+      getPublicCarsForHomepage(),
+      getPublicSeasonCalendar(),
+    ])
+    return { cars, seasonCalendar }
   },
   component: LandingPage,
 })
@@ -74,7 +91,9 @@ function LandingPage() {
   return (
     <>
       <HomeStructuredData />
-      <WebMcpTools />
+      <Suspense fallback={null}>
+        <WebMcpToolsLazy />
+      </Suspense>
       <CxqLandingPage
         initialCars={cars}
         initialSeasonCalendar={seasonCalendar}

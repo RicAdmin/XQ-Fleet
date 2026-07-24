@@ -45,7 +45,7 @@ import {
   nightsBetween,
   sanitizeBookingDates,
   type BookingState,
-} from '#/components/landing/CarDetailDialog'
+} from '#/lib/booking-state'
 
 import { LuggageFitModal } from '#/components/LuggageFitModal'
 import { LazySection } from '#/components/ui/LazySection'
@@ -55,6 +55,7 @@ import { displayDailyRateSen, usesSeasonDisplayPricing } from '#/lib/car-display
 import { checkoutSearchFromBooking } from '#/lib/checkout-trip'
 import { loadTripSearch, saveTripSearch } from '#/lib/trip-search-storage'
 import { catalogFitInput } from '#/lib/car-catalog'
+import { buildFleetCarCardAriaLabel } from '#/lib/fleet-car-card-a11y'
 import { carLuggageFit } from '#/lib/fleet-luggage-fit'
 import { isHondaNBox } from '#/lib/fleet-oku'
 import { filterPublicCars, getPublicSeasonCalendar } from '#/lib/portal-functions'
@@ -62,8 +63,12 @@ import type { PublicCarRow } from '#/lib/portal-functions'
 import type { SeasonRange } from '#/lib/pricing-logic'
 
 import {
-  HERO_BG,
+  HERO_BG_768,
+  HERO_BG_768_HEIGHT,
+  HERO_BG_768_WIDTH,
+  HERO_BG_AVIF_SRCSET,
   HERO_BG_SRCSET,
+  HERO_BG_WEBP_SRCSET,
   FOOTER_CTA_FLEET_IMAGE,
   FOOTER_CTA_SCENERY_IMAGE,
   HOTELS,
@@ -673,7 +678,7 @@ export function LandingNav({
     <nav className={'nav' + (onHero ? '' : ' nav--solid-light')}>
       <Link to={homePath as '/'}>
         <div className="brand" style={{ color: onHero ? '#fff' : 'var(--ink)' }}>
-          <BrandLogo size={48} />
+          <BrandLogo size={48} decorative />
           <BrandName />
         </div>
       </Link>
@@ -795,16 +800,26 @@ function Hero() {
     <section className="hero layout-bleed" data-screen-label="Hero">
       <div className="stage">
         <picture>
+          <source
+            type="image/avif"
+            srcSet={HERO_BG_AVIF_SRCSET}
+            sizes="100vw"
+          />
+          <source
+            type="image/webp"
+            srcSet={HERO_BG_WEBP_SRCSET}
+            sizes="100vw"
+          />
           <img
             className="hero-stage-img"
-            src={HERO_BG}
+            src={HERO_BG_768}
             srcSet={HERO_BG_SRCSET}
             sizes="100vw"
             alt=""
             fetchPriority="high"
-            decoding="async"
-            width={1280}
-            height={720}
+            decoding="sync"
+            width={HERO_BG_768_WIDTH}
+            height={HERO_BG_768_HEIGHT}
           />
         </picture>
         <div className="hero-title-block">
@@ -1581,6 +1596,20 @@ function FleetCarCard({
     onOpen()
   }
 
+  const cardAriaLabel = buildFleetCarCardAriaLabel({
+    make: car.make,
+    model: car.model,
+    category: car.category,
+    isOku: isHondaNBox(car),
+    okuLabel: t('booking.okuFriendly'),
+    rating: '4.8',
+    seatsLabel: t('booking.seatsCount', { count: fit.seats }),
+    doorsLabel: t('booking.doorsCount', { count: fit.doors }),
+    pricePrefix: showSeasonPrice ? t('booking.avgPerDay') : t('booking.startFrom'),
+    price: formatMYR(listedDailyRateSen),
+    perDay: t('common.perDay'),
+  })
+
   return (
     <>
       <article className="car-card">
@@ -1588,7 +1617,7 @@ function FleetCarCard({
           type="button"
           className="car-card-hit"
           onClick={handleOpen}
-          aria-label={`${car.make} ${car.model}, ${t('booking.startFrom')} ${formatMYR(listedDailyRateSen)} ${t('common.perDay')}`}
+          aria-label={cardAriaLabel}
         >
           <div className="car-photo">
             {isHondaNBox(car) ? <span className="tag-oku">{t('booking.okuFriendly')}</span> : null}
@@ -2598,10 +2627,12 @@ function CruiseBanner() {
       <article className="cruise-banner">
         <div className="cruise-banner-art">
           <img
-            src="/image/Sunset%20Cruise.png"
+            src="/image/Sunset%20Cruise.webp"
             alt={t('booking.cruiseAlt')}
             loading="lazy"
             decoding="async"
+            width={1280}
+            height={720}
           />
         </div>
 
@@ -2711,7 +2742,7 @@ export function SiteFooter({
       <div className="cols">
         <div>
           <div className="brand" style={{ color: '#fff' }}>
-            <BrandLogo size={56} />
+            <BrandLogo size={56} decorative />
             <BrandName />
           </div>
           <div className="footer-tagline">
@@ -2722,7 +2753,7 @@ export function SiteFooter({
           <FooterSocialLinks />
         </div>
         <div>
-          <h5>{t('footer.planTrip')}</h5>
+          <p className="footer-col-title">{t('footer.planTrip')}</p>
           <ul>
             <li>
               <LocaleLink to="/guides/pick-car">{t('footer.pickCar')}</LocaleLink>
@@ -2739,7 +2770,7 @@ export function SiteFooter({
           </ul>
         </div>
         <div>
-          <h5>{t('footer.company')}</h5>
+          <p className="footer-col-title">{t('footer.company')}</p>
           <ul>
             <li>
               <LocaleLink to="/about">{t('footer.aboutUs')}</LocaleLink>
@@ -2772,11 +2803,13 @@ export function SiteFooter({
               alt={t('footer.mattaAlt')}
               loading="lazy"
               decoding="async"
+              width={57}
+              height={44}
             />
           </div>
         </div>
         <div>
-          <h5>{t('footer.legal')}</h5>
+          <p className="footer-col-title">{t('footer.legal')}</p>
           <ul>
             <li>
               <LocaleLink to="/terms">{t('footer.terms')}</LocaleLink>
@@ -2796,7 +2829,7 @@ export function SiteFooter({
           </ul>
         </div>
         <div>
-          <h5>{t('footer.contact')}</h5>
+          <p className="footer-col-title">{t('footer.contact')}</p>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,.55)', margin: 0, lineHeight: 1.55 }}>
             <Phone size={11} style={{ verticalAlign: '-2px', marginRight: 4 }} />
             {t('footer.roadside')}
@@ -2812,18 +2845,12 @@ export function SiteFooter({
       </div>
       <div className="bottom">
         <span>{t('footer.copyright')}</span>
-        <span>
-          <LocaleLink to="/privacy" style={{ marginRight: 18 }}>
-            {t('footer.privacy')}
-          </LocaleLink>
-          <LocaleLink to="/terms" style={{ marginRight: 18 }}>
-            {t('footer.terms')}
-          </LocaleLink>
-          <LocaleLink to="/refund-policy" style={{ marginRight: 18 }}>
-            {t('footer.refund')}
-          </LocaleLink>
+        <nav className="site-footer-legal-links" aria-label={t('footer.legal')}>
+          <LocaleLink to="/privacy">{t('footer.privacy')}</LocaleLink>
+          <LocaleLink to="/terms">{t('footer.terms')}</LocaleLink>
+          <LocaleLink to="/refund-policy">{t('footer.refund')}</LocaleLink>
           <LocaleLink to="/pdpa">{t('footer.pdpa')}</LocaleLink>
-        </span>
+        </nav>
       </div>
     </footer>
   )

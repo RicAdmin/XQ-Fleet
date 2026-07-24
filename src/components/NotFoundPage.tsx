@@ -1,12 +1,13 @@
 import { useRouterState } from '@tanstack/react-router'
 import { Compass } from 'lucide-react'
-import { useEffect } from 'react'
+import { Suspense, use, useEffect } from 'react'
 
 import { LocaleLink } from '#/components/i18n/LocaleLink'
 import PublicMarketingShell from '#/components/shells/PublicMarketingShell'
 import { I18nProvider, useT } from '#/i18n/context'
 import { DEFAULT_LOCALE, isLocale } from '#/i18n/locales'
 import type { Locale } from '#/i18n/locales'
+import { ensureMessages } from '#/i18n/messages'
 
 function localeFromPathname(pathname: string): Locale {
   const segment = pathname.split('/').filter(Boolean)[0]
@@ -50,14 +51,24 @@ function NotFoundContent() {
   )
 }
 
-/** Root-level 404 — works with or without a locale layout above it. */
-export function NotFoundPage() {
+function NotFoundLocaleGate() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const locale = localeFromPathname(pathname)
+  // Locale layout beforeLoad is skipped for root notFound; load catalogs here.
+  use(ensureMessages(locale))
 
   return (
     <I18nProvider locale={locale}>
       <NotFoundContent />
     </I18nProvider>
+  )
+}
+
+/** Root-level 404 — works with or without a locale layout above it. */
+export function NotFoundPage() {
+  return (
+    <Suspense fallback={null}>
+      <NotFoundLocaleGate />
+    </Suspense>
   )
 }

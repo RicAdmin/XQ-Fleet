@@ -6,7 +6,7 @@ import PublicMarketingShell from '#/components/shells/PublicMarketingShell'
 import { useLocale, useT } from '#/i18n/context'
 import type { Locale } from '#/i18n/locales'
 import { LEGAL_COMPANY, LEGAL_PACK_INTRO } from '#/lib/legal/company'
-import { LEGAL_NAV_LINKS } from '#/lib/legal'
+import { LEGAL_NAV_LINKS } from '#/lib/legal/nav'
 import type { LegalDocument, LegalDocumentSlug, LegalLocaleContent } from '#/lib/legal/types'
 
 type LegalDocumentPageProps = {

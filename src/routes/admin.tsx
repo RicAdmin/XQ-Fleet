@@ -5,6 +5,8 @@ import { ErrorPanel } from '#/components/ui/ErrorPanel'
 import { useForceLightTheme } from '#/lib/theme-mode'
 import { requireAdminAccess } from '#/lib/route-guards'
 
+import '#/styles/admin-ui.css'
+
 function AdminRoot({ children }: { children: ReactNode }) {
   useForceLightTheme()
   return <div className="cxq-dashboard-root">{children}</div>

@@ -53,7 +53,6 @@ export function LanguageSwitcher({ className = '' }: { className?: string }) {
         className="lang-switcher-trigger"
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={t('nav.language')}
         onClick={() => setOpen((v) => !v)}
       >
         <Globe size={14} aria-hidden />

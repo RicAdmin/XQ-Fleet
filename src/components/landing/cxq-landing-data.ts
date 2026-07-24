@@ -3,18 +3,29 @@
 export const HERO_BG = '/image/hero-langkawi-adventure-1280.jpg'
 export const HERO_BG_768 = '/image/hero-langkawi-adventure-768.jpg'
 export const HERO_BG_FULL = '/image/hero-langkawi-adventure.jpg'
-/** Legacy PNG fallback (1 MB); prefer JPEG variants for LCP. */
+export const HERO_BG_768_WEBP = '/image/hero-langkawi-adventure-768.webp'
+export const HERO_BG_768_AVIF = '/image/hero-langkawi-adventure-768.avif'
+export const HERO_BG_1280_WEBP = '/image/hero-langkawi-adventure-1280.webp'
+export const HERO_BG_1280_AVIF = '/image/hero-langkawi-adventure-1280.avif'
+
+/** Legacy PNG fallback (1 MB); prefer JPEG/WebP/AVIF variants for LCP. */
 export const HERO_BG_LEGACY =
   '/image/Rent a Car in Langkawi for Every Adventure.png'
 
 export const HERO_BG_SRCSET = `${HERO_BG_768} 768w, ${HERO_BG} 1280w, ${HERO_BG_FULL} 1920w`
+export const HERO_BG_WEBP_SRCSET = `${HERO_BG_768_WEBP} 768w, ${HERO_BG_1280_WEBP} 1280w`
+export const HERO_BG_AVIF_SRCSET = `${HERO_BG_768_AVIF} 768w, ${HERO_BG_1280_AVIF} 1280w`
+
+/** Intrinsic dimensions of the 768w hero asset (used for LCP img attrs). */
+export const HERO_BG_768_WIDTH = 768
+export const HERO_BG_768_HEIGHT = 277
 
 export const AUTH_ASIDE_BG = '/image/Login form.JPG'
 
 export const FOOTER_CTA_FLEET_IMAGE =
-  '/image/Langkawi Car Rental - Pick This Car.JPG'
+  '/image/Langkawi Car Rental - Pick This Car.webp'
 export const FOOTER_CTA_SCENERY_IMAGE =
-  '/image/Langkawi Car Rental - Pick This Car.png'
+  '/image/Langkawi Car Rental - Pick This Car.webp'
 
 export const HOTELS = [
   'The Datai Langkawi',
@@ -140,7 +151,7 @@ export const BLOG_TIPS = [
     title: '10 essential tips for driving in Langkawi',
     excerpt:
       'From left-hand-drive etiquette to navigating Pantai Cenang on a Friday evening — the basics every tourist needs.',
-    img: '/image/Attractions/Sky%20bridge.png',
+    img: '/image/Attractions/Sky%20bridge.webp',
   },
   {
     id: 'rent-car-requirements',
@@ -158,7 +169,7 @@ export const BLOG_TIPS = [
     title: 'Why monsoon season is the quietest time to explore',
     excerpt:
       'Fewer crowds, greener hills, and off-peak rates — what to expect if you visit between May and June.',
-    img: '/image/Attractions/Kilim%20Geoforest%20Park.png',
+    img: '/image/Attractions/Kilim%20Geoforest%20Park.webp',
   },
 ] as const
 
@@ -170,9 +181,10 @@ export const ATTR_CATS = [
   'Landmarks',
 ] as const
 
-/** Local attraction photos in `public/image/Attractions/`. */
+/** Local attraction photos in `public/image/Attractions/` (WebP preferred). */
 function attractionImage(filename: string): string {
-  return `/image/Attractions/${encodeURIComponent(filename)}`
+  const webp = filename.replace(/\.png$/i, '.webp')
+  return `/image/Attractions/${encodeURIComponent(webp)}`
 }
 
 export const ATTRACTIONS = [

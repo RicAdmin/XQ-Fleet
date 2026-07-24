@@ -12,10 +12,11 @@ import netlify from '@netlify/vite-plugin-tanstack-start'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const siteUrl = env.SITE_URL || env.BETTER_AUTH_URL || 'http://localhost:3000'
+  const isDev = mode === 'development'
 
   return {
     plugins: [
-      devtools(),
+      ...(isDev ? [devtools()] : []),
       tsconfigPaths({ projects: ['./tsconfig.json'] }),
       tailwindcss(),
       tanstackStart(),
@@ -30,7 +31,8 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.VITE_SITE_URL': JSON.stringify(siteUrl),
     },
     build: {
-      sourcemap: true,
+      // Hidden maps for error monitoring without public .map fetch noise in Lighthouse.
+      sourcemap: 'hidden',
     },
   }
 })

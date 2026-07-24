@@ -1,29 +1,32 @@
-import { pdpaDocument } from '#/lib/legal/pdpa'
-import { privacyDocument } from '#/lib/legal/privacy'
-import { refundPolicyDocument } from '#/lib/legal/refund-policy'
-import { rentalAgreementDocument } from '#/lib/legal/rental-agreement'
-import { termsDocument } from '#/lib/legal/terms'
 import type { LegalDocument, LegalDocumentSlug } from '#/lib/legal/types'
-
-export const LEGAL_DOCUMENTS: Record<LegalDocumentSlug, LegalDocument> = {
-  terms: termsDocument,
-  'rental-agreement': rentalAgreementDocument,
-  privacy: privacyDocument,
-  'refund-policy': refundPolicyDocument,
-  pdpa: pdpaDocument,
-}
-
-export const LEGAL_NAV_LINKS = [
-  { slug: 'terms' as const, path: '/terms' as const, label: 'Terms & Conditions' },
-  { slug: 'rental-agreement' as const, path: '/rental-agreement' as const, label: 'Rental Contract' },
-  { slug: 'privacy' as const, path: '/privacy' as const, label: 'Privacy Policy' },
-  { slug: 'refund-policy' as const, path: '/refund-policy' as const, label: 'Refund Policy' },
-  { slug: 'pdpa' as const, path: '/pdpa' as const, label: 'PDPA Notice' },
-]
-
-export function getLegalDocument(slug: LegalDocumentSlug): LegalDocument {
-  return LEGAL_DOCUMENTS[slug]
-}
 
 export * from '#/lib/legal/types'
 export * from '#/lib/legal/company'
+export { LEGAL_NAV_LINKS, isLegalDocumentSlug } from '#/lib/legal/nav'
+
+/** Load a single legal document without pulling every locale body into the shared graph. */
+export async function loadLegalDocument(slug: LegalDocumentSlug): Promise<LegalDocument> {
+  switch (slug) {
+    case 'terms':
+      return (await import('#/lib/legal/terms')).termsDocument
+    case 'rental-agreement':
+      return (await import('#/lib/legal/rental-agreement')).rentalAgreementDocument
+    case 'privacy':
+      return (await import('#/lib/legal/privacy')).privacyDocument
+    case 'refund-policy':
+      return (await import('#/lib/legal/refund-policy')).refundPolicyDocument
+    case 'pdpa':
+      return (await import('#/lib/legal/pdpa')).pdpaDocument
+    default: {
+      const _exhaustive: never = slug
+      throw new Error(`Unknown legal document: ${_exhaustive}`)
+    }
+  }
+}
+
+/** @deprecated Prefer loadLegalDocument for route code-splitting. */
+export function getLegalDocument(slug: LegalDocumentSlug): LegalDocument {
+  throw new Error(
+    `getLegalDocument('${slug}') is sync-removed for code splitting — use loadLegalDocument in beforeLoad`,
+  )
+}

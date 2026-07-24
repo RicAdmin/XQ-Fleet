@@ -1,5 +1,5 @@
-import type { BookingState } from '#/components/landing/CarDetailDialog'
-import { sanitizeBookingDates } from '#/components/landing/CarDetailDialog'
+import type { BookingState } from '#/lib/booking-state'
+import { sanitizeBookingDates } from '#/lib/booking-state'
 
 const STORAGE_KEY = 'cxq-trip-search'
 
