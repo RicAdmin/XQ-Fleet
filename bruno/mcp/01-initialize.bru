@@ -1,0 +1,41 @@
+meta {
+  name: MCP Search Available Cars
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/mcp
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json, text/event-stream
+  mcp-protocol-version: 2025-03-26
+}
+
+body:json {
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {
+      "protocolVersion": "2025-03-26",
+      "capabilities": {},
+      "clientInfo": {
+        "name": "bruno-mcp-client",
+        "version": "1.0.0"
+      }
+    }
+  }
+}
+
+docs {
+  # MCP initialize (step 1)
+  
+  Run this first, then use the returned session id (if any) for `tools/list` and `tools/call` requests.
+  
+  For stateless PoC mode, follow with `tools/call` for `search_available_cars` with Trip dates.
+}

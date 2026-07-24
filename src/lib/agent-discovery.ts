@@ -258,8 +258,7 @@ export function buildMcpServerCard(siteUrl?: string) {
     },
     documentation: publicSitePath('/llms.txt', siteUrl),
     authentication: {
-      type: 'oauth2',
-      protectedResourceMetadata: publicSitePath('/.well-known/oauth-protected-resource', siteUrl),
+      type: 'public',
     },
   }
 }

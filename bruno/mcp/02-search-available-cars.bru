@@ -1,0 +1,39 @@
+meta {
+  name: MCP Search Available Cars
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/mcp
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json, text/event-stream
+  mcp-protocol-version: 2025-03-26
+}
+
+body:json {
+  {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/call",
+    "params": {
+      "name": "search_available_cars",
+      "arguments": {
+        "startDate": "2026-05-22",
+        "endDate": "2026-05-24"
+      }
+    }
+  }
+}
+
+docs {
+  # search_available_cars
+  
+  Finds Available cars for the Trip using the same fleet availability rules as the public site.
+  Returns Quote estimates labeled as non-binding.
+}

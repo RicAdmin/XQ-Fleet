@@ -47,6 +47,7 @@ import { Route as GuidesKnowHowRouteImport } from './routes/guides/know-how'
 import { Route as CheckoutCarIdRouteImport } from './routes/checkout/$carId'
 import { Route as BookCarIdRouteImport } from './routes/book/$carId'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
+import { Route as ApiMcpRouteImport } from './routes/api/mcp'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as AccountRentalsRouteImport } from './routes/account/rentals'
 import { Route as AccountProfileRouteImport } from './routes/account/profile'
@@ -298,6 +299,11 @@ const BookCarIdRoute = BookCarIdRouteImport.update({
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/blog/$slug',
   path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMcpRoute = ApiMcpRouteImport.update({
+  id: '/api/mcp',
+  path: '/api/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiHealthRoute = ApiHealthRouteImport.update({
@@ -639,6 +645,7 @@ export interface FileRoutesByFullPath {
   '/account/profile': typeof AccountProfileRoute
   '/account/rentals': typeof AccountRentalsRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/mcp': typeof ApiMcpRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/book/$carId': typeof BookCarIdRoute
   '/checkout/$carId': typeof CheckoutCarIdRoute
@@ -734,6 +741,7 @@ export interface FileRoutesByTo {
   '/account/profile': typeof AccountProfileRoute
   '/account/rentals': typeof AccountRentalsRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/mcp': typeof ApiMcpRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/book/$carId': typeof BookCarIdRoute
   '/checkout/$carId': typeof CheckoutCarIdRoute
@@ -834,6 +842,7 @@ export interface FileRoutesById {
   '/account/profile': typeof AccountProfileRoute
   '/account/rentals': typeof AccountRentalsRoute
   '/api/health': typeof ApiHealthRoute
+  '/api/mcp': typeof ApiMcpRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/book/$carId': typeof BookCarIdRoute
   '/checkout/$carId': typeof CheckoutCarIdRoute
@@ -935,6 +944,7 @@ export interface FileRouteTypes {
     | '/account/profile'
     | '/account/rentals'
     | '/api/health'
+    | '/api/mcp'
     | '/blog/$slug'
     | '/book/$carId'
     | '/checkout/$carId'
@@ -1030,6 +1040,7 @@ export interface FileRouteTypes {
     | '/account/profile'
     | '/account/rentals'
     | '/api/health'
+    | '/api/mcp'
     | '/blog/$slug'
     | '/book/$carId'
     | '/checkout/$carId'
@@ -1129,6 +1140,7 @@ export interface FileRouteTypes {
     | '/account/profile'
     | '/account/rentals'
     | '/api/health'
+    | '/api/mcp'
     | '/blog/$slug'
     | '/book/$carId'
     | '/checkout/$carId'
@@ -1215,6 +1227,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   TermsRoute: typeof TermsRoute
   ApiHealthRoute: typeof ApiHealthRoute
+  ApiMcpRoute: typeof ApiMcpRoute
   BlogSlugRoute: typeof BlogSlugRoute
   BookCarIdRoute: typeof BookCarIdRoute
   CheckoutCarIdRoute: typeof CheckoutCarIdRoute
@@ -1513,6 +1526,13 @@ declare module '@tanstack/react-router' {
       path: '/blog/$slug'
       fullPath: '/blog/$slug'
       preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mcp': {
+      id: '/api/mcp'
+      path: '/api/mcp'
+      fullPath: '/api/mcp'
+      preLoaderRoute: typeof ApiMcpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/health': {
@@ -2084,6 +2104,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   TermsRoute: TermsRoute,
   ApiHealthRoute: ApiHealthRoute,
+  ApiMcpRoute: ApiMcpRoute,
   BlogSlugRoute: BlogSlugRoute,
   BookCarIdRoute: BookCarIdRoute,
   CheckoutCarIdRoute: CheckoutCarIdRoute,

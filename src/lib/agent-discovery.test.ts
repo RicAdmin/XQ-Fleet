@@ -60,6 +60,7 @@ describe('agent-discovery', () => {
       resources: true,
       prompts: false,
     })
+    expect(card.authentication).toEqual({ type: 'public' })
   })
 
   it('builds agent skills discovery index v0.2.0', () => {

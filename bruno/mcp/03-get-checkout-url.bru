@@ -1,0 +1,43 @@
+meta {
+  name: MCP Get Checkout URL
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/mcp
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json, text/event-stream
+  mcp-protocol-version: 2025-03-26
+}
+
+body:json {
+  {
+    "jsonrpc": "2.0",
+    "id": 3,
+    "method": "tools/call",
+    "params": {
+      "name": "get_checkout_url",
+      "arguments": {
+        "carId": "{{carId}}",
+        "startDate": "2026-05-22",
+        "endDate": "2026-05-24",
+        "from": "lgk-airport",
+        "pickTime": "10:00",
+        "adults": 2
+      }
+    }
+  }
+}
+
+docs {
+  # get_checkout_url
+  
+  Builds an English Checkout URL with Trip dates prefilled. Does not create a Rental.
+  Replace `{{carId}}` with an id from search results.
+}

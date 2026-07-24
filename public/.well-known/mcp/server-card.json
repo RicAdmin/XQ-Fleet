@@ -15,7 +15,6 @@
   },
   "documentation": "https://car.xqholidays.com.my/llms.txt",
   "authentication": {
-    "type": "oauth2",
-    "protectedResourceMetadata": "https://car.xqholidays.com.my/.well-known/oauth-protected-resource"
+    "type": "public"
   }
 }
