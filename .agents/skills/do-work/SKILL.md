@@ -1,13 +1,13 @@
 ---
 name: do-work
-description: Do work on ready-for-agent GitHub issues — claim, TDD, draft PR with FE/BE artifacts. Use when the user says do-work, wants the next ready issue implemented, or a loop/automation should drain the ready-for-agent queue.
+description: Do work on ready-for-agent GitHub issues — claim, implement, draft PR with FE/BE artifacts. Use when the user says do-work, wants the next ready issue implemented, or a loop/automation should drain the ready-for-agent queue.
 ---
 
 # Do Work
 
-Pipeline: **resolve → claim → TDD → artifacts → draft PR**. One **work unit** per run, then stop. Does not write PRDs or create issues.
+Pipeline: **resolve → claim → implement → artifacts → draft PR**. One **work unit** per run, then stop. Does not write PRDs or create issues.
 
-Orchestrate the `tdd` skill for the red → green loop. Do not inline TDD rules here.
+Orchestrate the `implement` skill. Do not inline implementation rules here.
 
 ## 1. Preconditions
 
@@ -53,10 +53,10 @@ Before coding, claim **every** work-unit issue (all-or-nothing):
 
 Read Testing Decisions / acceptance criteria on the PRD and issues.
 
-- If seams are named clearly enough to TDD: treat them as pre-confirmed; proceed.
+- If seams are named clearly enough for implementation: treat them as pre-confirmed; proceed.
 - If seams are missing or ambiguous: comment on the issue what is unclear, remove `WIP`, add `HITL`, stop. Human re-arms later by removing `HITL` and adding `ready-for-agent`.
 
-**Done when:** seams are fixed for the TDD skill, or every claimed issue has been swapped to `HITL` and the run has stopped.
+**Done when:** seams are fixed for the `implement` skill, or every claimed issue has been swapped to `HITL` and the run has stopped.
 
 ## 5. Branch
 
@@ -66,14 +66,14 @@ From the repo’s default base (`main`): create and check out `issue-<n>-<short-
 
 ## 6. Implement
 
-Run the `tdd` skill against the agreed seams until:
+Run the `implement` skill against the agreed seams and acceptance criteria until:
 
 - every acceptance criterion on every work-unit issue is satisfied by the change, and
-- the seam tests are green.
+- tests are green.
+
+The `implement` skill owns TDD at seams, typechecking, the full test suite, code review, and commit — do not duplicate those steps here.
 
 On an **actionable failure** (won’t go green, missing access, scope explosion, etc.): comment what failed on the issue(s), remove `WIP`, add `HITL`, stop. Do not restore `ready-for-agent`.
-
-Do not run `code-review` in this pipeline.
 
 **Done when:** AC + green tests hold for the whole work unit, or issues are on `HITL` and the run has stopped.
 
@@ -85,7 +85,7 @@ Classify from the **diff** (not labels):
 - Server/API/db only → backend branch
 - Both → both artifact sets
 
-Follow [artifacts.md](artifacts.md). Reuse tests the TDD loop already wrote; do not invent a parallel suite.
+Follow [artifacts.md](artifacts.md). Reuse tests from the implement step; do not invent a parallel suite.
 
 **Done when:** required artifact set for the classification is present (committed scripts/requests + frontend screenshots captured under `docs/pr-artifacts/` when UI changed).
 

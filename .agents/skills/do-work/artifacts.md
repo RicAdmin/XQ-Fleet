@@ -12,7 +12,7 @@ Disclosed reference for the do-work artifacts step. Load when classifying the di
 
 ## Frontend
 
-- **Playwright:** Add or extend specs under the repo’s existing layout (prior art: `demo/scenario-*.spec.ts`, or paths named in the issue’s Testing Decisions). Prefer extending TDD seam tests over a second suite.
+- **Playwright:** Add or extend specs under the repo’s existing layout (prior art: `demo/scenario-*.spec.ts`, or paths named in the issue’s Testing Decisions). Prefer extending seam tests from the implement step over a second suite.
 - **Screenshots:** Capture the journeys the AC care about (viewport shots preferred over full-page unless the AC need scroll). Then **post** them into the draft PR — capture alone is not done.
 - **PR body:** Short “How to verify” with the Playwright file paths and a Screenshots section that embeds every posted image.
 
