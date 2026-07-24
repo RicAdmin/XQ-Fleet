@@ -9,7 +9,7 @@ import {
   drizzleAvailableCarsForTripDb,
   listAvailableCarsForTrip,
 } from '#/lib/available-cars-for-trip'
-import { getPublicCarDetail, publicCarDetailToRow } from '#/lib/portal-functions'
+import { getPublicCarDetail, getPublicCars, publicCarDetailToRow } from '#/lib/portal-functions'
 
 const rateLimitState = new Map<string, number[]>()
 
@@ -37,6 +37,8 @@ function mcpDeps() {
       const detail = await getPublicCarDetail({ data: { carId } })
       return detail ? publicCarDetailToRow(detail) : null
     },
+    // Public fleet catalog (status=available). Not Trip Available-car / rental-overlap listing.
+    listFleetCars: async () => getPublicCars(),
   }
 }
 

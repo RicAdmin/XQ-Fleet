@@ -39,7 +39,7 @@ echo "$LIST" | python3 -c "
 import json, sys
 d = json.load(sys.stdin)
 names = [t['name'] for t in d['result']['tools']]
-assert names == ['search_available_cars', 'get_checkout_url'], names
+assert names == ['search_available_cars', 'get_checkout_url', 'recommend_car_fit'], names
 print('   tools:', ', '.join(names))
 "
 

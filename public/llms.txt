@@ -14,7 +14,7 @@ Canonical origin: https://car.xqholidays.com.my (locales: /en, /ms, /zh)
 Programmatic booking handoff (read-only — does not create a Rental or payment):
 
 - [MCP server card](https://car.xqholidays.com.my/.well-known/mcp/server-card.json): Streamable HTTP MCP at `https://car.xqholidays.com.my/api/mcp` (public auth, no API key)
-- Tools: `search_available_cars` (live fleet + Quote estimates for a Trip), `get_checkout_url` (English Checkout URL with dates prefilled)
+- Tools: `recommend_car_fit` (Category + catalog examples from Hire intent), `search_available_cars` (Available cars + Quote estimates for a Trip), `get_checkout_url` (English Checkout URL with dates prefilled)
 - [Agent skills index](https://car.xqholidays.com.my/.well-known/agent-skills/index.json): `book-langkawi-car`, `langkawi-driving-guides`
 - [API catalog](https://car.xqholidays.com.my/.well-known/api-catalog): Discovery linkset for auth, MCP, and site docs
 - [Auth integration guide](https://car.xqholidays.com.my/auth.md): Better Auth endpoints (customer sign-in for Checkout completion)

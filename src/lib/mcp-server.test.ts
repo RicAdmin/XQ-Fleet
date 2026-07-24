@@ -1,8 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import type { PublicCarRow } from '#/lib/portal-functions'
-import { handleMcpHttpRequest } from '#/lib/mcp-server'
-import type { AgentCheckoutHandoffDeps } from '#/lib/agent-checkout-handoff'
+import { handleMcpHttpRequest, type McpServerDeps } from '#/lib/mcp-server'
 
 function sampleCar(overrides: Partial<PublicCarRow> = {}): PublicCarRow {
   return {
@@ -47,10 +46,11 @@ function sampleCar(overrides: Partial<PublicCarRow> = {}): PublicCarRow {
   }
 }
 
-function handoffDeps(overrides: Partial<AgentCheckoutHandoffDeps> = {}): AgentCheckoutHandoffDeps {
+function mcpDeps(overrides: Partial<McpServerDeps> = {}): McpServerDeps {
   return {
     searchCars: async () => [sampleCar()],
     getCar: async (carId) => (carId === 'car-1' ? sampleCar() : null),
+    listFleetCars: async () => [sampleCar()],
     siteUrl: 'https://carxq.com',
     ...overrides,
   }
@@ -70,10 +70,7 @@ async function parseSseJson(response: Response): Promise<unknown> {
   return JSON.parse(dataLine)
 }
 
-async function postMcp(
-  body: Record<string, unknown>,
-  deps: AgentCheckoutHandoffDeps,
-): Promise<unknown> {
+async function postMcp(body: Record<string, unknown>, deps: McpServerDeps): Promise<unknown> {
   const request = new Request('http://localhost/api/mcp', {
     method: 'POST',
     headers: {
@@ -90,14 +87,18 @@ async function postMcp(
 }
 
 describe('public MCP server at /api/mcp', () => {
-  it('lists search_available_cars and get_checkout_url tools', async () => {
+  it('lists search_available_cars, get_checkout_url, and recommend_car_fit tools', async () => {
     const payload = (await postMcp(
       { jsonrpc: '2.0', id: 1, method: 'tools/list', params: {} },
-      handoffDeps(),
+      mcpDeps(),
     )) as { result: { tools: Array<{ name: string }> } }
 
     const toolNames = payload.result.tools.map((tool) => tool.name)
-    expect(toolNames).toEqual(['search_available_cars', 'get_checkout_url'])
+    expect(toolNames).toEqual([
+      'search_available_cars',
+      'get_checkout_url',
+      'recommend_car_fit',
+    ])
   })
 
   it('invokes search_available_cars through the Agent checkout handoff seam', async () => {
@@ -114,7 +115,7 @@ describe('public MCP server at /api/mcp', () => {
           },
         },
       },
-      handoffDeps(),
+      mcpDeps(),
     )) as { result: { content: Array<{ text: string }> } }
 
     const result = JSON.parse(payload.result.content[0].text)
@@ -145,7 +146,7 @@ describe('public MCP server at /api/mcp', () => {
           },
         },
       },
-      handoffDeps(),
+      mcpDeps(),
     )) as { result: { content: Array<{ text: string }> } }
 
     const result = JSON.parse(payload.result.content[0].text)
@@ -169,10 +170,70 @@ describe('public MCP server at /api/mcp', () => {
           },
         },
       },
-      handoffDeps(),
+      mcpDeps(),
     )) as { result: { isError?: boolean; content: Array<{ text: string }> } }
 
     expect(payload.result.isError).toBe(true)
     expect(payload.result.content[0].text).toMatch(/unknown car/i)
+  })
+
+  it('invokes recommend_car_fit through the Car fit recommendation seam', async () => {
+    const listFleetCars = vi.fn(async () => [sampleCar()])
+    const searchCars = vi.fn(async () => [sampleCar()])
+    const payload = (await postMcp(
+      {
+        jsonrpc: '2.0',
+        id: 5,
+        method: 'tools/call',
+        params: {
+          name: 'recommend_car_fit',
+          arguments: {
+            adults: 2,
+            tripStyle: 'Small',
+          },
+        },
+      },
+      mcpDeps({ listFleetCars, searchCars }),
+    )) as { result: { content: Array<{ text: string }> } }
+
+    const result = JSON.parse(payload.result.content[0].text)
+    expect(listFleetCars).toHaveBeenCalledTimes(1)
+    expect(searchCars).not.toHaveBeenCalled()
+    expect(result.primary).toMatchObject({
+      category: 'economy',
+      examples: [
+        expect.objectContaining({
+          id: 'car-1',
+          dailyRateMyr: 70,
+        }),
+      ],
+    })
+    expect(result.primary.rationale.length).toBeGreaterThan(0)
+    expect(Array.isArray(result.alternatives)).toBe(true)
+    expect(typeof result.partialFit).toBe('boolean')
+    expect(typeof result.tightFit).toBe('boolean')
+    expect(result.primary.examples[0]).not.toHaveProperty('quoteEstimate')
+    expect(result).not.toHaveProperty('rentalId')
+  })
+
+  it('returns a tool error for invalid Hire intent on recommend_car_fit', async () => {
+    const payload = (await postMcp(
+      {
+        jsonrpc: '2.0',
+        id: 6,
+        method: 'tools/call',
+        params: {
+          name: 'recommend_car_fit',
+          arguments: {
+            adults: 0,
+          },
+        },
+      },
+      mcpDeps(),
+    )) as { result: { isError?: boolean; content: Array<{ text: string }> } }
+
+    // Zod may reject before the seam; either path is a tool error without a Rental.
+    expect(payload.result.isError).toBe(true)
+    expect(payload.result.content[0].text.length).toBeGreaterThan(0)
   })
 })

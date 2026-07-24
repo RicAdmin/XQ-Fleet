@@ -30,4 +30,16 @@ _Avoid_: Place a booking, agent booking, book via ChatGPT (when no Rental exists
 
 **Quote estimate**:
 A non-binding money figure shown before Checkout (for example daily rate × nights). The Checkout total is authoritative.
-_Avoid_: Price, total, invoice
+_Avoid_: Price, total, invoice; published daily rate alone (when no Trip nights are known)
+
+**Category**:
+A fleet grouping for a car (economy, mpv, suv, or other) used for pricing, promos, and fit advice.
+_Avoid_: Class, type, vehicle group (when meaning Category)
+
+**Hire intent**:
+What the traveller needs from a hire before a Trip is fixed: party size, luggage needs, and optionally trip style.
+_Avoid_: Trip, search criteria, booking request
+
+**Car fit recommendation**:
+A suggested primary Category (plus alternatives) and example fleet cars for a Hire intent. It is not an availability promise and does not create a Rental.
+_Avoid_: Available cars (when no Trip), booking recommendation, travel itinerary
