@@ -24,9 +24,9 @@ _index._agents.car.xqholidays.com.my. 3600 IN HTTPS 1 car.xqholidays.com.my. (
 
 Cloudflare dashboard equivalent:
 
-| Type  | Name                         | Priority | Target                  | Value                                      |
-|-------|------------------------------|----------|-------------------------|--------------------------------------------|
-| HTTPS | `_index._agents.car`         | 1        | `car.xqholidays.com.my` | `alpn="h2,h3" port=443`                    |
+| Type  | Name                 | Priority | Target                  | Value                   |
+| ----- | -------------------- | -------- | ----------------------- | ----------------------- |
+| HTTPS | `_index._agents.car` | 1        | `car.xqholidays.com.my` | `alpn="h2,h3" port=443` |
 
 ### MCP agent leaf (optional but recommended)
 
@@ -45,8 +45,25 @@ After `/.well-known` HTTP discovery is live, agents can follow:
 
 ## DNSSEC
 
-Enable DNSSEC on the Cloudflare zone `xqholidays.com.my` (DNS → DNSSEC → Enable)
-so validating resolvers return authenticated DNS-AID data.
+DNSSEC needs an authenticated chain from the `.com.my` parent to Cloudflare. Zone
+signing alone is not enough: Cloudflare can return `RRSIG` records while validating
+resolvers still return `AD=false` if the parent has no `DS` record.
+
+1. In Cloudflare, open `xqholidays.com.my` → **DNS** → **Settings** and enable
+   DNSSEC.
+2. Open **DS Record** and copy the generated key tag, algorithm, digest type, and
+   digest. Do not copy a DS value from this document because Cloudflare can rotate
+   the key.
+3. In Exabytes MyPanel, open the `xqholidays.com.my` domain → **DNSSEC/DS
+   Records** → **Add DS Record**, enter the Cloudflare values, and save.
+4. Wait for Exabytes/MYNIC to publish the DS record in the `.com.my` parent. The
+   Cloudflare status remains **Pending** until that happens.
+5. Confirm Cloudflare shows DNSSEC as **Active** and both public-resolver checks
+   below return authenticated data.
+
+Do not cancel and restart Cloudflare DNSSEC while the matching DS record is pending
+at the registrar. That would generate a different key and can leave a stale parent
+DS record, which breaks resolution for validating clients.
 
 ## Validation
 
@@ -54,6 +71,13 @@ so validating resolvers return authenticated DNS-AID data.
 # DoH (Cloudflare)
 curl -sH 'accept: application/dns-json' \
   'https://cloudflare-dns.com/dns-query?name=_index._agents.car.xqholidays.com.my&type=HTTPS'
+
+# Parent delegation must return the Cloudflare DS record.
+dig +dnssec xqholidays.com.my DS @1.1.1.1
+
+# HTTPS is RR type 65. TYPE65 works with older dig versions that do not know the
+# HTTPS mnemonic. Expect the HTTPS answer, its RRSIG, and `ad` in the header flags.
+dig +dnssec _index._agents.car.xqholidays.com.my TYPE65 @1.1.1.1
 
 # Scanner
 curl -s -X POST https://isitagentready.com/api/scan \
@@ -63,6 +87,10 @@ curl -s -X POST https://isitagentready.com/api/scan \
 ```
 
 Expect `checks.discoverability.dnsAid.status` → `"pass"`.
+
+If the HTTPS answer includes an `RRSIG` but the response header lacks `ad`, query
+the parent DS record first. An empty DS answer means registrar/registry publication
+is still pending; editing the DNS-AID HTTPS record will not fix that state.
 
 ## Notes
 
