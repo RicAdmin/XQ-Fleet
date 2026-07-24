@@ -9,6 +9,18 @@ Canonical origin: https://car.xqholidays.com.my (locales: /en, /ms, /zh)
 - [Home — car rental Langkawi](https://car.xqholidays.com.my/en): Search dates, browse fleet, book in ~90 seconds
 - [About XQ Car](https://car.xqholidays.com.my/en/about): Licensed operator since 2015, owned fleet, OKU-friendly vehicles, island-wide delivery
 
+## For AI agents
+
+Programmatic booking handoff (read-only — does not create a Rental or payment):
+
+- [MCP server card](https://car.xqholidays.com.my/.well-known/mcp/server-card.json): Streamable HTTP MCP at `https://car.xqholidays.com.my/api/mcp` (public auth, no API key)
+- Tools: `search_available_cars` (live fleet + Quote estimates for a Trip), `get_checkout_url` (English Checkout URL with dates prefilled)
+- [Agent skills index](https://car.xqholidays.com.my/.well-known/agent-skills/index.json): `book-langkawi-car`, `langkawi-driving-guides`
+- [API catalog](https://car.xqholidays.com.my/.well-known/api-catalog): Discovery linkset for auth, MCP, and site docs
+- [Auth integration guide](https://car.xqholidays.com.my/auth.md): Better Auth endpoints (customer sign-in for Checkout completion)
+
+Trip dates use `YYYY-MM-DD`. Quote estimates are non-binding; Checkout totals are authoritative.
+
 ## Blog — Langkawi car rental guides
 
 - [XQ Car Journal](https://car.xqholidays.com.my/en/blog): Guides on renting and driving in Langkawi
