@@ -50,8 +50,8 @@ describe('parseBlogMarkdown', () => {
       }),
     )
 
-    expect(posts).toHaveLength(27)
-    expect(new Set(posts.map((post) => post.slug)).size).toBe(27)
+    expect(posts).toHaveLength(29)
+    expect(new Set(posts.map((post) => post.slug)).size).toBe(29)
     expect(posts.filter((post) => post.language === 'ms')).toHaveLength(7)
     expect(posts.filter((post) => post.language === 'zh')).toHaveLength(2)
   })
