@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import type { PublicCarRow } from '#/lib/portal-functions'
 import {
@@ -187,5 +187,28 @@ describe('agent checkout handoff', () => {
         deps(),
       ),
     ).rejects.toThrow(/unknown car/i)
+  })
+
+  it('only reads fleet data via injected deps — no Rental or payment side effects', async () => {
+    const searchCars = vi.fn(async () => [sampleCar()])
+    const getCar = vi.fn(async (carId: string) => (carId === 'car-1' ? sampleCar() : null))
+    const handoffDeps = deps({ searchCars, getCar })
+
+    await searchAvailableCars(
+      { startDate: '2026-05-22', endDate: '2026-05-24' },
+      handoffDeps,
+    )
+    await getCheckoutUrl(
+      { carId: 'car-1', startDate: '2026-05-22', endDate: '2026-05-24' },
+      handoffDeps,
+    )
+
+    expect(searchCars).toHaveBeenCalledOnce()
+    expect(searchCars).toHaveBeenCalledWith({
+      startDate: '2026-05-22',
+      endDate: '2026-05-24',
+    })
+    expect(getCar).toHaveBeenCalledOnce()
+    expect(getCar).toHaveBeenCalledWith('car-1')
   })
 })
