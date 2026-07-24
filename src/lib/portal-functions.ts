@@ -1,10 +1,13 @@
 import { createServerFn } from '@tanstack/react-start'
-import { and, eq, gt, inArray, lt, notInArray } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 
-import { carPhotos, cars, rentals, seasonCalendar } from '#/db/schema'
+import {
+  drizzleAvailableCarsForTripDb,
+  listAvailableCarsForTrip,
+} from '#/lib/available-cars-for-trip'
+import { carPhotos, cars, seasonCalendar } from '#/db/schema'
 import type { CarCategory } from '#/db/schema'
 import { publicCarCatalogSelect, type PublicCarCatalogFields } from '#/lib/car-catalog'
-import { parseLocalYmd } from '#/lib/booking-datetime'
 import type { SeasonRange } from '#/lib/pricing-logic'
 
 export type { PublicCarCatalogFields } from '#/lib/car-catalog'
@@ -241,47 +244,7 @@ export const filterPublicCars = createServerFn({ method: 'GET' })
   .inputValidator((input: FilterPublicCarsInput) => input)
   .handler(async ({ data }): Promise<PublicCarRow[]> => {
     const { db } = await import('#/db')
-
-    const conditions = [eq(cars.status, 'available')]
-
-    if (data.category && data.category !== 'all') {
-      conditions.push(eq(cars.category, data.category as CarCategory))
-    }
-
-    // If date range provided, exclude cars with overlapping rentals
-    if (data.startDate && data.endDate) {
-      const start = parseLocalYmd(data.startDate)
-      const end = parseLocalYmd(data.endDate)
-      if (!start || !end) return []
-
-      const conflicting = await db
-        .select({ carId: rentals.carId })
-        .from(rentals)
-        .where(
-          and(
-            inArray(rentals.status, ['pending', 'active']),
-            lt(rentals.startDate, end),
-            gt(rentals.endDate, start),
-          ),
-        )
-
-      const conflictingIds = conflicting.map((r) => r.carId)
-      if (conflictingIds.length > 0) {
-        conditions.push(notInArray(cars.id, conflictingIds))
-      }
-    }
-
-    const rows = await db
-      .select(publicCarListSelect)
-      .from(cars)
-      .leftJoin(
-        carPhotos,
-        and(eq(carPhotos.carId, cars.id), eq(carPhotos.isCover, true)),
-      )
-      .where(and(...conditions))
-      .orderBy(cars.make, cars.model)
-
-    return rows
+    return listAvailableCarsForTrip(drizzleAvailableCarsForTripDb(db), data)
   })
 
 // ─── Public car detail ────────────────────────────────────────────────────────

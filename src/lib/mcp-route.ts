@@ -5,7 +5,11 @@ import {
   clientIpFromRequest,
   type RateLimitConfig,
 } from '#/lib/mcp-rate-limit'
-import { filterPublicCars, getPublicCarDetail, publicCarDetailToRow } from '#/lib/portal-functions'
+import {
+  drizzleAvailableCarsForTripDb,
+  listAvailableCarsForTrip,
+} from '#/lib/available-cars-for-trip'
+import { getPublicCarDetail, publicCarDetailToRow } from '#/lib/portal-functions'
 
 const rateLimitState = new Map<string, number[]>()
 
@@ -14,12 +18,16 @@ const MCP_RATE_LIMIT: RateLimitConfig = {
   maxRequests: 60,
 }
 
+async function searchAvailableCarsForTrip(input: { startDate: string; endDate: string }) {
+  const { db } = await import('#/db')
+  return listAvailableCarsForTrip(drizzleAvailableCarsForTripDb(db), input)
+}
+
 function mcpDeps() {
   const siteUrl = publicSiteUrl()
   return {
     siteUrl,
-    searchCars: async ({ startDate, endDate }: { startDate: string; endDate: string }) =>
-      filterPublicCars({ data: { startDate, endDate } }),
+    searchCars: searchAvailableCarsForTrip,
     getCar: async (carId: string) => {
       const detail = await getPublicCarDetail({ data: { carId } })
       return detail ? publicCarDetailToRow(detail) : null
