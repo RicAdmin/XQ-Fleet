@@ -18,6 +18,11 @@ const MCP_RATE_LIMIT: RateLimitConfig = {
   maxRequests: 60,
 }
 
+export type McpRouteHandlerOptions = {
+  rateLimitState?: Map<string, number[]>
+  rateLimit?: RateLimitConfig
+}
+
 async function searchAvailableCarsForTrip(input: { startDate: string; endDate: string }) {
   const { db } = await import('#/db')
   return listAvailableCarsForTrip(drizzleAvailableCarsForTripDb(db), input)
@@ -52,14 +57,21 @@ function rateLimitResponse(message: string, retryAfterSeconds: number): Response
   )
 }
 
-export async function mcpRouteHandler(request: Request): Promise<Response> {
-  const clientIp = clientIpFromRequest(request)
-  const decision = checkIpRateLimit(clientIp, Date.now(), rateLimitState, MCP_RATE_LIMIT)
+export function createMcpRouteHandler(options: McpRouteHandlerOptions = {}) {
+  const limitState = options.rateLimitState ?? rateLimitState
+  const limit = options.rateLimit ?? MCP_RATE_LIMIT
 
-  if (!decision.allowed) {
-    console.warn(`[mcp] rate limit exceeded for ${clientIp}`)
-    return rateLimitResponse(decision.message, decision.retryAfterSeconds)
+  return async function mcpRouteHandler(request: Request): Promise<Response> {
+    const clientIp = clientIpFromRequest(request)
+    const decision = checkIpRateLimit(clientIp, Date.now(), limitState, limit)
+
+    if (!decision.allowed) {
+      console.warn(`[mcp] rate limit exceeded for ${clientIp}`)
+      return rateLimitResponse(decision.message, decision.retryAfterSeconds)
+    }
+
+    return handleMcpHttpRequest(request, mcpDeps())
   }
-
-  return handleMcpHttpRequest(request, mcpDeps())
 }
+
+export const mcpRouteHandler = createMcpRouteHandler()
