@@ -50,9 +50,241 @@ export function buildOpenApiCommerce(siteUrl?: string) {
       },
     },
     paths: {
+      '/actions/search-available-cars': {
+        post: {
+          summary: 'Search Available cars for a Trip',
+          description:
+            'Returns fleet cars available for the requested pickup and return dates with non-binding Quote estimates. Does not create a Rental.',
+          operationId: 'searchAvailableCars',
+          tags: ['gpt-actions', 'fleet'],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  additionalProperties: false,
+                  properties: {
+                    startDate: {
+                      type: 'string',
+                      format: 'date',
+                      description: 'Trip pickup date in YYYY-MM-DD format.',
+                    },
+                    endDate: {
+                      type: 'string',
+                      format: 'date',
+                      description: 'Trip return date in YYYY-MM-DD format.',
+                    },
+                  },
+                  required: ['startDate', 'endDate'],
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Available cars and non-binding Quote estimates.',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      message: { type: 'string' },
+                      cars: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            id: { type: 'string' },
+                            displayName: { type: 'string' },
+                            category: {
+                              type: 'string',
+                              enum: ['economy', 'mpv', 'suv', 'other'],
+                            },
+                            dailyRateMyr: { type: 'number' },
+                            quoteEstimate: {
+                              type: 'object',
+                              properties: {
+                                nights: { type: 'integer' },
+                                estimatedTotalMyr: { type: 'number' },
+                                disclaimer: { type: 'string' },
+                              },
+                              required: [
+                                'nights',
+                                'estimatedTotalMyr',
+                                'disclaimer',
+                              ],
+                            },
+                          },
+                          required: [
+                            'id',
+                            'displayName',
+                            'category',
+                            'dailyRateMyr',
+                            'quoteEstimate',
+                          ],
+                        },
+                      },
+                    },
+                    required: ['message', 'cars'],
+                  },
+                },
+              },
+            },
+            '400': {
+              description: 'Invalid Trip dates or JSON request body.',
+            },
+          },
+        },
+      },
+      '/actions/get-checkout-url': {
+        post: {
+          summary: 'Create a Checkout URL for a selected car and Trip',
+          description:
+            'Returns an English Checkout URL with Trip details prefilled. Opening the URL does not create a Rental or payment.',
+          operationId: 'getCheckoutUrl',
+          tags: ['gpt-actions', 'checkout'],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  additionalProperties: false,
+                  properties: {
+                    carId: {
+                      type: 'string',
+                      description:
+                        'Stable car id returned by searchAvailableCars.',
+                    },
+                    startDate: { type: 'string', format: 'date' },
+                    endDate: { type: 'string', format: 'date' },
+                    from: {
+                      type: 'string',
+                      description:
+                        'Pickup meet point, such as lgk-airport or kuah-jetty.',
+                    },
+                    retLoc: {
+                      type: 'string',
+                      description:
+                        'Return meet point, such as lgk-airport or kuah-jetty.',
+                    },
+                    tripType: {
+                      type: 'string',
+                      enum: ['round', 'oneway'],
+                    },
+                    pickTime: {
+                      type: 'string',
+                      pattern: '^([01]\\d|2[0-3]):[0-5]\\d$',
+                      example: '10:00',
+                    },
+                    retTime: {
+                      type: 'string',
+                      pattern: '^([01]\\d|2[0-3]):[0-5]\\d$',
+                      example: '10:00',
+                    },
+                    adults: { type: 'integer', minimum: 1, maximum: 9 },
+                    children: { type: 'integer', minimum: 0, maximum: 8 },
+                  },
+                  required: ['carId', 'startDate', 'endDate'],
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Checkout URL for the selected car and Trip.',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      checkoutUrl: { type: 'string', format: 'uri' },
+                    },
+                    required: ['checkoutUrl'],
+                  },
+                },
+              },
+            },
+            '400': {
+              description:
+                'Invalid Trip, unknown car id, or JSON request body.',
+            },
+          },
+        },
+      },
+      '/actions/recommend-car-fit': {
+        post: {
+          summary: 'Recommend a Car fit from Hire intent',
+          description:
+            'Returns a primary Category, alternatives, and example fleet cars. This is not Trip availability and does not create a Rental.',
+          operationId: 'recommendCarFit',
+          tags: ['gpt-actions', 'fleet'],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  additionalProperties: false,
+                  properties: {
+                    adults: { type: 'integer', minimum: 1, maximum: 9 },
+                    children: {
+                      type: 'integer',
+                      minimum: 0,
+                      maximum: 8,
+                      default: 0,
+                    },
+                    bags: { type: 'integer', minimum: 0, default: 0 },
+                    tripStyle: {
+                      type: 'string',
+                      enum: ['Small', 'Comfort', 'Adventure'],
+                    },
+                  },
+                  required: ['adults'],
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description:
+                'Car fit recommendation with Category and fleet examples.',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      primary: { type: 'object', additionalProperties: true },
+                      alternatives: {
+                        type: 'array',
+                        items: { type: 'object', additionalProperties: true },
+                      },
+                      tightFit: { type: 'boolean' },
+                      partialFit: { type: 'boolean' },
+                      message: { type: 'string' },
+                    },
+                    required: [
+                      'primary',
+                      'alternatives',
+                      'tightFit',
+                      'partialFit',
+                      'message',
+                    ],
+                  },
+                },
+              },
+            },
+            '400': {
+              description: 'Invalid Hire intent or JSON request body.',
+            },
+          },
+        },
+      },
       '/acp/checkout_sessions': {
         post: {
-          summary: 'Create an agentic checkout session for a car rental booking',
+          summary:
+            'Create an agentic checkout session for a car rental booking',
           operationId: 'createCheckoutSession',
           tags: ['acp', 'checkout'],
           'x-payment-info': {
@@ -110,7 +342,8 @@ export function buildOpenApiCommerce(siteUrl?: string) {
                 method: 'card',
                 amount: '0',
                 currency: 'MYR',
-                description: 'Free discovery probe; x402 settlement optional on /api.',
+                description:
+                  'Free discovery probe; x402 settlement optional on /api.',
               },
             ],
           },
@@ -124,6 +357,28 @@ export function buildOpenApiCommerce(siteUrl?: string) {
           },
         },
       },
+    },
+  }
+}
+
+/** Focused OpenAPI document for direct import into the Custom GPT Actions editor. */
+export function buildGptActionsOpenApi(siteUrl?: string) {
+  const commerce = buildOpenApiCommerce(siteUrl)
+  return {
+    openapi: commerce.openapi,
+    info: {
+      title: 'XQ Car Langkawi GPT Actions',
+      version: commerce.info.version,
+      description:
+        'Search Available cars, recommend a Car fit, and hand customers off to XQ Car Checkout. These Actions do not create a Rental or settle payment.',
+    },
+    servers: commerce.servers,
+    paths: {
+      '/actions/search-available-cars':
+        commerce.paths['/actions/search-available-cars'],
+      '/actions/get-checkout-url': commerce.paths['/actions/get-checkout-url'],
+      '/actions/recommend-car-fit':
+        commerce.paths['/actions/recommend-car-fit'],
     },
   }
 }
@@ -149,7 +404,10 @@ export function buildUcpProfile(siteUrl?: string) {
             spec: `https://ucp.dev/${UCP_VERSION}/specification/overview`,
             transport: 'mcp',
             endpoint: `${base}/api/mcp`,
-            schema: publicSitePath('/.well-known/mcp/server-card.json', siteUrl),
+            schema: publicSitePath(
+              '/.well-known/mcp/server-card.json',
+              siteUrl,
+            ),
           },
         ],
       },
@@ -217,7 +475,10 @@ export function buildAcpDiscovery(siteUrl?: string) {
   }
 }
 
-export function buildX402PaymentRequired(siteUrl?: string, resourcePath = '/api') {
+export function buildX402PaymentRequired(
+  siteUrl?: string,
+  resourcePath = '/api',
+) {
   const resourceUrl = publicSitePath(resourcePath, siteUrl)
   const payTo = x402PayToAddress()
   const facilitator = x402FacilitatorUrl()
@@ -266,13 +527,19 @@ export function buildX402PaymentRequired(siteUrl?: string, resourcePath = '/api'
   return payload
 }
 
-export function encodeX402PaymentRequiredHeader(siteUrl?: string, resourcePath = '/api'): string {
-  return Buffer.from(JSON.stringify(buildX402PaymentRequired(siteUrl, resourcePath))).toString(
-    'base64',
-  )
+export function encodeX402PaymentRequiredHeader(
+  siteUrl?: string,
+  resourcePath = '/api',
+): string {
+  return Buffer.from(
+    JSON.stringify(buildX402PaymentRequired(siteUrl, resourcePath)),
+  ).toString('base64')
 }
 
-export function x402PaymentRequiredResponse(siteUrl?: string, resourcePath = '/api'): Response {
+export function x402PaymentRequiredResponse(
+  siteUrl?: string,
+  resourcePath = '/api',
+): Response {
   const paymentRequired = encodeX402PaymentRequiredHeader(siteUrl, resourcePath)
   return new Response('{}', {
     status: 402,
@@ -289,7 +556,10 @@ export function hasX402PaymentSignature(request: Request): boolean {
   return Boolean(request.headers.get('PAYMENT-SIGNATURE')?.trim())
 }
 
-export function x402ApiGatewayResponse(request: Request, siteUrl?: string): Response {
+export function x402ApiGatewayResponse(
+  request: Request,
+  siteUrl?: string,
+): Response {
   if (hasX402PaymentSignature(request)) {
     return jsonResponse({
       status: 'ok',

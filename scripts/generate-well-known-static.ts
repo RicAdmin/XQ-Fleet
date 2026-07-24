@@ -3,6 +3,7 @@ import { join } from 'node:path'
 
 import {
   buildAcpDiscovery,
+  buildGptActionsOpenApi,
   buildOpenApiCommerce,
   buildUcpProfile,
 } from '#/lib/agent-commerce-discovery'
@@ -43,7 +44,11 @@ function writeJson(relativePath: string, payload: unknown, siteUrl: string) {
 function writeText(relativePath: string, content: string, siteUrl: string) {
   const outFile = join(process.cwd(), 'public', relativePath)
   mkdirSync(join(outFile, '..'), { recursive: true })
-  writeFileSync(outFile, content.endsWith('\n') ? content : `${content}\n`, 'utf8')
+  writeFileSync(
+    outFile,
+    content.endsWith('\n') ? content : `${content}\n`,
+    'utf8',
+  )
   console.log(`[well-known] Wrote ${relativePath} for ${siteUrl}`)
 }
 
@@ -51,9 +56,15 @@ const siteUrl = resolveBuildSiteUrl()
 
 const discoveryFiles: Array<{ path: string; payload: unknown }> = [
   { path: 'api-catalog', payload: buildApiCatalog(siteUrl) },
-  { path: 'oauth-authorization-server', payload: buildOAuthAuthorizationServer(siteUrl) },
+  {
+    path: 'oauth-authorization-server',
+    payload: buildOAuthAuthorizationServer(siteUrl),
+  },
   { path: 'openid-configuration', payload: buildOpenIdConfiguration(siteUrl) },
-  { path: 'oauth-protected-resource', payload: buildOAuthProtectedResource(siteUrl) },
+  {
+    path: 'oauth-protected-resource',
+    payload: buildOAuthProtectedResource(siteUrl),
+  },
   { path: 'mcp/server-card.json', payload: buildMcpServerCard(siteUrl) },
   { path: 'agent-skills/index.json', payload: buildAgentSkillsIndex(siteUrl) },
   { path: 'acp.json', payload: buildAcpDiscovery(siteUrl) },
@@ -68,6 +79,7 @@ for (const file of discoveryFiles) {
 }
 
 writeJson('openapi.json', buildOpenApiCommerce(siteUrl), siteUrl)
+writeJson('openapi-actions.json', buildGptActionsOpenApi(siteUrl), siteUrl)
 writeText('auth.md', buildAuthMd(siteUrl), siteUrl)
 
 // Skill markdown lives under public/.well-known/agent-skills/; mirror for Netlify undotted publish.

@@ -1,27 +1,15 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "XQCar Commerce API",
+    "title": "XQ Car Langkawi GPT Actions",
     "version": "1.0.0",
-    "description": "Langkawi car rental checkout and booking APIs for agents. Primary settlement via iPay88 (card/FPX, MYR). Optional x402 micropayments for agent API access."
+    "description": "Search Available cars, recommend a Car fit, and hand customers off to XQ Car Checkout. These Actions do not create a Rental or settle payment."
   },
   "servers": [
     {
       "url": "https://car.xqholidays.com.my/api"
     }
   ],
-  "x-service-info": {
-    "categories": [
-      "commerce",
-      "travel",
-      "car-rental"
-    ],
-    "docs": {
-      "homepage": "https://car.xqholidays.com.my/",
-      "llms": "https://car.xqholidays.com.my/llms.txt",
-      "apiReference": "https://car.xqholidays.com.my/openapi.json"
-    }
-  },
   "paths": {
     "/actions/search-available-cars": {
       "post": {
@@ -328,85 +316,6 @@
           },
           "400": {
             "description": "Invalid Hire intent or JSON request body."
-          }
-        }
-      }
-    },
-    "/acp/checkout_sessions": {
-      "post": {
-        "summary": "Create an agentic checkout session for a car rental booking",
-        "operationId": "createCheckoutSession",
-        "tags": [
-          "acp",
-          "checkout"
-        ],
-        "x-payment-info": {
-          "offers": [
-            {
-              "intent": "session",
-              "method": "card",
-              "amount": null,
-              "currency": "MYR",
-              "description": "Checkout session total depends on vehicle, dates, and add-ons. Settled via iPay88 card or FPX."
-            }
-          ]
-        },
-        "responses": {
-          "201": {
-            "description": "Checkout session created"
-          }
-        }
-      }
-    },
-    "/agent/booking-quote": {
-      "post": {
-        "summary": "Quote a rental booking before checkout",
-        "operationId": "quoteBooking",
-        "tags": [
-          "booking"
-        ],
-        "x-payment-info": {
-          "offers": [
-            {
-              "intent": "charge",
-              "method": "card",
-              "amount": null,
-              "currency": "MYR",
-              "description": "Dynamic quote from fleet pricing engine. Economy from RM 70/day."
-            }
-          ]
-        },
-        "responses": {
-          "200": {
-            "description": "Booking quote"
-          }
-        }
-      }
-    },
-    "/agent/access": {
-      "get": {
-        "summary": "Agent API access (x402-protected catalog probe)",
-        "operationId": "agentApiAccess",
-        "tags": [
-          "agent"
-        ],
-        "x-payment-info": {
-          "offers": [
-            {
-              "intent": "charge",
-              "method": "card",
-              "amount": "0",
-              "currency": "MYR",
-              "description": "Free discovery probe; x402 settlement optional on /api."
-            }
-          ]
-        },
-        "responses": {
-          "200": {
-            "description": "Access granted"
-          },
-          "402": {
-            "description": "Payment required (x402)"
           }
         }
       }

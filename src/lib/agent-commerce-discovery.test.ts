@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   buildAcpDiscovery,
+  buildGptActionsOpenApi,
   buildOpenApiCommerce,
   buildUcpProfile,
   buildX402PaymentRequired,
@@ -28,6 +29,39 @@ describe('agent-commerce-discovery', () => {
 
     const quote = doc.paths['/agent/booking-quote']?.post
     expect(quote?.['x-payment-info']?.offers?.[0]?.intent).toBe('charge')
+  })
+
+  it('publishes the three GPT Actions with JSON request contracts', () => {
+    const doc = buildOpenApiCommerce(site)
+
+    const search = doc.paths['/actions/search-available-cars']?.post
+    expect(search?.operationId).toBe('searchAvailableCars')
+    expect(
+      search?.requestBody?.content?.['application/json']?.schema?.required,
+    ).toEqual(['startDate', 'endDate'])
+
+    const checkout = doc.paths['/actions/get-checkout-url']?.post
+    expect(checkout?.operationId).toBe('getCheckoutUrl')
+    expect(
+      checkout?.requestBody?.content?.['application/json']?.schema?.required,
+    ).toEqual(['carId', 'startDate', 'endDate'])
+
+    const fit = doc.paths['/actions/recommend-car-fit']?.post
+    expect(fit?.operationId).toBe('recommendCarFit')
+    expect(
+      fit?.requestBody?.content?.['application/json']?.schema?.required,
+    ).toEqual(['adults'])
+  })
+
+  it('builds a dedicated import document containing only GPT Actions', () => {
+    const doc = buildGptActionsOpenApi(site)
+
+    expect(doc.info.title).toBe('XQ Car Langkawi GPT Actions')
+    expect(Object.keys(doc.paths)).toEqual([
+      '/actions/search-available-cars',
+      '/actions/get-checkout-url',
+      '/actions/recommend-car-fit',
+    ])
   })
 
   it('builds UCP profile with services, capabilities, and payment handlers', () => {

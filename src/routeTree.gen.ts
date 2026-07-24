@@ -17,6 +17,7 @@ import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PdpaRouteImport } from './routes/pdpa'
 import { Route as OpenapiDotjsonRouteImport } from './routes/openapi[.]json'
+import { Route as OpenapiActionsDotjsonRouteImport } from './routes/openapi-actions[.]json'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AppRouteImport } from './routes/app'
@@ -87,6 +88,9 @@ import { Route as AppCustomersCustomerIdRouteImport } from './routes/app/custome
 import { Route as ApiWebhooksIpay88RouteImport } from './routes/api/webhooks/ipay88'
 import { Route as ApiPaymentResponseRouteImport } from './routes/api/payment/response'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiActionsSearchAvailableCarsRouteImport } from './routes/api/actions/search-available-cars'
+import { Route as ApiActionsRecommendCarFitRouteImport } from './routes/api/actions/recommend-car-fit'
+import { Route as ApiActionsGetCheckoutUrlRouteImport } from './routes/api/actions/get-checkout-url'
 import { Route as ApiAcpCheckout_sessionsRouteImport } from './routes/api/acp/checkout_sessions'
 import { Route as AdminRentalsRentalIdRouteImport } from './routes/admin/rentals/$rentalId'
 import { Route as AdminPromosPromoIdRouteImport } from './routes/admin/promos/$promoId'
@@ -146,6 +150,11 @@ const PdpaRoute = PdpaRouteImport.update({
 const OpenapiDotjsonRoute = OpenapiDotjsonRouteImport.update({
   id: '/openapi.json',
   path: '/openapi.json',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OpenapiActionsDotjsonRoute = OpenapiActionsDotjsonRouteImport.update({
+  id: '/openapi-actions.json',
+  path: '/openapi-actions.json',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -505,6 +514,24 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiActionsSearchAvailableCarsRoute =
+  ApiActionsSearchAvailableCarsRouteImport.update({
+    id: '/api/actions/search-available-cars',
+    path: '/api/actions/search-available-cars',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiActionsRecommendCarFitRoute =
+  ApiActionsRecommendCarFitRouteImport.update({
+    id: '/api/actions/recommend-car-fit',
+    path: '/api/actions/recommend-car-fit',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiActionsGetCheckoutUrlRoute =
+  ApiActionsGetCheckoutUrlRouteImport.update({
+    id: '/api/actions/get-checkout-url',
+    path: '/api/actions/get-checkout-url',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiAcpCheckout_sessionsRoute = ApiAcpCheckout_sessionsRouteImport.update({
   id: '/api/acp/checkout_sessions',
   path: '/api/acp/checkout_sessions',
@@ -622,6 +649,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/openapi-actions.json': typeof OpenapiActionsDotjsonRoute
   '/openapi.json': typeof OpenapiDotjsonRoute
   '/pdpa': typeof PdpaRoute
   '/privacy': typeof PrivacyRoute
@@ -684,6 +712,9 @@ export interface FileRoutesByFullPath {
   '/admin/promos/$promoId': typeof AdminPromosPromoIdRoute
   '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
   '/api/acp/checkout_sessions': typeof ApiAcpCheckout_sessionsRoute
+  '/api/actions/get-checkout-url': typeof ApiActionsGetCheckoutUrlRoute
+  '/api/actions/recommend-car-fit': typeof ApiActionsRecommendCarFitRoute
+  '/api/actions/search-available-cars': typeof ApiActionsSearchAvailableCarsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/payment/response': typeof ApiPaymentResponseRoute
   '/api/webhooks/ipay88': typeof ApiWebhooksIpay88Route
@@ -718,6 +749,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/openapi-actions.json': typeof OpenapiActionsDotjsonRoute
   '/openapi.json': typeof OpenapiDotjsonRoute
   '/pdpa': typeof PdpaRoute
   '/privacy': typeof PrivacyRoute
@@ -780,6 +812,9 @@ export interface FileRoutesByTo {
   '/admin/promos/$promoId': typeof AdminPromosPromoIdRoute
   '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
   '/api/acp/checkout_sessions': typeof ApiAcpCheckout_sessionsRoute
+  '/api/actions/get-checkout-url': typeof ApiActionsGetCheckoutUrlRoute
+  '/api/actions/recommend-car-fit': typeof ApiActionsRecommendCarFitRoute
+  '/api/actions/search-available-cars': typeof ApiActionsSearchAvailableCarsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/payment/response': typeof ApiPaymentResponseRoute
   '/api/webhooks/ipay88': typeof ApiWebhooksIpay88Route
@@ -819,6 +854,7 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/openapi-actions.json': typeof OpenapiActionsDotjsonRoute
   '/openapi.json': typeof OpenapiDotjsonRoute
   '/pdpa': typeof PdpaRoute
   '/privacy': typeof PrivacyRoute
@@ -881,6 +917,9 @@ export interface FileRoutesById {
   '/admin/promos/$promoId': typeof AdminPromosPromoIdRoute
   '/admin/rentals/$rentalId': typeof AdminRentalsRentalIdRoute
   '/api/acp/checkout_sessions': typeof ApiAcpCheckout_sessionsRoute
+  '/api/actions/get-checkout-url': typeof ApiActionsGetCheckoutUrlRoute
+  '/api/actions/recommend-car-fit': typeof ApiActionsRecommendCarFitRoute
+  '/api/actions/search-available-cars': typeof ApiActionsSearchAvailableCarsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/payment/response': typeof ApiPaymentResponseRoute
   '/api/webhooks/ipay88': typeof ApiWebhooksIpay88Route
@@ -921,6 +960,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/forgot-password'
     | '/login'
+    | '/openapi-actions.json'
     | '/openapi.json'
     | '/pdpa'
     | '/privacy'
@@ -983,6 +1023,9 @@ export interface FileRouteTypes {
     | '/admin/promos/$promoId'
     | '/admin/rentals/$rentalId'
     | '/api/acp/checkout_sessions'
+    | '/api/actions/get-checkout-url'
+    | '/api/actions/recommend-car-fit'
+    | '/api/actions/search-available-cars'
     | '/api/auth/$'
     | '/api/payment/response'
     | '/api/webhooks/ipay88'
@@ -1017,6 +1060,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/forgot-password'
     | '/login'
+    | '/openapi-actions.json'
     | '/openapi.json'
     | '/pdpa'
     | '/privacy'
@@ -1079,6 +1123,9 @@ export interface FileRouteTypes {
     | '/admin/promos/$promoId'
     | '/admin/rentals/$rentalId'
     | '/api/acp/checkout_sessions'
+    | '/api/actions/get-checkout-url'
+    | '/api/actions/recommend-car-fit'
+    | '/api/actions/search-available-cars'
     | '/api/auth/$'
     | '/api/payment/response'
     | '/api/webhooks/ipay88'
@@ -1117,6 +1164,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/forgot-password'
     | '/login'
+    | '/openapi-actions.json'
     | '/openapi.json'
     | '/pdpa'
     | '/privacy'
@@ -1179,6 +1227,9 @@ export interface FileRouteTypes {
     | '/admin/promos/$promoId'
     | '/admin/rentals/$rentalId'
     | '/api/acp/checkout_sessions'
+    | '/api/actions/get-checkout-url'
+    | '/api/actions/recommend-car-fit'
+    | '/api/actions/search-available-cars'
     | '/api/auth/$'
     | '/api/payment/response'
     | '/api/webhooks/ipay88'
@@ -1218,6 +1269,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  OpenapiActionsDotjsonRoute: typeof OpenapiActionsDotjsonRoute
   OpenapiDotjsonRoute: typeof OpenapiDotjsonRoute
   PdpaRoute: typeof PdpaRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -1247,6 +1299,9 @@ export interface RootRouteChildren {
   ApiIndexRoute: typeof ApiIndexRoute
   BlogIndexRoute: typeof BlogIndexRoute
   ApiAcpCheckout_sessionsRoute: typeof ApiAcpCheckout_sessionsRoute
+  ApiActionsGetCheckoutUrlRoute: typeof ApiActionsGetCheckoutUrlRoute
+  ApiActionsRecommendCarFitRoute: typeof ApiActionsRecommendCarFitRoute
+  ApiActionsSearchAvailableCarsRoute: typeof ApiActionsSearchAvailableCarsRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiPaymentResponseRoute: typeof ApiPaymentResponseRoute
   ApiWebhooksIpay88Route: typeof ApiWebhooksIpay88Route
@@ -1316,6 +1371,13 @@ declare module '@tanstack/react-router' {
       path: '/openapi.json'
       fullPath: '/openapi.json'
       preLoaderRoute: typeof OpenapiDotjsonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/openapi-actions.json': {
+      id: '/openapi-actions.json'
+      path: '/openapi-actions.json'
+      fullPath: '/openapi-actions.json'
+      preLoaderRoute: typeof OpenapiActionsDotjsonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -1808,6 +1870,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/actions/search-available-cars': {
+      id: '/api/actions/search-available-cars'
+      path: '/api/actions/search-available-cars'
+      fullPath: '/api/actions/search-available-cars'
+      preLoaderRoute: typeof ApiActionsSearchAvailableCarsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/actions/recommend-car-fit': {
+      id: '/api/actions/recommend-car-fit'
+      path: '/api/actions/recommend-car-fit'
+      fullPath: '/api/actions/recommend-car-fit'
+      preLoaderRoute: typeof ApiActionsRecommendCarFitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/actions/get-checkout-url': {
+      id: '/api/actions/get-checkout-url'
+      path: '/api/actions/get-checkout-url'
+      fullPath: '/api/actions/get-checkout-url'
+      preLoaderRoute: typeof ApiActionsGetCheckoutUrlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/acp/checkout_sessions': {
       id: '/api/acp/checkout_sessions'
       path: '/api/acp/checkout_sessions'
@@ -2095,6 +2178,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  OpenapiActionsDotjsonRoute: OpenapiActionsDotjsonRoute,
   OpenapiDotjsonRoute: OpenapiDotjsonRoute,
   PdpaRoute: PdpaRoute,
   PrivacyRoute: PrivacyRoute,
@@ -2125,6 +2209,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiIndexRoute: ApiIndexRoute,
   BlogIndexRoute: BlogIndexRoute,
   ApiAcpCheckout_sessionsRoute: ApiAcpCheckout_sessionsRoute,
+  ApiActionsGetCheckoutUrlRoute: ApiActionsGetCheckoutUrlRoute,
+  ApiActionsRecommendCarFitRoute: ApiActionsRecommendCarFitRoute,
+  ApiActionsSearchAvailableCarsRoute: ApiActionsSearchAvailableCarsRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiPaymentResponseRoute: ApiPaymentResponseRoute,
   ApiWebhooksIpay88Route: ApiWebhooksIpay88Route,
