@@ -2,22 +2,24 @@ import type { CSSProperties, ReactNode } from 'react'
 
 import { Link, useMatchRoute } from '@tanstack/react-router'
 import {
+  ArrowLeftRight,
+  BarChart3,
   CalendarCheck,
   Car,
+  CreditCard,
   LayoutDashboard,
   LogOut,
   Settings,
   Tag,
   Users,
+  Wrench,
 } from 'lucide-react'
 
 import BrandLogo from '#/components/BrandLogo'
-import { Avatar, AvatarFallback } from '#/components/ui/avatar'
-import { Badge } from '#/components/ui/badge'
+import { Button } from '#/components/ui/button'
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -33,7 +35,6 @@ import {
 import { TooltipProvider } from '#/components/ui/tooltip'
 import { authClient } from '#/lib/auth-client'
 import type { AppRole } from '#/lib/auth-model'
-import { getRoleLabel } from '#/lib/auth-model'
 import {
   resolveAdminNavSections,
   type AdminNavSection,
@@ -51,6 +52,20 @@ const NAV_SECTIONS: AdminNavSection<ReactNode>[] = [
         icon: <LayoutDashboard />,
         exact: true,
         ownerOnly: true,
+      },
+      {
+        type: 'link',
+        label: 'Operation',
+        to: '/admin/operations',
+        icon: <ArrowLeftRight />,
+        exact: false,
+      },
+      {
+        type: 'link',
+        label: 'Payments',
+        to: '/admin/payments',
+        icon: <CreditCard />,
+        exact: false,
       },
     ],
   },
@@ -80,6 +95,13 @@ const NAV_SECTIONS: AdminNavSection<ReactNode>[] = [
         icon: <Users />,
         exact: false,
       },
+      {
+        type: 'link',
+        label: 'Maintenance',
+        to: '/admin/maintenance',
+        icon: <Wrench />,
+        exact: false,
+      },
     ],
   },
   {
@@ -87,11 +109,24 @@ const NAV_SECTIONS: AdminNavSection<ReactNode>[] = [
     items: [
       {
         type: 'link',
+        label: 'Reports',
+        to: '/admin/reports',
+        icon: <BarChart3 />,
+        exact: false,
+        ownerOnly: true,
+      },
+      {
+        type: 'link',
         label: 'Promo codes',
         icon: <Tag />,
         to: '/admin/promos',
         exact: false,
         ownerOnly: true,
+      },
+      {
+        type: 'placeholder',
+        label: 'Affiliates',
+        icon: <Users />,
       },
     ],
   },
@@ -114,6 +149,15 @@ const NAV_SECTIONS: AdminNavSection<ReactNode>[] = [
   },
 ]
 
+function formatTopbarDate(date: Date): string {
+  return date.toLocaleDateString('en-MY', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
 type AdminSidebarShellProps = {
   children: ReactNode
   pageTitle?: string
@@ -131,7 +175,9 @@ function AdminNavMenu({
     <>
       {sections.map((section) => (
         <SidebarGroup key={section.label}>
-          <SidebarGroupLabel>{section.label}</SidebarGroupLabel>
+          <SidebarGroupLabel className="admin-sidebar-section-label px-2">
+            {section.label}
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {section.items.map((item) => {
@@ -141,12 +187,12 @@ function AdminNavMenu({
                       <SidebarMenuButton
                         disabled
                         tooltip={`${item.label} — coming soon`}
-                        className="opacity-60"
+                        className="opacity-55"
                         aria-label={`${item.label} — coming soon`}
                       >
                         {item.icon}
                         <span>{item.label}</span>
-                        <span className="ml-auto text-[10px] font-semibold tracking-wide uppercase text-muted-foreground">
+                        <span className="admin-nav-soon">
                           soon
                         </span>
                       </SidebarMenuButton>
@@ -167,9 +213,8 @@ function AdminNavMenu({
                       isActive={isActive}
                       tooltip={item.label}
                       className={cn(
-                        'relative text-[var(--sea-ink)] no-underline hover:text-[var(--sea-ink)]',
-                        isActive &&
-                          'bg-[var(--ember-wash)] font-medium text-[var(--sea-ink)] shadow-[inset_3px_0_0_var(--ember)] hover:bg-[var(--ember-wash)] hover:text-[var(--sea-ink)] data-active:bg-[var(--ember-wash)] data-active:text-[var(--sea-ink)]',
+                        'admin-nav-link no-underline',
+                        isActive && 'is-active',
                       )}
                       render={
                         <Link
@@ -194,14 +239,15 @@ function AdminNavMenu({
 
 export default function AdminSidebarShell({
   children,
-  pageTitle = 'Dashboard',
   user,
 }: AdminSidebarShellProps) {
-  const initial = user.name.length > 0 ? user.name[0].toUpperCase() : 'A'
-  const roleLabel = user.role ? getRoleLabel(user.role as AppRole) : 'Owner'
   const isOwner =
     user.role === 'owner' || user.role === 'super_admin' || !user.role
   const navSections = resolveAdminNavSections(NAV_SECTIONS, { isOwner })
+  const now = new Date()
+  const today = formatTopbarDate(now)
+  const todayIso = now.toISOString().slice(0, 10)
+  const displayName = user.name?.trim() || user.email
 
   const handleSignOut = async () => {
     await authClient.signOut()
@@ -211,12 +257,12 @@ export default function AdminSidebarShell({
   return (
     <TooltipProvider>
       <SidebarProvider
-        className="cxq-light-surface min-h-svh"
+        className="cxq-light-surface admin-shell-layout min-h-svh"
         style={
           {
-            '--sidebar-width': '13.75rem',
-            '--sidebar-width-icon': '3.5rem',
-            '--sidebar': 'var(--surface-strong, #ffffff)',
+            '--sidebar-width': '14rem',
+            '--sidebar-width-icon': '3.25rem',
+            '--sidebar': '#ffffff',
             '--sidebar-foreground': 'var(--sea-ink, #14181a)',
             '--sidebar-accent': 'var(--ember-wash)',
             '--sidebar-accent-foreground': 'var(--sea-ink, #14181a)',
@@ -225,68 +271,54 @@ export default function AdminSidebarShell({
           } as CSSProperties
         }
       >
-        <Sidebar collapsible="icon" className="border-r border-[var(--line)]">
-          <SidebarHeader className="border-b border-[var(--line)]">
-            <div className="flex items-center gap-2 px-1 py-1.5">
-              <span className="flex size-8 shrink-0 items-center justify-center">
-                <BrandLogo size={32} />
-              </span>
-              <span className="truncate font-[family-name:var(--font-display)] text-[0.95rem] font-semibold tracking-tight text-[var(--sea-ink)] group-data-[collapsible=icon]:hidden">
-                XQCar
-              </span>
+        <Sidebar collapsible="icon" className="admin-sidebar-panel border-r border-[var(--line)]">
+          <SidebarHeader className="admin-sidebar-header border-b border-[var(--line)] bg-[var(--surface-strong)]">
+            <div className="admin-sidebar-brand">
+              <BrandLogo size={36} className="shrink-0" decorative />
+              <p className="admin-sidebar-brand-text truncate group-data-[collapsible=icon]:hidden">
+                CarOS
+              </p>
             </div>
           </SidebarHeader>
 
-          <SidebarContent>
+          <SidebarContent className="bg-[var(--surface-strong)]">
             <AdminNavMenu sections={navSections} />
           </SidebarContent>
 
-          <SidebarFooter className="border-t border-[var(--line)]">
-            <div className="flex items-center gap-2 px-1 py-1 group-data-[collapsible=icon]:justify-center">
-              <Avatar className="size-8">
-                <AvatarFallback className="bg-[var(--ember-wash)] text-xs font-semibold text-[var(--ember-deep)]">
-                  {initial}
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-                <p className="truncate text-sm font-medium text-[var(--sea-ink)]">
-                  {user.name}
-                </p>
-                <p className="truncate text-xs text-[var(--sea-ink-soft)]">
-                  {user.email}
-                </p>
-              </div>
-            </div>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="Sign out"
-                  onClick={handleSignOut}
-                  aria-label="Sign out"
-                >
-                  <LogOut />
-                  <span>Sign out</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarFooter>
           <SidebarRail />
         </Sidebar>
 
-        <SidebarInset className="bg-[var(--bg-base,#f4f5f7)]">
-          <header className="sticky top-0 z-10 flex h-[61px] items-center gap-3 border-b border-[var(--line)] bg-[var(--surface-strong,#ffffff)]/94 px-4 backdrop-blur-lg">
-            <SidebarTrigger className="-ml-1" aria-label="Toggle sidebar" />
-            <h1 className="flex-1 truncate font-[family-name:var(--font-display)] text-lg font-semibold text-[var(--sea-ink)]">
-              {pageTitle}
-            </h1>
-            <Badge
-              variant="secondary"
-              className="rounded-full bg-[var(--ember-wash)] text-[var(--ember-deep)]"
-            >
-              {roleLabel}
-            </Badge>
+        <SidebarInset className="admin-main-canvas">
+          <header className="admin-topbar sticky top-0 z-10 flex items-center gap-2.5 border-b border-[var(--line)] px-3 md:px-5">
+            <SidebarTrigger
+              className="-ml-0.5 size-8 text-[var(--sea-ink-soft)] hover:text-[var(--sea-ink)]"
+              aria-label="Toggle sidebar"
+            />
+            <div className="admin-topbar-meta min-w-0 flex-1 truncate">
+              <p className="truncate leading-tight">
+                <span className="admin-topbar-user">{displayName}</span>
+                <span className="mx-2 text-[var(--line)]" aria-hidden>
+                  ·
+                </span>
+                <time dateTime={todayIso}>{today}</time>
+              </p>
+            </div>
+            <div className="admin-topbar-actions flex shrink-0 items-center">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleSignOut}
+                className="admin-topbar-signout gap-1.5 rounded-md border-[var(--line)] font-medium text-[var(--sea-ink-soft)] hover:bg-[var(--surface-muted)] hover:text-[var(--sea-ink)]"
+              >
+                <LogOut className="size-4" aria-hidden />
+                Sign out
+              </Button>
+            </div>
           </header>
-          <div className="flex flex-1 flex-col p-4 md:p-6">{children}</div>
+          <div className="admin-main-content flex min-w-0 flex-1 flex-col gap-0 p-3 md:p-5 lg:px-6 lg:py-5">
+            {children}
+          </div>
         </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>

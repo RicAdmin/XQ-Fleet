@@ -7,6 +7,11 @@ import type { PaymentStatus, RentalStatus, RentalType } from '#/db/schema'
 import { requireRole } from '#/lib/auth-functions'
 import { fleetOpsRoles, fullAdminRoles } from '#/lib/auth-model'
 import {
+  assertCarHasBookingCapacity,
+  getCarFleetCapacity,
+  usesSingleUnitCarStatus,
+} from '#/lib/fleet-capacity'
+import {
   adminInputValidator,
   carCategoryFilterSchema,
   paginationSchema,
@@ -24,6 +29,8 @@ export type RentalListRow = {
   paymentStatus: PaymentStatus
   startDate: Date
   endDate: Date
+  pickUpTime: string | null
+  returnTime: string | null
   dailyRateSen: number
   totalAmountSen: number
   depositAmountSen: number
@@ -31,6 +38,7 @@ export type RentalListRow = {
   createdAt: Date
   updatedAt: Date
   customerFullName: string | null
+  customerEmail: string | null
   carPlateNumber: string | null
   carMake: string | null
   carModel: string | null
@@ -166,6 +174,56 @@ export type RentalListResult = {
   statusCounts: Record<string, number>
 }
 
+export type OperationsQueue = {
+  pickups: RentalListRow[]
+  returns: RentalListRow[]
+}
+
+const rentalListSelect = {
+  id: rentals.id,
+  carId: rentals.carId,
+  customerId: rentals.customerId,
+  type: rentals.type,
+  status: rentals.status,
+  paymentStatus: rentals.paymentStatus,
+  startDate: rentals.startDate,
+  endDate: rentals.endDate,
+  pickUpTime: rentals.pickUpTime,
+  returnTime: rentals.returnTime,
+  dailyRateSen: rentals.dailyRateSen,
+  totalAmountSen: rentals.totalAmountSen,
+  depositAmountSen: rentals.depositAmountSen,
+  paidAmountSen: rentals.paidAmountSen,
+  createdAt: rentals.createdAt,
+  updatedAt: rentals.updatedAt,
+  customerFullName: customers.fullName,
+  customerEmail: customers.email,
+  carPlateNumber: cars.plateNumber,
+  carMake: cars.make,
+  carModel: cars.model,
+} as const
+
+export const getOperationsQueue = createServerFn({ method: 'GET' }).handler(
+  async (): Promise<OperationsQueue> => {
+    await requireRole(fleetOpsRoles)
+    const { db } = await import('#/db')
+
+    const base = () =>
+      db
+        .select(rentalListSelect)
+        .from(rentals)
+        .leftJoin(cars, eq(rentals.carId, cars.id))
+        .leftJoin(customers, eq(rentals.customerId, customers.id))
+
+    const [pickups, returns] = await Promise.all([
+      base().where(eq(rentals.status, 'pending')).orderBy(asc(rentals.startDate)),
+      base().where(eq(rentals.status, 'active')).orderBy(asc(rentals.endDate)),
+    ])
+
+    return { pickups, returns }
+  },
+)
+
 const listRentalsSchema = paginationSchema.extend({
   status: z.enum(rentalStatusValues).optional(),
   category: carCategoryFilterSchema,
@@ -234,26 +292,7 @@ export const listRentals = createServerFn({ method: 'GET' })
     const offset = (data.page - 1) * data.pageSize
 
     const baseQuery = db
-      .select({
-        id: rentals.id,
-        carId: rentals.carId,
-        customerId: rentals.customerId,
-        type: rentals.type,
-        status: rentals.status,
-        paymentStatus: rentals.paymentStatus,
-        startDate: rentals.startDate,
-        endDate: rentals.endDate,
-        dailyRateSen: rentals.dailyRateSen,
-        totalAmountSen: rentals.totalAmountSen,
-        depositAmountSen: rentals.depositAmountSen,
-        paidAmountSen: rentals.paidAmountSen,
-        createdAt: rentals.createdAt,
-        updatedAt: rentals.updatedAt,
-        customerFullName: customers.fullName,
-        carPlateNumber: cars.plateNumber,
-        carMake: cars.make,
-        carModel: cars.model,
-      })
+      .select(rentalListSelect)
       .from(rentals)
       .leftJoin(cars, eq(rentals.carId, cars.id))
       .leftJoin(customers, eq(rentals.customerId, customers.id))
@@ -393,22 +432,12 @@ export const createRental = createServerFn({ method: 'POST' })
 
     const { db } = await import('#/db')
 
-    // Overlap check
-    const overlap = await db
-      .select({ id: rentals.id })
-      .from(rentals)
-      .where(
-        and(
-          eq(rentals.carId, data.carId),
-          inArray(rentals.status, ['pending', 'active']),
-          lt(rentals.startDate, endDate),
-          gt(rentals.endDate, startDate),
-        ),
-      )
-      .limit(1)
-
-    if (overlap.length > 0)
-      throw new Error('This car already has a booking that overlaps with the selected dates.')
+    const fleetCapacity = await assertCarHasBookingCapacity(db, {
+      carId: data.carId,
+      tripStart: startDate,
+      tripEnd: endDate,
+      errorMessage: 'This car already has a booking that overlaps with the selected dates.',
+    })
 
     // Get user ID for audit trail
     const { auth } = await import('#/lib/auth')
@@ -416,8 +445,13 @@ export const createRental = createServerFn({ method: 'POST' })
     const session = await auth.api.getSession({ headers: getRequestHeaders() })
     const createdByUserId = session?.user?.id ?? null
 
-    // Set car to reserved
-    await db.update(cars).set({ status: 'reserved', updatedAt: new Date() }).where(eq(cars.id, data.carId))
+    // Single-slot models keep legacy reserved status on the car row.
+    if (usesSingleUnitCarStatus(fleetCapacity)) {
+      await db
+        .update(cars)
+        .set({ status: 'reserved', updatedAt: new Date() })
+        .where(eq(cars.id, data.carId))
+    }
 
     const result = await db
       .insert(rentals)
@@ -457,7 +491,13 @@ export const confirmHandover = createServerFn({ method: 'POST' })
     if (rental.status !== 'pending')
       throw new Error('Only pending rentals can be confirmed for handover.')
 
-    await db.update(cars).set({ status: 'rented', updatedAt: new Date() }).where(eq(cars.id, rental.carId))
+    const fleetCapacity = await getCarFleetCapacity(db, rental.carId)
+    if (fleetCapacity && usesSingleUnitCarStatus(fleetCapacity)) {
+      await db
+        .update(cars)
+        .set({ status: 'rented', updatedAt: new Date() })
+        .where(eq(cars.id, rental.carId))
+    }
 
     const result = await db
       .update(rentals)
@@ -558,10 +598,13 @@ export const cancelRental = createServerFn({ method: 'POST' })
     if (!rental) throw new Error('Rental not found.')
     if (rental.status !== 'pending') throw new Error('Only pending rentals can be cancelled.')
 
-    await db
-      .update(cars)
-      .set({ status: 'available', updatedAt: new Date() })
-      .where(eq(cars.id, rental.carId))
+    const fleetCapacity = await getCarFleetCapacity(db, rental.carId)
+    if (fleetCapacity && usesSingleUnitCarStatus(fleetCapacity)) {
+      await db
+        .update(cars)
+        .set({ status: 'available', updatedAt: new Date() })
+        .where(eq(cars.id, rental.carId))
+    }
 
     const result = await db
       .update(rentals)
@@ -609,23 +652,13 @@ export const extendRental = createServerFn({ method: 'POST' })
     if (newEndDate <= rental.startDate)
       throw new Error('New end date must be after the rental start date.')
 
-    // Overlap check (exclude current rental)
-    const overlap = await db
-      .select({ id: rentals.id })
-      .from(rentals)
-      .where(
-        and(
-          eq(rentals.carId, rental.carId),
-          inArray(rentals.status, ['pending', 'active']),
-          ne(rentals.id, data.rentalId),
-          lt(rentals.startDate, newEndDate),
-          gt(rentals.endDate, rental.startDate),
-        ),
-      )
-      .limit(1)
-
-    if (overlap.length > 0)
-      throw new Error('Cannot extend — another booking overlaps with the new end date.')
+    await assertCarHasBookingCapacity(db, {
+      carId: rental.carId,
+      tripStart: rental.startDate,
+      tripEnd: newEndDate,
+      excludeRentalId: data.rentalId,
+      errorMessage: 'Cannot extend — another booking overlaps with the new end date.',
+    })
 
     const newTotalSen = calcTotalSen(rental.dailyRateSen, rental.startDate, newEndDate)
 

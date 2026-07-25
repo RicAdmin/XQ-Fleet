@@ -26,7 +26,7 @@ describe('auth-model helpers', () => {
   it('returns the correct login routes and role guards', () => {
     expect(getLoginPathForSurface('admin')).toBe('/internal/login')
     expect(getLoginPathForSurface('app')).toBe('/internal/login')
-    expect(getLoginPathForSurface('account')).toBe('/login')
+    expect(getLoginPathForSurface('account')).toBe('/en/login')
     expect(isAppRole('owner')).toBe(true)
     expect(isAppRole('staff')).toBe(true)
     expect(isAppRole('customer')).toBe(true)

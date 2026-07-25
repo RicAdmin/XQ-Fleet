@@ -9,7 +9,7 @@ import { getAllMaintenanceEvents, getMaintenanceDashboardAlerts } from '#/lib/ma
 export const Route = createFileRoute('/app/maintenance/')({
   beforeLoad: async ({ context }) => {
     const { session } = context as unknown as { session: { user: { role: string; name: string; email: string } } | null }
-    if (!session) throw redirect({ to: '/login' })
+    if (!session) throw redirect({ to: '/internal/login' })
     const [events, alerts] = await Promise.all([
       getAllMaintenanceEvents({ data: { statusFilter: 'all' } }),
       getMaintenanceDashboardAlerts(),

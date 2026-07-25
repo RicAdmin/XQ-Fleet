@@ -24,7 +24,8 @@ import {
   SheetTitle,
 } from '#/components/ui/sheet'
 import type { CarCategory, CarColor, CarStatus, MaintenanceEventType } from '#/db/schema'
-import { getCarById, updateCar } from '#/lib/car-functions'
+import { getCarById, updateCar, updateCarFleetCapacity } from '#/lib/car-functions'
+import { fleetBookingCapacity } from '#/lib/fleet-capacity'
 import {
   deriveCarDisplayStatus,
   pickOpenRentalForDisplay,
@@ -159,6 +160,8 @@ type CarRow = {
   category: CarCategory
   status: CarStatus
   dailyRateSen: number
+  numberOfUnits: number
+  overbookUnits: number
   currentMileage: number | null
   notes: string | null
   createdAt: Date
@@ -240,6 +243,10 @@ function CarDetailPage() {
   const [formData, setFormData] = useState<CarFormData>(carToForm(initialCar))
   const [formError, setFormError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [fleetUnits, setFleetUnits] = useState(String(initialCar.numberOfUnits))
+  const [overbookUnits, setOverbookUnits] = useState(String(initialCar.overbookUnits))
+  const [fleetError, setFleetError] = useState<string | null>(null)
+  const [fleetSaving, setFleetSaving] = useState(false)
 
   const displayStatus = deriveCarDisplayStatus(
     car.status,
@@ -317,6 +324,28 @@ function CarDetailPage() {
       setFormError(err instanceof Error ? err.message : 'Something went wrong.')
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  async function handleFleetCapacitySave(event: React.FormEvent) {
+    event.preventDefault()
+    setFleetError(null)
+    setFleetSaving(true)
+    try {
+      const updated = await updateCarFleetCapacity({
+        data: {
+          carId: car.id,
+          numberOfUnits: Number(fleetUnits),
+          overbookUnits: Number(overbookUnits),
+        },
+      })
+      setCar(updated as CarRow)
+      setFleetUnits(String(updated.numberOfUnits))
+      setOverbookUnits(String(updated.overbookUnits))
+    } catch (err) {
+      setFleetError(err instanceof Error ? err.message : 'Something went wrong.')
+    } finally {
+      setFleetSaving(false)
     }
   }
 
@@ -539,6 +568,98 @@ function CarDetailPage() {
               </CardContent>
             </Card>
           </div>
+
+          {isOwner ? (
+            <Card>
+              <CardHeader>
+                <CardDescription className="island-kicker">Fleet capacity</CardDescription>
+                <CardTitle className="text-base">Booking slots for this model</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form className="grid gap-4 sm:grid-cols-2 lg:max-w-xl" onSubmit={handleFleetCapacitySave}>
+                  <div>
+                    <label className="field-label" htmlFor="fleet-units">
+                      Units
+                    </label>
+                    <input
+                      id="fleet-units"
+                      type="number"
+                      min={1}
+                      className="field-input"
+                      value={fleetUnits}
+                      onChange={(e) => setFleetUnits(e.target.value)}
+                    />
+                    <p className="mt-1 text-xs text-[var(--sea-ink-soft)]">
+                      Normal fleet count for this model (no overbook).
+                    </p>
+                  </div>
+                  <div>
+                    <label className="field-label" htmlFor="fleet-overbook">
+                      Partner overbook
+                    </label>
+                    <input
+                      id="fleet-overbook"
+                      type="number"
+                      min={0}
+                      className="field-input"
+                      value={overbookUnits}
+                      onChange={(e) => setOverbookUnits(e.target.value)}
+                    />
+                    <p className="mt-1 text-xs text-[var(--sea-ink-soft)]">
+                      Extra bookings allowed via partner sourcing.
+                    </p>
+                  </div>
+                  <div className="sm:col-span-2 flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-sm text-[var(--sea-ink-soft)]">
+                      Max concurrent bookings:{' '}
+                      <span className="font-medium text-[var(--sea-ink)]">
+                        {fleetBookingCapacity({
+                          numberOfUnits: Number(fleetUnits) || 1,
+                          overbookUnits: Number(overbookUnits) || 0,
+                        })}
+                      </span>
+                    </p>
+                    <button
+                      type="submit"
+                      className="button-primary"
+                      disabled={fleetSaving}
+                    >
+                      {fleetSaving ? 'Saving…' : 'Save capacity'}
+                    </button>
+                  </div>
+                  {fleetError ? <p className="form-error sm:col-span-2">{fleetError}</p> : null}
+                </form>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardDescription className="island-kicker">Fleet capacity</CardDescription>
+                <CardTitle className="text-base">Booking slots for this model</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="flex flex-col gap-3">
+                  <div className="summary-row">
+                    <dt className="text-sm text-[var(--sea-ink-soft)]">Units</dt>
+                    <dd className="text-sm font-medium text-[var(--sea-ink)]">{car.numberOfUnits}</dd>
+                  </div>
+                  <div className="summary-row">
+                    <dt className="text-sm text-[var(--sea-ink-soft)]">Partner overbook</dt>
+                    <dd className="text-sm font-medium text-[var(--sea-ink)]">{car.overbookUnits}</dd>
+                  </div>
+                  <div className="summary-row">
+                    <dt className="text-sm text-[var(--sea-ink-soft)]">Max concurrent bookings</dt>
+                    <dd className="text-sm font-medium text-[var(--sea-ink)]">
+                      {fleetBookingCapacity({
+                        numberOfUnits: car.numberOfUnits,
+                        overbookUnits: car.overbookUnits,
+                      })}
+                    </dd>
+                  </div>
+                </dl>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="maintenance" className="flex flex-col gap-4">

@@ -489,6 +489,7 @@ function CarsPage() {
     <AdminSidebarShell user={session.user} pageTitle="Fleet">
       {/* Page header */}
       <PageHeader
+        kicker="Fleet inventory"
         title="Vehicle Inventory"
         description={
           result

@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from '#/i18n/locales'
+
 export const appRoles = ['owner', 'staff', 'customer', 'super_admin'] as const
 export type AppRole = (typeof appRoles)[number]
 
@@ -42,8 +44,13 @@ export function getHomePathForRole(role: AppRole) {
   }
 }
 
+/** Locale-prefixed customer sign-in (not `/login`, which is staff-only). */
+export const customerLoginPath = `/${DEFAULT_LOCALE}/login` as const
+
 export function getLoginPathForSurface(surface: ProtectedSurface) {
-  return surface === 'account' ? ('/login' as const) : ('/internal/login' as const)
+  return surface === 'account'
+    ? customerLoginPath
+    : ('/internal/login' as const)
 }
 
 export function canAccessSurface(role: AppRole, surface: ProtectedSurface) {

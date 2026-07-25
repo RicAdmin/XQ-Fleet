@@ -1,11 +1,12 @@
-import { and, eq, gt, inArray, lt, notInArray } from 'drizzle-orm'
+import { and, eq, notInArray } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
-import { carPhotos, cars, rentals } from '#/db/schema'
+import { carPhotos, cars } from '#/db/schema'
 import type { CarCategory } from '#/db/schema'
 import type * as schema from '#/db/schema'
 import { publicCarCatalogSelect } from '#/lib/car-catalog'
 import { parseLocalYmd } from '#/lib/booking-datetime'
+import { findCarIdsAtBookingCapacity } from '#/lib/fleet-capacity'
 import type { PublicCarRow } from '#/lib/portal-functions'
 
 export const BLOCKING_RENTAL_STATUSES = ['pending', 'active'] as const
@@ -80,17 +81,7 @@ export function drizzleAvailableCarsForTripDb(
 ): AvailableCarsForTripDb {
   return {
     async findCarIdsWithBlockingRentals(tripStart, tripEnd) {
-      const conflicting = await db
-        .select({ carId: rentals.carId })
-        .from(rentals)
-        .where(
-          and(
-            inArray(rentals.status, [...BLOCKING_RENTAL_STATUSES]),
-            lt(rentals.startDate, tripEnd),
-            gt(rentals.endDate, tripStart),
-          ),
-        )
-      return conflicting.map((row) => row.carId)
+      return findCarIdsAtBookingCapacity(db, tripStart, tripEnd)
     },
 
     async listAvailableCars({ category, excludeCarIds }) {

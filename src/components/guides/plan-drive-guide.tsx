@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from '@tanstack/react-router'
+
+import { customerLoginPath } from '#/lib/auth-model'
 import { ArrowRight, Car, Check, MapPin, Pin, X } from 'lucide-react'
 
 import { authClient } from '#/lib/auth-client'
@@ -166,7 +168,7 @@ export function PlanDriveGuide() {
                         )}
                       </button>
                     ) : (
-                      <Link to="/login" className="btn btn-ghost btn-sm" title="Sign in first to save">
+                      <Link to={customerLoginPath} className="btn btn-ghost btn-sm" title="Sign in first to save">
                         Sign in to save
                       </Link>
                     )}

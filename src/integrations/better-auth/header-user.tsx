@@ -1,7 +1,12 @@
 import { Link } from '@tanstack/react-router'
 
 import { authClient } from '#/lib/auth-client'
-import { getHomePathForRole, getRoleLabel, isAppRole } from '#/lib/auth-model'
+import {
+  customerLoginPath,
+  getHomePathForRole,
+  getRoleLabel,
+  isAppRole,
+} from '#/lib/auth-model'
 
 export default function BetterAuthHeader() {
   const { data: session, isPending } = authClient.useSession()
@@ -18,7 +23,7 @@ export default function BetterAuthHeader() {
         <Link to="/register" className="button-secondary">
           Register
         </Link>
-        <Link to="/login" className="button-primary">
+        <Link to={customerLoginPath} className="button-primary">
           Sign in
         </Link>
       </div>

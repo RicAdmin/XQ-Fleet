@@ -496,6 +496,7 @@ export default function RentalsList({
     <AdminSidebarShell user={session.user} pageTitle="Rentals">
       {/* Page header */}
       <PageHeader
+        kicker="Active rentals"
         title="Rentals"
         description={
           result

@@ -102,7 +102,7 @@ export function DataTable<T>({
                 key={col.key}
                 aria-sort={ariaSort}
                 className={cn(
-                  'h-10 bg-[var(--muted,#F5F4F2)] px-3 py-2 text-xs font-bold tracking-[0.08em] text-[var(--ink-muted,var(--sea-ink-soft))] uppercase',
+                  'h-9 bg-[var(--muted,#F5F4F2)] px-3 py-1.5 text-[0.6875rem] font-semibold tracking-[0.06em] text-[var(--ink-muted,var(--sea-ink-soft))] uppercase',
                   col.sortable && 'cursor-pointer select-none',
                   col.headerClassName,
                 )}
@@ -128,7 +128,7 @@ export function DataTable<T>({
           emptyState ? (
             <TableRow className="hover:bg-transparent">
               <TableCell colSpan={columns.length} className="p-0">
-                <div className="flex min-h-[240px] flex-col items-center justify-center gap-3 p-8 text-center">
+                <div className="flex min-h-[180px] flex-col items-center justify-center gap-2 p-6 text-center text-[0.8125rem]">
                   {emptyState}
                 </div>
               </TableCell>
@@ -140,7 +140,7 @@ export function DataTable<T>({
               key={getKey(row)}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
               className={cn(
-                'h-10 hover:bg-[var(--muted,#F5F4F2)]',
+                'h-9 hover:bg-[var(--muted,#F5F4F2)]',
                 onRowClick && 'cursor-pointer',
               )}
             >
@@ -152,7 +152,7 @@ export function DataTable<T>({
                 return (
                   <TableCell
                     key={col.key}
-                    className={cn('px-3 py-[0.42rem] text-sm', cellCls)}
+                    className={cn('px-3 py-2 text-[0.8125rem] leading-snug', cellCls)}
                   >
                     {col.render(row)}
                   </TableCell>

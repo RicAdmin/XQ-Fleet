@@ -9,7 +9,7 @@ import '#/styles/admin-ui.css'
 
 function AdminRoot({ children }: { children: ReactNode }) {
   useForceLightTheme()
-  return <div className="cxq-dashboard-root">{children}</div>
+  return <div className="cxq-dashboard-root admin-shell">{children}</div>
 }
 
 export const Route = createFileRoute('/admin')({

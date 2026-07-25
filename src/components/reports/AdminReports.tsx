@@ -970,7 +970,7 @@ export default function AdminReports({ session, initialRevenue, allCars }: Admin
 
   return (
     <AdminSidebarShell user={session.user} pageTitle="Reports">
-      <PageHeader title="Reports" description="Owner-only analytics and export tools." />
+      <PageHeader kicker="Analytics" title="Reports" description="Owner-only analytics and export tools." />
 
       {/* Tab switcher */}
       <StatusFilterTabs

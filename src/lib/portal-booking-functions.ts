@@ -1,11 +1,16 @@
 import { createServerFn } from '@tanstack/react-start'
-import { and, desc, eq, gt, inArray, lt, notExists } from 'drizzle-orm'
+import { and, desc, eq, inArray, notExists } from 'drizzle-orm'
 
 import { cars, customers, payments, rentals, seasonCalendar, promos } from '#/db/schema'
 import type { CarCategory, RentalStatus } from '#/db/schema'
 import { getRequestSession } from '#/lib/auth-functions'
 import { recordAuditLog } from '#/lib/audit-log'
 import { parseBookingDateRange } from '#/lib/booking-datetime'
+import {
+  assertCarHasBookingCapacity,
+  usesSingleUnitCarStatus,
+  type FleetCapacity,
+} from '#/lib/fleet-capacity'
 import { HOLD_MINUTES } from '#/lib/payment-functions'
 import {
   computeFinalTotal,
@@ -460,28 +465,14 @@ export const createPortalBooking = createServerFn({ method: 'POST' })
     })
 
     const rentalId = await db.transaction(async (tx) => {
-      // Overlap check (inside tx so we don't race with another concurrent booking).
-      const overlap = await tx
-        .select({ id: rentals.id })
-        .from(rentals)
-        .where(
-          and(
-            eq(rentals.carId, data.carId),
-            inArray(rentals.status, ['pending', 'active']),
-            lt(rentals.startDate, endDate),
-            gt(rentals.endDate, startDate),
-          ),
-        )
-        .limit(1)
-      if (overlap.length > 0)
-        throw new Error('This car is not available for the selected dates.')
-
-      // Load car with season pricing
+      // Load car with season pricing and fleet capacity
       const [car] = await tx
         .select({
           id: cars.id,
           status: cars.status,
           availableForBooking: cars.availableForBooking,
+          numberOfUnits: cars.numberOfUnits,
+          overbookUnits: cars.overbookUnits,
           dailyRateSen: cars.dailyRateSen,
           priceLowSeasonSen: cars.priceLowSeasonSen,
           pricePeakSeasonSen: cars.pricePeakSeasonSen,
@@ -500,6 +491,20 @@ export const createPortalBooking = createServerFn({ method: 'POST' })
       if (!car) throw new Error('Car not found.')
       if (car.status !== 'available')
         throw new Error('This car is not currently available for booking.')
+
+      const fleetCapacity: FleetCapacity = {
+        numberOfUnits: car.numberOfUnits,
+        overbookUnits: car.overbookUnits,
+      }
+
+      // Capacity check (inside tx so we don't race with another concurrent booking).
+      await assertCarHasBookingCapacity(tx, {
+        carId: data.carId,
+        tripStart: startDate,
+        tripEnd: endDate,
+        capacity: fleetCapacity,
+        errorMessage: 'This car is not available for the selected dates.',
+      })
 
       const addOns: BookingAddOns = {
         childSeat: data.childSeat,
@@ -574,11 +579,13 @@ export const createPortalBooking = createServerFn({ method: 'POST' })
         })
         .returning({ id: rentals.id })
 
-      // Set car to payment-pending
-      await tx
-        .update(cars)
-        .set({ status: 'payment-pending', updatedAt: new Date() })
-        .where(eq(cars.id, data.carId))
+      // Single-slot models keep legacy payment-pending status on the car row.
+      if (usesSingleUnitCarStatus(fleetCapacity)) {
+        await tx
+          .update(cars)
+          .set({ status: 'payment-pending', updatedAt: new Date() })
+          .where(eq(cars.id, data.carId))
+      }
 
       // Atomic promo redemption (Phase 2).
       if (data.couponCode && discountAmountSen > 0 && promoRow) {

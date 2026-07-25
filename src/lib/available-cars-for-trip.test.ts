@@ -2,6 +2,11 @@ import { describe, expect, it } from 'vitest'
 
 import type { PublicCarRow } from '#/lib/portal-functions'
 import {
+  fleetBookingCapacity,
+  isFleetAtCapacity,
+  type FleetCapacity,
+} from '#/lib/fleet-capacity'
+import {
   listAvailableCarsForTrip,
   rentalIntervalsOverlap,
   type AvailableCarsForTripDb,
@@ -53,6 +58,7 @@ function sampleCar(overrides: Partial<PublicCarRow> = {}): PublicCarRow {
 function fakeDb(
   cars: PublicCarRow[],
   blockingRentals: Array<{ carId: string; start: Date; end: Date }> = [],
+  capacities: Record<string, FleetCapacity> = {},
 ): AvailableCarsForTripDb {
   return {
     listAvailableCars: async ({ category, excludeCarIds }) => {
@@ -65,13 +71,21 @@ function fakeDb(
       return rows
     },
     findCarIdsWithBlockingRentals: async (tripStart, tripEnd) => {
-      const ids = new Set<string>()
+      const overlapCounts = new Map<string, number>()
       for (const rental of blockingRentals) {
         if (rentalIntervalsOverlap(rental.start, rental.end, tripStart, tripEnd)) {
-          ids.add(rental.carId)
+          overlapCounts.set(rental.carId, (overlapCounts.get(rental.carId) ?? 0) + 1)
         }
       }
-      return [...ids]
+
+      const atCapacity: string[] = []
+      for (const [carId, count] of overlapCounts) {
+        const capacity = capacities[carId] ?? { numberOfUnits: 1, overbookUnits: 0 }
+        if (isFleetAtCapacity(count, capacity)) {
+          atCapacity.push(carId)
+        }
+      }
+      return atCapacity
     },
   }
 }
@@ -131,6 +145,29 @@ describe('listAvailableCarsForTrip', () => {
     })
 
     expect(result.map((c) => c.id)).toEqual(['car-free'])
+  })
+
+  it('keeps multi-unit cars available until capacity is reached', async () => {
+    const cars = [sampleCar({ id: 'car-mpv' })]
+    const db = fakeDb(
+      cars,
+      [
+        {
+          carId: 'car-mpv',
+          start: new Date(2026, 4, 20),
+          end: new Date(2026, 4, 25),
+        },
+      ],
+      { 'car-mpv': { numberOfUnits: 2, overbookUnits: 0 } },
+    )
+
+    const result = await listAvailableCarsForTrip(db, {
+      startDate: '2026-05-22',
+      endDate: '2026-05-24',
+    })
+
+    expect(result.map((c) => c.id)).toEqual(['car-mpv'])
+    expect(fleetBookingCapacity({ numberOfUnits: 2, overbookUnits: 0 })).toBe(2)
   })
 
   it('keeps cars when Rentals do not overlap the Trip', async () => {

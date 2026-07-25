@@ -46,10 +46,10 @@ export function AdminListFilterBar({
   const showFilterRow = filtersOpen && children
 
   return (
-    <div className={cn('border-b border-[var(--line)] py-2', className)}>
+    <div className={cn('border-b border-[var(--line)] px-3 py-2', className)}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-          <InputGroup className="h-8 w-full min-w-[min(100%,18rem)] max-w-xl flex-1 sm:min-w-[22rem]">
+          <InputGroup className="h-8 w-full min-w-[min(100%,16rem)] max-w-md flex-1 sm:min-w-[18rem]">
             <InputGroupAddon>
               <Search />
             </InputGroupAddon>
