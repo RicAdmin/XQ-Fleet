@@ -1,0 +1,1 @@
+ALTER TABLE "cars" ADD COLUMN IF NOT EXISTS "overbook_units" integer DEFAULT 0 NOT NULL;

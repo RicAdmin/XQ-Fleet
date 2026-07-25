@@ -767,6 +767,71 @@ html.dark .cxq-light-surface {
   background-color: #f4f5f7;
 }
 
+/* Admin shell — matches landing canvas, ink, ember tokens */
+.admin-shell {
+  min-height: 100dvh;
+  font-family: var(--font-sans);
+}
+
+.admin-shell-layout {
+  min-height: 100dvh;
+  --admin-chrome-height: 3.75rem;
+}
+
+.admin-sidebar-panel {
+  box-shadow: 1px 0 0 rgba(20, 24, 26, 0.04);
+}
+
+.admin-sidebar-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+  height: var(--admin-chrome-height);
+  min-height: var(--admin-chrome-height);
+  padding: 0 0.75rem;
+}
+
+.admin-sidebar-header > .admin-sidebar-brand {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-main-canvas {
+  background:
+    radial-gradient(ellipse 120% 80% at 100% -20%, rgba(255, 102, 0, 0.06), transparent 55%),
+    var(--bg-base, #f4f5f7);
+}
+
+.admin-topbar {
+  height: var(--admin-chrome-height, 3.5rem);
+  min-height: var(--admin-chrome-height, 3.5rem);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+}
+
+.admin-main-content {
+  max-width: 1320px;
+  width: 100%;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+.admin-dashboard-hero {
+  background: linear-gradient(
+    135deg,
+    var(--surface-strong) 0%,
+    color-mix(in srgb, var(--surface-strong) 88%, var(--ember-wash)) 100%
+  );
+}
+
+.admin-kpi-card {
+  min-height: 5.5rem;
+}
+
 .admin-layout {
   display: flex;
   height: 100dvh;

@@ -1,15 +1,16 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { BookingDrawer } from '#/components/admin/BookingDrawer'
+import { BackToTopButton } from '#/components/ui/BackToTopButton'
 import { StatusBadge } from '#/components/ui/StatusBadge'
 import { AdminListFilterBar } from '#/components/ui/AdminListFilterBar'
-import { AdminTablePagination } from '#/components/ui/AdminTablePagination'
 import { CsvDownloadButton } from '#/components/ui/CsvDownloadButton'
 import { type Column, DataTable } from '#/components/ui/DataTable'
 import { DateRangeFilter, DateRangeQuickPresets } from '#/components/ui/DateRangeFilter'
 import { ErrorPanel } from '#/components/ui/ErrorPanel'
 import { StatusFilterSelect } from '#/components/ui/StatusFilterSelect'
 import { TableSkeleton } from '#/components/ui/TableSkeleton'
+import { useInfiniteScroll } from '#/hooks/use-infinite-scroll'
 import {
   CAR_CATEGORY_FILTER_OPTIONS,
   type CarCategoryFilter,
@@ -17,7 +18,6 @@ import {
 import type {
   AdminBookingRow,
   AdminBookingsInput,
-  AdminBookingsResult,
 } from '#/lib/admin-dashboard-functions'
 import {
   exportAdminBookings,
@@ -79,18 +79,30 @@ function bookingsToCsvRows(rows: ReadonlyArray<AdminBookingRow>): CsvRow[] {
 
 export function BookingsTab() {
   const [filters, setFilters] = useState<Filters>({ status: undefined })
-  const [page, setPage] = useState(1)
-  const [result, setResult] = useState<AdminBookingsResult | null>(null)
+  const [rows, setRows] = useState<AdminBookingRow[]>([])
+  const [total, setTotal] = useState<number | null>(null)
+  const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [activeRentalId, setActiveRentalId] = useState<string | null>(null)
   const [searchInput, setSearchInput] = useState('')
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [categoryTab, setCategoryTab] = useState<CarCategoryFilter>('all')
 
-  async function load(p = page, f = filters) {
-    setLoading(true)
+  const hasMore = total != null && rows.length < total
+  const initialized = total != null
+
+  const fetchPage = useCallback(async (p: number, f: Filters, append: boolean) => {
+    if (append) {
+      setLoadingMore(true)
+    } else {
+      setLoading(true)
+      setRows([])
+      setTotal(null)
+    }
     setError(null)
+
     try {
       const res = await getAdminBookings({
         data: {
@@ -105,25 +117,40 @@ export function BookingsTab() {
           sortDir: 'desc',
         },
       })
-      setResult(res)
+      setTotal(res.total)
+      setPage(res.page)
+      setRows((prev) => (append ? [...prev, ...res.rows] : res.rows))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load bookings.')
     } finally {
       setLoading(false)
+      setLoadingMore(false)
     }
-  }
+  }, [])
+
+  const reload = useCallback(() => {
+    void fetchPage(1, filters, false)
+  }, [fetchPage, filters])
+
+  const loadMore = useCallback(() => {
+    if (loading || loadingMore || !hasMore) return
+    void fetchPage(page + 1, filters, true)
+  }, [loading, loadingMore, hasMore, page, filters, fetchPage])
+
+  const sentinelRef = useInfiniteScroll({
+    enabled: hasMore && !loading && !loadingMore,
+    onLoadMore: loadMore,
+  })
 
   useEffect(() => {
-    void load(1, filters)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.status, filters.category, filters.from, filters.to, filters.search])
+    void fetchPage(1, filters, false)
+  }, [filters.status, filters.category, filters.from, filters.to, filters.search, fetchPage])
 
   useEffect(() => {
     const timer = setTimeout(() => {
       const next = searchInput.trim() || undefined
       setFilters((prev) => {
         if (prev.search === next) return prev
-        setPage(1)
         return { ...prev, search: next }
       })
     }, SEARCH_DEBOUNCE_MS)
@@ -131,7 +158,6 @@ export function BookingsTab() {
   }, [searchInput])
 
   function applyFilters(next: Filters) {
-    setPage(1)
     setFilters(next)
   }
 
@@ -153,7 +179,6 @@ export function BookingsTab() {
   )
 
   const statusTab: StatusFilter = filters.status ?? 'all'
-  const totalPages = result ? Math.max(1, Math.ceil(result.total / result.pageSize)) : 1
 
   const columns = useMemo<Column<AdminBookingRow>[]>(
     () => [
@@ -245,9 +270,9 @@ export function BookingsTab() {
       actions={
         <>
           <CsvDownloadButton
-            filename={csvFilename('bookings-page')}
-            rows={result ? bookingsToCsvRows(result.rows) : []}
-            label="CSV (page)"
+            filename={csvFilename('bookings-loaded')}
+            rows={bookingsToCsvRows(rows)}
+            label="CSV (loaded)"
           />
           <CsvDownloadButton
             filename={csvFilename('bookings-all')}
@@ -309,54 +334,50 @@ export function BookingsTab() {
         <ErrorPanel
           title="Failed to load bookings"
           message={error}
-          onRetry={() => load()}
+          onRetry={reload}
         />
       )}
 
-      {loading && !result && (
+      {loading && !initialized && (
         <article className="workspace-panel island-shell overflow-hidden p-0">
           {toolbar}
           <TableSkeleton rows={8} columns={7} />
         </article>
       )}
 
-      {result && (
-        <div className="space-y-3">
-          <article className="workspace-panel island-shell overflow-hidden p-0">
-            {toolbar}
-            <DataTable
-              columns={columns}
-              data={[...result.rows]}
-              getKey={(r) => r.id}
-              onRowClick={(r) => setActiveRentalId(r.id)}
-              emptyState={
-                <div className="text-center text-sm text-muted-foreground">
-                  No bookings match these filters.
-                </div>
-              }
-            />
-          </article>
-          <AdminTablePagination
-            page={result.page}
-            totalPages={totalPages}
-            total={result.total}
-            loading={loading}
-            onPageChange={(p) => {
-              setPage(p)
-              void load(p)
-            }}
+      {initialized && (
+        <article className="workspace-panel island-shell overflow-hidden p-0">
+          {toolbar}
+          <DataTable
+            columns={columns}
+            data={rows}
+            getKey={(r) => r.id}
+            onRowClick={(r) => setActiveRentalId(r.id)}
+            emptyState={
+              <div className="text-center text-sm text-muted-foreground">
+                No bookings match these filters.
+              </div>
+            }
           />
-        </div>
+          <div ref={sentinelRef} className="admin-infinite-sentinel" aria-hidden />
+          <div className="admin-infinite-status">
+            {loadingMore
+              ? 'Loading more bookings…'
+              : hasMore
+                ? `Showing ${rows.length.toLocaleString()} of ${total.toLocaleString()} · scroll for more`
+                : `${total.toLocaleString()} booking${total === 1 ? '' : 's'} · end of list`}
+          </div>
+        </article>
       )}
+
+      <BackToTopButton />
 
       {activeRentalId && (
         <BookingDrawer
           rentalId={activeRentalId}
           open={!!activeRentalId}
           onClose={() => setActiveRentalId(null)}
-          onMutated={() => {
-            void load(page)
-          }}
+          onMutated={reload}
         />
       )}
     </div>

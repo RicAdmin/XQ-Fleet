@@ -18,7 +18,6 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PdpaRouteImport } from './routes/pdpa'
 import { Route as OpenapiDotjsonRouteImport } from './routes/openapi[.]json'
 import { Route as OpenapiActionsDotjsonRouteImport } from './routes/openapi-actions[.]json'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -73,6 +72,8 @@ import { Route as AdminSettingsIndexRouteImport } from './routes/admin/settings/
 import { Route as AdminReportsIndexRouteImport } from './routes/admin/reports/index'
 import { Route as AdminRentalsIndexRouteImport } from './routes/admin/rentals/index'
 import { Route as AdminPromosIndexRouteImport } from './routes/admin/promos/index'
+import { Route as AdminPaymentsIndexRouteImport } from './routes/admin/payments/index'
+import { Route as AdminOperationsIndexRouteImport } from './routes/admin/operations/index'
 import { Route as AdminMaintenanceIndexRouteImport } from './routes/admin/maintenance/index'
 import { Route as AdminCustomersIndexRouteImport } from './routes/admin/customers/index'
 import { Route as AdminCarsIndexRouteImport } from './routes/admin/cars/index'
@@ -153,11 +154,6 @@ const OpenapiDotjsonRoute = OpenapiDotjsonRouteImport.update({
 const OpenapiActionsDotjsonRoute = OpenapiActionsDotjsonRouteImport.update({
   id: '/openapi-actions.json',
   path: '/openapi-actions.json',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -433,6 +429,16 @@ const AdminPromosIndexRoute = AdminPromosIndexRouteImport.update({
   path: '/promos/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPaymentsIndexRoute = AdminPaymentsIndexRouteImport.update({
+  id: '/payments/',
+  path: '/payments/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOperationsIndexRoute = AdminOperationsIndexRouteImport.update({
+  id: '/operations/',
+  path: '/operations/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMaintenanceIndexRoute = AdminMaintenanceIndexRouteImport.update({
   id: '/maintenance/',
   path: '/maintenance/',
@@ -635,7 +641,6 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
-  '/login': typeof LoginRoute
   '/openapi-actions.json': typeof OpenapiActionsDotjsonRoute
   '/openapi.json': typeof OpenapiDotjsonRoute
   '/pdpa': typeof PdpaRoute
@@ -716,6 +721,8 @@ export interface FileRoutesByFullPath {
   '/admin/cars/': typeof AdminCarsIndexRoute
   '/admin/customers/': typeof AdminCustomersIndexRoute
   '/admin/maintenance/': typeof AdminMaintenanceIndexRoute
+  '/admin/operations/': typeof AdminOperationsIndexRoute
+  '/admin/payments/': typeof AdminPaymentsIndexRoute
   '/admin/promos/': typeof AdminPromosIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
   '/admin/reports/': typeof AdminReportsIndexRoute
@@ -733,7 +740,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/login': typeof LoginRoute
   '/openapi-actions.json': typeof OpenapiActionsDotjsonRoute
   '/openapi.json': typeof OpenapiDotjsonRoute
   '/pdpa': typeof PdpaRoute
@@ -814,6 +820,8 @@ export interface FileRoutesByTo {
   '/admin/cars': typeof AdminCarsIndexRoute
   '/admin/customers': typeof AdminCustomersIndexRoute
   '/admin/maintenance': typeof AdminMaintenanceIndexRoute
+  '/admin/operations': typeof AdminOperationsIndexRoute
+  '/admin/payments': typeof AdminPaymentsIndexRoute
   '/admin/promos': typeof AdminPromosIndexRoute
   '/admin/rentals': typeof AdminRentalsIndexRoute
   '/admin/reports': typeof AdminReportsIndexRoute
@@ -836,7 +844,6 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
-  '/login': typeof LoginRoute
   '/openapi-actions.json': typeof OpenapiActionsDotjsonRoute
   '/openapi.json': typeof OpenapiDotjsonRoute
   '/pdpa': typeof PdpaRoute
@@ -917,6 +924,8 @@ export interface FileRoutesById {
   '/admin/cars/': typeof AdminCarsIndexRoute
   '/admin/customers/': typeof AdminCustomersIndexRoute
   '/admin/maintenance/': typeof AdminMaintenanceIndexRoute
+  '/admin/operations/': typeof AdminOperationsIndexRoute
+  '/admin/payments/': typeof AdminPaymentsIndexRoute
   '/admin/promos/': typeof AdminPromosIndexRoute
   '/admin/rentals/': typeof AdminRentalsIndexRoute
   '/admin/reports/': typeof AdminReportsIndexRoute
@@ -940,7 +949,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/forgot-password'
-    | '/login'
     | '/openapi-actions.json'
     | '/openapi.json'
     | '/pdpa'
@@ -1021,6 +1029,8 @@ export interface FileRouteTypes {
     | '/admin/cars/'
     | '/admin/customers/'
     | '/admin/maintenance/'
+    | '/admin/operations/'
+    | '/admin/payments/'
     | '/admin/promos/'
     | '/admin/rentals/'
     | '/admin/reports/'
@@ -1038,7 +1048,6 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/forgot-password'
-    | '/login'
     | '/openapi-actions.json'
     | '/openapi.json'
     | '/pdpa'
@@ -1119,6 +1128,8 @@ export interface FileRouteTypes {
     | '/admin/cars'
     | '/admin/customers'
     | '/admin/maintenance'
+    | '/admin/operations'
+    | '/admin/payments'
     | '/admin/promos'
     | '/admin/rentals'
     | '/admin/reports'
@@ -1140,7 +1151,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/forgot-password'
-    | '/login'
     | '/openapi-actions.json'
     | '/openapi.json'
     | '/pdpa'
@@ -1221,6 +1231,8 @@ export interface FileRouteTypes {
     | '/admin/cars/'
     | '/admin/customers/'
     | '/admin/maintenance/'
+    | '/admin/operations/'
+    | '/admin/payments/'
     | '/admin/promos/'
     | '/admin/rentals/'
     | '/admin/reports/'
@@ -1243,7 +1255,6 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
-  LoginRoute: typeof LoginRoute
   OpenapiActionsDotjsonRoute: typeof OpenapiActionsDotjsonRoute
   OpenapiDotjsonRoute: typeof OpenapiDotjsonRoute
   PdpaRoute: typeof PdpaRoute
@@ -1353,13 +1364,6 @@ declare module '@tanstack/react-router' {
       path: '/openapi-actions.json'
       fullPath: '/openapi-actions.json'
       preLoaderRoute: typeof OpenapiActionsDotjsonRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -1740,6 +1744,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPromosIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/payments/': {
+      id: '/admin/payments/'
+      path: '/payments'
+      fullPath: '/admin/payments/'
+      preLoaderRoute: typeof AdminPaymentsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/operations/': {
+      id: '/admin/operations/'
+      path: '/operations'
+      fullPath: '/admin/operations/'
+      preLoaderRoute: typeof AdminOperationsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/maintenance/': {
       id: '/admin/maintenance/'
       path: '/maintenance'
@@ -2082,6 +2100,8 @@ interface AdminRouteChildren {
   AdminCarsIndexRoute: typeof AdminCarsIndexRoute
   AdminCustomersIndexRoute: typeof AdminCustomersIndexRoute
   AdminMaintenanceIndexRoute: typeof AdminMaintenanceIndexRoute
+  AdminOperationsIndexRoute: typeof AdminOperationsIndexRoute
+  AdminPaymentsIndexRoute: typeof AdminPaymentsIndexRoute
   AdminPromosIndexRoute: typeof AdminPromosIndexRoute
   AdminRentalsIndexRoute: typeof AdminRentalsIndexRoute
   AdminReportsIndexRoute: typeof AdminReportsIndexRoute
@@ -2098,6 +2118,8 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCarsIndexRoute: AdminCarsIndexRoute,
   AdminCustomersIndexRoute: AdminCustomersIndexRoute,
   AdminMaintenanceIndexRoute: AdminMaintenanceIndexRoute,
+  AdminOperationsIndexRoute: AdminOperationsIndexRoute,
+  AdminPaymentsIndexRoute: AdminPaymentsIndexRoute,
   AdminPromosIndexRoute: AdminPromosIndexRoute,
   AdminRentalsIndexRoute: AdminRentalsIndexRoute,
   AdminReportsIndexRoute: AdminReportsIndexRoute,
@@ -2134,7 +2156,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
-  LoginRoute: LoginRoute,
   OpenapiActionsDotjsonRoute: OpenapiActionsDotjsonRoute,
   OpenapiDotjsonRoute: OpenapiDotjsonRoute,
   PdpaRoute: PdpaRoute,

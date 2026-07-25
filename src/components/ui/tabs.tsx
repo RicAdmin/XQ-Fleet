@@ -29,7 +29,7 @@ const tabsListVariants = cva(
         default: "bg-muted",
         line: "gap-1 bg-transparent",
         /** Admin icon+label pill strip (ember wash active state). */
-        pill: "h-auto w-full gap-0.5 rounded-full border border-[var(--line)] bg-[var(--surface-strong)] p-0.5 group-data-horizontal/tabs:h-auto",
+        pill: "h-auto w-full gap-0.5 rounded-md border border-[var(--line)] bg-[var(--surface-strong)] p-0.5 group-data-horizontal/tabs:h-auto",
       },
     },
     defaultVariants: {
@@ -63,8 +63,8 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
         "data-active:bg-background data-active:text-foreground dark:data-active:border-input dark:data-active:bg-input/30 dark:data-active:text-foreground",
         "after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-horizontal/tabs:after:inset-x-0 group-data-horizontal/tabs:after:bottom-[-5px] group-data-horizontal/tabs:after:h-0.5 group-data-vertical/tabs:after:inset-y-0 group-data-vertical/tabs:after:-right-1 group-data-vertical/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-active:after:opacity-100",
         // Pill variant — matches admin prototype icon+label strip
-        "group-data-[variant=pill]/tabs-list:h-auto group-data-[variant=pill]/tabs-list:gap-1.5 group-data-[variant=pill]/tabs-list:rounded-full group-data-[variant=pill]/tabs-list:px-3 group-data-[variant=pill]/tabs-list:py-1.5 group-data-[variant=pill]/tabs-list:text-[var(--sea-ink-soft)] group-data-[variant=pill]/tabs-list:shadow-none group-data-[variant=pill]/tabs-list:hover:text-[var(--sea-ink)]",
-        "group-data-[variant=pill]/tabs-list:data-active:border-transparent group-data-[variant=pill]/tabs-list:data-active:bg-[var(--ember-wash)] group-data-[variant=pill]/tabs-list:data-active:font-semibold group-data-[variant=pill]/tabs-list:data-active:text-[var(--ember-deep)] group-data-[variant=pill]/tabs-list:data-active:shadow-none",
+        "group-data-[variant=pill]/tabs-list:h-auto group-data-[variant=pill]/tabs-list:gap-1 group-data-[variant=pill]/tabs-list:rounded-md group-data-[variant=pill]/tabs-list:px-2.5 group-data-[variant=pill]/tabs-list:py-1.5 group-data-[variant=pill]/tabs-list:text-[0.8125rem] group-data-[variant=pill]/tabs-list:text-[var(--sea-ink-soft)] group-data-[variant=pill]/tabs-list:shadow-none group-data-[variant=pill]/tabs-list:hover:text-[var(--sea-ink)]",
+        "group-data-[variant=pill]/tabs-list:data-active:border-transparent group-data-[variant=pill]/tabs-list:data-active:bg-[var(--ember)] group-data-[variant=pill]/tabs-list:data-active:font-semibold group-data-[variant=pill]/tabs-list:data-active:text-white group-data-[variant=pill]/tabs-list:data-active:shadow-none group-data-[variant=pill]/tabs-list:data-active:[&_svg]:text-white",
         "group-data-[variant=pill]/tabs-list:after:hidden",
         className
       )}

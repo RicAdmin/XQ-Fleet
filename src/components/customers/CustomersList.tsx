@@ -317,6 +317,7 @@ export default function CustomersList({
     <AdminSidebarShell user={session.user} pageTitle="Customers">
       {/* Page header */}
       <PageHeader
+        kicker="Customer records"
         title="Customers"
         description={
           result

@@ -6,6 +6,7 @@ import type { Locale } from '#/i18n/locales'
 import { DEFAULT_LOCALE, isLocale } from '#/i18n/locales'
 import { getRequestSession } from '#/lib/auth-functions'
 import { paymentCallbackPath } from '#/lib/brand'
+import { getCarFleetCapacity, usesSingleUnitCarStatus } from '#/lib/fleet-capacity'
 import { logIpay88 } from '#/lib/ipay88-log'
 import type { PaymentSettingsRow } from '#/lib/settings-functions'
 
@@ -254,10 +255,13 @@ export const initiatePayment = createServerFn({ method: 'POST' })
       .set({ paymentHoldExpiresAt: holdExpiry, updatedAt: new Date() })
       .where(eq(rentals.id, rental.id))
 
-    await db
-      .update(cars)
-      .set({ status: 'payment-pending', updatedAt: new Date() })
-      .where(eq(cars.id, rental.carId))
+    const fleetCapacity = await getCarFleetCapacity(db, rental.carId)
+    if (fleetCapacity && usesSingleUnitCarStatus(fleetCapacity)) {
+      await db
+        .update(cars)
+        .set({ status: 'payment-pending', updatedAt: new Date() })
+        .where(eq(cars.id, rental.carId))
+    }
 
     // Build iPay88 form params
     const refNo = payment.id.replace(/-/g, '')

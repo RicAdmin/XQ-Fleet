@@ -181,6 +181,7 @@ function AdminPromosPage() {
   return (
     <AdminSidebarShell user={session.user} pageTitle="Promo codes">
       <PageHeader
+        kicker="Growth · Promos"
         title="Promo codes"
         description="Create, edit, and audit discount codes."
         actions={

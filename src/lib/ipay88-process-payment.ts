@@ -3,6 +3,7 @@ import { DEFAULT_LOCALE, isLocale } from '#/i18n/locales'
 import { publicLocalePath } from '#/lib/brand'
 import { logIpay88, sanitizeIpay88Fields } from '#/lib/ipay88-log'
 import { formatAmountRM, verifyResponseSignature } from '#/lib/payment-functions'
+import { getCarFleetCapacity, usesSingleUnitCarStatus } from '#/lib/fleet-capacity'
 
 export type Ipay88CallbackSource = 'callback' | 'response'
 
@@ -256,10 +257,13 @@ export async function processIpay88Payment(
         })
         .where(eq(rentals.id, rentalData.id))
 
-      await db
-        .update(cars)
-        .set({ status: 'reserved', updatedAt: new Date() })
-        .where(and(eq(cars.id, rentalData.carId), eq(cars.status, 'payment-pending')))
+      const fleetCapacity = await getCarFleetCapacity(db, rentalData.carId)
+      if (fleetCapacity && usesSingleUnitCarStatus(fleetCapacity)) {
+        await db
+          .update(cars)
+          .set({ status: 'reserved', updatedAt: new Date() })
+          .where(and(eq(cars.id, rentalData.carId), eq(cars.status, 'payment-pending')))
+      }
 
       const [coverPhoto] = await db
         .select({ url: carPhotos.url })
@@ -398,10 +402,13 @@ export async function processIpay88Payment(
     .limit(1)
 
   if (failedRentalData) {
-    await db
-      .update(cars)
-      .set({ status: 'available', updatedAt: new Date() })
-      .where(and(eq(cars.id, failedRentalData.carId), eq(cars.status, 'payment-pending')))
+    const fleetCapacity = await getCarFleetCapacity(db, failedRentalData.carId)
+    if (fleetCapacity && usesSingleUnitCarStatus(fleetCapacity)) {
+      await db
+        .update(cars)
+        .set({ status: 'available', updatedAt: new Date() })
+        .where(and(eq(cars.id, failedRentalData.carId), eq(cars.status, 'payment-pending')))
+    }
 
     const { makeBookingRef } = await import('#/emails/email-helpers')
     const { sendPaymentFailed } = await import('#/lib/email-functions')

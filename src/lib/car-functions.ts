@@ -47,6 +47,12 @@ type UpdateCarStatusInput = {
   status: 'maintenance' | 'damaged' | 'available'
 }
 
+type UpdateCarFleetCapacityInput = {
+  carId: string
+  numberOfUnits: number
+  overbookUnits: number
+}
+
 type RetireCarInput = {
   carId: string
 }
@@ -84,6 +90,16 @@ function validateCarFields(data: {
   if (data.dailyRateSen < 0) throw new Error('Daily rate cannot be negative.')
 
   return { ...data, plateNumber, make, model }
+}
+
+function validateFleetCapacityFields(data: { numberOfUnits: number; overbookUnits: number }) {
+  if (!Number.isInteger(data.numberOfUnits) || data.numberOfUnits < 1) {
+    throw new Error('Number of units must be at least 1.')
+  }
+  if (!Number.isInteger(data.overbookUnits) || data.overbookUnits < 0) {
+    throw new Error('Overbook units cannot be negative.')
+  }
+  return data
 }
 
 export const getCars = createServerFn({ method: 'GET' }).handler(async () => {
@@ -357,6 +373,27 @@ export const updateCar = createServerFn({ method: 'POST' })
         category: data.category,
         dailyRateSen: validated.dailyRateSen,
         notes: data.notes ?? null,
+        updatedAt: new Date(),
+      })
+      .where(eq(cars.id, data.carId))
+      .returning()
+
+    if (!result[0]) throw new Error('Vehicle not found.')
+    return result[0]
+  })
+
+export const updateCarFleetCapacity = createServerFn({ method: 'POST' })
+  .inputValidator((input: UpdateCarFleetCapacityInput) => input)
+  .handler(async ({ data }) => {
+    await requireRole(fullAdminRoles)
+    const validated = validateFleetCapacityFields(data)
+
+    const { db } = await import('#/db')
+    const result = await db
+      .update(cars)
+      .set({
+        numberOfUnits: validated.numberOfUnits,
+        overbookUnits: validated.overbookUnits,
         updatedAt: new Date(),
       })
       .where(eq(cars.id, data.carId))

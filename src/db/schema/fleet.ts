@@ -153,6 +153,8 @@ export const cars = pgTable(
     ownedByFleet: boolean('owned_by_fleet').notNull().default(true),
     vendorName: text('vendor_name'),
     numberOfUnits: integer('number_of_units').notNull().default(1),
+    /** Extra partner-sourced bookings allowed beyond numberOfUnits. */
+    overbookUnits: integer('overbook_units').notNull().default(0),
     promotionalPriceSen: integer('promotional_price_sen'),
     lateReturnHourlyFeeSen: integer('late_return_hourly_fee_sen').notNull().default(0),
     fuelPolicy: text('fuel_policy'),

@@ -51,6 +51,7 @@ export type PublicCarDetail = {
   ownedByFleet: boolean
   vendorName: string | null
   numberOfUnits: number
+  overbookUnits: number
   lateReturnHourlyFeeSen: number
   notesInternal: string | null
   registrationNumber: string | null
@@ -279,6 +280,7 @@ export const getPublicCarDetail = createServerFn({ method: 'GET' })
         ownedByFleet: cars.ownedByFleet,
         vendorName: cars.vendorName,
         numberOfUnits: cars.numberOfUnits,
+        overbookUnits: cars.overbookUnits,
         lateReturnHourlyFeeSen: cars.lateReturnHourlyFeeSen,
         notesInternal: cars.notesInternal,
         registrationNumber: cars.registrationNumber,

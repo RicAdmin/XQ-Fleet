@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router'
 import BrandLogo from '#/components/BrandLogo'
 import BetterAuthHeader from '#/integrations/better-auth/header-user'
 import ThemeToggle from '#/components/ThemeToggle'
+import { customerLoginPath } from '#/lib/auth-model'
 
 export default function Header() {
   return (
@@ -33,18 +34,11 @@ export default function Header() {
             About
           </Link>
           <Link
-            to="/login"
+            to={customerLoginPath}
             className="nav-link"
             activeProps={{ className: 'nav-link is-active' }}
           >
             Customer login
-          </Link>
-          <Link
-            to="/internal/login"
-            className="nav-link"
-            activeProps={{ className: 'nav-link is-active' }}
-          >
-            Internal login
           </Link>
         </div>
       </nav>

@@ -326,6 +326,7 @@ function AdminMaintenancePage() {
   return (
     <AdminSidebarShell user={session.user} pageTitle="Maintenance">
       <PageHeader
+        kicker="Fleet maintenance"
         title="Fleet Maintenance"
         description={`${openEvents.length} open event${openEvents.length !== 1 ? 's' : ''} · ${events.length} total`}
         actions={

@@ -194,6 +194,7 @@ async function main() {
   const iOwnership = col('Ownership')
   const iVendor = col('Vendor_Name')
   const iUnits = col('Number_Of_Units')
+  const iOverbook = header.indexOf('Overbook_Units')
   const iPromoPrice = col('Promotional_Price')
   const iPrice = col('Price_Low_Season')
   const iPricePeak = col('Price_Peak_Season')
@@ -277,6 +278,8 @@ async function main() {
     const minRentalDays = Number.parseInt(cells[iMinDays]?.trim() ?? '1', 10) || 1
     const maxRentalDays = Number.parseInt(cells[iMaxDays]?.trim() ?? '30', 10) || 30
     const numberOfUnits = parseIntOrNull(cells[iUnits]) ?? 1
+    const overbookUnits =
+      iOverbook >= 0 ? Math.max(0, parseIntOrNull(cells[iOverbook]) ?? 0) : 0
     const availableForBooking = parseBool(cells[iAvailableForBooking], true)
     const notes = (cells[iShort] ?? '').trim() || null
     const requestedImage = (cells[iImage] ?? '').trim()
@@ -337,6 +340,7 @@ async function main() {
         ownedByFleet: parseBool(cells[iOwnership], true),
         vendorName: (cells[iVendor] ?? '').trim() || null,
         numberOfUnits,
+        overbookUnits,
         fuelPolicy: (cells[iFuelPolicy] ?? '').trim() || null,
         carLocations: (cells[iCarLocations] ?? '').trim() || null,
         registrationNumber: registration,

@@ -12,6 +12,7 @@ interface PageHeaderBackLink {
 interface PageHeaderProps {
   title: string
   description?: string | ReactNode
+  kicker?: string
   actions?: ReactNode
   backLink?: PageHeaderBackLink
   variant?: 'default' | 'detail'
@@ -21,6 +22,7 @@ interface PageHeaderProps {
 export function PageHeader({
   title,
   description,
+  kicker,
   actions,
   backLink,
   variant = 'default',
@@ -30,23 +32,24 @@ export function PageHeader({
 
   if (isDetail) {
     return (
-      <div className={cn('mb-3.5', className)}>
+      <div className={cn('ui-page-head ui-page-head--detail', className)}>
         {backLink ? (
           <Link
             to={backLink.to}
-            className="ui-back-link mb-1 inline-flex w-fit items-center gap-1.5 text-[0.8125rem] font-semibold text-[var(--sea-ink)] no-underline hover:text-[var(--lagoon-deep)]"
+            className="ui-back-link inline-flex w-fit items-center gap-1.5 no-underline"
           >
-            <ArrowLeft size={14} strokeWidth={2.5} className="shrink-0" />
+            <ArrowLeft size={13} strokeWidth={2.5} className="shrink-0" />
             {backLink.label}
           </Link>
         ) : null}
-        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
-          <div className="min-w-0 flex-1">
-            <h2 className="ui-page-title font-[family-name:var(--font-display)] text-xl font-semibold leading-tight text-[var(--sea-ink)]">
+        <div className="ui-page-head__row flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+          <div className="ui-page-head__main min-w-0 flex-1">
+            {kicker ? <p className="island-kicker mb-1">{kicker}</p> : null}
+            <h2 className="ui-page-title font-semibold text-[var(--sea-ink)]">
               {title}
             </h2>
             {description ? (
-              <div className="ui-page-desc mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[0.8125rem] leading-snug text-[var(--sea-ink-soft)]">
+              <div className="ui-page-desc flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[var(--sea-ink-soft)]">
                 {description}
               </div>
             ) : null}
@@ -62,21 +65,15 @@ export function PageHeader({
   }
 
   return (
-    <div
-      className={cn(
-        'ui-page-head mb-4 flex flex-wrap items-start justify-between gap-3',
-        className,
-      )}
-    >
+    <div className={cn('ui-page-head flex flex-wrap items-start justify-between gap-3', className)}>
       <div className="min-w-0 flex-1">
-        <h2 className="ui-page-title font-[family-name:var(--font-display)] text-2xl font-semibold text-[var(--sea-ink)]">
-          {title}
-        </h2>
-        {description ? (
-          <div className="ui-page-desc mt-1 text-sm text-[var(--sea-ink-soft)]">
-            {description}
-          </div>
-        ) : null}
+        {kicker ? <p className="island-kicker mb-1">{kicker}</p> : null}
+        <div className="ui-page-head__title-row">
+          <h2 className="ui-page-title font-semibold text-[var(--sea-ink)]">{title}</h2>
+          {description ? (
+            <div className="ui-page-desc text-[var(--sea-ink-soft)]">{description}</div>
+          ) : null}
+        </div>
       </div>
       {actions ? (
         <div className="ui-page-head__actions flex flex-wrap items-center gap-2">
