@@ -1,7 +1,7 @@
 import '#/components/landing/cxq-landing-scoped.css'
 import '#/components/landing/cxq-landing-overrides.css'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 
@@ -11,6 +11,7 @@ import { LoadingSpinner } from '#/components/ui/LoadingSpinner'
 import { toLocalYmd } from '#/lib/booking-datetime'
 import {
   bookingHasCompleteTrip,
+  checkoutSearchFromBooking,
   parseCheckoutSearch,
   resolveCheckoutBooking,
   type CheckoutTripSearch,
@@ -51,6 +52,7 @@ function CheckoutRoutePending() {
 function CheckoutPage() {
   const navigate = useNavigate()
   const search = Route.useSearch() as CheckoutTripSearch
+  const { carId, locale } = Route.useParams()
   const { carRow, authUser } = Route.useLoaderData()
   const { data: session, isPending: clientSessionPending } = authClient.useSession()
 
@@ -79,6 +81,18 @@ function CheckoutPage() {
   const booking = useMemo(() => resolveCheckoutBooking(search), [search])
   const startYmd = toLocalYmd(booking.pickDate)
   const endYmd = toLocalYmd(booking.retDate)
+
+  const onBookingChange = useCallback(
+    (next: BookingState) => {
+      void navigate({
+        to: '/$locale/checkout/$carId',
+        params: { locale, carId },
+        search: checkoutSearchFromBooking(next),
+        replace: true,
+      })
+    },
+    [navigate, locale, carId],
+  )
 
   useEffect(() => {
     if (!bookingHasCompleteTrip(booking)) return
@@ -114,6 +128,7 @@ function CheckoutPage() {
           <LandingCheckoutFlow
             car={carRow}
             booking={booking}
+            onBookingChange={onBookingChange}
             startYmd={startYmd}
             endYmd={endYmd}
             user={checkoutUser}

@@ -11,15 +11,21 @@ import {
   Clock,
   Cog,
   MapPin,
+  Pencil,
   Phone,
 } from 'lucide-react'
 
 import { LoadingSpinner } from '#/components/ui/LoadingSpinner'
 import { CheckoutInlineAuth } from '#/components/landing/CheckoutInlineAuth'
+import { CheckoutTripEditor } from '#/components/landing/CheckoutTripEditor'
 import { PaymentMethodIcons } from '#/components/landing/payment-method-icons'
 import type { TranslateFn } from '#/i18n/translate'
 import { usePublicI18n } from '#/i18n/usePublicI18n'
-import { checkoutSearchFromBooking, bookingHasCompleteTrip } from '#/lib/checkout-trip'
+import {
+  checkoutSearchFromBooking,
+  bookingHasCompleteTrip,
+  bookingHasPickupReturnDetails,
+} from '#/lib/checkout-trip'
 import {
   clearCheckoutDraft,
   loadCheckoutDraft,
@@ -297,6 +303,7 @@ function normalizePhoneInput(value: string): string {
 type LandingCheckoutFlowProps = {
   car: PublicCarRow
   booking: BookingState
+  onBookingChange?: (next: BookingState) => void
   startYmd?: string
   endYmd?: string
   user?: SessionUserLite
@@ -307,6 +314,7 @@ type LandingCheckoutFlowProps = {
 export function LandingCheckoutFlow({
   car,
   booking,
+  onBookingChange,
   startYmd,
   endYmd,
   user,
@@ -390,6 +398,8 @@ export function LandingCheckoutFlow({
   }>({})
   const [submitting, setSubmitting] = useState(false)
   const [flowError, setFlowError] = useState<string | null>(null)
+  const [editingTrip, setEditingTrip] = useState(false)
+  const [showTripErrors, setShowTripErrors] = useState(false)
 
   // Promo code state — wired to `validatePromo` server fn.
   const [promoInput, setPromoInput] = useState('')
@@ -510,12 +520,27 @@ export function LandingCheckoutFlow({
   const pickupLoc = booking.from.trim() || t('checkout.pickupTbc')
   const returnLoc =
     booking.tripType === 'round' ? pickupLoc : booking.retLoc.trim() || pickupLoc
+  const tripDetailsComplete = bookingHasPickupReturnDetails(booking)
   const tripDuration = formatTripDuration(
     booking.pickDate,
     booking.pickTime,
     booking.retDate,
     booking.retTime,
   )
+
+  useEffect(() => {
+    if (tripDetailsComplete) setShowTripErrors(false)
+  }, [tripDetailsComplete])
+
+  const revealTripErrors = useCallback(() => {
+    setShowTripErrors(true)
+    setFlowError(null)
+    requestAnimationFrame(() => {
+      document
+        .querySelector('.cs-trip .cs-trip-leg--invalid, .cs-trip .checkout-validation-banner, .cs-trip')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    })
+  }, [])
 
   const lug = carLuggageFit(catalogFitInput(car))
 
@@ -623,12 +648,12 @@ export function LandingCheckoutFlow({
   )
 
   const createBooking = useCallback(async () => {
-    if (!bookingHasCompleteTrip(booking)) {
-      setFlowError(t('checkout.errTripDatesRequired'))
+    if (!bookingHasPickupReturnDetails(booking)) {
+      revealTripErrors()
       return
     }
     if (!startYmd || !endYmd) {
-      setFlowError(t('checkout.errPickValidDates'))
+      revealTripErrors()
       return
     }
     if (!preview || previewError) {
@@ -678,6 +703,7 @@ export function LandingCheckoutFlow({
     appliedPromo,
     preview,
     previewError,
+    revealTripErrors,
     t,
   ])
 
@@ -803,6 +829,10 @@ export function LandingCheckoutFlow({
   const advance = useCallback(async () => {
     setFlowError(null)
     if (step === 0) {
+      if (!bookingHasPickupReturnDetails(booking)) {
+        revealTripErrors()
+        return
+      }
       if (!validateReview()) return
       if (resolvedSessionPending) return
       if (resolvedUser) {
@@ -821,12 +851,14 @@ export function LandingCheckoutFlow({
     }
   }, [
     step,
+    booking,
     validateReview,
     resolvedUser,
     guestCheckout,
     createBooking,
     resolvedSessionPending,
     persistDraft,
+    revealTripErrors,
   ])
 
   const handleInlineAuthSuccess = useCallback(async () => {
@@ -1542,39 +1574,105 @@ export function LandingCheckoutFlow({
               </div>
             </div>
 
-            <div className="cs-trip">
-              <div className="cs-trip-legs">
-                <div className="cs-trip-leg">
-                  <span className="cs-trip-lbl">{t('booking.pickup')}</span>
-                  <strong>
-                    {booking.pickDate?.toLocaleDateString('en-GB', {
-                      weekday: 'short',
-                      day: '2-digit',
-                      month: 'short',
-                    })}
-                  </strong>
-                  <em>{booking.pickTime.trim() || '—'}</em>
-                  <span className="cs-trip-loc">
-                    <MapPin size={11} aria-hidden />
-                    <span>{pickupLoc}</span>
-                  </span>
-                </div>
-                <div className="cs-trip-leg cs-trip-leg--return">
-                  <span className="cs-trip-lbl">{t('booking.return')}</span>
-                  <strong>
-                    {booking.retDate?.toLocaleDateString('en-GB', {
-                      weekday: 'short',
-                      day: '2-digit',
-                      month: 'short',
-                    })}
-                  </strong>
-                  <em>{booking.retTime.trim() || '—'}</em>
-                  <span className="cs-trip-loc">
-                    <MapPin size={11} aria-hidden />
-                    <span>{returnLoc}</span>
-                  </span>
-                </div>
+            <div className={'cs-trip' + (tripDetailsComplete ? '' : ' cs-trip--incomplete')}>
+              <div className="cs-trip-head">
+                <span className="cs-trip-title">{t('checkout.tripDetails')}</span>
+                {onBookingChange ? (
+                  <button
+                    type="button"
+                    className="cs-trip-edit"
+                    onClick={() => setEditingTrip((open) => !open)}
+                    aria-expanded={editingTrip}
+                  >
+                    <Pencil size={12} aria-hidden />
+                    {editingTrip ? t('common.cancel') : t('checkout.editTrip')}
+                  </button>
+                ) : null}
               </div>
+
+              {!tripDetailsComplete && !editingTrip && showTripErrors ? (
+                <div className="checkout-validation-banner" role="alert">
+                  <strong>{t('checkout.completeRequiredFields')}</strong>
+                  <span>
+                    {t('checkout.fieldsNeedAttention', {
+                      count:
+                        Number(!booking.pickDate || !booking.pickTime.trim()) +
+                        Number(!booking.retDate || !booking.retTime.trim()) +
+                        Number(!booking.from.trim()) +
+                        Number(booking.tripType === 'oneway' && !booking.retLoc.trim()),
+                    })}
+                  </span>
+                </div>
+              ) : null}
+
+              {editingTrip && onBookingChange ? (
+                <CheckoutTripEditor
+                  booking={booking}
+                  onChange={onBookingChange}
+                  showErrors={showTripErrors}
+                />
+              ) : (
+                <div className="cs-trip-legs">
+                  <div
+                    className={
+                      'cs-trip-leg' +
+                      (showTripErrors && (!booking.pickDate || !booking.pickTime.trim())
+                        ? ' cs-trip-leg--invalid'
+                        : '')
+                    }
+                  >
+                    <span className="cs-trip-lbl">{t('booking.pickup')}</span>
+                    <strong>
+                      {booking.pickDate
+                        ? booking.pickDate.toLocaleDateString('en-GB', {
+                            weekday: 'short',
+                            day: '2-digit',
+                            month: 'short',
+                          })
+                        : '—'}
+                    </strong>
+                    <em>{booking.pickTime.trim() || '—'}</em>
+                    <span className="cs-trip-loc">
+                      <MapPin size={11} aria-hidden />
+                      <span>{pickupLoc}</span>
+                    </span>
+                    {showTripErrors && (!booking.pickDate || !booking.pickTime.trim()) ? (
+                      <span className="bk-field-error" role="alert">
+                        {t('booking.selectPickupError')}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div
+                    className={
+                      'cs-trip-leg cs-trip-leg--return' +
+                      (showTripErrors && (!booking.retDate || !booking.retTime.trim())
+                        ? ' cs-trip-leg--invalid'
+                        : '')
+                    }
+                  >
+                    <span className="cs-trip-lbl">{t('booking.return')}</span>
+                    <strong>
+                      {booking.retDate
+                        ? booking.retDate.toLocaleDateString('en-GB', {
+                            weekday: 'short',
+                            day: '2-digit',
+                            month: 'short',
+                          })
+                        : '—'}
+                    </strong>
+                    <em>{booking.retTime.trim() || '—'}</em>
+                    <span className="cs-trip-loc">
+                      <MapPin size={11} aria-hidden />
+                      <span>{returnLoc}</span>
+                    </span>
+                    {showTripErrors && (!booking.retDate || !booking.retTime.trim()) ? (
+                      <span className="bk-field-error" role="alert">
+                        {t('booking.selectReturnError')}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="cs-divider" />
@@ -1719,7 +1817,18 @@ export function LandingCheckoutFlow({
                 </button>
               ) : (
                 <div className="cs-pay-actions">
-                  <button type="button" className="btn btn-leaf btn-lg" onClick={() => void advance()} disabled={submitting || resolvedSessionPending || previewLoading || !preview || Boolean(previewError) || (step === 1 && !resolvedUser && !guestCheckout)}>
+                  <button
+                    type="button"
+                    className="btn btn-leaf btn-lg"
+                    onClick={() => void advance()}
+                    disabled={
+                      submitting ||
+                      resolvedSessionPending ||
+                      (step === 1 && !resolvedUser && !guestCheckout) ||
+                      (tripDetailsComplete &&
+                        (previewLoading || !preview || Boolean(previewError)))
+                    }
+                  >
                     {step === 0
                       ? resolvedUser
                         ? t('checkout.payAmount', { total })

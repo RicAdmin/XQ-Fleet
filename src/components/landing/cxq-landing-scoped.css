@@ -468,10 +468,11 @@ img { display: block; max-width: 100%; }
 .bk-field-error {
   display: block;
   margin-top: 4px;
-  font-size: 11px;
-  line-height: 1.35;
+  font-size: 11.5px;
+  line-height: 1.45;
   color: var(--brand-coral);
   font-weight: 500;
+  font-style: normal;
 }
 .booking-row {
   display: grid;
@@ -5074,12 +5075,12 @@ input[type=range] { width: 100%; accent-color: var(--brand-leaf); }
   padding: 0;
   min-width: 580px;
   max-height: none;
-  overflow: hidden;
+  overflow: visible;
 }
-.dt-cal { padding: 14px 16px; border-right: 1px solid var(--line); }
+.dt-cal { padding: 14px 16px; border-right: 1px solid var(--line); min-width: 0; }
 .dt-cal .cal-head { margin-bottom: 10px; }
 .dt-cal .cal-grid { gap: 4px; }
-.dt-time { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.dt-time { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .dt-time h5 { margin: 0; font-size: 14px; font-weight: 600; letter-spacing: -.01em; }
 .dt-time-hint {
   margin: 0;
@@ -5089,21 +5090,23 @@ input[type=range] { width: 100%; accent-color: var(--brand-leaf); }
 }
 .dt-time-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   flex: 1;
-  overflow: auto;
+  overflow: visible;
   align-content: start;
 }
 .dt-time-grid button {
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 10px;
-  padding: 9px 8px;
-  font: 500 12.5px/1 var(--font-sans);
+  padding: 9px 6px;
+  font: 500 12px/1 var(--font-sans);
   cursor: pointer;
   letter-spacing: -.005em;
   transition: all .15s;
+  white-space: nowrap;
+  min-width: 0;
 }
 .dt-time-grid button:hover { border-color: var(--ink); background: var(--canvas-2); }
 .dt-time-grid button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
@@ -6866,6 +6869,7 @@ input[type=range] { width: 100%; accent-color: var(--brand-leaf); }
   border-radius: 18px;
   padding: 20px;
   display: flex; flex-direction: column; gap: 14px;
+  overflow: visible;
 }
 .cs-car {
   display: grid; grid-template-columns: auto 1fr; gap: 12px;
@@ -6897,6 +6901,110 @@ input[type=range] { width: 100%; accent-color: var(--brand-leaf); }
 .cs-trip {
   display: flex;
   flex-direction: column;
+  gap: 10px;
+}
+.cs-trip--incomplete {
+  padding: 12px;
+  margin: -12px;
+  border-radius: 14px;
+  background: #fff;
+}
+.cs-trip-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.cs-trip-title {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 650;
+  color: var(--muted);
+}
+.cs-trip-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: none;
+  background: transparent;
+  color: var(--brand-leaf);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 8px;
+}
+.cs-trip-edit:hover:not(:disabled) {
+  background: rgba(255, 102, 0, 0.08);
+}
+.cs-trip-edit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.cs-trip-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: visible;
+}
+.cs-trip-editor-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.cs-trip-editor-head strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.cs-trip-editor-head p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.cs-trip-editor-fields {
+  display: grid;
+  gap: 8px;
+}
+.cs-trip-editor-fields.simple {
+  grid-template-columns: 1fr;
+}
+.cs-trip-editor-fields.with-return {
+  grid-template-columns: 1fr;
+}
+.cs-trip-editor-fields .bk-field {
+  min-width: 0;
+  /* Let the wide date/time popover paint outside the field. */
+  overflow: visible;
+}
+.cs-trip-editor-fields .bk-menu {
+  z-index: 40;
+}
+/* Side-by-side calendar + time, anchored to the field’s right end
+   so the popover opens left into the main checkout column. */
+.cs-trip-editor-fields .dt-menu {
+  grid-template-columns: 1fr 1.05fr;
+  left: auto;
+  right: 0;
+  width: max-content;
+  min-width: 580px;
+  max-width: calc(100vw - 24px);
+  transform: none;
+  max-height: none;
+  overflow: visible;
+}
+.cs-trip-editor-fields .dt-cal {
+  border-right: 1px solid var(--line);
+  border-bottom: 0;
+}
+.cs-trip-editor-fields .dt-time-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 .cs-trip-duration {
   display: inline-flex;
@@ -6935,6 +7043,10 @@ input[type=range] { width: 100%; accent-color: var(--brand-leaf); }
   background: var(--canvas-2);
   border: 1px solid var(--line);
   border-radius: 12px;
+}
+.cs-trip-leg--invalid {
+  border-color: rgba(255, 102, 0, 0.55);
+  background: rgba(255, 102, 0, 0.04);
 }
 .cs-trip-leg--return {
   text-align: right;
@@ -7911,6 +8023,19 @@ button.ess4-link { font: inherit; }
   .bk-trip-tabs button { flex: 1; justify-content: center; padding: 7px 10px; }
   .dt-menu { min-width: 240px; max-width: calc(100vw - 24px); }
   .dt-time-grid { grid-template-columns: repeat(2, 1fr); }
+  .cs-trip-editor-fields .dt-menu {
+    grid-template-columns: 1fr;
+    left: 0;
+    right: 0;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    transform: none;
+  }
+  .cs-trip-editor-fields .dt-cal {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
   .loc-menu { min-width: 240px; max-width: calc(100vw - 24px); }
 
   /* Sections */

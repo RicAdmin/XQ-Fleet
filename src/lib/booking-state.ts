@@ -28,6 +28,20 @@ export function hasTripDates(
   )
 }
 
+/** Pickup and return meet points chosen (return location required for one-way). */
+export function hasTripLocations(
+  booking: Pick<BookingState, 'from' | 'retLoc' | 'tripType'>,
+): boolean {
+  if (!booking.from.trim()) return false
+  if (booking.tripType === 'oneway' && !booking.retLoc.trim()) return false
+  return true
+}
+
+/** Dates, times, and locations ready for checkout payment. */
+export function hasPickupReturnDetails(booking: BookingState): boolean {
+  return hasTripDates(booking) && hasTripLocations(booking)
+}
+
 export function cloneBooking(booking: BookingState): BookingState {
   return {
     ...booking,
