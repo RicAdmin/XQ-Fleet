@@ -225,7 +225,7 @@ function ReportStatCard({ label, value }: { label: string; value: string }) {
       className="rounded-[var(--radius-xl,1rem)] shadow-[var(--shadow-md)] ring-1 ring-[var(--border,rgba(17,17,16,0.10))]"
     >
       <CardHeader className="pb-0">
-        <CardDescription className="text-[0.7rem] font-semibold tracking-[0.08em] text-[var(--sea-ink-soft)] uppercase">
+        <CardDescription className="text-sm font-medium text-[var(--sea-ink-soft)]">
           {label}
         </CardDescription>
       </CardHeader>
@@ -251,7 +251,7 @@ const REVENUE_COLUMNS: Column<RevenueRow>[] = [
     header: 'Car',
     render: (r) => (
       <>
-        <Link to="/admin/rentals/$rentalId" params={{ rentalId: r.id }} className="plate-link">
+        <Link to="/internal/jobs/$jobId" params={{ jobId: r.id }} className="plate-link">
           {r.carPlateNumber ?? '—'}
         </Link>
         <span className="vehicle-model">{r.carMake} {r.carModel}</span>
@@ -402,7 +402,7 @@ function RevenueTab({
             {data.outstanding.map((r) => (
               <div key={r.id} className="list-row">
                 <div>
-                  <Link to="/admin/rentals/$rentalId" params={{ rentalId: r.id }} className="plate-link">
+                  <Link to="/internal/jobs/$jobId" params={{ jobId: r.id }} className="plate-link">
                     {r.carPlateNumber ?? '—'}
                   </Link>
                   <span className="ml-2 text-sm text-[var(--sea-ink-soft)]">{r.carMake} {r.carModel}</span>
@@ -606,7 +606,8 @@ function OverdueTab() {
                     <tr key={r.id}>
                       <td>
                         <Link
-                          to="/admin/rentals/$rentalId"
+                          to="/internal/jobs/$jobId"
+                          params={{ jobId: r.id }}
                           params={{ rentalId: r.id }}
                           className="plate-link"
                         >

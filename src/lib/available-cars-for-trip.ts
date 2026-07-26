@@ -8,6 +8,7 @@ import { publicCarCatalogSelect } from '#/lib/car-catalog'
 import { parseLocalYmd } from '#/lib/booking-datetime'
 import { findCarIdsAtBookingCapacity } from '#/lib/fleet-capacity'
 import type { PublicCarRow } from '#/lib/portal-functions'
+import { uniquePublicCarModels } from '#/lib/portal-functions'
 
 export const BLOCKING_RENTAL_STATUSES = ['pending', 'active'] as const
 
@@ -95,15 +96,17 @@ export function drizzleAvailableCarsForTripDb(
         conditions.push(notInArray(cars.id, excludeCarIds))
       }
 
-      return db
-        .select(publicCarListSelect)
-        .from(cars)
-        .leftJoin(
-          carPhotos,
-          and(eq(carPhotos.carId, cars.id), eq(carPhotos.isCover, true)),
-        )
-        .where(and(...conditions))
-        .orderBy(cars.make, cars.model)
+      return uniquePublicCarModels(
+        await db
+          .select(publicCarListSelect)
+          .from(cars)
+          .leftJoin(
+            carPhotos,
+            and(eq(carPhotos.carId, cars.id), eq(carPhotos.isCover, true)),
+          )
+          .where(and(...conditions))
+          .orderBy(cars.make, cars.model),
+      )
     },
   }
 }

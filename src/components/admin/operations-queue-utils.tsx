@@ -1,5 +1,7 @@
 import { cn } from '#/lib/utils'
+import { formatJobType } from '#/lib/job-display'
 import type { RentalListRow } from '#/lib/rental-functions'
+import { StatusBadge } from '#/components/ui/StatusBadge'
 
 export function formatOperationDate(d: Date): string {
   return new Date(d).toLocaleDateString('en-MY', {
@@ -113,6 +115,77 @@ export function OperationDueCell({
   )
 }
 
+export function OperationCustomerCell({ rental }: { rental: RentalListRow }) {
+  return (
+    <div>
+      <div className="font-semibold text-[var(--sea-ink)]">{rental.customerFullName ?? '—'}</div>
+      {rental.customerPhone ? (
+        <div className="text-[var(--admin-text-sm)] text-[var(--sea-ink-soft)]">
+          {rental.customerPhone}
+        </div>
+      ) : null}
+      {rental.customerIcOrPassport ? (
+        <div className="font-mono text-[var(--admin-text-sm)] text-[var(--sea-ink-soft)]">
+          {rental.customerIcOrPassport}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+export function OperationPaymentCell({ rental }: { rental: RentalListRow }) {
+  const balanceSen = Math.max(0, rental.totalAmountSen - rental.paidAmountSen)
+
+  return (
+    <div>
+      <StatusBadge status={rental.paymentStatus} size="sm" />
+      {rental.depositAmountSen > 0 ? (
+        <div className="mt-1 text-[var(--admin-text-sm)] text-[var(--sea-ink-soft)]">
+          Dep. {formatMYR(rental.depositAmountSen)}
+        </div>
+      ) : null}
+      {balanceSen > 0 ? (
+        <div className="mt-1 text-[var(--admin-text-sm)] font-medium text-amber-700">
+          Bal. {formatMYR(balanceSen)}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+export function OperationJobContext({ rental }: { rental: RentalListRow }) {
+  const balanceSen = Math.max(0, rental.totalAmountSen - rental.paidAmountSen)
+
+  return (
+    <div className="space-y-2 rounded-lg border border-[var(--line)] bg-[var(--surface-muted)] p-3 text-sm">
+      <div>
+        <div className="font-semibold text-[var(--sea-ink)]">{rental.customerFullName ?? '—'}</div>
+        <div className="text-[var(--sea-ink-soft)]">
+          {[rental.customerPhone, rental.customerIcOrPassport].filter(Boolean).join(' · ') || '—'}
+        </div>
+      </div>
+      <div className="text-[var(--sea-ink-soft)]">
+        <div>
+          Pickup: {formatOperationDateTime(rental.startDate, rental.pickUpTime)}
+          {rental.pickUpLocation ? ` · ${rental.pickUpLocation}` : ''}
+        </div>
+        <div>
+          Return: {formatOperationDateTime(rental.endDate, rental.returnTime)}
+          {rental.returnLocation ? ` · ${rental.returnLocation}` : ''}
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <StatusBadge status={rental.paymentStatus} size="sm" />
+        <span className="text-[var(--sea-ink-soft)]">
+          Total {formatMYR(rental.totalAmountSen)}
+          {balanceSen > 0 ? ` · Balance ${formatMYR(balanceSen)}` : ''}
+        </span>
+      </div>
+      <div className="text-[var(--sea-ink-soft)]">{formatJobType(rental.type)}</div>
+    </div>
+  )
+}
+
 export function OperationScheduleCell({ rental }: { rental: RentalListRow }) {
   return (
     <div className="admin-op-schedule">
@@ -120,12 +193,18 @@ export function OperationScheduleCell({ rental }: { rental: RentalListRow }) {
         <span className="admin-op-schedule-label">Pickup</span>
         <span className="admin-op-schedule-value">
           {formatOperationDateTime(rental.startDate, rental.pickUpTime)}
+          {rental.pickUpLocation ? (
+            <span className="block text-[var(--sea-ink-soft)]">{rental.pickUpLocation}</span>
+          ) : null}
         </span>
       </div>
       <div className="admin-op-schedule-row">
         <span className="admin-op-schedule-label">Return</span>
         <span className="admin-op-schedule-value">
           {formatOperationDateTime(rental.endDate, rental.returnTime)}
+          {rental.returnLocation ? (
+            <span className="block text-[var(--sea-ink-soft)]">{rental.returnLocation}</span>
+          ) : null}
         </span>
       </div>
       <div className="admin-op-schedule-duration">{formatRentalDuration(rental)}</div>
@@ -169,10 +248,14 @@ export function filterPickupRows(
 
     const haystack = [
       row.customerFullName,
+      row.customerPhone,
+      row.customerIcOrPassport,
       row.customerEmail,
       row.carPlateNumber,
       row.carMake,
       row.carModel,
+      row.pickUpLocation,
+      row.returnLocation,
     ]
       .filter(Boolean)
       .join(' ')
@@ -198,10 +281,14 @@ export function filterReturnRows(
 
     const haystack = [
       row.customerFullName,
+      row.customerPhone,
+      row.customerIcOrPassport,
       row.customerEmail,
       row.carPlateNumber,
       row.carMake,
       row.carModel,
+      row.pickUpLocation,
+      row.returnLocation,
     ]
       .filter(Boolean)
       .join(' ')

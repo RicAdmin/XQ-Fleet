@@ -1,35 +1,66 @@
 import { describe, expect, it } from 'vitest'
 
+import { INTERNAL_JOBS_PATH } from '#/lib/internal-routes'
+
 import {
   canAccessSurface,
+  getDefaultHomePathForPersona,
   getHomePathForRole,
-  getLoginPathForSurface,
-  isAppRole,
+  resolveDashboardPersona,
 } from '#/lib/auth-model'
 
 describe('auth-model helpers', () => {
   it('maps each role to the correct home path', () => {
-    expect(getHomePathForRole('owner')).toBe('/admin')
-    expect(getHomePathForRole('staff')).toBe('/app')
+    expect(getHomePathForRole('owner')).toBe(INTERNAL_JOBS_PATH)
+    expect(getHomePathForRole('staff', 'customer_service')).toBe(INTERNAL_JOBS_PATH)
+    expect(getHomePathForRole('staff', 'operations')).toBe(INTERNAL_JOBS_PATH)
     expect(getHomePathForRole('customer')).toBe('/')
   })
 
   it('knows which roles can reach each protected surface', () => {
     expect(canAccessSurface('owner', 'admin')).toBe(true)
-    expect(canAccessSurface('staff', 'admin')).toBe(false)
+    expect(canAccessSurface('staff', 'admin')).toBe(true)
     expect(canAccessSurface('owner', 'app')).toBe(true)
     expect(canAccessSurface('staff', 'app')).toBe(true)
     expect(canAccessSurface('customer', 'app')).toBe(false)
     expect(canAccessSurface('customer', 'account')).toBe(true)
   })
 
-  it('returns the correct login routes and role guards', () => {
-    expect(getLoginPathForSurface('admin')).toBe('/internal/login')
-    expect(getLoginPathForSurface('app')).toBe('/internal/login')
-    expect(getLoginPathForSurface('account')).toBe('/en/login')
-    expect(isAppRole('owner')).toBe(true)
-    expect(isAppRole('staff')).toBe(true)
-    expect(isAppRole('customer')).toBe(true)
-    expect(isAppRole('unknown')).toBe(false)
+  it('resolves dashboard personas and super-admin view mode', () => {
+    expect(
+      resolveDashboardPersona({
+        role: 'staff',
+        staffProfile: 'operations',
+      }),
+    ).toBe('operations')
+
+    expect(
+      resolveDashboardPersona({
+        role: 'super_admin',
+        viewMode: 'customer_service',
+      }),
+    ).toBe('customer_service')
+
+    expect(
+      resolveDashboardPersona({
+        role: 'super_admin',
+        viewMode: 'operations',
+      }),
+    ).toBe('operations')
+
+    expect(
+      resolveDashboardPersona({
+        role: 'super_admin',
+        viewMode: 'admin',
+      }),
+    ).toBe('admin')
+
+    expect(resolveDashboardPersona({ role: 'owner' })).toBe('admin')
+  })
+
+  it('maps personas to default home paths', () => {
+    expect(getDefaultHomePathForPersona('customer_service')).toBe(INTERNAL_JOBS_PATH)
+    expect(getDefaultHomePathForPersona('operations')).toBe(INTERNAL_JOBS_PATH)
+    expect(getDefaultHomePathForPersona('admin')).toBe(INTERNAL_JOBS_PATH)
   })
 })

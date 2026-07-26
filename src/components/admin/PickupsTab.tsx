@@ -15,11 +15,15 @@ import {
 import {
   filterPickupRows,
   isPickupOverdue,
+  OperationCustomerCell,
   OperationDueCell,
+  OperationJobContext,
   OperationMoneyCell,
+  OperationPaymentCell,
   OperationScheduleCell,
   type OperationQueueFilters,
 } from '#/components/admin/operations-queue-utils'
+import { showAdminToast } from '#/components/ui/AdminToast'
 import { confirmHandover, type RentalListRow } from '#/lib/rental-functions'
 
 const SEARCH_DEBOUNCE_MS = 300
@@ -79,6 +83,7 @@ export function PickupsTab({ rows, onMutated }: PickupsTabProps) {
         },
       })
       setActiveRental(null)
+      showAdminToast('Handover confirmed.')
       await onMutated()
     } catch (err) {
       setHandoverError(err instanceof Error ? err.message : 'Failed to confirm handover.')
@@ -110,16 +115,7 @@ export function PickupsTab({ rows, onMutated }: PickupsTabProps) {
         key: 'customer',
         header: 'Customer',
         cellClassName: 'admin-op-col-customer whitespace-normal',
-        render: (r) => (
-          <div>
-            <div className="font-semibold text-[var(--sea-ink)]">
-              {r.customerFullName ?? '—'}
-            </div>
-            <div className="admin-op-email text-[var(--admin-text-sm)] text-[var(--sea-ink-soft)]">
-              {r.customerEmail ?? '—'}
-            </div>
-          </div>
-        ),
+        render: (r) => <OperationCustomerCell rental={r} />,
       },
       {
         key: 'car',
@@ -141,11 +137,9 @@ export function PickupsTab({ rows, onMutated }: PickupsTabProps) {
         render: (r) => <OperationScheduleCell rental={r} />,
       },
       {
-        key: 'total',
-        header: 'Total',
-        headerClassName: 'text-right',
-        cellClassName: 'admin-op-col-money text-right',
-        render: (r) => <OperationMoneyCell amountSen={r.totalAmountSen} />,
+        key: 'paymentStatus',
+        header: 'Payment',
+        render: (r) => <OperationPaymentCell rental={r} />,
       },
       {
         key: 'paid',
@@ -162,7 +156,7 @@ export function PickupsTab({ rows, onMutated }: PickupsTabProps) {
     <AdminListFilterBar
       searchValue={searchInput}
       onSearchChange={setSearchInput}
-      searchPlaceholder="Customer, car…"
+      searchPlaceholder="Customer, phone, IC, or plate…"
       searchAriaLabel="Search pickups"
       filtersOpen={filtersOpen}
       onFiltersOpenChange={setFiltersOpen}
@@ -170,11 +164,14 @@ export function PickupsTab({ rows, onMutated }: PickupsTabProps) {
       hasActiveFilters={hasActiveFilters}
       onClearFilters={clearFilters}
       inlineControls={
-        <DateRangeQuickPresets
-          from={filters.from}
-          to={filters.to}
-          onRangeChange={(from, to) => setFilters((prev) => ({ ...prev, from, to }))}
-        />
+        <div className="admin-filter-bar__quick-group">
+          <span className="admin-filter-bar__quick-label">Quick range:</span>
+          <DateRangeQuickPresets
+            from={filters.from}
+            to={filters.to}
+            onRangeChange={(from, to) => setFilters((prev) => ({ ...prev, from, to }))}
+          />
+        </div>
       }
     >
       <DateRangeFilter
@@ -201,7 +198,7 @@ export function PickupsTab({ rows, onMutated }: PickupsTabProps) {
             <div className="text-center text-sm text-muted-foreground">
               {hasActiveFilters
                 ? 'No pickups match these filters.'
-                : 'No pickups scheduled. Pending rentals will appear here.'}
+                : 'No pickups scheduled. Pending jobs will appear here.'}
             </div>
           }
         />
@@ -223,11 +220,12 @@ export function PickupsTab({ rows, onMutated }: PickupsTabProps) {
           <SheetHeader className="border-b border-[var(--line)] px-5 pb-4 pt-5">
             <p className="island-kicker mb-1">Pickup</p>
             <SheetTitle className="text-lg font-semibold text-[var(--sea-ink)]">
-              {activeRental?.carPlateNumber ?? 'Rental'} — Confirm handover
+              {activeRental?.carPlateNumber ?? 'Job'} — Confirm handover
             </SheetTitle>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto px-5 py-4">
-            <form id="pickups-handover-form" className="space-y-4" onSubmit={handleHandoverSubmit}>
+            {activeRental ? <OperationJobContext rental={activeRental} /> : null}
+            <form id="pickups-handover-form" className="mt-4 space-y-4" onSubmit={handleHandoverSubmit}>
               <div>
                 <label className="field-label" htmlFor="pickups-ho-mileage">
                   Start mileage (km)

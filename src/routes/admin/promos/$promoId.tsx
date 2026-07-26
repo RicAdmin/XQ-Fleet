@@ -20,8 +20,9 @@ import type { AdminPromoDetail } from '#/lib/promo-functions'
 import type { Promo } from '#/db/schema'
 
 export const Route = createFileRoute('/admin/promos/$promoId')({
-  beforeLoad: async ({ params }) => {
-    await requireFullAdminAccess()
+  beforeLoad: async ({ params, cause }) => {
+    const { session } = await requireFullAdminAccess({ cause })
+    if (!session) return
     const detail = await getPromoDetail({ data: { id: params.promoId } })
     if (!detail) throw notFound()
     return { detail }

@@ -1,32 +1,10 @@
-import { createFileRoute, notFound, useNavigate } from '@tanstack/react-router'
-
-import CustomerProfile from '#/components/customers/CustomerProfile'
-import type { CustomerRow } from '#/components/customers/CustomersList'
-import { getCustomerById } from '#/lib/customer-functions'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/app/customers/$customerId')({
-  beforeLoad: async ({ params }) => {
-    const customer = await getCustomerById({ data: { customerId: params.customerId } })
-    if (!customer) throw notFound()
-    return { customer }
+  beforeLoad: ({ params }) => {
+    throw redirect({
+      to: '/admin/customers/$customerId',
+      params: { customerId: params.customerId },
+    })
   },
-  component: AppCustomerDetailPage,
 })
-
-function AppCustomerDetailPage() {
-  const { session, customer } = Route.useRouteContext() as unknown as {
-    session: { user: { name: string; email: string; role: string } }
-    customer: CustomerRow
-  }
-  const navigate = useNavigate()
-
-  return (
-    <CustomerProfile
-      initialCustomer={customer}
-      session={session}
-      listPath="/app/customers"
-      canDelete={false}
-      onDeleted={() => navigate({ to: '/app/customers' })}
-    />
-  )
-}

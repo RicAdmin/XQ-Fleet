@@ -239,6 +239,7 @@ export const customers = pgTable(
   (table) => [
     uniqueIndex('customers_auth_user_id_unique').on(table.authUserId),
     uniqueIndex('customers_ic_or_passport_unique').on(table.icOrPassport),
+    index('customers_created_at_idx').on(table.createdAt),
   ],
 )
 
@@ -322,6 +323,9 @@ export const rentals = pgTable(
     index('rentals_car_id_idx').on(table.carId),
     index('rentals_customer_id_idx').on(table.customerId),
     index('rentals_status_idx').on(table.status),
+    index('rentals_status_start_date_idx').on(table.status, table.startDate),
+    index('rentals_status_end_date_idx').on(table.status, table.endDate),
+    index('rentals_car_id_status_idx').on(table.carId, table.status),
   ],
 )
 
@@ -359,7 +363,7 @@ export const payments = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [index('payments_rental_id_idx').on(table.rentalId)],
+  (table) => [index('payments_rental_id_idx').on(table.rentalId), index('payments_created_at_idx').on(table.createdAt)],
 )
 
 export const maintenanceEvents = pgTable(

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
+import { INTERNAL_JOBS_PATH } from '#/lib/internal-routes'
+
 import {
   resolveAdminNavSections,
   type AdminNavSection,
@@ -7,111 +9,148 @@ import {
 
 const SECTIONS: AdminNavSection<string>[] = [
   {
-    label: 'Overview',
+    label: 'Manage',
+    audiences: ['customer_service', 'operations', 'admin'],
     items: [
       {
         type: 'link',
-        label: 'Dashboard',
-        icon: 'dash',
-        to: '/admin/',
-        exact: true,
-        ownerOnly: true,
+        label: 'Operation',
+        icon: 'ops',
+        to: '/admin/operations',
+        exact: false,
+        audiences: ['operations', 'admin'],
+      },
+      {
+        type: 'link',
+        label: 'Job',
+        icon: 'job',
+        to: INTERNAL_JOBS_PATH,
+        exact: false,
+      },
+      {
+        type: 'link',
+        label: 'Availability',
+        icon: 'avail',
+        to: '/admin/availability',
+        exact: false,
+      },
+      {
+        type: 'link',
+        label: 'Payment',
+        icon: 'pay',
+        to: '/admin/payments',
+        exact: false,
+      },
+      {
+        type: 'link',
+        label: 'Customer',
+        icon: 'cust',
+        to: '/admin/customers',
+        exact: false,
+        audiences: ['customer_service', 'admin'],
       },
     ],
   },
   {
-    label: 'Fleet',
+    label: 'Maintenance',
+    audiences: ['operations', 'admin'],
     items: [
       {
         type: 'link',
-        label: 'Vehicles',
-        icon: 'car',
+        label: 'Maintenance',
+        icon: 'maint',
+        to: '/admin/maintenance',
+        exact: false,
+      },
+    ],
+  },
+  {
+    label: 'Insight',
+    audiences: ['admin'],
+    items: [
+      {
+        type: 'link',
+        label: 'Reports',
+        icon: 'reports',
+        to: '/admin/reports',
+        exact: false,
+      },
+      {
+        type: 'link',
+        label: 'Promo code',
+        icon: 'promo',
+        to: '/admin/promos',
+        exact: false,
+      },
+    ],
+  },
+  {
+    label: 'Configuration',
+    audiences: ['admin'],
+    items: [
+      {
+        type: 'link',
+        label: 'Vehicle',
+        icon: 'vehicle',
         to: '/admin/cars',
         exact: false,
       },
       {
         type: 'link',
-        label: 'Rentals',
-        icon: 'rentals',
-        to: '/admin/rentals',
-        staffTo: '/app/rentals',
+        label: 'Partner',
+        icon: 'partner',
+        to: '/admin/partners',
         exact: false,
       },
       {
         type: 'link',
-        label: 'Customers',
-        icon: 'customers',
-        to: '/admin/customers',
-        staffTo: '/app/customers',
+        label: 'Location',
+        icon: 'loc',
+        to: '/admin/locations',
+        exact: false,
+      },
+      {
+        type: 'link',
+        label: 'Staff',
+        icon: 'staff',
+        to: '/admin/staff',
         exact: false,
       },
     ],
   },
-  {
-    label: 'Team',
-    items: [{ type: 'placeholder', label: 'Staff', icon: 'staff' }],
-  },
 ]
 
 describe('resolveAdminNavSections', () => {
-  it('keeps ownerOnly items for an owner session', () => {
-    const resolved = resolveAdminNavSections(SECTIONS, { isOwner: true })
-    const overview = resolved.find((s) => s.label === 'Overview')
-    expect(overview?.items).toEqual([
-      {
-        type: 'link',
-        label: 'Dashboard',
-        icon: 'dash',
-        href: '/admin/',
-        exact: true,
-      },
+  it('shows CS manage items without operation or maintenance', () => {
+    const resolved = resolveAdminNavSections(SECTIONS, { persona: 'customer_service' })
+    expect(resolved.map((s) => s.label)).toEqual(['Manage'])
+    expect(resolved[0]?.items.map((i) => i.label)).toEqual([
+      'Job',
+      'Availability',
+      'Payment',
+      'Customer',
     ])
   })
 
-  it('omits ownerOnly items for a staff session', () => {
-    const resolved = resolveAdminNavSections(SECTIONS, { isOwner: false })
-    expect(resolved.find((s) => s.label === 'Overview')).toBeUndefined()
-    const fleet = resolved.find((s) => s.label === 'Fleet')
-    expect(fleet?.items.map((i) => i.label)).toEqual([
-      'Vehicles',
-      'Rentals',
-      'Customers',
+  it('shows ops manage + maintenance without insight/config', () => {
+    const resolved = resolveAdminNavSections(SECTIONS, { persona: 'operations' })
+    expect(resolved.map((s) => s.label)).toEqual(['Manage', 'Maintenance'])
+    const manage = resolved.find((s) => s.label === 'Manage')
+    expect(manage?.items.map((i) => i.label)).toEqual([
+      'Operation',
+      'Job',
+      'Availability',
+      'Payment',
     ])
   })
 
-  it('resolves to vs staffTo by role', () => {
-    const forOwner = resolveAdminNavSections(SECTIONS, { isOwner: true })
-    const forStaff = resolveAdminNavSections(SECTIONS, { isOwner: false })
-
-    const ownerRentals = forOwner
-      .flatMap((s) => s.items)
-      .find((i) => i.type === 'link' && i.label === 'Rentals')
-    const staffRentals = forStaff
-      .flatMap((s) => s.items)
-      .find((i) => i.type === 'link' && i.label === 'Rentals')
-
-    expect(ownerRentals).toMatchObject({
-      type: 'link',
-      href: '/admin/rentals',
-    })
-    expect(staffRentals).toMatchObject({
-      type: 'link',
-      href: '/app/rentals',
-    })
-  })
-
-  it('never treats a placeholder as a navigable link', () => {
-    for (const isOwner of [true, false]) {
-      const resolved = resolveAdminNavSections(SECTIONS, { isOwner })
-      const staff = resolved
-        .flatMap((s) => s.items)
-        .find((i) => i.label === 'Staff')
-      expect(staff).toEqual({
-        type: 'placeholder',
-        label: 'Staff',
-        icon: 'staff',
-      })
-      expect(staff && 'href' in staff).toBe(false)
-    }
+  it('shows full admin menus including insight and configuration', () => {
+    const resolved = resolveAdminNavSections(SECTIONS, { persona: 'admin' })
+    expect(resolved.map((s) => s.label)).toEqual([
+      'Manage',
+      'Maintenance',
+      'Insight',
+      'Configuration',
+    ])
   })
 })

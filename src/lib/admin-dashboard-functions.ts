@@ -16,7 +16,8 @@ import type {
   PaymentStatus,
   RentalStatus,
 } from '#/db/schema'
-import { requireAdmin } from '#/lib/auth-functions'
+import { requireAdmin, requireRole } from '#/lib/auth-functions'
+import { fleetOpsRoles } from '#/lib/auth-model'
 import {
   deriveCarDisplayStatus,
   getOverdueCarIds,
@@ -341,7 +342,7 @@ export type AdminPaymentsInput = z.infer<typeof adminPaymentsInputSchema>
 export const getAdminPayments = createServerFn({ method: 'GET' })
   .inputValidator(adminPaymentsInputSchema.parse.bind(adminPaymentsInputSchema))
   .handler(async ({ data }): Promise<AdminPaymentsResult> => {
-    await requireAdmin()
+    await requireRole(fleetOpsRoles)
     const { db } = await import('#/db')
 
     const filters = []

@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, useRouter } from '@tanstack/react-router'
+import { Car } from 'lucide-react'
 
+import { formatOperationDate, formatOperationTime } from '#/components/admin/operations-queue-utils'
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
+import { showAdminToast } from '#/components/ui/AdminToast'
 import { Button } from '#/components/ui/button'
 import { ConfirmActionDialog } from '#/components/ui/ConfirmActionDialog'
 import { Card, CardContent, CardDescription, CardHeader } from '#/components/ui/card'
@@ -14,6 +17,16 @@ import {
   SheetHeader,
   SheetTitle,
 } from '#/components/ui/sheet'
+import type { RentalType } from '#/db/schema'
+import {
+  formatJobDurationLabel,
+  formatJobSource,
+  formatJobType,
+  jobBookingRef,
+  toTimeHms,
+  toTimeInputValue,
+} from '#/lib/job-display'
+import { listActivePickupLocations } from '#/lib/location-functions'
 import type { RentalFullRow } from '#/lib/rental-functions'
 import {
   cancelRental,
@@ -21,6 +34,7 @@ import {
   confirmHandover,
   deleteRental,
   extendRental,
+  updateRentalBooking,
 } from '#/lib/rental-functions'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -35,7 +49,51 @@ function formatDate(d: Date | null | undefined) {
 }
 
 function toDateInput(d: Date): string {
-  return d.toISOString().split('T')[0]
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+function DetailField({
+  label,
+  children,
+  mono,
+}: {
+  label: string
+  children: React.ReactNode
+  mono?: boolean
+}) {
+  return (
+    <div className="job-detail-field">
+      <dt className="job-detail-field__label">{label}</dt>
+      <dd className={mono ? 'job-detail-field__value font-mono' : 'job-detail-field__value'}>
+        {children}
+      </dd>
+    </div>
+  )
+}
+
+function ArrangementBlock({
+  title,
+  date,
+  time,
+  location,
+}: {
+  title: string
+  date: Date
+  time: string | null
+  location: string | null
+}) {
+  return (
+    <div className="job-detail-leg">
+      <p className="job-detail-leg__kicker">{title}</p>
+      <p className="job-detail-leg__when tabular-nums">
+        {formatOperationDate(date)} · {formatOperationTime(time, date)}
+      </p>
+      <p className="job-detail-leg__where">{location?.trim() || '—'}</p>
+    </div>
+  )
 }
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
@@ -50,7 +108,7 @@ const STATUS_STYLES = {
 function RentalStatusBadge({ status }: { status: string }) {
   const style = STATUS_STYLES[status as keyof typeof STATUS_STYLES] ?? 'bg-slate-100 text-slate-500 border-slate-200'
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-sm font-semibold ${style}`}>
+    <span className={`inline-flex items-center rounded border px-1.5 py-0.5 text-[11px] font-semibold leading-none ${style}`}>
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   )
@@ -79,6 +137,8 @@ type RentalDetailProps = {
   initialRental: RentalFullRow
   session: { user: { name: string; email: string; role: string } }
   listPath: string
+  backLabel?: string
+  jobMode?: 'manage' | 'operations'
   canDelete: boolean
 }
 
@@ -88,10 +148,18 @@ export default function RentalDetail({
   initialRental,
   session,
   listPath,
+  backLabel = 'Back to jobs',
+  jobMode = 'manage',
   canDelete,
 }: RentalDetailProps) {
+  const isOpsMode = jobMode === 'operations'
   const navigate = useNavigate()
+  const router = useRouter()
   const [rental, setRental] = useState<RentalFullRow>(initialRental)
+
+  useEffect(() => {
+    void router.preloadRoute({ to: listPath })
+  }, [router, listPath])
 
   // Handover form
   const [handoverOpen, setHandoverOpen] = useState(false)
@@ -116,6 +184,27 @@ export default function RentalDetail({
   const [extendError, setExtendError] = useState<string | null>(null)
   const [isSubmittingExtend, setIsSubmittingExtend] = useState(false)
 
+  // Edit booking (admin / manage mode)
+  const [bookingEditOpen, setBookingEditOpen] = useState(false)
+  const [bookingType, setBookingType] = useState<RentalType>(rental.type)
+  const [bookingStartDate, setBookingStartDate] = useState(() => toDateInput(rental.startDate))
+  const [bookingEndDate, setBookingEndDate] = useState(() => toDateInput(rental.endDate))
+  const [bookingPickUpTime, setBookingPickUpTime] = useState(() =>
+    toTimeInputValue(rental.pickUpTime),
+  )
+  const [bookingReturnTime, setBookingReturnTime] = useState(() =>
+    toTimeInputValue(rental.returnTime),
+  )
+  const [bookingPickUpLocation, setBookingPickUpLocation] = useState(
+    rental.pickUpLocation ?? 'Office',
+  )
+  const [bookingReturnLocation, setBookingReturnLocation] = useState(
+    rental.returnLocation ?? 'Office',
+  )
+  const [locationOptions, setLocationOptions] = useState<string[]>(['Office', 'Airport', 'Jetty'])
+  const [bookingError, setBookingError] = useState<string | null>(null)
+  const [isSubmittingBooking, setIsSubmittingBooking] = useState(false)
+
   // Cancel
   const [confirmCancelOpen, setConfirmCancelOpen] = useState(false)
   const [cancelError, setCancelError] = useState<string | null>(null)
@@ -125,6 +214,31 @@ export default function RentalDetail({
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  const canEditBooking =
+    !isOpsMode && (rental.status === 'pending' || rental.status === 'active')
+
+  useEffect(() => {
+    if (!bookingEditOpen) return
+    void listActivePickupLocations()
+      .then((rows) => {
+        const labels = rows.map((row) => row.label)
+        const extras = [rental.pickUpLocation, rental.returnLocation].filter(
+          (label): label is string =>
+            typeof label === 'string' && label.length > 0 && !labels.includes(label),
+        )
+        setLocationOptions([...labels, ...extras])
+      })
+      .catch(() => {
+        // Keep defaults; still allow editing with current values.
+        const fallback = ['Office', 'Airport', 'Jetty']
+        const extras = [rental.pickUpLocation, rental.returnLocation].filter(
+          (label): label is string =>
+            typeof label === 'string' && label.length > 0 && !fallback.includes(label),
+        )
+        setLocationOptions([...fallback, ...extras])
+      })
+  }, [bookingEditOpen, rental.pickUpLocation, rental.returnLocation])
 
   // ── Handlers ───────────────────────────────────────────────────────────────
 
@@ -147,6 +261,7 @@ export default function RentalDetail({
         startConditionNote: result?.startConditionNote ?? (startCondition || null),
       }))
       setHandoverOpen(false)
+      showAdminToast('Handover confirmed.')
     } catch (err) {
       setHandoverError(err instanceof Error ? err.message : 'Failed to confirm handover.')
     } finally {
@@ -179,6 +294,7 @@ export default function RentalDetail({
         actualReturnDate: result?.actualReturnDate ?? new Date(),
       }))
       setReturnOpen(false)
+      showAdminToast('Return closed.')
     } catch (err) {
       setReturnError(err instanceof Error ? err.message : 'Failed to close return.')
     } finally {
@@ -200,10 +316,61 @@ export default function RentalDetail({
         totalAmountSen: result?.totalAmountSen ?? prev.totalAmountSen,
       }))
       setExtendOpen(false)
+      showAdminToast('Job extended.')
     } catch (err) {
-      setExtendError(err instanceof Error ? err.message : 'Failed to extend rental.')
+      setExtendError(err instanceof Error ? err.message : 'Failed to extend job.')
     } finally {
       setIsSubmittingExtend(false)
+    }
+  }
+
+  function openBookingEdit() {
+    setBookingType(rental.type)
+    setBookingStartDate(toDateInput(rental.startDate))
+    setBookingEndDate(toDateInput(rental.endDate))
+    setBookingPickUpTime(toTimeInputValue(rental.pickUpTime))
+    setBookingReturnTime(toTimeInputValue(rental.returnTime))
+    setBookingPickUpLocation(rental.pickUpLocation ?? 'Office')
+    setBookingReturnLocation(rental.returnLocation ?? 'Office')
+    setBookingError(null)
+    setBookingEditOpen(true)
+  }
+
+  async function handleBookingEditSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setBookingError(null)
+    setIsSubmittingBooking(true)
+    try {
+      const result = await updateRentalBooking({
+        data: {
+          rentalId: rental.id,
+          type: bookingType,
+          startDate: bookingStartDate,
+          endDate: bookingEndDate,
+          pickUpTime: toTimeHms(bookingPickUpTime),
+          returnTime: toTimeHms(bookingReturnTime),
+          pickUpLocation: bookingPickUpLocation,
+          returnLocation: bookingReturnLocation,
+        },
+      })
+      setRental((prev) => ({
+        ...prev,
+        type: result?.type ?? bookingType,
+        startDate: result?.startDate ?? new Date(bookingStartDate),
+        endDate: result?.endDate ?? new Date(bookingEndDate),
+        pickUpTime: result?.pickUpTime ?? toTimeHms(bookingPickUpTime),
+        returnTime: result?.returnTime ?? toTimeHms(bookingReturnTime),
+        pickUpLocation: result?.pickUpLocation ?? bookingPickUpLocation,
+        returnLocation: result?.returnLocation ?? bookingReturnLocation,
+        totalAmountSen: result?.totalAmountSen ?? prev.totalAmountSen,
+        paymentStatus: result?.paymentStatus ?? prev.paymentStatus,
+      }))
+      setBookingEditOpen(false)
+      showAdminToast('Booking updated.')
+    } catch (err) {
+      setBookingError(err instanceof Error ? err.message : 'Failed to update booking.')
+    } finally {
+      setIsSubmittingBooking(false)
     }
   }
 
@@ -214,8 +381,9 @@ export default function RentalDetail({
       await cancelRental({ data: { rentalId: rental.id } })
       setRental((prev) => ({ ...prev, status: 'cancelled' }))
       setConfirmCancelOpen(false)
+      showAdminToast('Job cancelled.')
     } catch (err) {
-      setCancelError(err instanceof Error ? err.message : 'Failed to cancel rental.')
+      setCancelError(err instanceof Error ? err.message : 'Failed to cancel job.')
     } finally {
       setIsCancelling(false)
     }
@@ -228,286 +396,306 @@ export default function RentalDetail({
       await deleteRental({ data: { rentalId: rental.id } })
       navigate({ to: listPath as never })
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : 'Failed to delete rental.')
+      setDeleteError(err instanceof Error ? err.message : 'Failed to delete job.')
       setIsDeleting(false)
     }
   }
 
   // ── Derived ───────────────────────────────────────────────────────────────
 
-  const rentalDays = Math.max(
-    1,
-    Math.ceil(
-      (new Date(rental.endDate).getTime() - new Date(rental.startDate).getTime()) /
-        (1000 * 60 * 60 * 24),
-    ),
-  )
-
   const balanceSen = Math.max(0, rental.totalAmountSen - rental.paidAmountSen)
+  const hasArrangementActions =
+    canEditBooking || rental.status === 'pending' || rental.status === 'active'
 
   return (
-    <AdminSidebarShell user={session.user} pageTitle="Rental detail">
+    <AdminSidebarShell user={session.user} pageTitle="Job detail">
       <PageHeader
         variant="detail"
-        backLink={{ to: listPath, label: 'Back' }}
-        title={rental.carPlateNumber ?? 'Rental'}
-        description={
-          <>
-            <span>{rental.customerFullName ?? 'Customer'}</span>
-            <span className="ui-meta-sep" aria-hidden>
-              ·
-            </span>
-            <span>{rental.type === 'walk-in' ? 'Walk-in' : 'Booking'}</span>
-            <span className="ui-meta-sep" aria-hidden>
-              ·
-            </span>
-            <span>
-              {rentalDays} day{rentalDays !== 1 ? 's' : ''}
-            </span>
-            <span className="ui-meta-sep" aria-hidden>
-              ·
-            </span>
-            <span className="tabular-nums">
-              {formatDate(rental.startDate)} → {formatDate(rental.endDate)}
-            </span>
-          </>
+        backLink={{ to: listPath, label: backLabel }}
+        media={
+          <div className="job-detail-head-thumb" aria-hidden={!rental.carCoverPhotoUrl}>
+            {rental.carCoverPhotoUrl ? (
+              <img
+                src={rental.carCoverPhotoUrl}
+                alt={
+                  rental.carCoverPhotoAlt
+                  ?? ([rental.carMake, rental.carModel].filter(Boolean).join(' ')
+                    || rental.carPlateNumber
+                    || 'Vehicle')
+                }
+              />
+            ) : (
+              <span className="job-detail-head-thumb__placeholder">
+                <Car size={28} strokeWidth={1.75} />
+              </span>
+            )}
+          </div>
         }
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <RentalStatusBadge status={rental.status} />
-            {rental.status === 'pending' ? (
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  className="button-primary text-sm"
-                  onClick={() => setHandoverOpen(true)}
-                >
-                  Confirm handover
-                </button>
-                <button
-                  type="button"
-                  className="button-danger text-sm"
-                  onClick={() => {
-                    setConfirmCancelOpen(true)
-                    setCancelError(null)
-                  }}
-                >
-                  Cancel booking
-                </button>
-              </div>
-            ) : null}
-            {rental.status === 'active' ? (
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  className="button-primary text-sm"
-                  onClick={() => {
-                    setPaidAmountRM('')
-                    setReturnOpen(true)
-                  }}
-                >
-                  Close return
-                </button>
-                {session.user.role === 'owner' ? (
-                  <button
-                    type="button"
-                    className="button-secondary text-sm"
-                    onClick={() => {
-                      setNewEndDate(toDateInput(rental.endDate))
-                      setExtendOpen(true)
-                    }}
-                  >
-                    Extend rental
-                  </button>
-                ) : null}
-              </div>
-            ) : null}
-            {canDelete && (rental.status === 'closed' || rental.status === 'cancelled') ? (
-              <button
-                type="button"
-                className="button-danger text-sm"
-                onClick={() => {
-                  setConfirmDeleteOpen(true)
-                  setDeleteError(null)
-                }}
-              >
-                Delete record
-              </button>
-            ) : null}
+        title={rental.customerFullName ?? 'Customer'}
+        description={
+          <div className="job-detail-head-meta">
+            <div className="job-detail-head-meta__attrs">
+              <span className="job-detail-head-meta__ref font-mono tabular-nums">
+                {jobBookingRef(rental.id)}
+              </span>
+              {rental.carPlateNumber ? (
+                <span className="ui-chip ui-chip--sm font-mono tabular-nums">
+                  {rental.carPlateNumber}
+                </span>
+              ) : null}
+              <span className="ui-chip ui-chip--sm">
+                {formatJobSource(rental.type, rental.createdByName)}
+              </span>
+              <span className="ui-chip ui-chip--sm tabular-nums">
+                {formatJobDurationLabel(
+                  rental.startDate,
+                  rental.endDate,
+                  rental.extraHoursDecimal,
+                )}
+              </span>
+            </div>
+          </div>
+        }
+        aside={
+          <div className="job-detail-head-arrangement">
+            <div className="job-detail-legs job-detail-legs--head">
+              <ArrangementBlock
+                title="Pickup"
+                date={rental.startDate}
+                time={rental.pickUpTime}
+                location={rental.pickUpLocation}
+              />
+              <ArrangementBlock
+                title="Return"
+                date={rental.endDate}
+                time={rental.returnTime}
+                location={rental.returnLocation}
+              />
+            </div>
           </div>
         }
       />
 
-      {rental.status === 'cancelled' ? (
-        <p className="mb-4 text-sm text-[var(--sea-ink-soft)]">
-          This rental was cancelled. No charges apply.
-        </p>
-      ) : null}
+      <div className="job-detail">
+        {rental.status === 'cancelled' ? (
+          <p className="job-detail-banner">
+            This job was cancelled. No charges apply.
+          </p>
+        ) : null}
 
-      <div className="mb-4 grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="island-kicker">Vehicle</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <dl className="flex flex-col gap-2">
-              <div className="summary-row">
-                <dt className="text-sm text-[var(--sea-ink-soft)]">Plate</dt>
-                <dd className="font-mono text-sm font-semibold text-[var(--lagoon-deep)]">
-                  {rental.carPlateNumber ?? '—'}
-                </dd>
-              </div>
-              <div className="summary-row">
-                <dt className="text-sm text-[var(--sea-ink-soft)]">Model</dt>
-                <dd className="text-sm font-medium text-[var(--sea-ink)]">
-                  {[rental.carMake, rental.carModel].filter(Boolean).join(' ') || '—'}
-                </dd>
-              </div>
-            </dl>
-          </CardContent>
-        </Card>
+        <div className="job-detail-grid">
+          <div className="job-detail-main">
+            <Card className="job-detail-card">
+              {hasArrangementActions ? (
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-end gap-3">
+                    <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+                      {canEditBooking ? (
+                        <button
+                          type="button"
+                          className="button-secondary job-detail-head-btn"
+                          onClick={openBookingEdit}
+                        >
+                          Edit booking
+                        </button>
+                      ) : null}
+                      {rental.status === 'pending' ? (
+                        <>
+                          <button
+                            type="button"
+                            className="button-primary job-detail-head-btn"
+                            onClick={() => setHandoverOpen(true)}
+                          >
+                            Confirm handover
+                          </button>
+                          {!isOpsMode ? (
+                            <button
+                              type="button"
+                              className="button-danger job-detail-head-btn"
+                              onClick={() => {
+                                setConfirmCancelOpen(true)
+                                setCancelError(null)
+                              }}
+                            >
+                              Cancel job
+                            </button>
+                          ) : null}
+                        </>
+                      ) : null}
+                      {rental.status === 'active' ? (
+                        <>
+                          <button
+                            type="button"
+                            className="button-primary job-detail-head-btn"
+                            onClick={() => {
+                              setPaidAmountRM('')
+                              setReturnOpen(true)
+                            }}
+                          >
+                            Close return
+                          </button>
+                          {!isOpsMode && session.user.role === 'owner' ? (
+                            <button
+                              type="button"
+                              className="button-secondary job-detail-head-btn"
+                              onClick={() => {
+                                setNewEndDate(toDateInput(rental.endDate))
+                                setExtendOpen(true)
+                              }}
+                            >
+                              Extend job
+                            </button>
+                          ) : null}
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
+                </CardHeader>
+              ) : null}
+              <CardContent className="space-y-4">
+                <dl className="job-detail-fields">
+                  <DetailField label="Source">
+                    {formatJobSource(rental.type, rental.createdByName)}
+                  </DetailField>
+                  <DetailField label="Duration">
+                    {formatJobDurationLabel(
+                      rental.startDate,
+                      rental.endDate,
+                      rental.extraHoursDecimal,
+                    )}
+                  </DetailField>
+                  {(rental.status === 'active' || rental.status === 'closed') && (
+                    <DetailField label="Mileage">
+                      {rental.startMileage != null
+                        ? `${rental.startMileage.toLocaleString()} km`
+                        : '—'}
+                      {' → '}
+                      {rental.status === 'closed' && rental.endMileage != null
+                        ? `${rental.endMileage.toLocaleString()} km`
+                        : 'out'}
+                    </DetailField>
+                  )}
+                </dl>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="island-kicker">Customer</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <dl className="flex flex-col gap-2">
-              <div className="summary-row">
-                <dt className="text-sm text-[var(--sea-ink-soft)]">Name</dt>
-                <dd className="text-sm font-medium text-[var(--sea-ink)]">
-                  {rental.customerFullName ?? '—'}
-                </dd>
-              </div>
-              <div className="summary-row">
-                <dt className="text-sm text-[var(--sea-ink-soft)]">Phone</dt>
-                <dd className="text-sm font-medium text-[var(--sea-ink)]">
-                  {rental.customerPhone ?? '—'}
-                </dd>
-              </div>
-              <div className="summary-row">
-                <dt className="text-sm text-[var(--sea-ink-soft)]">IC / Passport</dt>
-                <dd className="text-sm font-medium text-[var(--sea-ink)]">
-                  {rental.customerIcOrPassport ?? '—'}
-                </dd>
-              </div>
-            </dl>
-          </CardContent>
-        </Card>
+            <Card className="job-detail-card">
+              <CardHeader className="pb-2">
+                <CardDescription className="island-kicker">Customer</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <dl className="job-detail-fields">
+                  <DetailField label="Name">
+                    {rental.customerFullName ?? '—'}
+                  </DetailField>
+                  <DetailField label="Mobile">
+                    {rental.customerPhone ?? '—'}
+                  </DetailField>
+                  <DetailField label="Email">
+                    {rental.customerEmail ?? '—'}
+                  </DetailField>
+                  <DetailField label="IC / Passport">
+                    {rental.customerIcOrPassport ?? '—'}
+                  </DetailField>
+                </dl>
+              </CardContent>
+            </Card>
+          </div>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="island-kicker">Booking</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <dl className="flex flex-col gap-2">
-              <div className="summary-row">
-                <dt className="text-sm text-[var(--sea-ink-soft)]">Type</dt>
-                <dd className="text-sm font-medium text-[var(--sea-ink)]">
-                  {rental.type === 'walk-in' ? 'Walk-in' : 'Advance booking'}
-                </dd>
-              </div>
-              <div className="summary-row">
-                <dt className="text-sm text-[var(--sea-ink-soft)]">Dates</dt>
-                <dd className="text-sm font-medium text-[var(--sea-ink)]">
-                  {formatDate(rental.startDate)} → {formatDate(rental.endDate)}
-                </dd>
-              </div>
-              <div className="summary-row">
-                <dt className="text-sm text-[var(--sea-ink-soft)]">Duration</dt>
-                <dd className="text-sm font-medium text-[var(--sea-ink)]">
-                  {rentalDays} day{rentalDays !== 1 ? 's' : ''}
-                </dd>
-              </div>
-              {(rental.status === 'active' || rental.status === 'closed') && (
-                <div className="summary-row">
-                  <dt className="text-sm text-[var(--sea-ink-soft)]">Mileage</dt>
-                  <dd className="text-sm font-medium text-[var(--sea-ink)]">
-                    {rental.startMileage != null
-                      ? `${rental.startMileage.toLocaleString()} km`
-                      : '—'}
-                    {' → '}
-                    {rental.status === 'closed' && rental.endMileage != null
-                      ? `${rental.endMileage.toLocaleString()} km`
-                      : 'out'}
-                  </dd>
-                </div>
-              )}
-            </dl>
-          </CardContent>
-        </Card>
+          <aside className="job-detail-rail">
+            <Card className="job-detail-card">
+              <CardHeader className="pb-2">
+                <CardDescription className="island-kicker">Vehicle</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <dl className="job-detail-fields">
+                  <DetailField label="Plate" mono>
+                    <span className="font-semibold text-[var(--lagoon-deep)]">
+                      {rental.carPlateNumber ?? '—'}
+                    </span>
+                  </DetailField>
+                  <DetailField label="Model">
+                    {[rental.carMake, rental.carModel].filter(Boolean).join(' ') || '—'}
+                  </DetailField>
+                  {rental.carCategory ? (
+                    <DetailField label="Category">
+                      {rental.carCategory}
+                    </DetailField>
+                  ) : null}
+                </dl>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="island-kicker">Payment</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <dl className="flex flex-col gap-2">
-              <div className="summary-row">
-                <dt className="text-sm text-[var(--sea-ink-soft)]">Total</dt>
-                <dd className="text-sm font-semibold text-[var(--sea-ink)]">
-                  {formatMYR(rental.totalAmountSen)}
-                </dd>
-              </div>
-              <div className="summary-row">
-                <dt className="text-sm text-[var(--sea-ink-soft)]">Paid</dt>
-                <dd className="text-sm font-medium text-[var(--sea-ink)]">
-                  {formatMYR(rental.paidAmountSen)}
-                </dd>
-              </div>
-              <div className="summary-row">
-                <dt className="text-sm text-[var(--sea-ink-soft)]">Balance</dt>
-                <dd
-                  className={`text-sm font-medium ${balanceSen > 0 ? 'text-amber-700' : 'text-[var(--sea-ink)]'}`}
-                >
-                  {formatMYR(balanceSen)}
-                </dd>
-              </div>
-              <div className="summary-row">
-                <dt className="text-sm text-[var(--sea-ink-soft)]">Status</dt>
-                <dd>
-                  <PaymentBadge status={rental.paymentStatus} />
-                </dd>
-              </div>
-            </dl>
-            {(rental.status === 'active' || rental.status === 'closed') && (
-              <div className="mt-3 flex flex-wrap gap-2 border-t border-[var(--line)] pt-3">
-                <a
-                  href={`/api/documents/agreement/${rental.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="button-secondary text-sm"
-                >
-                  Agreement
-                </a>
-                <a
-                  href={`/api/documents/agreement/${rental.id}?download=1`}
-                  className="button-secondary text-sm"
-                >
-                  Download
-                </a>
-                {rental.status === 'closed' ? (
-                  <>
+            <Card className="job-detail-card">
+              <CardHeader className="pb-2">
+                <CardDescription className="island-kicker">Payment</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <dl className="job-detail-fields">
+                  <DetailField label="Total">
+                    <span className="font-semibold tabular-nums">
+                      {formatMYR(rental.totalAmountSen)}
+                    </span>
+                  </DetailField>
+                  {rental.depositAmountSen > 0 ? (
+                    <DetailField label="Deposit">
+                      <span className="tabular-nums">{formatMYR(rental.depositAmountSen)}</span>
+                    </DetailField>
+                  ) : null}
+                  <DetailField label="Paid">
+                    <span className="tabular-nums">{formatMYR(rental.paidAmountSen)}</span>
+                  </DetailField>
+                  <DetailField label="Balance">
+                    <span
+                      className={`tabular-nums font-medium ${balanceSen > 0 ? 'text-amber-700' : ''}`}
+                    >
+                      {formatMYR(balanceSen)}
+                    </span>
+                  </DetailField>
+                  <DetailField label="Status">
+                    <PaymentBadge status={rental.paymentStatus} />
+                  </DetailField>
+                </dl>
+                {(rental.status === 'active' || rental.status === 'closed') && (
+                  <div className="job-detail-docs">
                     <a
-                      href={`/api/documents/invoice/${rental.id}`}
+                      href={`/api/documents/agreement/${rental.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="button-secondary text-sm"
                     >
-                      Invoice
+                      Agreement
                     </a>
                     <a
-                      href={`/api/documents/invoice/${rental.id}?download=1`}
+                      href={`/api/documents/agreement/${rental.id}?download=1`}
                       className="button-secondary text-sm"
                     >
                       Download
                     </a>
-                  </>
-                ) : null}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                    {rental.status === 'closed' ? (
+                      <>
+                        <a
+                          href={`/api/documents/invoice/${rental.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="button-secondary text-sm"
+                        >
+                          Invoice
+                        </a>
+                        <a
+                          href={`/api/documents/invoice/${rental.id}?download=1`}
+                          className="button-secondary text-sm"
+                        >
+                          Download
+                        </a>
+                      </>
+                    ) : null}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </aside>
+        </div>
       </div>
 
       {/* ── Confirm Handover Sheet ── */}
@@ -650,7 +838,7 @@ export default function RentalDetail({
           <SheetHeader className="border-b border-[var(--line)] px-5 pb-4 pt-5">
             <p className="island-kicker mb-1">Extend</p>
             <SheetTitle className="text-lg font-semibold text-[var(--sea-ink)]">
-              Extend rental
+              Extend job
             </SheetTitle>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto px-5 py-4">
@@ -684,6 +872,155 @@ export default function RentalDetail({
         </SheetContent>
       </Sheet>
 
+      {/* ── Edit Booking Sheet ── */}
+      <Sheet
+        open={bookingEditOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setBookingEditOpen(false)
+            setBookingError(null)
+          }
+        }}
+      >
+        <SheetContent side="right" className="flex flex-col gap-0 p-0 sm:max-w-[28rem]">
+          <SheetHeader className="border-b border-[var(--line)] px-5 pb-4 pt-5">
+            <p className="island-kicker mb-1">Booking</p>
+            <SheetTitle className="text-lg font-semibold text-[var(--sea-ink)]">
+              Edit booking
+            </SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 overflow-y-auto px-5 py-4">
+            <form id="booking-edit-form" className="space-y-4" onSubmit={handleBookingEditSubmit}>
+              <div>
+                <label className="field-label">Job type</label>
+                <div className="mt-1 flex gap-3">
+                  {(['booking', 'walk-in'] as RentalType[]).map((t) => (
+                    <label key={t} className="flex cursor-pointer items-center gap-2">
+                      <input
+                        type="radio"
+                        name="booking-type"
+                        value={t}
+                        checked={bookingType === t}
+                        onChange={() => setBookingType(t)}
+                        className="accent-[var(--lagoon-deep)]"
+                      />
+                      <span className="text-sm text-[var(--sea-ink)]">{formatJobType(t)}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="field-label" htmlFor="bk-start">Pickup date</label>
+                  <input
+                    id="bk-start"
+                    type="date"
+                    className="field-input"
+                    value={bookingStartDate}
+                    onChange={(e) => setBookingStartDate(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="field-label" htmlFor="bk-pickup-time">Pickup time</label>
+                  <input
+                    id="bk-pickup-time"
+                    type="time"
+                    className="field-input"
+                    value={bookingPickUpTime}
+                    onChange={(e) => setBookingPickUpTime(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="field-label" htmlFor="bk-end">Return date</label>
+                  <input
+                    id="bk-end"
+                    type="date"
+                    className="field-input"
+                    value={bookingEndDate}
+                    min={bookingStartDate || undefined}
+                    onChange={(e) => setBookingEndDate(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="field-label" htmlFor="bk-return-time">Return time</label>
+                  <input
+                    id="bk-return-time"
+                    type="time"
+                    className="field-input"
+                    value={bookingReturnTime}
+                    onChange={(e) => setBookingReturnTime(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="field-label" htmlFor="bk-pickup-loc">Pickup location</label>
+                  <select
+                    id="bk-pickup-loc"
+                    className="field-input"
+                    value={bookingPickUpLocation}
+                    onChange={(e) => setBookingPickUpLocation(e.target.value)}
+                    required
+                  >
+                    {locationOptions.map((label) => (
+                      <option key={`pu-${label}`} value={label}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="field-label" htmlFor="bk-return-loc">Return location</label>
+                  <select
+                    id="bk-return-loc"
+                    className="field-input"
+                    value={bookingReturnLocation}
+                    onChange={(e) => setBookingReturnLocation(e.target.value)}
+                    required
+                  >
+                    {locationOptions.map((label) => (
+                      <option key={`rt-${label}`} value={label}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <p className="text-sm text-[var(--sea-ink-soft)]">
+                Duration and total are recalculated from the daily rate when you save.
+              </p>
+
+              {bookingError && <p className="form-error">{bookingError}</p>}
+            </form>
+          </div>
+          <SheetFooter className="flex-row gap-2 border-t border-[var(--line)] px-5 py-4">
+            <Button type="submit" form="booking-edit-form" disabled={isSubmittingBooking}>
+              {isSubmittingBooking ? 'Saving…' : 'Save booking'}
+            </Button>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => {
+                setBookingEditOpen(false)
+                setBookingError(null)
+              }}
+            >
+              Cancel
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+
       {/* ── Confirm cancel ── */}
       <ConfirmActionDialog
         open={confirmCancelOpen}
@@ -693,16 +1030,16 @@ export default function RentalDetail({
             setCancelError(null)
           }
         }}
-        title="Cancel this booking?"
+        title="Cancel this job?"
         description={
           <>
-            The booking for <strong>{rental.carPlateNumber}</strong> will be cancelled and the car released back to available.
+            The job for <strong>{rental.carPlateNumber}</strong> will be cancelled and the vehicle released.
             {cancelError ? (
               <span className="mt-2 block text-[var(--error)]">{cancelError}</span>
             ) : null}
           </>
         }
-        confirmLabel="Cancel booking"
+        confirmLabel="Cancel job"
         cancelLabel="Keep"
         variant="destructive"
         confirming={isCancelling}
@@ -718,10 +1055,10 @@ export default function RentalDetail({
             setDeleteError(null)
           }
         }}
-        title="Delete this rental?"
+        title="Delete this job?"
         description={
           <>
-            This will permanently remove the rental record for{' '}
+            This will permanently remove the job record for{' '}
             <strong>{rental.carPlateNumber}</strong>. This cannot be undone.
             {deleteError ? (
               <span className="mt-2 block text-[var(--error)]">{deleteError}</span>

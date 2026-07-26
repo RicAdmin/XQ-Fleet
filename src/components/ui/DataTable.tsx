@@ -64,9 +64,9 @@ function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
   if (!active)
     return <ArrowUpDown className="ml-1 inline size-[11px] opacity-35" />
   return dir === 'asc' ? (
-    <ChevronUp className="ml-1 inline size-[11px] text-[var(--ember)]" />
+    <ChevronUp className="ml-1 inline size-[11px] text-[var(--ui-ink)]" />
   ) : (
-    <ChevronDown className="ml-1 inline size-[11px] text-[var(--ember)]" />
+    <ChevronDown className="ml-1 inline size-[11px] text-[var(--ui-ink)]" />
   )
 }
 
@@ -102,8 +102,7 @@ export function DataTable<T>({
                 key={col.key}
                 aria-sort={ariaSort}
                 className={cn(
-                  'h-9 bg-[var(--muted,#F5F4F2)] px-3 py-1.5 text-[0.6875rem] font-semibold tracking-[0.06em] text-[var(--ink-muted,var(--sea-ink-soft))] uppercase',
-                  col.sortable && 'cursor-pointer select-none',
+                  col.sortable && 'sortable cursor-pointer select-none',
                   col.headerClassName,
                 )}
                 onClick={
@@ -128,7 +127,7 @@ export function DataTable<T>({
           emptyState ? (
             <TableRow className="hover:bg-transparent">
               <TableCell colSpan={columns.length} className="p-0">
-                <div className="flex min-h-[180px] flex-col items-center justify-center gap-2 p-6 text-center text-[0.8125rem]">
+                <div className="hub-empty-state flex min-h-[10rem] flex-col items-center justify-center gap-2 p-6 text-center text-[length:var(--admin-text)] text-[var(--ui-muted)]">
                   {emptyState}
                 </div>
               </TableCell>
@@ -139,10 +138,7 @@ export function DataTable<T>({
             <TableRow
               key={getKey(row)}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
-              className={cn(
-                'h-9 hover:bg-[var(--muted,#F5F4F2)]',
-                onRowClick && 'cursor-pointer',
-              )}
+              className={cn(onRowClick && 'is-clickable cursor-pointer')}
             >
               {columns.map((col) => {
                 const cellCls =
@@ -150,10 +146,7 @@ export function DataTable<T>({
                     ? col.cellClassName(row)
                     : col.cellClassName
                 return (
-                  <TableCell
-                    key={col.key}
-                    className={cn('px-3 py-2 text-[0.8125rem] leading-snug', cellCls)}
-                  >
+                  <TableCell key={col.key} className={cellCls}>
                     {col.render(row)}
                   </TableCell>
                 )

@@ -801,23 +801,20 @@ html.dark .cxq-light-surface {
 }
 
 .admin-main-canvas {
-  background:
-    radial-gradient(ellipse 120% 80% at 100% -20%, rgba(255, 102, 0, 0.06), transparent 55%),
-    var(--bg-base, #f4f5f7);
+  background: #ffffff;
 }
 
 .admin-topbar {
   height: var(--admin-chrome-height, 3.5rem);
   min-height: var(--admin-chrome-height, 3.5rem);
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
+  background: #ffffff;
 }
 
 .admin-main-content {
-  max-width: 1320px;
+  max-width: none;
   width: 100%;
   min-width: 0;
-  margin-inline: auto;
+  margin-inline: 0;
 }
 
 .admin-dashboard-hero {
@@ -1091,8 +1088,7 @@ html.dark .cxq-light-surface {
   padding: 0 1.25rem;
   height: 3.5rem;
   border-bottom: 1px solid var(--line);
-  background: var(--header-bg);
-  backdrop-filter: blur(8px);
+  background: #ffffff;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -5525,12 +5521,13 @@ select.field-input {
 /* Admin tab switcher reuses .status-tabs */
 .admin-tab-panel { margin-top: 1rem; }
 
-/* Admin filters bar */
+/* Admin filters bar — legacy; dashboard uses .cxq-dashboard-root rules in admin-ui.css */
 .admin-filter-bar {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: flex-start;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid var(--line);
   margin-bottom: 1rem;

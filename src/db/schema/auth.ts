@@ -17,6 +17,13 @@ export const userRoleEnum = pgEnum('user_role', [
   'super_admin',
 ])
 
+export const staffProfileEnum = pgEnum('staff_profile', [
+  'customer_service',
+  'operations',
+])
+
+export type StaffProfile = (typeof staffProfileEnum.enumValues)[number]
+
 export const users = pgTable(
   'users',
   {
@@ -26,6 +33,7 @@ export const users = pgTable(
     emailVerified: boolean('email_verified').notNull().default(false),
     image: text('image'),
     role: userRoleEnum('role').notNull().default('customer'),
+    staffProfile: staffProfileEnum('staff_profile'),
     isActive: boolean('is_active').notNull().default(true),
     invitedByUserId: text('invited_by_user_id').references(
       (): AnyPgColumn => users.id,

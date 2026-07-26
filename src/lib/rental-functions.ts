@@ -1,8 +1,8 @@
 import { createServerFn } from '@tanstack/react-start'
-import { and, asc, desc, eq, gt, ilike, inArray, lt, ne, or, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, gte, ilike, inArray, lte, or, sql } from 'drizzle-orm'
 import { z } from 'zod'
 
-import { cars, customers, payments, rentals } from '#/db/schema'
+import { carPhotos, cars, customers, payments, rentals, users } from '#/db/schema'
 import type { PaymentStatus, RentalStatus, RentalType } from '#/db/schema'
 import { requireRole } from '#/lib/auth-functions'
 import { fleetOpsRoles, fullAdminRoles } from '#/lib/auth-model'
@@ -35,13 +35,20 @@ export type RentalListRow = {
   totalAmountSen: number
   depositAmountSen: number
   paidAmountSen: number
+  extraHoursDecimal: string | null
   createdAt: Date
   updatedAt: Date
   customerFullName: string | null
   customerEmail: string | null
+  customerPhone: string | null
+  customerIcOrPassport: string | null
+  pickUpLocation: string | null
+  returnLocation: string | null
   carPlateNumber: string | null
   carMake: string | null
   carModel: string | null
+  createdByUserId: string | null
+  createdByName: string | null
 }
 
 export type RentalFullRow = RentalListRow & {
@@ -50,11 +57,10 @@ export type RentalFullRow = RentalListRow & {
   endMileage: number | null
   startConditionNote: string | null
   endConditionNote: string | null
-  createdByUserId: string | null
-  customerIcOrPassport: string | null
-  customerPhone: string | null
   carCategory: string | null
   carDailyRateSen: number | null
+  carCoverPhotoUrl: string | null
+  carCoverPhotoAlt: string | null
 }
 
 export type AvailableCarOption = {
@@ -74,6 +80,11 @@ type CreateRentalInput = {
   type: RentalType
   startDate: string // ISO date string YYYY-MM-DD
   endDate: string
+  pickUpTime?: string
+  returnTime?: string
+  pickUpLocation?: string
+  returnLocation?: string
+  deliveryFeeSen?: number
   dailyRateSen: number
   totalAmountSen: number
   depositAmountSen: number
@@ -101,6 +112,17 @@ type CancelRentalInput = {
 type ExtendRentalInput = {
   rentalId: string
   newEndDate: string // ISO date string
+}
+
+type UpdateRentalBookingInput = {
+  rentalId: string
+  type: RentalType
+  startDate: string
+  endDate: string
+  pickUpTime: string
+  returnTime: string
+  pickUpLocation: string
+  returnLocation: string
 }
 
 type DeleteRentalInput = {
@@ -171,12 +193,13 @@ export type RentalListResult = {
   total: number
   page: number
   pageSize: number
-  statusCounts: Record<string, number>
+  statusCounts?: Record<string, number>
 }
 
 export type OperationsQueue = {
   pickups: RentalListRow[]
   returns: RentalListRow[]
+  all: RentalListRow[]
 }
 
 const rentalListSelect = {
@@ -194,13 +217,20 @@ const rentalListSelect = {
   totalAmountSen: rentals.totalAmountSen,
   depositAmountSen: rentals.depositAmountSen,
   paidAmountSen: rentals.paidAmountSen,
+  extraHoursDecimal: rentals.extraHoursDecimal,
   createdAt: rentals.createdAt,
   updatedAt: rentals.updatedAt,
   customerFullName: customers.fullName,
   customerEmail: customers.email,
+  customerPhone: customers.phone,
+  customerIcOrPassport: customers.icOrPassport,
+  pickUpLocation: rentals.pickUpLocation,
+  returnLocation: rentals.returnLocation,
   carPlateNumber: cars.plateNumber,
   carMake: cars.make,
   carModel: cars.model,
+  createdByUserId: rentals.createdByUserId,
+  createdByName: users.name,
 } as const
 
 export const getOperationsQueue = createServerFn({ method: 'GET' }).handler(
@@ -208,19 +238,23 @@ export const getOperationsQueue = createServerFn({ method: 'GET' }).handler(
     await requireRole(fleetOpsRoles)
     const { db } = await import('#/db')
 
-    const base = () =>
-      db
-        .select(rentalListSelect)
-        .from(rentals)
-        .leftJoin(cars, eq(rentals.carId, cars.id))
-        .leftJoin(customers, eq(rentals.customerId, customers.id))
+    const rows = await db
+      .select(rentalListSelect)
+      .from(rentals)
+      .leftJoin(cars, eq(rentals.carId, cars.id))
+      .leftJoin(customers, eq(rentals.customerId, customers.id))
+      .leftJoin(users, eq(rentals.createdByUserId, users.id))
+      .where(inArray(rentals.status, ['pending', 'active']))
+      .orderBy(asc(rentals.startDate), asc(rentals.endDate))
 
-    const [pickups, returns] = await Promise.all([
-      base().where(eq(rentals.status, 'pending')).orderBy(asc(rentals.startDate)),
-      base().where(eq(rentals.status, 'active')).orderBy(asc(rentals.endDate)),
-    ])
+    const pickups = rows
+      .filter((row) => row.status === 'pending')
+      .sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
+    const returns = rows
+      .filter((row) => row.status === 'active')
+      .sort((a, b) => a.endDate.getTime() - b.endDate.getTime())
 
-    return { pickups, returns }
+    return { pickups, returns, all: rows }
   },
 )
 
@@ -228,6 +262,15 @@ const listRentalsSchema = paginationSchema.extend({
   status: z.enum(rentalStatusValues).optional(),
   category: carCategoryFilterSchema,
   search: z.string().trim().max(120).optional(),
+  from: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  to: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  includeStatusCounts: z.boolean().optional(),
   sortKey: z
     .enum([
       'startDate',
@@ -242,7 +285,7 @@ const listRentalsSchema = paginationSchema.extend({
   sortDir: sortDirSchema,
 })
 
-async function getRentalStatusCounts() {
+async function queryRentalStatusCounts() {
   const { db } = await import('#/db')
   const rows = await db
     .select({ status: rentals.status, count: sql<number>`count(*)::int` })
@@ -258,6 +301,13 @@ async function getRentalStatusCounts() {
   return statusCounts
 }
 
+export const getRentalStatusCounts = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    await requireRole(fleetOpsRoles)
+    return queryRentalStatusCounts()
+  },
+)
+
 export const listRentals = createServerFn({ method: 'GET' })
   .inputValidator(adminInputValidator(listRentalsSchema))
   .handler(async ({ data }): Promise<RentalListResult> => {
@@ -267,11 +317,19 @@ export const listRentals = createServerFn({ method: 'GET' })
     const filters = []
     if (data.status) filters.push(eq(rentals.status, data.status))
     if (data.category) filters.push(eq(cars.category, data.category))
+    if (data.from) {
+      filters.push(gte(rentals.startDate, new Date(`${data.from}T00:00:00`)))
+    }
+    if (data.to) {
+      filters.push(lte(rentals.startDate, new Date(`${data.to}T23:59:59.999`)))
+    }
     if (data.search) {
       const needle = `%${data.search}%`
       filters.push(
         or(
           ilike(customers.fullName, needle),
+          ilike(customers.phone, needle),
+          ilike(customers.email, needle),
           ilike(cars.plateNumber, needle),
         )!,
       )
@@ -296,6 +354,7 @@ export const listRentals = createServerFn({ method: 'GET' })
       .from(rentals)
       .leftJoin(cars, eq(rentals.carId, cars.id))
       .leftJoin(customers, eq(rentals.customerId, customers.id))
+      .leftJoin(users, eq(rentals.createdByUserId, users.id))
 
     const rowsPromise = whereClause
       ? baseQuery.where(whereClause).orderBy(orderBy).limit(data.pageSize).offset(offset)
@@ -306,13 +365,14 @@ export const listRentals = createServerFn({ method: 'GET' })
       .from(rentals)
       .leftJoin(cars, eq(rentals.carId, cars.id))
       .leftJoin(customers, eq(rentals.customerId, customers.id))
+      .leftJoin(users, eq(rentals.createdByUserId, users.id))
 
     const countPromise = whereClause ? countBase.where(whereClause) : countBase
 
     const [rows, countResult, statusCounts] = await Promise.all([
       rowsPromise,
       countPromise,
-      getRentalStatusCounts(),
+      data.includeStatusCounts ? queryRentalStatusCounts() : Promise.resolve(undefined),
     ])
 
     return {
@@ -320,7 +380,7 @@ export const listRentals = createServerFn({ method: 'GET' })
       total: Number(countResult[0]?.count ?? 0),
       page: data.page,
       pageSize: data.pageSize,
-      statusCounts,
+      ...(statusCounts ? { statusCounts } : {}),
     }
   })
 
@@ -357,6 +417,30 @@ export const getRentalsByCarId = createServerFn({ method: 'GET' })
       .orderBy(desc(rentals.startDate))
   })
 
+/** Lightweight open jobs for status badges — avoids loading full rental history. */
+export const getOpenRentalsByCarId = createServerFn({ method: 'GET' })
+  .inputValidator((data: { carId: string }) => data)
+  .handler(async ({ data }) => {
+    await requireRole(fleetOpsRoles)
+    const { db } = await import('#/db')
+    return db
+      .select({
+        id: rentals.id,
+        status: rentals.status,
+        startDate: rentals.startDate,
+        endDate: rentals.endDate,
+      })
+      .from(rentals)
+      .where(
+        and(
+          eq(rentals.carId, data.carId),
+          inArray(rentals.status, ['pending', 'active']),
+        ),
+      )
+      .orderBy(desc(rentals.startDate))
+      .limit(5)
+  })
+
 export const getRentalById = createServerFn({ method: 'GET' })
   .inputValidator((input: GetRentalByIdInput) => input)
   .handler(async ({ data }) => {
@@ -372,19 +456,26 @@ export const getRentalById = createServerFn({ method: 'GET' })
         paymentStatus: rentals.paymentStatus,
         startDate: rentals.startDate,
         endDate: rentals.endDate,
+        pickUpTime: rentals.pickUpTime,
+        returnTime: rentals.returnTime,
+        pickUpLocation: rentals.pickUpLocation,
+        returnLocation: rentals.returnLocation,
         actualReturnDate: rentals.actualReturnDate,
         dailyRateSen: rentals.dailyRateSen,
         totalAmountSen: rentals.totalAmountSen,
         depositAmountSen: rentals.depositAmountSen,
         paidAmountSen: rentals.paidAmountSen,
+        extraHoursDecimal: rentals.extraHoursDecimal,
         startMileage: rentals.startMileage,
         endMileage: rentals.endMileage,
         startConditionNote: rentals.startConditionNote,
         endConditionNote: rentals.endConditionNote,
         createdByUserId: rentals.createdByUserId,
+        createdByName: users.name,
         createdAt: rentals.createdAt,
         updatedAt: rentals.updatedAt,
         customerFullName: customers.fullName,
+        customerEmail: customers.email,
         customerIcOrPassport: customers.icOrPassport,
         customerPhone: customers.phone,
         carPlateNumber: cars.plateNumber,
@@ -392,10 +483,17 @@ export const getRentalById = createServerFn({ method: 'GET' })
         carModel: cars.model,
         carCategory: cars.category,
         carDailyRateSen: cars.dailyRateSen,
+        carCoverPhotoUrl: carPhotos.url,
+        carCoverPhotoAlt: carPhotos.altText,
       })
       .from(rentals)
       .leftJoin(cars, eq(rentals.carId, cars.id))
+      .leftJoin(
+        carPhotos,
+        and(eq(carPhotos.carId, cars.id), eq(carPhotos.isCover, true)),
+      )
       .leftJoin(customers, eq(rentals.customerId, customers.id))
+      .leftJoin(users, eq(rentals.createdByUserId, users.id))
       .where(eq(rentals.id, data.rentalId))
       .limit(1)
     return rows[0] ?? null
@@ -430,6 +528,11 @@ export const createRental = createServerFn({ method: 'POST' })
       throw new Error('Invalid dates provided.')
     if (endDate <= startDate) throw new Error('End date must be after start date.')
 
+    const pickUpLocation = data.pickUpLocation?.trim()
+    const returnLocation = data.returnLocation?.trim()
+    if (!pickUpLocation) throw new Error('Pickup location is required.')
+    if (!returnLocation) throw new Error('Return location is required.')
+
     const { db } = await import('#/db')
 
     const fleetCapacity = await assertCarHasBookingCapacity(db, {
@@ -463,6 +566,11 @@ export const createRental = createServerFn({ method: 'POST' })
         paymentStatus: 'unpaid',
         startDate,
         endDate,
+        pickUpTime: data.pickUpTime?.trim() || '09:00:00',
+        returnTime: data.returnTime?.trim() || '09:00:00',
+        pickUpLocation,
+        returnLocation,
+        deliveryFeeSen: data.deliveryFeeSen ?? 0,
         dailyRateSen: data.dailyRateSen,
         totalAmountSen: data.totalAmountSen,
         depositAmountSen: data.depositAmountSen,
@@ -535,13 +643,25 @@ export const closeReturn = createServerFn({ method: 'POST' })
     if (rental.status !== 'active') throw new Error('Only active rentals can be closed.')
 
     const paymentStatus = derivePaymentStatus(data.paidAmountSen, rental.totalAmountSen)
-    const newCarStatus = data.flagDamage ? 'damaged' : 'available'
     const now = new Date()
 
-    await db
-      .update(cars)
-      .set({ status: newCarStatus, updatedAt: now })
-      .where(eq(cars.id, rental.carId))
+    // Only single-slot models use cars.status as the live inventory signal.
+    // Multi-unit catalog rows stay available while concurrent jobs are open.
+    const fleetCapacity = await getCarFleetCapacity(db, rental.carId)
+    if (fleetCapacity && usesSingleUnitCarStatus(fleetCapacity)) {
+      const newCarStatus = data.flagDamage ? 'damaged' : 'available'
+      await db
+        .update(cars)
+        .set({ status: newCarStatus, updatedAt: now })
+        .where(eq(cars.id, rental.carId))
+    }
+
+    const endNote =
+      data.flagDamage && data.endConditionNote
+        ? `[DAMAGE] ${data.endConditionNote}`
+        : data.flagDamage
+          ? '[DAMAGE] Flagged on return'
+          : (data.endConditionNote ?? null)
 
     const result = await db
       .update(rentals)
@@ -549,7 +669,7 @@ export const closeReturn = createServerFn({ method: 'POST' })
         status: 'closed',
         paymentStatus,
         endMileage: data.endMileage,
-        endConditionNote: data.endConditionNote ?? null,
+        endConditionNote: endNote,
         paidAmountSen: data.paidAmountSen,
         actualReturnDate: now,
         updatedAt: now,
@@ -665,6 +785,73 @@ export const extendRental = createServerFn({ method: 'POST' })
     const result = await db
       .update(rentals)
       .set({ endDate: newEndDate, totalAmountSen: newTotalSen, updatedAt: new Date() })
+      .where(eq(rentals.id, data.rentalId))
+      .returning()
+
+    return result[0]
+  })
+
+export const updateRentalBooking = createServerFn({ method: 'POST' })
+  .inputValidator((input: UpdateRentalBookingInput) => input)
+  .handler(async ({ data }) => {
+    await requireRole(fleetOpsRoles)
+    const { db } = await import('#/db')
+
+    const existing = await db
+      .select({
+        id: rentals.id,
+        carId: rentals.carId,
+        status: rentals.status,
+        dailyRateSen: rentals.dailyRateSen,
+        paidAmountSen: rentals.paidAmountSen,
+      })
+      .from(rentals)
+      .where(eq(rentals.id, data.rentalId))
+      .limit(1)
+
+    const rental = existing[0]
+    if (!rental) throw new Error('Job not found.')
+    if (rental.status !== 'pending' && rental.status !== 'active') {
+      throw new Error('Only pending or active jobs can be edited.')
+    }
+
+    const startDate = new Date(data.startDate)
+    const endDate = new Date(data.endDate)
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      throw new Error('Invalid dates provided.')
+    }
+    if (endDate <= startDate) throw new Error('Return date must be after pickup date.')
+
+    const pickUpLocation = data.pickUpLocation.trim()
+    const returnLocation = data.returnLocation.trim()
+    if (!pickUpLocation) throw new Error('Pickup location is required.')
+    if (!returnLocation) throw new Error('Return location is required.')
+
+    await assertCarHasBookingCapacity(db, {
+      carId: rental.carId,
+      tripStart: startDate,
+      tripEnd: endDate,
+      excludeRentalId: data.rentalId,
+      errorMessage: 'These dates overlap another booking for this car.',
+    })
+
+    const totalAmountSen = calcTotalSen(rental.dailyRateSen, startDate, endDate)
+    const paymentStatus = derivePaymentStatus(rental.paidAmountSen, totalAmountSen)
+
+    const result = await db
+      .update(rentals)
+      .set({
+        type: data.type,
+        startDate,
+        endDate,
+        pickUpTime: data.pickUpTime.trim() || '09:00:00',
+        returnTime: data.returnTime.trim() || '09:00:00',
+        pickUpLocation,
+        returnLocation,
+        totalAmountSen,
+        paymentStatus,
+        updatedAt: new Date(),
+      })
       .where(eq(rentals.id, data.rentalId))
       .returning()
 

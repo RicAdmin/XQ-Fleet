@@ -252,8 +252,8 @@ export function BookingDrawer({ rentalId, open, onClose, onMutated }: BookingDra
                 )}
               </dl>
               <Link
-                to="/admin/rentals/$rentalId"
-                params={{ rentalId }}
+                to="/internal/jobs/$jobId"
+                params={{ jobId: rentalId }}
                 className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-[var(--lagoon-deep)] hover:underline"
               >
                 <FileText size={12} /> Open full rental detail page

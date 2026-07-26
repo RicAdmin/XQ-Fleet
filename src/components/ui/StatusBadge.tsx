@@ -23,7 +23,7 @@ const STATUS_LABELS: Record<string, string> = {
   inactive: 'Inactive',
   expired: 'Expired',
   exhausted: 'Exhausted',
-  'walk-in': 'Walk-in',
+  'walk-in': 'In House',
   booking: 'Booking',
 }
 

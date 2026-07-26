@@ -71,6 +71,13 @@
       "when": 1779456180000,
       "tag": "0009_car_catalog_details",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1779456420000,
+      "tag": "0013_fleet_partners",
+      "breakpoints": true
     }
   ]
 }

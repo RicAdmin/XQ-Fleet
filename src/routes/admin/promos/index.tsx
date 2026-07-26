@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 import { Pencil, Plus, Sparkles } from 'lucide-react'
 
 import { PromoBulkGenerateSheet } from '#/components/admin/PromoBulkGenerateSheet'
@@ -18,7 +18,7 @@ import { RowActionsMenu } from '#/components/ui/RowActionsMenu'
 import { StatusBadge } from '#/components/ui/StatusBadge'
 import { StatusFilterSelect } from '#/components/ui/StatusFilterSelect'
 import { TableSkeleton } from '#/components/ui/TableSkeleton'
-import { requireFullAdminAccess } from '#/lib/route-guards'
+import { fullAdminRoles, isAppRole } from '#/lib/auth-model'
 import type {
   AdminPromoListResult,
   AdminPromoListRow,
@@ -26,7 +26,14 @@ import type {
 import { listPromos } from '#/lib/promo-functions'
 
 export const Route = createFileRoute('/admin/promos/')({
-  beforeLoad: async () => requireFullAdminAccess(),
+  beforeLoad: ({ context }) => {
+    const { session } = context as unknown as {
+      session: { user: { role: string; name: string; email: string } } | null
+    }
+    if (!session || !isAppRole(session.user.role) || !fullAdminRoles.includes(session.user.role)) {
+      throw notFound()
+    }
+  },
   component: AdminPromosPage,
   errorComponent: ({ error, reset }) => (
     <ErrorPanel

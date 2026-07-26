@@ -16,11 +16,15 @@ import {
   filterReturnRows,
   formatMYR,
   isReturnOverdue,
+  OperationCustomerCell,
   OperationDueCell,
+  OperationJobContext,
   OperationMoneyCell,
+  OperationPaymentCell,
   OperationScheduleCell,
   type OperationQueueFilters,
 } from '#/components/admin/operations-queue-utils'
+import { showAdminToast } from '#/components/ui/AdminToast'
 import { closeReturn, type RentalListRow } from '#/lib/rental-functions'
 
 const SEARCH_DEBOUNCE_MS = 300
@@ -89,6 +93,7 @@ export function ReturnsTab({ rows, onMutated }: ReturnsTabProps) {
         },
       })
       setActiveRental(null)
+      showAdminToast('Return closed.')
       await onMutated()
     } catch (err) {
       setReturnError(err instanceof Error ? err.message : 'Failed to close return.')
@@ -120,16 +125,7 @@ export function ReturnsTab({ rows, onMutated }: ReturnsTabProps) {
         key: 'customer',
         header: 'Customer',
         cellClassName: 'admin-op-col-customer whitespace-normal',
-        render: (r) => (
-          <div>
-            <div className="font-semibold text-[var(--sea-ink)]">
-              {r.customerFullName ?? '—'}
-            </div>
-            <div className="admin-op-email text-[var(--admin-text-sm)] text-[var(--sea-ink-soft)]">
-              {r.customerEmail ?? '—'}
-            </div>
-          </div>
-        ),
+        render: (r) => <OperationCustomerCell rental={r} />,
       },
       {
         key: 'car',
@@ -151,11 +147,9 @@ export function ReturnsTab({ rows, onMutated }: ReturnsTabProps) {
         render: (r) => <OperationScheduleCell rental={r} />,
       },
       {
-        key: 'total',
-        header: 'Total',
-        headerClassName: 'text-right',
-        cellClassName: 'admin-op-col-money text-right',
-        render: (r) => <OperationMoneyCell amountSen={r.totalAmountSen} />,
+        key: 'paymentStatus',
+        header: 'Payment',
+        render: (r) => <OperationPaymentCell rental={r} />,
       },
       {
         key: 'balance',
@@ -177,7 +171,7 @@ export function ReturnsTab({ rows, onMutated }: ReturnsTabProps) {
     <AdminListFilterBar
       searchValue={searchInput}
       onSearchChange={setSearchInput}
-      searchPlaceholder="Customer, car…"
+      searchPlaceholder="Customer, phone, IC, or plate…"
       searchAriaLabel="Search returns"
       filtersOpen={filtersOpen}
       onFiltersOpenChange={setFiltersOpen}
@@ -185,11 +179,14 @@ export function ReturnsTab({ rows, onMutated }: ReturnsTabProps) {
       hasActiveFilters={hasActiveFilters}
       onClearFilters={clearFilters}
       inlineControls={
-        <DateRangeQuickPresets
-          from={filters.from}
-          to={filters.to}
-          onRangeChange={(from, to) => setFilters((prev) => ({ ...prev, from, to }))}
-        />
+        <div className="admin-filter-bar__quick-group">
+          <span className="admin-filter-bar__quick-label">Quick range:</span>
+          <DateRangeQuickPresets
+            from={filters.from}
+            to={filters.to}
+            onRangeChange={(from, to) => setFilters((prev) => ({ ...prev, from, to }))}
+          />
+        </div>
       }
     >
       <DateRangeFilter
@@ -216,7 +213,7 @@ export function ReturnsTab({ rows, onMutated }: ReturnsTabProps) {
             <div className="text-center text-sm text-muted-foreground">
               {hasActiveFilters
                 ? 'No returns match these filters.'
-                : 'No returns due. Active rentals will appear here.'}
+                : 'No returns due. Active jobs will appear here.'}
             </div>
           }
         />
@@ -238,11 +235,12 @@ export function ReturnsTab({ rows, onMutated }: ReturnsTabProps) {
           <SheetHeader className="border-b border-[var(--line)] px-5 pb-4 pt-5">
             <p className="island-kicker mb-1">Return</p>
             <SheetTitle className="text-lg font-semibold text-[var(--sea-ink)]">
-              {activeRental?.carPlateNumber ?? 'Rental'} — Close return
+              {activeRental?.carPlateNumber ?? 'Job'} — Close return
             </SheetTitle>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto px-5 py-4">
-            <form id="returns-form" className="space-y-4" onSubmit={handleReturnSubmit}>
+            {activeRental ? <OperationJobContext rental={activeRental} /> : null}
+            <form id="returns-form" className="mt-4 space-y-4" onSubmit={handleReturnSubmit}>
               <div>
                 <label className="field-label" htmlFor="returns-mileage">
                   End mileage (km)

@@ -13,6 +13,8 @@ interface PageHeaderProps {
   title: string
   description?: string | ReactNode
   kicker?: string
+  media?: ReactNode
+  aside?: ReactNode
   actions?: ReactNode
   backLink?: PageHeaderBackLink
   variant?: 'default' | 'detail'
@@ -23,6 +25,8 @@ export function PageHeader({
   title,
   description,
   kicker,
+  media,
+  aside,
   actions,
   backLink,
   variant = 'default',
@@ -36,6 +40,8 @@ export function PageHeader({
         {backLink ? (
           <Link
             to={backLink.to}
+            preload="intent"
+            preloadDelay={80}
             className="ui-back-link inline-flex w-fit items-center gap-1.5 no-underline"
           >
             <ArrowLeft size={13} strokeWidth={2.5} className="shrink-0" />
@@ -43,19 +49,31 @@ export function PageHeader({
           </Link>
         ) : null}
         <div className="ui-page-head__row flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
-          <div className="ui-page-head__main min-w-0 flex-1">
-            {kicker ? <p className="island-kicker mb-1">{kicker}</p> : null}
-            <h2 className="ui-page-title font-semibold text-[var(--sea-ink)]">
-              {title}
-            </h2>
-            {description ? (
-              <div className="ui-page-desc flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[var(--sea-ink-soft)]">
-                {description}
-              </div>
+          <div className="ui-page-head__lead min-w-0 flex flex-1 items-start gap-3">
+            {media ? (
+              <div className="ui-page-head__media shrink-0">{media}</div>
             ) : null}
+            <div className="ui-page-head__main min-w-0 flex-1">
+              <div className="ui-page-head__main-inner">
+                <div className="ui-page-head__main-content min-w-0">
+                  {kicker ? <p className="island-kicker mb-1">{kicker}</p> : null}
+                  <h2 className="ui-page-title font-semibold text-[var(--sea-ink)]">
+                    {title}
+                  </h2>
+                  {description ? (
+                    <div className="ui-page-desc text-[var(--sea-ink-soft)]">
+                      {description}
+                    </div>
+                  ) : null}
+                </div>
+                {aside ? (
+                  <div className="ui-page-head__aside shrink-0">{aside}</div>
+                ) : null}
+              </div>
+            </div>
           </div>
           {actions ? (
-            <div className="ui-page-head__actions flex shrink-0 flex-wrap items-center gap-2">
+            <div className="ui-page-head__actions flex shrink-0 flex-wrap items-center gap-1.5">
               {actions}
             </div>
           ) : null}

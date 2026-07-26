@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { StatusBadge } from '#/components/ui/StatusBadge'
 import { AdminListFilterBar } from '#/components/ui/AdminListFilterBar'
@@ -73,10 +73,15 @@ function toRows(rows: ReadonlyArray<AdminPaymentRow>): CsvRow[] {
   }))
 }
 
-export function PaymentsTab() {
+export function PaymentsTab({
+  initialResult,
+}: {
+  initialResult?: AdminPaymentsResult
+}) {
+  const skipInitialLoad = useRef(Boolean(initialResult))
   const [filters, setFilters] = useState<Filters>({ status: undefined })
   const [page, setPage] = useState(1)
-  const [result, setResult] = useState<AdminPaymentsResult | null>(null)
+  const [result, setResult] = useState<AdminPaymentsResult | null>(initialResult ?? null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchInput, setSearchInput] = useState('')
@@ -107,6 +112,10 @@ export function PaymentsTab() {
   }
 
   useEffect(() => {
+    if (skipInitialLoad.current) {
+      skipInitialLoad.current = false
+      return
+    }
     void load(1, filters)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.status, filters.category, filters.from, filters.to, filters.search])
@@ -209,11 +218,14 @@ export function PaymentsTab() {
       hasActiveFilters={hasActiveFilters}
       onClearFilters={clearFilters}
       inlineControls={
-        <DateRangeQuickPresets
-          from={filters.from}
-          to={filters.to}
-          onRangeChange={(from, to) => applyFilters({ ...filters, from, to })}
-        />
+        <div className="admin-filter-bar__quick-group">
+          <span className="admin-filter-bar__quick-label">Quick range:</span>
+          <DateRangeQuickPresets
+            from={filters.from}
+            to={filters.to}
+            onRangeChange={(from, to) => applyFilters({ ...filters, from, to })}
+          />
+        </div>
       }
       actions={
         <CsvDownloadButton
@@ -273,7 +285,7 @@ export function PaymentsTab() {
       )}
 
       {result && (
-        <div className="space-y-3">
+        <div className="admin-stack">
           <article className="workspace-panel island-shell overflow-hidden p-0">
             {toolbar}
             <DataTable

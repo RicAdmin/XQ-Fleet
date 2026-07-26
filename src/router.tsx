@@ -13,7 +13,11 @@ export function getRouter() {
 
     scrollRestoration: true,
     defaultPreload: 'intent',
-    defaultPreloadStaleTime: 0,
+    // Keep admin beforeLoad results warm so sidebar hover/nav does not re-hit the DB every time.
+    // Auth redirects must never be sticky — guards skip redirect on preload (see route-guards).
+    defaultPreloadStaleTime: 60_000,
+    defaultPendingMs: 120,
+    defaultPendingMinMs: 200,
     defaultNotFoundComponent: NotFoundPage,
     rewrite: {
       // Netlify + TanStack serve handlers at /well-known/*; scanners request /.well-known/*.

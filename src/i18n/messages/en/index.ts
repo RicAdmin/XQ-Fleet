@@ -45,7 +45,7 @@ export const enFooter = {
   roadside: '24/7 roadside · +60 11 3521 5576',
   weAccept: 'We accept',
   copyright:
-    '© 2026 XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - Release.260626.01',
+    '© 2026 XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - Release.260627.01',
   instagram: 'Instagram',
   facebook: 'Facebook',
   tiktok: 'TikTok',

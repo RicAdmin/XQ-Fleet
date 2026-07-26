@@ -105,16 +105,17 @@ export function DateRangeQuickPresets({
   const preset = detectPreset(from, to)
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-1', className)}>
+    <div className={cn('flex flex-wrap items-center gap-1.5', className)}>
       {QUICK_PRESETS.map((p) => {
         const isActive = preset === p.key
         return (
           <Button
             key={p.key}
             type="button"
-            variant={isActive ? 'secondary' : 'outline'}
+            variant="outline"
             size="sm"
-            className={cn('h-8 font-normal', isActive && 'border-[var(--ember-border)]')}
+            data-active={isActive ? 'true' : 'false'}
+            className="admin-filter-preset"
             onClick={() => {
               if (isActive) {
                 onRangeChange(undefined, undefined)
@@ -181,8 +182,8 @@ export function DateRangeFilter({
             variant="outline"
             aria-label="Filter by custom date range"
             className={cn(
-              'h-8 max-w-[11rem] justify-between gap-1.5 font-normal',
-              hasRange && !preset && 'border-[var(--ember-border)] text-[var(--sea-ink)]',
+              'admin-filter-control max-w-[11rem] justify-between gap-1.5',
+              hasRange && !preset && 'border-[var(--ui-ink)] text-[var(--ui-ink)]',
               className,
             )}
           />

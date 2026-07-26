@@ -1,13 +1,22 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 
+import {
+  getDefaultHomePathForPersona,
+  resolveDashboardPersona,
+  staffProfileFromSessionUser,
+  type AppRole,
+} from '#/lib/auth-model'
+
 export const Route = createFileRoute('/admin/')({
   beforeLoad: async ({ context }) => {
     const { session } = context as unknown as {
-      session: { user: { role: string; name: string; email: string } }
+      session: { user: { role: string; staffProfile?: string | null } }
     }
-    if (session.user.role !== 'owner' && session.user.role !== 'super_admin') {
-      throw redirect({ to: '/admin/cars' })
-    }
-    throw redirect({ to: '/admin/operations' })
+    const role = session.user.role as AppRole
+    const persona = resolveDashboardPersona({
+      role,
+      staffProfile: staffProfileFromSessionUser(session.user),
+    })
+    throw redirect({ to: getDefaultHomePathForPersona(persona) })
   },
 })

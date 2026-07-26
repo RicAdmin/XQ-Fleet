@@ -50,7 +50,7 @@ export const msMessages: EnMessages = {
     roadside: 'Bantuan jalan raya 24/7 · +60 11 3521 5576',
     weAccept: 'Kami terima',
     copyright:
-      '© 2026 XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - Release.260626.01',
+      '© 2026 XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - Release.260627.01',
     instagram: 'Instagram',
     facebook: 'Facebook',
     tiktok: 'TikTok',

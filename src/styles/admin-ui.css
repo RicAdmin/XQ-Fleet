@@ -39,14 +39,23 @@
 
   font-family: var(--font-sans);
   --font-display: var(--font-sans);
+  --font-heading: var(--font-sans);
   font-size: var(--admin-text);
   line-height: 1.45;
   color: var(--ui-ink);
   -webkit-font-smoothing: antialiased;
+  letter-spacing: 0;
 }
 
-.cxq-dashboard-root .font-mono {
+.cxq-dashboard-root,
+.cxq-dashboard-root * {
   font-family: inherit;
+}
+
+.cxq-dashboard-root .font-mono,
+.cxq-dashboard-root .tabular-nums {
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── Typography ─────────────────────────────────────────────── */
@@ -72,11 +81,11 @@
 .cxq-dashboard-root .ui-label {
   display: block;
   margin-bottom: 0.3rem;
-  font-size: var(--admin-text-xs);
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ui-muted);
+  font-size: var(--admin-text-sm);
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--ui-ink);
 }
 
 /* ── Card / panel ───────────────────────────────────────────── */
@@ -105,15 +114,166 @@
 .cxq-dashboard-root .admin-filter-bar,
 .cxq-dashboard-root .ui-toolbar {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--admin-space-2);
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: var(--admin-space-3);
   padding: var(--admin-space-3) var(--admin-space-4);
   margin-bottom: 0;
   background: var(--ui-white);
   border: 1px solid var(--ui-border);
   border-bottom: none;
   border-radius: var(--ui-radius) var(--ui-radius) 0 0;
+}
+
+/* Filter bar nested inside a list panel */
+.cxq-dashboard-root .workspace-panel > .admin-filter-bar,
+.cxq-dashboard-root .workspace-panel > .ui-toolbar {
+  border: none;
+  border-bottom: 1px solid var(--ui-border);
+  border-radius: 0;
+  background: var(--ui-white);
+}
+
+.cxq-dashboard-root .admin-filter-bar__row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--admin-space-2);
+  width: 100%;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .admin-filter-bar__actions {
+  display: flex;
+  shrink: 0;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--admin-space-2);
+}
+
+.cxq-dashboard-root .admin-filter-bar__actions > button {
+  height: 2.25rem;
+  min-height: 2.25rem;
+  box-sizing: border-box;
+}
+
+.cxq-dashboard-root .admin-filter-bar__quick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--admin-space-2) var(--admin-space-3);
+  width: 100%;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .admin-filter-bar__quick-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--admin-space-2);
+  min-width: 0;
+}
+
+.cxq-dashboard-root .admin-filter-bar__quick-label {
+  flex-shrink: 0;
+  font-size: var(--admin-text-sm);
+  font-weight: 600;
+  color: var(--ui-ink);
+  line-height: 1.2;
+}
+
+.cxq-dashboard-root .admin-filter-bar__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .admin-filter-bar__extra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--admin-space-2);
+  padding-top: var(--admin-space-1);
+  border-top: 1px solid var(--ui-border);
+}
+
+.cxq-dashboard-root .admin-filter-control {
+  height: 2.25rem;
+  min-height: 2.25rem;
+  font-size: var(--admin-text-sm);
+  font-weight: 500;
+  border-radius: var(--ui-radius-sm);
+}
+
+.cxq-dashboard-root .admin-filter-search {
+  height: 2.25rem;
+  flex: 0 1 36rem;
+  width: 36rem;
+  max-width: 100%;
+  min-width: 14rem;
+  background: var(--ui-white);
+  border-radius: var(--ui-radius-sm);
+}
+
+.cxq-dashboard-root .admin-filter-search__summary {
+  pointer-events: none;
+  font-size: var(--admin-text-sm);
+  font-weight: 500;
+  color: var(--ui-muted);
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .admin-filter-preset {
+  box-sizing: border-box;
+  height: 1.875rem;
+  min-height: 1.875rem;
+  max-height: 1.875rem;
+  padding-block: 0;
+  padding-inline: 0.75rem;
+  font-size: var(--admin-text-sm);
+  font-weight: 500;
+  line-height: 1;
+  border-radius: var(--ui-radius-sm);
+  border-width: 1px;
+  background: var(--ui-white);
+}
+
+.cxq-dashboard-root .admin-filter-bar__chips .admin-filter-preset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cxq-dashboard-root .admin-filter-bar__chips .admin-filter-preset:active {
+  transform: none;
+}
+
+.cxq-dashboard-root .admin-filter-preset[data-active='true'] {
+  border-color: var(--ui-ink);
+  background: var(--ui-ink);
+  color: var(--ui-white);
+}
+
+@media (max-width: 640px) {
+  .cxq-dashboard-root .admin-filter-bar__row {
+    flex-wrap: wrap;
+  }
+
+  .cxq-dashboard-root .admin-filter-search {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .cxq-dashboard-root .admin-filter-bar__actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 
 .cxq-dashboard-root .ui-toolbar + .ui-card,
@@ -202,22 +362,38 @@
   border-color: #b91c1c;
   color: #fff;
   box-shadow: none;
-  border-radius: 999px;
+  border-radius: var(--ui-radius-sm);
+}
+
+.cxq-dashboard-root .button-primary,
+.cxq-dashboard-root .button-secondary {
+  min-height: 2rem;
+  padding: 0.35rem 0.85rem;
+  font-size: var(--admin-text);
+  font-weight: 600;
+  border-radius: var(--ui-radius-sm);
+  box-shadow: none;
+  transform: none;
+}
+
+.cxq-dashboard-root .button-primary {
+  border: 1px solid var(--ui-accent);
+  background: var(--ui-accent);
+  color: var(--ui-white);
+}
+
+.cxq-dashboard-root .button-primary:hover:not(:disabled) {
+  background: var(--ui-accent-hover);
+  border-color: var(--ui-accent-hover);
+  color: var(--ui-white);
+  transform: none;
+  box-shadow: none;
 }
 
 .cxq-dashboard-root .button-danger:hover:not(:disabled) {
   background: #991b1b;
   border-color: #991b1b;
   color: #fff;
-  transform: none;
-  box-shadow: none;
-}
-
-.cxq-dashboard-root .ui-btn--accent:hover:not(:disabled),
-.cxq-dashboard-root .button-primary:hover:not(:disabled) {
-  background: var(--ui-accent-hover);
-  border-color: var(--ui-accent-hover);
-  color: var(--ui-white);
   transform: none;
   box-shadow: none;
 }
@@ -353,14 +529,15 @@
 }
 
 .cxq-dashboard-root .cars-table thead th,
-.cxq-dashboard-root .ui-table thead th {
+.cxq-dashboard-root .ui-table thead th,
+.cxq-dashboard-root .ui-table [data-slot='table-head'] {
   padding: 0.55rem 0.85rem;
   height: 2.5rem;
   text-align: left;
   font-size: var(--admin-text-sm);
   font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  letter-spacing: normal;
+  text-transform: none;
   color: var(--ui-muted);
   background: var(--ui-canvas);
   border-bottom: 1px solid var(--ui-border);
@@ -393,8 +570,9 @@
 }
 
 .cxq-dashboard-root .cars-table tbody td,
-.cxq-dashboard-root .ui-table tbody td {
-  padding: 0.55rem 0.85rem;
+.cxq-dashboard-root .ui-table tbody td,
+.cxq-dashboard-root .ui-table [data-slot='table-cell'] {
+  padding: 0.65rem 0.85rem;
   font-size: var(--admin-text);
   color: var(--ui-ink);
   vertical-align: middle;
@@ -416,6 +594,311 @@
 .cxq-dashboard-root .cars-table .vehicle-model {
   color: var(--ui-muted);
   font-size: var(--admin-text-sm);
+}
+
+/* Fleet vehicles list — denser identity cell */
+.cxq-dashboard-root .cars-table--fleet {
+  table-layout: fixed;
+}
+
+.cxq-dashboard-root .cars-table--fleet .cars-table__col-vehicle {
+  width: 14.5rem;
+  max-width: 14.5rem;
+}
+
+.cxq-dashboard-root .cars-table--fleet .cars-table__col-type {
+  width: 5.75rem;
+}
+
+.cxq-dashboard-root .cars-table--fleet .cars-table__col-owned {
+  width: 10.5rem;
+}
+
+.cxq-dashboard-root .cars-table--fleet .cars-table__col-partner {
+  width: 5.5rem;
+}
+
+.cxq-dashboard-root .fleet-vehicle-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.cxq-dashboard-root .fleet-vehicle-cell__media {
+  width: 3.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 1px solid var(--ui-border, var(--line));
+  background: var(--surface-muted, #f4f5f7);
+}
+
+.cxq-dashboard-root .fleet-vehicle-cell__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cxq-dashboard-root .fleet-vehicle-cell__placeholder {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  color: var(--sea-ink-soft);
+  opacity: 0.55;
+}
+
+.cxq-dashboard-root .fleet-vehicle-cell__body {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.cxq-dashboard-root .fleet-vehicle-cell__plate {
+  display: inline-block;
+  margin: 0.1rem 0 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--sea-ink-soft);
+  text-decoration: none;
+}
+
+.cxq-dashboard-root .fleet-vehicle-cell__plate:hover {
+  color: var(--sea-ink);
+  text-decoration: underline;
+}
+
+.cxq-dashboard-root .fleet-vehicle-cell__name {
+  display: inline-block;
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--sea-ink);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
+}
+
+.cxq-dashboard-root .fleet-vehicle-cell__name:hover {
+  color: var(--lagoon-deep, var(--sea-ink));
+  text-decoration: underline;
+}
+
+.cxq-dashboard-root .fleet-vehicle-cell__meta {
+  margin: 0.15rem 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--sea-ink-soft);
+  line-height: 1.2;
+}
+
+.cxq-dashboard-root .fleet-vehicle-cell__swatch {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgb(0 0 0 / 12%);
+  flex-shrink: 0;
+}
+
+.cxq-dashboard-root .fleet-rate-cell {
+  font-variant-numeric: tabular-nums;
+  font-weight: 550;
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .fleet-capacity-owned {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 6.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.cxq-dashboard-root .fleet-capacity-owned--empty {
+  font-size: 0.8125rem;
+  color: var(--sea-ink-soft);
+}
+
+.cxq-dashboard-root .fleet-capacity-owned__line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .fleet-capacity-owned__plate {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 600;
+  color: var(--sea-ink);
+}
+
+.cxq-dashboard-root .fleet-capacity-owned__meta {
+  font-weight: 500;
+  color: var(--sea-ink-soft);
+}
+
+.cxq-dashboard-root .fleet-capacity-partner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 4.5rem;
+}
+
+.cxq-dashboard-root .fleet-capacity-partner--empty {
+  font-size: 0.8125rem;
+  color: var(--sea-ink-soft);
+}
+
+.cxq-dashboard-root .fleet-capacity-partner__line {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .fleet-capacity-partner__code {
+  min-width: 2rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--sea-ink-soft);
+}
+
+.cxq-dashboard-root .fleet-capacity-partner__count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--sea-ink);
+}
+
+.cxq-dashboard-root .fleet-source-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  min-width: 5rem;
+}
+
+.cxq-dashboard-root .fleet-source-cell__codes {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--sea-ink-soft);
+  line-height: 1.2;
+}
+
+.cxq-dashboard-root .partner-models-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 6rem;
+  max-width: 12rem;
+}
+
+.cxq-dashboard-root .partner-models-cell__line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .partner-models-cell__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--sea-ink);
+}
+
+.cxq-dashboard-root .partner-models-cell__capacity {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--sea-ink-soft);
+}
+
+.cxq-dashboard-root .fleet-status-select {
+  appearance: none;
+  cursor: pointer;
+  border: 0;
+  padding-right: 1.25rem;
+}
+
+.cxq-dashboard-root .fleet-status-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.cxq-dashboard-root .fleet-flag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  max-width: 9.5rem;
+}
+
+.cxq-dashboard-root .fleet-flag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+  border: 1px solid transparent;
+}
+
+.cxq-dashboard-root .fleet-flag--owned {
+  background: #eef6f1;
+  color: #1f6b3a;
+  border-color: #cfe5d7;
+}
+
+.cxq-dashboard-root .fleet-flag--partner {
+  background: #f3f4f6;
+  color: #4b5563;
+  border-color: #e5e7eb;
+}
+
+.cxq-dashboard-root .fleet-flag--featured {
+  background: #fff4e8;
+  color: #b45309;
+  border-color: #fbd9b0;
+}
+
+.cxq-dashboard-root .fleet-flag--hidden {
+  background: #fafafa;
+  color: #6b7280;
+  border-color: #e5e7eb;
+}
+
+.cxq-dashboard-root .fleet-car-form__section {
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--ui-border, var(--line));
+}
+
+.cxq-dashboard-root .fleet-car-form__section:last-of-type {
+  border-bottom: 0;
+  padding-bottom: 0;
 }
 
 /* ── Status chips (monochrome) ──────────────────────────────── */
@@ -445,14 +928,14 @@
 
 .cxq-dashboard-root .category-pill {
   display: inline-block;
-  padding: 0.12rem 0.4rem;
-  border-radius: 5px;
-  font-size: 0.625rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--ui-radius-sm);
+  font-size: var(--admin-text-xs);
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  text-transform: none;
+  letter-spacing: 0;
   background: var(--ui-canvas);
-  color: var(--ui-muted);
+  color: var(--ui-ink);
   border: 1px solid var(--ui-border);
 }
 
@@ -472,10 +955,10 @@
 }
 
 .cxq-dashboard-root .kpi-card-label {
-  font-size: var(--admin-text-xs);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-size: var(--admin-text-sm);
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
   color: var(--ui-muted);
 }
 
@@ -562,6 +1045,19 @@
   color: var(--ui-ink);
 }
 
+.cxq-dashboard-root .admin-main-canvas {
+  --background: #ffffff;
+  background: #ffffff;
+}
+
+.cxq-dashboard-root .admin-topbar {
+  background: #ffffff;
+}
+
+.cxq-dashboard-root .admin-main-content {
+  background: #ffffff;
+}
+
 .cxq-dashboard-root .admin-topbar-meta {
   font-size: 1rem;
   line-height: 1.35;
@@ -573,10 +1069,46 @@
   color: var(--ui-ink);
 }
 
+.cxq-dashboard-root .admin-topbar-meta .admin-topbar-persona {
+  font-weight: 500;
+  color: var(--sea-ink-soft);
+}
+
+.cxq-dashboard-root .admin-topbar-context {
+  font-size: 1rem;
+  line-height: 1.35;
+  color: var(--ui-muted);
+}
+
 .cxq-dashboard-root .admin-topbar-signout {
   height: 2.125rem;
   padding-inline: 0.85rem;
   font-size: var(--admin-text-md);
+}
+
+.cxq-dashboard-root .summary-row--compact {
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.65rem;
+  gap: 0.75rem;
+}
+
+.cxq-dashboard-root .summary-row--split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem 1rem;
+  align-items: start;
+}
+
+.cxq-dashboard-root .summary-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .summary-field dt,
+.cxq-dashboard-root .summary-field dd {
+  margin: 0;
 }
 
 .cxq-dashboard-root [data-slot='tabs-list'][data-variant='pill'] [data-slot='tabs-trigger'] {
@@ -598,7 +1130,7 @@
   height: 1.125rem;
 }
 
-/* Collapsed sidebar — icons only */
+/* Collapsed sidebar — icons only, centered */
 .cxq-dashboard-root .group[data-collapsible='icon'] [data-sidebar='group-label'] {
   display: none;
   height: 0;
@@ -625,15 +1157,40 @@
   justify-content: center;
 }
 
-.cxq-dashboard-root .group[data-collapsible='icon'] [data-sidebar='group'] {
-  padding: 0.35rem 0.25rem;
+.cxq-dashboard-root .group[data-collapsible='icon'] [data-sidebar='content'] {
+  align-items: center;
 }
 
-.cxq-dashboard-root .group[data-collapsible='icon'] [data-sidebar='menu-button'].admin-nav-link {
+.cxq-dashboard-root .group[data-collapsible='icon'] [data-sidebar='group'] {
+  align-items: center;
+  padding: 0.35rem 0;
+}
+
+.cxq-dashboard-root .group[data-collapsible='icon'] [data-sidebar='group-content'],
+.cxq-dashboard-root .group[data-collapsible='icon'] [data-sidebar='menu'] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.cxq-dashboard-root .group[data-collapsible='icon'] [data-sidebar='menu-item'] {
+  display: flex;
+  width: 100%;
   justify-content: center;
+}
+
+.cxq-dashboard-root .group[data-collapsible='icon'] [data-sidebar='menu-button'],
+.cxq-dashboard-root .group[data-collapsible='icon'] [data-sidebar='menu-button'].admin-nav-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 2rem;
   min-width: 2rem;
-  padding-inline: 0;
+  max-width: 2rem;
+  height: 2rem;
+  margin-inline: auto;
+  padding: 0;
 }
 
 .cxq-dashboard-root .admin-nav-soon {
@@ -643,6 +1200,27 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--ui-muted);
+}
+
+/* Hover flyout: expand over content; keep layout gap at icon width */
+.cxq-dashboard-root .admin-shell-layout[data-nav-flyout='hover'] [data-slot='sidebar-gap'] {
+  width: var(--sidebar-width-icon) !important;
+}
+
+.cxq-dashboard-root .admin-shell-layout[data-nav-flyout='hover'] [data-slot='sidebar-container'] {
+  width: var(--sidebar-width) !important;
+  z-index: 40;
+  box-shadow: 4px 0 28px rgba(20, 24, 26, 0.14);
+  border-right: 1px solid var(--ui-border);
+}
+
+.cxq-dashboard-root .admin-shell-layout[data-nav-flyout='hover'] [data-sidebar='sidebar'] {
+  background: var(--ui-white);
+}
+
+/* Pinned expand uses normal layout push; keep elevated edge for clarity */
+.cxq-dashboard-root .admin-shell-layout[data-nav-flyout='pinned'] [data-slot='sidebar-container'] {
+  z-index: 30;
 }
 
 .cxq-dashboard-root .sidebar-nav-item.is-active {
@@ -681,16 +1259,23 @@
 .cxq-dashboard-root .admin-pagination,
 .cxq-dashboard-root .ui-pagination {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.55rem 0.75rem;
+  gap: var(--admin-space-2);
+  padding: var(--admin-space-3) var(--admin-space-4);
   font-size: var(--admin-text-sm);
   color: var(--ui-muted);
   background: var(--ui-white);
   border: 1px solid var(--ui-border);
   border-top: none;
   border-radius: 0 0 var(--ui-radius) var(--ui-radius);
+}
+
+.cxq-dashboard-root .workspace-panel + .admin-pagination,
+.cxq-dashboard-root .space-y-3 > .admin-pagination {
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius);
 }
 
 /* ── Settings ───────────────────────────────────────────────── */
@@ -715,7 +1300,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--admin-space-4);
-  margin-bottom: var(--admin-space-5);
+  margin-bottom: 0;
   padding-bottom: 0;
   border-bottom: none;
 }
@@ -733,15 +1318,46 @@
 }
 
 .cxq-dashboard-root .ui-page-head--detail .ui-page-head__main {
+  min-width: 0;
+}
+
+.cxq-dashboard-root .ui-page-head--detail .ui-page-head__main-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  width: 100%;
+}
+
+.cxq-dashboard-root .ui-page-head--detail .ui-page-head__main-content {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.25rem;
+  min-width: 0;
+  flex: 1 1 12rem;
+}
+
+.cxq-dashboard-root .ui-page-head--detail .ui-page-head__aside {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin-left: auto;
+}
+
+.cxq-dashboard-root .job-detail-head-arrangement {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: min(100%, 22rem);
+}
+
+.cxq-dashboard-root .ui-page-head--detail .ui-page-head__lead {
   min-width: 0;
 }
 
 .cxq-dashboard-root .ui-page-head--detail .ui-page-head__row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
   min-width: 0;
@@ -753,10 +1369,6 @@
 }
 
 .cxq-dashboard-root .ui-page-head--detail .ui-page-desc {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.25rem 0.45rem;
   margin-top: 0;
   font-size: var(--admin-text-sm);
   line-height: 1.35;
@@ -772,7 +1384,78 @@
   display: flex;
   shrink: 0;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
+}
+
+.cxq-dashboard-root .job-detail-head-thumb {
+  width: 4.75rem;
+  height: 4.75rem;
+  padding: 0.2rem;
+  border-radius: var(--ui-radius-sm);
+  border: 1px solid var(--ui-border);
+  background: var(--ui-canvas);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cxq-dashboard-root .job-detail-head-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+.cxq-dashboard-root .job-detail-head-thumb__placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .job-detail-head-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  margin: 0.15rem 0 0;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .job-detail-head-meta__attrs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.cxq-dashboard-root .job-detail-head-meta__ref {
+  font-size: var(--admin-text-sm);
+  font-weight: 600;
+  color: var(--lagoon-deep);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+.cxq-dashboard-root .job-detail-head-btn.button-primary,
+.cxq-dashboard-root .job-detail-head-btn.button-secondary,
+.cxq-dashboard-root .job-detail-head-btn.button-danger {
+  min-height: 1.625rem;
+  padding: 0.2rem 0.55rem;
+  font-size: var(--admin-text-xs);
+  font-weight: 600;
+  line-height: 1.2;
+  border-radius: 6px;
+}
+
+.cxq-dashboard-root .button-danger.job-detail-head-btn {
+  min-height: 1.625rem;
+  padding: 0.2rem 0.55rem;
+  font-size: var(--admin-text-xs);
+  font-weight: 600;
+  line-height: 1.2;
 }
 
 .cxq-dashboard-root .ui-page-head__title-row {
@@ -824,10 +1507,10 @@
 
 .cxq-dashboard-root .island-kicker {
   margin: 0;
-  font-size: var(--admin-text-xs);
+  font-size: var(--admin-text-sm);
   font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+  letter-spacing: normal;
+  text-transform: none;
   color: var(--ui-muted);
   line-height: 1.2;
 }
@@ -844,6 +1527,10 @@
   word-break: break-all;
 }
 
+.cxq-dashboard-root code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
 .cxq-dashboard-root .form-error {
   color: var(--ui-muted);
   background: var(--ui-canvas);
@@ -858,7 +1545,27 @@
 
 .cxq-dashboard-root .workspace-panel.island-shell.p-4,
 .cxq-dashboard-root section.workspace-panel.p-4 {
-  padding: 0.85rem 1rem;
+  padding: var(--admin-space-4) var(--admin-space-5);
+}
+
+.cxq-dashboard-root .admin-main-content {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--admin-space-3);
+  padding: var(--admin-space-4);
+  margin-inline: 0;
+  max-width: none;
+  width: 100%;
+  background: #ffffff;
+}
+
+@media (min-width: 768px) {
+  .cxq-dashboard-root .admin-main-content {
+    padding: var(--admin-space-5) var(--admin-space-6);
+  }
 }
 
 .cxq-dashboard-root .admin-settings-intro {
@@ -881,7 +1588,302 @@
   margin-bottom: 0.3rem;
   font-size: var(--admin-text-sm);
   font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
   color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .maint-config-label {
+  font-size: var(--admin-text-sm);
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--ui-muted);
+  margin-bottom: 0.25rem;
+}
+
+/* ── Create job inline panel (above jobs table) ── */
+
+.cxq-dashboard-root .job-create-panel {
+  background: var(--ui-white);
+}
+
+.cxq-dashboard-root .job-create-panel__body {
+  background: var(--ui-canvas);
+  padding: var(--admin-space-4) var(--admin-space-5);
+}
+
+.cxq-dashboard-root .job-create-panel__footer {
+  background: var(--ui-white);
+}
+
+.cxq-dashboard-root .job-create-form,
+.cxq-dashboard-root .job-create-form.job-create-form--inline {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--admin-space-4);
+  padding: 0;
+  font-size: var(--admin-text);
+  line-height: 1.45;
+  color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .job-create-form .ui-label {
+  margin-bottom: 0.35rem;
+  font-size: var(--admin-text-sm);
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--ui-ink);
+  line-height: 1.2;
+}
+
+.cxq-dashboard-root .job-create-form__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .job-create-form__section-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--admin-space-2);
+  min-width: 0;
+}
+
+.cxq-dashboard-root .job-create-form__field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .job-create-form__control {
+  min-width: 0;
+}
+
+.cxq-dashboard-root .job-create-form__grid {
+  display: grid;
+  gap: var(--admin-space-2);
+  grid-template-columns: 1fr;
+}
+
+.cxq-dashboard-root .job-create-form__grid--2 {
+  grid-template-columns: 1fr;
+}
+
+.cxq-dashboard-root .job-create-form__grid--3 {
+  grid-template-columns: 1fr;
+}
+
+.cxq-dashboard-root .job-create-form__grid--4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 900px) {
+  .cxq-dashboard-root .job-create-form.job-create-form--inline {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--admin-space-4);
+    row-gap: var(--admin-space-4);
+  }
+
+  .cxq-dashboard-root .job-create-form__source,
+  .cxq-dashboard-root .job-create-form__customer,
+  .cxq-dashboard-root .job-create-form__schedule,
+  .cxq-dashboard-root .job-create-form__car,
+  .cxq-dashboard-root .job-create-form__locations,
+  .cxq-dashboard-root .job-create-form__payment {
+    grid-column: span 12;
+  }
+
+  .cxq-dashboard-root .job-create-form__grid--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cxq-dashboard-root .job-create-form__grid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .cxq-dashboard-root .job-create-form__grid--4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.cxq-dashboard-root .job-create-form__payment-total {
+  max-width: 16rem;
+}
+
+.cxq-dashboard-root .job-create-form__xq-id {
+  max-width: 20rem;
+}
+
+.cxq-dashboard-root .job-create-form__customer .job-create-form__chips {
+  margin-bottom: var(--admin-space-2);
+}
+
+.cxq-dashboard-root .job-create-form__customer .job-create-form__control,
+.cxq-dashboard-root .job-create-form__customer .job-create-form__section-body {
+  margin-top: 0;
+}
+
+.cxq-dashboard-root .job-create-form__chips {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .job-create-form__chips .admin-filter-preset {
+  width: auto;
+  flex: 0 0 auto;
+  align-self: auto;
+}
+
+/* Chips — same size as jobs filter bar */
+.cxq-dashboard-root .job-create-form .admin-filter-preset,
+.cxq-dashboard-root .job-create-form__chips .admin-filter-preset {
+  font-size: var(--admin-text-sm) !important;
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* Inputs — one family, one size */
+.cxq-dashboard-root .job-create-form .field-input,
+.cxq-dashboard-root .job-create-form [data-slot='input-group'] {
+  min-height: 2rem;
+  font-size: var(--admin-text);
+  font-weight: 400;
+  color: var(--ui-ink);
+  background: var(--ui-white);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+  box-shadow: none;
+}
+
+.cxq-dashboard-root .job-create-form [data-slot='input-group'] {
+  width: 100%;
+  height: 2rem;
+  padding-inline: 0;
+}
+
+.cxq-dashboard-root .job-create-form [data-slot='input-group-control'] {
+  height: 100%;
+  padding: 0.35rem 0.65rem;
+  font: inherit;
+  font-size: var(--admin-text);
+  color: var(--ui-ink);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.cxq-dashboard-root .job-create-form [data-slot='input-group']:focus-within {
+  border-color: var(--ui-ink);
+  box-shadow: 0 0 0 3px rgba(20, 24, 26, 0.06);
+}
+
+.cxq-dashboard-root .job-create-form .field-input::placeholder,
+.cxq-dashboard-root .job-create-form [data-slot='input-group-control']::placeholder {
+  color: color-mix(in srgb, var(--ui-muted) 80%, transparent);
+  font-weight: 400;
+}
+
+.cxq-dashboard-root .job-create-form select.field-input {
+  width: 100%;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .job-location-leg {
+  min-width: 0;
+}
+
+.cxq-dashboard-root .job-location-leg__fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--admin-space-2);
+  margin-top: var(--admin-space-2);
+  padding: var(--admin-space-3);
+  background: var(--ui-white);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+}
+
+.cxq-dashboard-root .job-location-leg__fields--with-fee {
+  grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
+  align-items: end;
+}
+
+.cxq-dashboard-root .job-location-leg__detail,
+.cxq-dashboard-root .job-location-leg__fee {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .cxq-dashboard-root .job-location-leg__fields--with-fee {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+}
+
+.cxq-dashboard-root .job-create-amount {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .job-create-amount__prefix {
+  flex-shrink: 0;
+  font-size: var(--admin-text-sm);
+  font-weight: 600;
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .job-create-amount__input {
+  min-width: 0;
+}
+
+.cxq-dashboard-root .job-create-optional {
+  font-size: inherit;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .job-create-payment__apply {
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  color: var(--ui-ink);
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.cxq-dashboard-root .job-create-payment__apply:hover {
+  color: var(--ui-accent);
+}
+
+.cxq-dashboard-root .job-create-payment__hint {
+  margin: 0.5rem 0 0;
+  padding: 0.55rem 0.65rem;
+  font-size: var(--admin-text-sm);
+  color: var(--ui-muted);
+  background: var(--ui-white);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+  line-height: 1.35;
+}
+
+.cxq-dashboard-root .job-create-payment__hint strong {
+  color: var(--ui-ink);
+  font-weight: 600;
 }
 
 /* Stack rhythm for stacked admin sections */
@@ -1016,8 +2018,8 @@
 
 .cxq-dashboard-root .admin-ops-table tbody td {
   vertical-align: top;
-  padding-top: 0.65rem;
-  padding-bottom: 0.65rem;
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
 }
 
 .cxq-dashboard-root .admin-op-col-due {
@@ -1083,10 +2085,10 @@
 }
 
 .cxq-dashboard-root .admin-op-schedule-label {
-  font-size: var(--admin-text-xs);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-size: var(--admin-text-sm);
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
   color: var(--ui-muted);
 }
 
@@ -1130,4 +2132,364 @@
 
 .cxq-dashboard-root .error-panel-icon {
   color: var(--ui-muted);
+}
+
+/* ── Job detail layout ──────────────────────────────────────── */
+
+.cxq-dashboard-root .job-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--admin-space-4);
+  width: 100%;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .job-detail-banner {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  font-size: var(--admin-text-sm);
+  color: var(--ui-muted);
+  background: color-mix(in srgb, var(--ui-canvas) 70%, #dbeafe);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+}
+
+.cxq-dashboard-root .job-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--admin-space-4);
+  align-items: start;
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .cxq-dashboard-root .job-detail-grid {
+    grid-template-columns: minmax(0, 1.55fr) minmax(17rem, 0.85fr);
+  }
+
+  .cxq-dashboard-root .job-detail-rail {
+    position: sticky;
+    top: calc(var(--admin-chrome-height, 3.5rem) + var(--admin-space-3));
+  }
+}
+
+.cxq-dashboard-root .job-detail-main,
+.cxq-dashboard-root .job-detail-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--admin-space-4);
+  min-width: 0;
+}
+
+.cxq-dashboard-root .job-detail-card {
+  margin: 0;
+}
+
+.cxq-dashboard-root .job-detail-legs {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--admin-space-3);
+}
+
+@media (min-width: 640px) {
+  .cxq-dashboard-root .job-detail-legs {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.cxq-dashboard-root .job-detail-legs--head {
+  width: 100%;
+  gap: 0.45rem;
+}
+
+.cxq-dashboard-root .job-detail-legs--head .job-detail-leg {
+  padding: 0.5rem 0.65rem;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .job-detail-legs--head .job-detail-leg__kicker {
+  margin-bottom: 0.2rem;
+  font-size: 10px;
+}
+
+.cxq-dashboard-root .job-detail-legs--head .job-detail-leg__when {
+  font-size: var(--admin-text-sm);
+}
+
+.cxq-dashboard-root .job-detail-legs--head .job-detail-leg__where {
+  margin-top: 0.15rem;
+  font-size: var(--admin-text-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .job-detail-leg {
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+  background: color-mix(in srgb, var(--ui-canvas) 45%, var(--ui-white));
+}
+
+.cxq-dashboard-root .job-detail-leg__kicker {
+  margin: 0 0 0.35rem;
+  font-size: var(--admin-text-sm);
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .job-detail-leg__when {
+  margin: 0;
+  font-size: var(--admin-text-md);
+  font-weight: 600;
+  color: var(--ui-ink);
+  line-height: 1.3;
+}
+
+.cxq-dashboard-root .job-detail-leg__where {
+  margin: 0.25rem 0 0;
+  font-size: var(--admin-text-sm);
+  color: var(--ui-muted);
+  line-height: 1.35;
+}
+
+.cxq-dashboard-root .job-detail-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+}
+
+.cxq-dashboard-root .job-detail-field {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: baseline;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--ui-border);
+}
+
+.cxq-dashboard-root .job-detail-field:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.cxq-dashboard-root .job-detail-field:first-child {
+  padding-top: 0;
+}
+
+.cxq-dashboard-root .job-detail-field__label {
+  margin: 0;
+  font-size: var(--admin-text-sm);
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .job-detail-field__value {
+  margin: 0;
+  font-size: var(--admin-text);
+  font-weight: 500;
+  color: var(--ui-ink);
+  min-width: 0;
+  word-break: break-word;
+}
+
+.cxq-dashboard-root .job-detail-docs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: var(--admin-space-3);
+  padding-top: var(--admin-space-3);
+  border-top: 1px solid var(--ui-border);
+}
+
+/* ── Website catalog form (car detail) ── */
+
+.cxq-dashboard-root .catalog-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.cxq-dashboard-root .catalog-form__section {
+  padding: var(--admin-space-5) 0;
+  border-bottom: 1px solid var(--ui-border);
+}
+
+.cxq-dashboard-root .catalog-form__section:first-child {
+  padding-top: 0;
+}
+
+.cxq-dashboard-root .catalog-form__section:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.cxq-dashboard-root .catalog-form__section-head {
+  margin-bottom: var(--admin-space-4);
+}
+
+.cxq-dashboard-root .catalog-form__section-title {
+  margin: 0 0 0.2rem;
+  font-size: var(--admin-text-md);
+  font-weight: 600;
+  color: var(--ui-ink);
+  letter-spacing: -0.01em;
+}
+
+.cxq-dashboard-root .catalog-form__section-desc {
+  margin: 0;
+  max-width: 42rem;
+  font-size: var(--admin-text-sm);
+  color: var(--ui-muted);
+  line-height: 1.45;
+}
+
+.cxq-dashboard-root .catalog-form__grid {
+  display: grid;
+  gap: var(--admin-space-4);
+}
+
+.cxq-dashboard-root .catalog-form__grid--2 {
+  grid-template-columns: 1fr;
+}
+
+.cxq-dashboard-root .catalog-form__grid--4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .cxq-dashboard-root .catalog-form__grid--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .cxq-dashboard-root .catalog-form__grid--4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.cxq-dashboard-root .catalog-form__toggles {
+  display: grid;
+  gap: var(--admin-space-3);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .cxq-dashboard-root .catalog-form__toggles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.cxq-dashboard-root .catalog-form__toggle {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-height: 4.5rem;
+  padding: var(--admin-space-3) var(--admin-space-4);
+  padding-right: 2.25rem;
+  background: var(--ui-canvas);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius);
+  cursor: pointer;
+  transition:
+    border-color 0.12s ease,
+    background 0.12s ease;
+}
+
+.cxq-dashboard-root .catalog-form__toggle:has(input:checked) {
+  border-color: var(--lagoon-deep, #0d7377);
+  background: color-mix(in srgb, var(--lagoon-deep, #0d7377) 7%, var(--ui-white));
+}
+
+.cxq-dashboard-root .catalog-form__toggle:has(input:disabled) {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.cxq-dashboard-root .catalog-form__toggle input {
+  position: absolute;
+  top: var(--admin-space-3);
+  right: var(--admin-space-3);
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: var(--lagoon-deep, #0d7377);
+}
+
+.cxq-dashboard-root .catalog-form__toggle-label {
+  font-size: var(--admin-text-sm);
+  font-weight: 600;
+  color: var(--ui-ink);
+  line-height: 1.35;
+}
+
+.cxq-dashboard-root .catalog-form__toggle-desc {
+  font-size: var(--admin-text-xs);
+  color: var(--ui-muted);
+  line-height: 1.4;
+}
+
+.cxq-dashboard-root .catalog-form__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--admin-space-2);
+}
+
+.cxq-dashboard-root .catalog-form__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.8rem;
+  font-size: var(--admin-text-sm);
+  color: var(--ui-ink);
+  background: var(--ui-white);
+  border: 1px solid var(--ui-border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    border-color 0.12s ease,
+    background 0.12s ease;
+  user-select: none;
+}
+
+.cxq-dashboard-root .catalog-form__chip:has(input:checked) {
+  border-color: var(--lagoon-deep, #0d7377);
+  background: color-mix(in srgb, var(--lagoon-deep, #0d7377) 8%, var(--ui-white));
+}
+
+.cxq-dashboard-root .catalog-form__chip:has(input:disabled) {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.cxq-dashboard-root .catalog-form__chip input {
+  width: 0.9rem;
+  height: 0.9rem;
+  margin: 0;
+  accent-color: var(--lagoon-deep, #0d7377);
+}
+
+.cxq-dashboard-root .catalog-form textarea.field-input {
+  min-height: 5rem;
+  resize: vertical;
+  line-height: 1.5;
+  padding: 0.6rem 0.75rem;
+}
+
+.cxq-dashboard-root .catalog-form textarea.field-input--tall {
+  min-height: 7.5rem;
+}
+
+.cxq-dashboard-root .catalog-form__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--admin-space-3);
+  padding-top: var(--admin-space-5);
+  margin-top: var(--admin-space-2);
+  border-top: 1px solid var(--ui-border);
 }

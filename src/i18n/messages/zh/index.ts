@@ -50,7 +50,7 @@ export const zhMessages: EnMessages = {
     roadside: '24/7 道路救援 · +60 11 3521 5576',
     weAccept: '我们接受',
     copyright:
-      '© 2026 XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - Release.260626.01',
+      '© 2026 XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - Release.260627.01',
     instagram: 'Instagram',
     facebook: 'Facebook',
     tiktok: 'TikTok',

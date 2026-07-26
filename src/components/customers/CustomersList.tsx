@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { Link } from '@tanstack/react-router'
 import { Pencil, Plus, Users } from 'lucide-react'
@@ -23,6 +23,7 @@ import {
 import {
   createCustomer,
   deleteCustomer,
+  getCustomerAccountCounts,
   listCustomers,
   updateCustomer,
   type CustomerListResult,
@@ -59,7 +60,7 @@ type AccountFilter = 'all' | 'linked' | 'walk-in'
 const ACCOUNT_FILTER_OPTIONS: { value: AccountFilter; label: string }[] = [
   { value: 'all', label: 'All customers' },
   { value: 'linked', label: 'Linked account' },
-  { value: 'walk-in', label: 'Walk-in' },
+  { value: 'walk-in', label: 'In House' },
 ]
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -87,6 +88,8 @@ type CustomersListProps = {
   session: { user: { name: string; email: string; role: string } }
   basePath: string
   canDelete: boolean
+  initialResult?: CustomerListResult
+  initialAccountCounts?: Record<'all' | 'linked' | 'walk-in', number>
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -95,8 +98,14 @@ export default function CustomersList({
   session,
   basePath,
   canDelete,
+  initialResult,
+  initialAccountCounts,
 }: CustomersListProps) {
-  const [result, setResult] = useState<CustomerListResult | null>(null)
+  const skipInitialLoad = useRef(Boolean(initialResult))
+  const [result, setResult] = useState<CustomerListResult | null>(initialResult ?? null)
+  const [accountCounts, setAccountCounts] = useState<
+    Record<'all' | 'linked' | 'walk-in', number>
+  >(initialAccountCounts ?? { all: 0, linked: 0, 'walk-in': 0 })
   const [loading, setLoading] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [page, setPage] = useState(1)
@@ -141,6 +150,19 @@ export default function CustomersList({
   }
 
   useEffect(() => {
+    if (initialAccountCounts) return
+    void getCustomerAccountCounts()
+      .then(setAccountCounts)
+      .catch(() => {
+        // Non-blocking tab counts.
+      })
+  }, [initialAccountCounts])
+
+  useEffect(() => {
+    if (skipInitialLoad.current) {
+      skipInitialLoad.current = false
+      return
+    }
     setPage(1)
     void load(1)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -155,7 +177,6 @@ export default function CustomersList({
   }, [searchInput])
 
   const totalPages = result ? Math.max(1, Math.ceil(result.total / result.pageSize)) : 1
-  const accountCounts = result?.accountCounts ?? { all: 0, linked: 0, 'walk-in': 0 }
   const activeFilterCount = accountFilter !== 'all' ? 1 : 0
   const hasActiveFilters =
     accountFilter !== 'all' || searchInput.trim().length > 0 || search.length > 0
@@ -186,6 +207,14 @@ export default function CustomersList({
     setFormData((prev) => ({ ...prev, [key]: value }))
   }
 
+  async function refreshAccountCounts() {
+    try {
+      setAccountCounts(await getCustomerAccountCounts())
+    } catch {
+      // Non-blocking tab counts.
+    }
+  }
+
   async function handleFormSubmit(event: React.FormEvent) {
     event.preventDefault()
     setFormError(null)
@@ -214,7 +243,7 @@ export default function CustomersList({
           },
         })
         setPage(1)
-        await load(1)
+        await Promise.all([load(1), refreshAccountCounts()])
       }
       closeForm()
     } catch (err) {
@@ -233,7 +262,7 @@ export default function CustomersList({
     try {
       await deleteCustomer({ data: { customerId: confirmingDelete.id } })
       setConfirmingDelete(null)
-      await load(page)
+      await Promise.all([load(page), refreshAccountCounts()])
     } catch (err) {
       setDeleteError(err instanceof Error ? err.message : 'Delete failed.')
     } finally {
@@ -339,7 +368,7 @@ export default function CustomersList({
       {loading && !result && <TableSkeleton rows={8} columns={6} />}
 
       {result && (
-      <div className="space-y-3">
+      <div className="admin-stack">
       <article className="workspace-panel island-shell overflow-x-auto p-0">
         <AdminListFilterBar
           searchValue={searchInput}

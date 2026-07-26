@@ -21,11 +21,14 @@ const extraTrustedOrigins = (process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? '')
   .map((origin) => origin.trim())
   .filter(Boolean)
 
+const isDev = process.env.NODE_ENV !== 'production'
+
 const trustedOrigins = Array.from(
   new Set([
     defaultBaseUrl,
     'http://localhost:3000',
     'http://127.0.0.1:3000',
+    ...(isDev ? ['http://localhost:*', 'http://127.0.0.1:*'] : []),
     ...extraTrustedOrigins,
   ]),
 )
@@ -86,6 +89,11 @@ export const auth = betterAuth({
       },
       invitedByUserId: {
         type: 'string',
+        required: false,
+        input: false,
+      },
+      staffProfile: {
+        type: ['customer_service', 'operations'],
         required: false,
         input: false,
       },

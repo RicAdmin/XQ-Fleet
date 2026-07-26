@@ -7059,18 +7059,19 @@ input[type=range] { width: 100%; accent-color: var(--brand-leaf); }
   gap: 20px;
 }
 .cs-pay-icons {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 6px;
-  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
 }
 .cs-pay-chip {
   display: grid;
   place-items: center;
-  width: 100%;
-  min-width: 0;
+  width: 54px;
   height: 34px;
+  flex-shrink: 0;
   padding: 3px 4px;
   border-radius: 8px;
   border: 1px solid var(--line);

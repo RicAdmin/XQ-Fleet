@@ -309,7 +309,7 @@ export async function processIpay88Payment(
         {
           rentalId: rentalData.id,
           bookingRef,
-          adminPanelUrl: `${baseUrl}/admin/rentals/${rentalData.id}`,
+          adminPanelUrl: `${baseUrl}/internal/jobs/${rentalData.id}`,
           customerName: rentalData.customerName,
           customerEmail: rentalData.customerEmail ?? '',
           customerPhone: rentalData.customerPhone,

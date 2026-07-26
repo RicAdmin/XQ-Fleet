@@ -7,6 +7,15 @@ import type { CarCategory, CarColor, CarStatus } from '#/db/schema'
 import { requireRole } from '#/lib/auth-functions'
 import { fleetOpsRoles, fullAdminRoles } from '#/lib/auth-model'
 import {
+  listCapacitySummariesByMakeModel,
+  loadAndSyncCarCapacityBoard,
+  ownedUnitCountFromSiblings,
+  setCarPartnerAllocationsInDb,
+  type CarCapacityBoard,
+  type CarCapacityPartnerLine,
+  type OwnedCapacityUnit,
+} from '#/lib/car-capacity'
+import {
   deriveCarDisplayStatus,
   getOverdueCarBuckets,
   type CarDisplayStatus,
@@ -17,6 +26,7 @@ import {
   carCategoryFilterSchema,
   paginationSchema,
   sortDirSchema,
+  uuidString,
 } from '#/lib/validation/admin-schemas'
 
 type CreateCarInput = {
@@ -28,6 +38,8 @@ type CreateCarInput = {
   category: CarCategory
   dailyRateSen: number
   notes?: string
+  ownedByFleet?: boolean
+  availableForBooking?: boolean
 }
 
 type UpdateCarInput = {
@@ -40,6 +52,56 @@ type UpdateCarInput = {
   category: CarCategory
   dailyRateSen: number
   notes?: string
+  ownedByFleet?: boolean
+  availableForBooking?: boolean
+}
+
+type UpdateCarCatalogInput = {
+  carId: string
+  slug?: string | null
+  featured: boolean
+  availableForBooking: boolean
+  ownedByFleet: boolean
+  vendorName?: string | null
+  metaTitle?: string | null
+  metaDescription?: string | null
+  longDescription?: string | null
+  highlights?: string[] | null
+  bodyType?: string | null
+  passengers: number
+  doors: number
+  transmission?: string | null
+  fuelType?: string | null
+  appleCarPlay: boolean
+  androidAuto: boolean
+  bootCapacityL?: number | null
+  bootCapacityLabel?: string | null
+  largeSuitcasesCount?: number | null
+  smallCarryonsCount?: number | null
+  combinedCapacityL?: number | null
+  combinedCapacityLabel?: string | null
+  tagFunAdventure: boolean
+  tagFamilyComfort: boolean
+  tagSmallOku: boolean
+  fuelPolicy?: string | null
+  carLocations?: string | null
+}
+
+type UpdateCarPricingInput = {
+  carId: string
+  dailyRateSen: number
+  priceLowSeasonSen: number
+  pricePeakSeasonSen: number
+  priceSuperPeakSeasonSen: number
+  extHourLowSen: number
+  extHourPeakAndSuperPeakSen: number
+  deliveryFeeAirportSen: number
+  deliveryFeeJettySen: number
+  deliveryFeeHotelSen: number
+  lateReturnHourlyFeeSen: number
+  promotionalPriceSen?: number | null
+  minRentalDays: number
+  maxRentalDays: number
 }
 
 type UpdateCarStatusInput = {
@@ -118,6 +180,8 @@ const carStatusValues = [
   'retired',
 ] as const satisfies readonly CarStatus[]
 
+export type CarListPartnerCapacity = CarCapacityPartnerLine
+
 export type CarListRow = {
   id: string
   plateNumber: string
@@ -131,6 +195,13 @@ export type CarListRow = {
   displayStatus: CarDisplayStatus
   dailyRateSen: number
   notes: string | null
+  ownedByFleet: boolean
+  availableForBooking: boolean
+  featured: boolean
+  coverPhotoUrl: string | null
+  ownedCapacityCount: number
+  ownedUnits: OwnedCapacityUnit[]
+  partnerCapacities: CarListPartnerCapacity[]
   createdAt: Date
   updatedAt: Date
 }
@@ -266,6 +337,19 @@ export const listCars = createServerFn({ method: 'GET' })
               ),
             )
 
+    const coverPhotos =
+      carIds.length === 0
+        ? []
+        : await db
+            .select({
+              carId: carPhotos.carId,
+              url: carPhotos.url,
+            })
+            .from(carPhotos)
+            .where(and(inArray(carPhotos.carId, carIds), eq(carPhotos.isCover, true)))
+
+    const coverByCarId = new Map(coverPhotos.map((photo) => [photo.carId, photo.url]))
+
     const openByCarId = new Map<
       string,
       { status: string; startDate: Date; endDate: Date }
@@ -279,10 +363,24 @@ export const listCars = createServerFn({ method: 'GET' })
     }
 
     const now = new Date()
-    const enrichedRows: CarListRow[] = rows.map((row) => ({
-      ...row,
-      displayStatus: deriveCarDisplayStatus(row.status, openByCarId.get(row.id), now),
-    }))
+    const capacityByMakeModel = await listCapacitySummariesByMakeModel(db, rows)
+    const enrichedRows: CarListRow[] = rows.map((row) => {
+      const capacityKey = `${row.make.toLowerCase()}\0${row.model.toLowerCase()}`
+      const capacity = capacityByMakeModel.get(capacityKey) ?? {
+        ownedCount: ownedUnitCountFromSiblings(0),
+        ownedUnits: [],
+        partners: [],
+      }
+
+      return {
+        ...row,
+        coverPhotoUrl: coverByCarId.get(row.id) ?? null,
+        displayStatus: deriveCarDisplayStatus(row.status, openByCarId.get(row.id), now),
+        ownedCapacityCount: capacity.ownedCount,
+        ownedUnits: capacity.ownedUnits,
+        partnerCapacities: capacity.partners,
+      }
+    })
 
     return {
       rows: enrichedRows,
@@ -335,6 +433,8 @@ export const createCar = createServerFn({ method: 'POST' })
         category: data.category,
         dailyRateSen: validated.dailyRateSen,
         notes: data.notes ?? null,
+        ownedByFleet: data.ownedByFleet ?? true,
+        availableForBooking: data.availableForBooking ?? true,
         status: 'available',
       })
       .returning()
@@ -373,6 +473,136 @@ export const updateCar = createServerFn({ method: 'POST' })
         category: data.category,
         dailyRateSen: validated.dailyRateSen,
         notes: data.notes ?? null,
+        ...(data.ownedByFleet !== undefined ? { ownedByFleet: data.ownedByFleet } : {}),
+        ...(data.availableForBooking !== undefined
+          ? { availableForBooking: data.availableForBooking }
+          : {}),
+        updatedAt: new Date(),
+      })
+      .where(eq(cars.id, data.carId))
+      .returning()
+
+    if (!result[0]) throw new Error('Vehicle not found.')
+    return result[0]
+  })
+
+function emptyToNull(value: string | null | undefined): string | null {
+  const trimmed = value?.trim()
+  return trimmed ? trimmed : null
+}
+
+export const updateCarCatalog = createServerFn({ method: 'POST' })
+  .inputValidator((input: UpdateCarCatalogInput) => input)
+  .handler(async ({ data }) => {
+    await requireRole(fullAdminRoles)
+    if (data.passengers < 1 || data.passengers > 20) {
+      throw new Error('Passengers must be between 1 and 20.')
+    }
+    if (data.doors < 2 || data.doors > 6) {
+      throw new Error('Doors must be between 2 and 6.')
+    }
+
+    const slug = emptyToNull(data.slug)
+    const { db } = await import('#/db')
+
+    if (slug) {
+      const conflict = await db
+        .select({ id: cars.id })
+        .from(cars)
+        .where(and(eq(cars.slug, slug), ne(cars.id, data.carId)))
+        .limit(1)
+      if (conflict.length > 0) {
+        throw new Error(`Slug "${slug}" is already used by another vehicle.`)
+      }
+    }
+
+    const result = await db
+      .update(cars)
+      .set({
+        slug,
+        featured: data.featured,
+        availableForBooking: data.availableForBooking,
+        ownedByFleet: data.ownedByFleet,
+        vendorName: emptyToNull(data.vendorName),
+        metaTitle: emptyToNull(data.metaTitle),
+        metaDescription: emptyToNull(data.metaDescription),
+        longDescription: emptyToNull(data.longDescription),
+        highlights: data.highlights?.length ? data.highlights : null,
+        bodyType: emptyToNull(data.bodyType),
+        passengers: data.passengers,
+        doors: data.doors,
+        transmission: emptyToNull(data.transmission),
+        fuelType: emptyToNull(data.fuelType),
+        appleCarPlay: data.appleCarPlay,
+        androidAuto: data.androidAuto,
+        bootCapacityL: data.bootCapacityL ?? null,
+        bootCapacityLabel: emptyToNull(data.bootCapacityLabel),
+        largeSuitcasesCount: data.largeSuitcasesCount ?? null,
+        smallCarryonsCount: data.smallCarryonsCount ?? null,
+        combinedCapacityL: data.combinedCapacityL ?? null,
+        combinedCapacityLabel: emptyToNull(data.combinedCapacityLabel),
+        tagFunAdventure: data.tagFunAdventure,
+        tagFamilyComfort: data.tagFamilyComfort,
+        tagSmallOku: data.tagSmallOku,
+        fuelPolicy: emptyToNull(data.fuelPolicy),
+        carLocations: emptyToNull(data.carLocations),
+        updatedAt: new Date(),
+      })
+      .where(eq(cars.id, data.carId))
+      .returning()
+
+    if (!result[0]) throw new Error('Vehicle not found.')
+    return result[0]
+  })
+
+function assertNonNegativeSen(value: number, label: string) {
+  if (!Number.isFinite(value) || value < 0) {
+    throw new Error(`${label} cannot be negative.`)
+  }
+}
+
+export const updateCarPricing = createServerFn({ method: 'POST' })
+  .inputValidator((input: UpdateCarPricingInput) => input)
+  .handler(async ({ data }) => {
+    await requireRole(fullAdminRoles)
+
+    assertNonNegativeSen(data.dailyRateSen, 'Daily rate')
+    assertNonNegativeSen(data.priceLowSeasonSen, 'Low-season price')
+    assertNonNegativeSen(data.pricePeakSeasonSen, 'Peak-season price')
+    assertNonNegativeSen(data.priceSuperPeakSeasonSen, 'Super-peak price')
+    assertNonNegativeSen(data.extHourLowSen, 'Extension hour (low)')
+    assertNonNegativeSen(data.extHourPeakAndSuperPeakSen, 'Extension hour (peak)')
+    assertNonNegativeSen(data.deliveryFeeAirportSen, 'Airport delivery fee')
+    assertNonNegativeSen(data.deliveryFeeJettySen, 'Jetty delivery fee')
+    assertNonNegativeSen(data.deliveryFeeHotelSen, 'Hotel delivery fee')
+    assertNonNegativeSen(data.lateReturnHourlyFeeSen, 'Late return fee')
+    if (data.promotionalPriceSen != null) {
+      assertNonNegativeSen(data.promotionalPriceSen, 'Promotional price')
+    }
+    if (!Number.isInteger(data.minRentalDays) || data.minRentalDays < 1) {
+      throw new Error('Minimum rental days must be at least 1.')
+    }
+    if (!Number.isInteger(data.maxRentalDays) || data.maxRentalDays < data.minRentalDays) {
+      throw new Error('Maximum rental days must be >= minimum.')
+    }
+
+    const { db } = await import('#/db')
+    const result = await db
+      .update(cars)
+      .set({
+        dailyRateSen: data.dailyRateSen,
+        priceLowSeasonSen: data.priceLowSeasonSen,
+        pricePeakSeasonSen: data.pricePeakSeasonSen,
+        priceSuperPeakSeasonSen: data.priceSuperPeakSeasonSen,
+        extHourLowSen: data.extHourLowSen,
+        extHourPeakAndSuperPeakSen: data.extHourPeakAndSuperPeakSen,
+        deliveryFeeAirportSen: data.deliveryFeeAirportSen,
+        deliveryFeeJettySen: data.deliveryFeeJettySen,
+        deliveryFeeHotelSen: data.deliveryFeeHotelSen,
+        lateReturnHourlyFeeSen: data.lateReturnHourlyFeeSen,
+        promotionalPriceSen: data.promotionalPriceSen ?? null,
+        minRentalDays: data.minRentalDays,
+        maxRentalDays: data.maxRentalDays,
         updatedAt: new Date(),
       })
       .where(eq(cars.id, data.carId))
@@ -401,6 +631,72 @@ export const updateCarFleetCapacity = createServerFn({ method: 'POST' })
 
     if (!result[0]) throw new Error('Vehicle not found.')
     return result[0]
+  })
+
+const carIdSchema = z.object({ carId: uuidString })
+
+export type { CarCapacityBoard }
+
+export const getCarCapacityBoard = createServerFn({ method: 'GET' })
+  .inputValidator(adminInputValidator(carIdSchema))
+  .handler(async ({ data }): Promise<CarCapacityBoard> => {
+    await requireRole(fleetOpsRoles)
+    const { db } = await import('#/db')
+    const board = await loadAndSyncCarCapacityBoard(db, data.carId)
+    if (!board) throw new Error('Vehicle not found.')
+    return board
+  })
+
+const setCarPartnerAllocationsSchema = z.object({
+  carId: uuidString,
+  numberOfUnits: z.number().int().min(1).max(500).optional(),
+  ownedUnits: z
+    .array(
+      z.object({
+        carId: uuidString.optional(),
+        plateNumber: z.string().trim().min(1).max(32),
+        color: z.enum([
+          'white',
+          'black',
+          'silver',
+          'grey',
+          'red',
+          'blue',
+          'dark-blue',
+          'maroon',
+          'gold',
+          'beige',
+          'green',
+          'other',
+        ]),
+        year: z.number().int().min(1960).max(2100),
+      }),
+    )
+    .min(1)
+    .max(500)
+    .optional(),
+  rows: z
+    .array(
+      z.object({
+        partnerId: uuidString,
+        maxUnits: z.number().int().min(1).max(500),
+        isActive: z.boolean().optional(),
+      }),
+    )
+    .max(50),
+})
+
+export const setCarPartnerAllocations = createServerFn({ method: 'POST' })
+  .inputValidator(adminInputValidator(setCarPartnerAllocationsSchema))
+  .handler(async ({ data }): Promise<CarCapacityBoard> => {
+    await requireRole(fullAdminRoles)
+    const { db } = await import('#/db')
+    return setCarPartnerAllocationsInDb(db, {
+      carId: data.carId,
+      numberOfUnits: data.numberOfUnits,
+      ownedUnits: data.ownedUnits,
+      rows: data.rows,
+    })
   })
 
 export const updateCarStatus = createServerFn({ method: 'POST' })

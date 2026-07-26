@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { ArrowRight } from 'lucide-react'
 
 import CxqAuthMarketingAside from '#/components/auth/CxqAuthMarketingAside'
@@ -8,6 +8,7 @@ import PublicAuthShell from '#/components/shells/PublicAuthShell'
 import { authClient } from '#/lib/auth-client'
 import { createInitialOwner } from '#/lib/auth-functions'
 import { appRoleFromSessionUser, getHomePathForRole } from '#/lib/auth-model'
+import { INTERNAL_JOBS_PATH } from '#/lib/internal-routes'
 import { loadInternalLoginState } from '#/lib/route-guards'
 
 export const Route = createFileRoute('/internal/login')({
@@ -19,6 +20,7 @@ export const Route = createFileRoute('/internal/login')({
 
 function InternalLoginPage() {
   const navigate = Route.useNavigate()
+  const router = useRouter()
   const { hasOwner } = Route.useRouteContext()
 
   const [name, setName] = useState('')
@@ -57,7 +59,8 @@ function InternalLoginPage() {
                     data: { name, email, password },
                   })
                   await authClient.signIn.email({ email, password })
-                  await navigate({ to: '/admin' })
+                  await router.invalidate()
+                  await navigate({ to: INTERNAL_JOBS_PATH })
                   return
                 }
 
@@ -84,6 +87,8 @@ function InternalLoginPage() {
                   return
                 }
 
+                // Drop any pre-login preload matches that cached an auth redirect.
+                await router.invalidate()
                 await navigate({ to: getHomePathForRole(role) })
               } catch (submissionError) {
                 setError(

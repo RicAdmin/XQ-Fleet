@@ -4,13 +4,26 @@ import { PaymentsTab } from '#/components/admin/PaymentsTab'
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
 import { ErrorPanel } from '#/components/ui/ErrorPanel'
 import { PageHeader } from '#/components/ui/PageHeader'
+import {
+  getAdminPayments,
+  type AdminPaymentsResult,
+} from '#/lib/admin-dashboard-functions'
+
+const PAGE_SIZE = 25
 
 export const Route = createFileRoute('/admin/payments/')({
-  beforeLoad: async ({ context }) => {
+  beforeLoad: async ({ context, cause }) => {
     const { session } = context as unknown as {
       session: { user: { role: string; name: string; email: string } } | null
     }
-    if (!session) throw redirect({ to: '/internal/login' })
+    if (!session) {
+      if (cause === 'preload') return
+      throw redirect({ to: '/internal/login' })
+    }
+    const initialResult = await getAdminPayments({
+      data: { page: 1, pageSize: PAGE_SIZE },
+    })
+    return { initialResult }
   },
   component: AdminPaymentsPage,
   errorComponent: ({ error, reset }) => (
@@ -23,18 +36,19 @@ export const Route = createFileRoute('/admin/payments/')({
 })
 
 function AdminPaymentsPage() {
-  const { session } = Route.useRouteContext() as unknown as {
+  const { session, initialResult } = Route.useRouteContext() as unknown as {
     session: { user: { name: string; email: string; role: string } }
+    initialResult: AdminPaymentsResult
   }
 
   return (
     <AdminSidebarShell user={session.user} pageTitle="Payments">
       <PageHeader
         kicker="Finance"
-        title="Payments"
-        description="Payment transactions across bookings and rentals."
+        title="Payment"
+        description="Payment transactions across jobs and bookings."
       />
-      <PaymentsTab />
+      <PaymentsTab initialResult={initialResult} />
     </AdminSidebarShell>
   )
 }

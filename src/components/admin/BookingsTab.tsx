@@ -261,11 +261,14 @@ export function BookingsTab() {
       hasActiveFilters={hasActiveFilters}
       onClearFilters={clearFilters}
       inlineControls={
-        <DateRangeQuickPresets
-          from={filters.from}
-          to={filters.to}
-          onRangeChange={(from, to) => applyFilters({ ...filters, from, to })}
-        />
+        <div className="admin-filter-bar__quick-group">
+          <span className="admin-filter-bar__quick-label">Quick range:</span>
+          <DateRangeQuickPresets
+            from={filters.from}
+            to={filters.to}
+            onRangeChange={(from, to) => applyFilters({ ...filters, from, to })}
+          />
+        </div>
       }
       actions={
         <>

@@ -38,9 +38,12 @@ import {
 import type { MaintenanceEventType } from '#/db/schema'
 
 export const Route = createFileRoute('/admin/maintenance/')({
-  beforeLoad: async ({ context }) => {
+  beforeLoad: async ({ context, cause }) => {
     const { session } = context as unknown as { session: { user: { role: string; name: string; email: string } } | null }
-    if (!session) throw redirect({ to: '/internal/login' })
+    if (!session) {
+      if (cause === 'preload') return
+      throw redirect({ to: '/internal/login' })
+    }
     const [events, alerts, carList] = await Promise.all([
       getAllMaintenanceEvents({ data: { statusFilter: 'all' } }),
       getMaintenanceDashboardAlerts(),
@@ -692,7 +695,7 @@ function AdminMaintenancePage() {
 function StatCard({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
     <div className="island-shell rounded-xl p-3">
-      <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-[var(--sea-ink-soft)]">{label}</p>
+      <p className="mb-1 text-sm font-medium text-[var(--sea-ink-soft)]">{label}</p>
       <p
         className="text-xl font-bold leading-none tabular-nums"
         style={{ color: accent ? 'var(--error)' : 'var(--sea-ink)' }}

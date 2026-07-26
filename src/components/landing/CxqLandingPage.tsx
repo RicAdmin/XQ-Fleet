@@ -58,7 +58,7 @@ import { catalogFitInput } from '#/lib/car-catalog'
 import { buildFleetCarCardAriaLabel } from '#/lib/fleet-car-card-a11y'
 import { carLuggageFit } from '#/lib/fleet-luggage-fit'
 import { isHondaNBox } from '#/lib/fleet-oku'
-import { filterPublicCars, getPublicSeasonCalendar } from '#/lib/portal-functions'
+import { filterPublicCars, getPublicSeasonCalendar, uniquePublicCarModels } from '#/lib/portal-functions'
 import type { PublicCarRow } from '#/lib/portal-functions'
 import type { SeasonRange } from '#/lib/pricing-logic'
 
@@ -503,7 +503,7 @@ function NavModelSearch({
   const rootRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const [open, setOpen] = useState(false)
-  const fleet = useMemo(() => uniquePublicCars(cars ?? []), [cars])
+  const fleet = useMemo(() => uniquePublicCarModels(cars ?? []), [cars])
 
   const clearSearch = () => {
     if (onClear) {
@@ -1425,15 +1425,6 @@ function PaxMenu({
 
 const TOP_PICKS_INITIAL_COUNT = 8
 
-function uniquePublicCars(cars: PublicCarRow[]) {
-  const seen = new Set<string>()
-  return cars.filter((car) => {
-    if (seen.has(car.id)) return false
-    seen.add(car.id)
-    return true
-  })
-}
-
 function TopPicksSection({
   cars,
   modelQuery,
@@ -1460,7 +1451,7 @@ function TopPicksSection({
   const { t } = usePublicI18n()
   const [filter, setFilter] = useState<(typeof TOP_TAGS)[number]>('All')
   const [showAll, setShowAll] = useState(false)
-  const fleet = useMemo(() => uniquePublicCars(cars), [cars])
+  const fleet = useMemo(() => uniquePublicCarModels(cars), [cars])
   const list = useMemo(() => {
     const cat = tagToCategory(filter)
     let next = cat === 'all' ? fleet : fleet.filter((c) => c.category === cat)

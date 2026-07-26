@@ -42,7 +42,7 @@ function FleetTile({ label, count, dotVar, bgVar, borderVar }: { label: string; 
         style={{ background: `var(${dotVar})` }}
       />
       <span className="text-xl font-bold leading-none text-[var(--sea-ink)]">{count}</span>
-      <span className="text-[10px] font-semibold uppercase tracking-wide text-[var(--sea-ink-soft)]">{label}</span>
+      <span className="text-sm font-medium text-[var(--sea-ink-soft)]">{label}</span>
     </div>
   )
 }

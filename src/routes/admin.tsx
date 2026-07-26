@@ -13,7 +13,7 @@ function AdminRoot({ children }: { children: ReactNode }) {
 }
 
 export const Route = createFileRoute('/admin')({
-  beforeLoad: async () => requireAdminAccess(),
+  beforeLoad: async ({ cause }) => requireAdminAccess({ cause }),
   component: () => (
     <AdminRoot>
       <Outlet />

@@ -45,7 +45,7 @@ function StatCard({
         {icon}
       </div>
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-[var(--sea-ink-soft)]">
+        <p className="text-sm font-medium text-[var(--sea-ink-soft)]">
           {label}
         </p>
         <p className="mt-0.5 text-2xl font-bold text-[var(--sea-ink)]">{value}</p>
@@ -114,8 +114,8 @@ type RentalAlertRowProps = {
 function RentalAlertRow({ id, carPlateNumber, carMake, carModel, customerFullName, endDate, daysOverdue }: RentalAlertRowProps) {
   return (
     <Link
-      to="/admin/rentals/$rentalId"
-      params={{ rentalId: id }}
+      to="/internal/jobs/$jobId"
+      params={{ jobId: id }}
       className="list-row hover:bg-[var(--chip-bg)] transition-colors"
     >
       <div>

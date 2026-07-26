@@ -25,7 +25,7 @@ type StatusFilterSelectProps<T extends string> = {
 
 /**
  * Compact status dropdown for dashboard / list toolbars.
- * Height matches Input / InputGroup (h-8).
+ * Height matches search / date controls (2rem).
  */
 export function StatusFilterSelect<T extends string>({
   value,
@@ -46,8 +46,8 @@ export function StatusFilterSelect<T extends string>({
             variant="outline"
             aria-label={ariaLabel}
             className={cn(
-              'h-8 min-w-[7.5rem] max-w-[14rem] justify-between gap-1.5 px-2.5 font-normal',
-              isFiltered && 'border-[var(--ember-border)]',
+              'admin-filter-control min-w-[7.5rem] max-w-[14rem] justify-between gap-1.5 px-2.5',
+              isFiltered && 'border-[var(--ui-ink)]',
               className,
             )}
           />

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
-import { CalendarDays, KeyRound, Undo2 } from 'lucide-react'
+import { KeyRound, List, Undo2 } from 'lucide-react'
 
-import { BookingsTab } from '#/components/admin/BookingsTab'
+import { AllJobsTab } from '#/components/admin/AllJobsTab'
 import { PickupsTab } from '#/components/admin/PickupsTab'
 import { ReturnsTab } from '#/components/admin/ReturnsTab'
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
@@ -10,7 +10,7 @@ import { PageHeader } from '#/components/ui/PageHeader'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '#/components/ui/tabs'
 import { getOperationsQueue, type OperationsQueue } from '#/lib/rental-functions'
 
-type OperationTab = 'pickups' | 'returns' | 'bookings'
+type OperationTab = 'pickups' | 'returns' | 'all'
 
 type AdminOperationsProps = {
   session: { user: { name: string; email: string; role: string } }
@@ -29,8 +29,9 @@ export default function AdminOperations({ session, initialQueue }: AdminOperatio
   return (
     <AdminSidebarShell user={session.user} pageTitle="Operation">
       <PageHeader
+        kicker="Operations floor"
         title="Operation"
-        description="Daily pickup and return workflows, plus booking activity."
+        description="Pickup, return, and open jobs — phone, IC, and payment at a glance."
       />
 
       <Tabs
@@ -41,15 +42,15 @@ export default function AdminOperations({ session, initialQueue }: AdminOperatio
         <TabsList variant="pill" className="w-full max-w-xl">
           <TabsTrigger value="pickups">
             <KeyRound size={14} />
-            Pickups ({queue.pickups.length})
+            Pickup ({queue.pickups.length})
           </TabsTrigger>
           <TabsTrigger value="returns">
             <Undo2 size={14} />
-            Returns ({queue.returns.length})
+            Return ({queue.returns.length})
           </TabsTrigger>
-          <TabsTrigger value="bookings">
-            <CalendarDays size={14} />
-            Bookings
+          <TabsTrigger value="all">
+            <List size={14} />
+            All ({queue.all.length})
           </TabsTrigger>
         </TabsList>
 
@@ -61,8 +62,8 @@ export default function AdminOperations({ session, initialQueue }: AdminOperatio
           <ReturnsTab rows={queue.returns} onMutated={refreshQueue} />
         </TabsContent>
 
-        <TabsContent value="bookings" className="mt-0">
-          <BookingsTab />
+        <TabsContent value="all" className="mt-0">
+          <AllJobsTab rows={queue.all} />
         </TabsContent>
       </Tabs>
     </AdminSidebarShell>

@@ -300,7 +300,7 @@ export function buildHomepageMarkdown(siteUrl?: string): string {
 
 - [Terms](${base}/terms) · [Privacy](${base}/privacy) · [PDPA](${base}/pdpa) · [Refund policy](${base}/refund-policy)
 
-© 2026 XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - Release.260626.01
+© 2026 XQCar · Xiao Qiang Holidays Sdn Bhd 201301017811 - Release.260627.01
 `
 }
 

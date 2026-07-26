@@ -182,6 +182,38 @@ function withHomepageCatalogDefaults(
   }
 }
 
+export function makeModelKey(make: string, model: string): string {
+  return `${make.toLowerCase()}\0${model.toLowerCase()}`
+}
+
+function publicListingScore(
+  car: Pick<PublicCarRow, 'featured' | 'slug' | 'coverPhotoUrl'>,
+): number {
+  return (car.featured ? 10 : 0) + (car.slug ? 100 : 0) + (car.coverPhotoUrl ? 1 : 0)
+}
+
+/** One public listing row per make/model (not per physical plate). */
+export function uniquePublicCarModels(cars: PublicCarRow[]): PublicCarRow[] {
+  const byModel = new Map<string, PublicCarRow>()
+  for (const car of cars) {
+    const key = makeModelKey(car.make, car.model)
+    const existing = byModel.get(key)
+    if (!existing) {
+      byModel.set(key, car)
+      continue
+    }
+    const scoreDiff = publicListingScore(car) - publicListingScore(existing)
+    if (scoreDiff > 0 || (scoreDiff === 0 && car.id.localeCompare(existing.id) < 0)) {
+      byModel.set(key, car)
+    }
+  }
+  return [...byModel.values()].sort((a, b) => {
+    const makeCmp = a.make.localeCompare(b.make)
+    if (makeCmp !== 0) return makeCmp
+    return a.model.localeCompare(b.model)
+  })
+}
+
 // ─── Season calendar (public) ─────────────────────────────────────────────────
 
 export const getPublicSeasonCalendar = createServerFn({ method: 'GET' }).handler(
@@ -211,7 +243,7 @@ export const getPublicCars = createServerFn({ method: 'GET' }).handler(async ():
     .where(and(eq(cars.status, 'available')))
     .orderBy(cars.make, cars.model)
 
-  return rows
+  return uniquePublicCarModels(rows)
 })
 
 /** Slimmer listing for homepage SSR — omits longDescription / highlights / meta fields. */
@@ -229,7 +261,7 @@ export const getPublicCarsForHomepage = createServerFn({ method: 'GET' }).handle
       .where(and(eq(cars.status, 'available')))
       .orderBy(cars.make, cars.model)
 
-    return rows.map(withHomepageCatalogDefaults)
+    return uniquePublicCarModels(rows.map(withHomepageCatalogDefaults))
   },
 )
 

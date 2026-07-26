@@ -3,37 +3,48 @@
  * No React/DOM dependencies — safe to unit-test in isolation.
  */
 
+import type { DashboardPersona } from '#/lib/auth-model'
+
 export type AdminNavLinkTo =
   | '/admin'
   | '/admin/'
   | '/admin/cars'
+  | '/admin/car-models'
   | '/admin/customers'
   | '/admin/rentals'
+  | '/internal/jobs'
   | '/admin/settings'
   | '/admin/promos'
   | '/admin/affiliates'
   | '/admin/reports'
   | '/admin/operations'
   | '/admin/payments'
+  | '/admin/availability'
+  | '/admin/locations'
+  | '/admin/staff'
+  | '/admin/partners'
   | '/admin/maintenance'
   | '/app/customers'
   | '/app/rentals'
+
+/** Which dashboard personas see this nav item. */
+export type AdminNavAudience = DashboardPersona
 
 export type AdminNavLinkItem<TIcon = unknown> = {
   type: 'link'
   label: string
   icon: TIcon
   to: AdminNavLinkTo
-  /** Alternate path shown to staff (non-owner) instead of `to` */
-  staffTo?: AdminNavLinkTo
   exact: boolean
-  ownerOnly?: boolean
+  /** Visible only to these personas. Omit = all personas. */
+  audiences?: ReadonlyArray<AdminNavAudience>
 }
 
 export type AdminNavPlaceholderItem<TIcon = unknown> = {
   type: 'placeholder'
   label: string
   icon: TIcon
+  audiences?: ReadonlyArray<AdminNavAudience>
 }
 
 export type AdminNavSectionItem<TIcon = unknown> =
@@ -43,6 +54,7 @@ export type AdminNavSectionItem<TIcon = unknown> =
 export type AdminNavSection<TIcon = unknown> = {
   label: string
   items: AdminNavSectionItem<TIcon>[]
+  audiences?: ReadonlyArray<AdminNavAudience>
 }
 
 export type ResolvedAdminNavLink<TIcon = unknown> = {
@@ -69,22 +81,32 @@ export type ResolvedAdminNavSection<TIcon = unknown> = {
 }
 
 export type ResolveAdminNavOptions = {
-  isOwner: boolean
+  persona: DashboardPersona
+}
+
+function matchesAudience(
+  audiences: ReadonlyArray<AdminNavAudience> | undefined,
+  persona: DashboardPersona,
+): boolean {
+  if (!audiences || audiences.length === 0) return true
+  return audiences.includes(persona)
 }
 
 /**
- * Filters `ownerOnly` items for non-owners, resolves `to` vs `staffTo`,
- * and leaves placeholders as non-navigable rows regardless of role.
+ * Filters nav sections/items by dashboard persona (CS, Ops, or full admin).
  */
 export function resolveAdminNavSections<TIcon>(
   sections: AdminNavSection<TIcon>[],
-  { isOwner }: ResolveAdminNavOptions,
+  { persona }: ResolveAdminNavOptions,
 ): ResolvedAdminNavSection<TIcon>[] {
   return sections
+    .filter((section) => matchesAudience(section.audiences, persona))
     .map((section) => {
       const items: ResolvedAdminNavItem<TIcon>[] = []
 
       for (const item of section.items) {
+        if (!matchesAudience(item.audiences, persona)) continue
+
         if (item.type === 'placeholder') {
           items.push({
             type: 'placeholder',
@@ -94,13 +116,11 @@ export function resolveAdminNavSections<TIcon>(
           continue
         }
 
-        if (item.ownerOnly && !isOwner) continue
-
         items.push({
           type: 'link',
           label: item.label,
           icon: item.icon,
-          href: item.staffTo && !isOwner ? item.staffTo : item.to,
+          href: item.to,
           exact: item.exact,
         })
       }

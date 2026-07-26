@@ -14,7 +14,7 @@ import { getCustomerBookings, getPortalCustomerProfile } from '#/lib/portal-book
 import { requireSurfaceAccess } from '#/lib/route-guards'
 
 export const Route = createFileRoute('/account')({
-  beforeLoad: async () => requireSurfaceAccess('account'),
+  beforeLoad: async ({ cause }) => requireSurfaceAccess('account', { cause }),
   loader: async () => {
     const [bookings, portalCustomer] = await Promise.all([
       getCustomerBookings(),

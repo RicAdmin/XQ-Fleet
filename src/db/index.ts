@@ -59,6 +59,7 @@ function getPool(): pg.Pool {
     connectionString,
     ssl: useSsl(connectionString) ? { rejectUnauthorized: false } : undefined,
     connectionTimeoutMillis: 15_000,
+    max: 10,
   })
   return pool
 }

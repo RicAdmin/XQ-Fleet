@@ -226,7 +226,7 @@ function ProtoCarDetailsPage() {
                 </dl>
                 {mockCar.notes && (
                   <div className="mt-4 border-t border-[var(--line)] pt-4">
-                    <p className="mb-1 text-xs font-medium uppercase tracking-wide text-[var(--sea-ink-soft)]">Notes</p>
+                    <p className="mb-1 text-sm font-medium text-[var(--sea-ink-soft)]">Notes</p>
                     <p className="text-sm text-[var(--sea-ink)]">{mockCar.notes}</p>
                   </div>
                 )}

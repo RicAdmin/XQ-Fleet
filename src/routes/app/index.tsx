@@ -1,21 +1,22 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 
-import StaffDashboard from '#/components/dashboard/StaffDashboard'
-import type { DashboardData } from '#/lib/dashboard-functions'
-import { getDashboardData } from '#/lib/dashboard-functions'
+import {
+  getDefaultHomePathForPersona,
+  resolveDashboardPersona,
+  staffProfileFromSessionUser,
+  type AppRole,
+} from '#/lib/auth-model'
 
 export const Route = createFileRoute('/app/')({
-  beforeLoad: async () => {
-    const data = await getDashboardData()
-    return { data }
+  beforeLoad: async ({ context }) => {
+    const { session } = context as unknown as {
+      session: { user: { role: string; staffProfile?: string | null } }
+    }
+    const role = session.user.role as AppRole
+    const persona = resolveDashboardPersona({
+      role,
+      staffProfile: staffProfileFromSessionUser(session.user),
+    })
+    throw redirect({ to: getDefaultHomePathForPersona(persona) })
   },
-  component: StaffAppPage,
 })
-
-function StaffAppPage() {
-  const { session, data } = Route.useRouteContext() as unknown as {
-    session: { user: { name: string; email: string; role: string } }
-    data: DashboardData
-  }
-  return <StaffDashboard user={session.user} data={data} />
-}

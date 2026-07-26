@@ -10,7 +10,7 @@ function StaffAppRoot({ children }: { children: ReactNode }) {
 }
 
 export const Route = createFileRoute('/app')({
-  beforeLoad: async () => requireSurfaceAccess('app'),
+  beforeLoad: async ({ cause }) => requireSurfaceAccess('app', { cause }),
   component: () => (
     <StaffAppRoot>
       <Outlet />
