@@ -260,6 +260,11 @@ export const msMessages: EnMessages = {
     redirectingPayment: 'Mengalihkan ke pembayaran…',
     payAmount: 'Bayar RM {total}',
     pickupTbc: 'Lokasi ambil TBC',
+    editTrip: 'Edit',
+    editTripTitle: 'Butiran ambil & pulang',
+    editTripSub: 'Tetapkan lokasi temu, tarikh, dan masa untuk teruskan.',
+    errPickupLocationRequired: 'Pilih lokasi ambil.',
+    errReturnLocationRequired: 'Pilih lokasi pulang.',
     errNameRequired: 'Sila masukkan nama untuk tempahan ini.',
     errEmailRequired: 'Tambah e-mel untuk hantar pengesahan tempahan.',
     errEmailInvalid:
@@ -275,9 +280,6 @@ export const msMessages: EnMessages = {
     errCountryInvalid: 'Pilih negara yang sah.',
     errDriverName: 'Sila masukkan nama penuh pemandu seperti pada lesen.',
     errDriverLicense: 'Sila masukkan nombor IC, pasport, atau lesen pemandu.',
-    errTripDatesRequired:
-      'Tarikh dan masa ambil serta pulang diperlukan. Kembali dan lengkapkan carian anda.',
-    errPickValidDates: 'Pilih tarikh sah dari bar carian dahulu.',
     errPricePreview:
       'Tidak dapat mengira harga untuk tarikh ini. Semak butiran perjalanan anda.',
     errCreateBooking: 'Tidak dapat mencipta tempahan.',

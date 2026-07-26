@@ -253,6 +253,11 @@ export const enCheckout = {
   redirectingPayment: 'Redirecting to payment…',
   payAmount: 'Pay RM {total}',
   pickupTbc: 'Pickup location TBC',
+  editTrip: 'Edit',
+  editTripTitle: 'Pickup & return details',
+  editTripSub: 'Set your meet points, dates, and times to continue.',
+  errPickupLocationRequired: 'Select a pickup location.',
+  errReturnLocationRequired: 'Select a return location.',
   errNameRequired: 'Please enter the name for this booking.',
   errEmailRequired:
     "Add the email where you'd like your booking confirmation sent.",
@@ -271,9 +276,6 @@ export const enCheckout = {
     "Please enter the driver's full name as shown on their license.",
   errDriverLicense:
     "Please enter the driver's IC, passport, or license number.",
-  errTripDatesRequired:
-    'Pickup and return dates and times are required. Go back and complete your search.',
-  errPickValidDates: 'Pick valid dates from the search bar first.',
   errPricePreview:
     'Could not calculate a price for these dates. Check your trip details.',
   errCreateBooking: 'Could not create booking.',

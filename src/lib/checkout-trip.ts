@@ -1,6 +1,7 @@
 import {
   cloneBooking,
   defaultBooking,
+  hasPickupReturnDetails,
   hasTripDates,
   sanitizeBookingDates,
   type BookingState,
@@ -34,8 +35,8 @@ export function parseCheckoutSearch(search: Record<string, unknown>): CheckoutTr
     from: typeof search.from === 'string' ? search.from : undefined,
     retLoc: typeof search.retLoc === 'string' ? search.retLoc : undefined,
     tripType: tripType === 'round' || tripType === 'oneway' ? tripType : undefined,
-    pickTime: typeof search.pickTime === 'string' ? search.pickTime : undefined,
-    retTime: typeof search.retTime === 'string' ? search.retTime : undefined,
+    pickTime: optionalSearchString(search.pickTime),
+    retTime: optionalSearchString(search.retTime),
     adults: optionalSearchString(search.adults),
     children: optionalSearchString(search.children),
   }
@@ -77,6 +78,12 @@ export function resolveCheckoutBooking(search: CheckoutTripSearch): BookingState
   })
 }
 
+/** Dates and times present — enough to preview pricing. */
 export function bookingHasCompleteTrip(booking: BookingState): boolean {
   return hasTripDates(booking)
+}
+
+/** Dates, times, and pickup/return locations — required before payment. */
+export function bookingHasPickupReturnDetails(booking: BookingState): boolean {
+  return hasPickupReturnDetails(booking)
 }
