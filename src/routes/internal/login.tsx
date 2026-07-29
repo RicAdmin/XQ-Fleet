@@ -19,7 +19,6 @@ export const Route = createFileRoute('/internal/login')({
 })
 
 function InternalLoginPage() {
-  const navigate = Route.useNavigate()
   const router = useRouter()
   const { hasOwner } = Route.useRouteContext()
 
@@ -59,8 +58,10 @@ function InternalLoginPage() {
                     data: { name, email, password },
                   })
                   await authClient.signIn.email({ email, password })
+                  // Use router.navigate (not Route.useNavigate) so we don't keep
+                  // `from: /internal/login` after invalidate rematches away from login.
                   await router.invalidate()
-                  await navigate({ to: INTERNAL_JOBS_PATH })
+                  await router.navigate({ to: INTERNAL_JOBS_PATH, replace: true })
                   return
                 }
 
@@ -89,7 +90,7 @@ function InternalLoginPage() {
 
                 // Drop any pre-login preload matches that cached an auth redirect.
                 await router.invalidate()
-                await navigate({ to: getHomePathForRole(role) })
+                await router.navigate({ to: getHomePathForRole(role), replace: true })
               } catch (submissionError) {
                 setError(
                   submissionError instanceof Error

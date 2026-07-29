@@ -43,6 +43,7 @@ import { Route as RCodeRouteImport } from './routes/r/$code'
 import { Route as PayRentalIdRouteImport } from './routes/pay/$rentalId'
 import { Route as InternalLoginRouteImport } from './routes/internal/login'
 import { Route as InternalJobRouteImport } from './routes/internal/job'
+import { Route as InternalDashboardRouteImport } from './routes/internal/dashboard'
 import { Route as GuidesPlanDriveRouteImport } from './routes/guides/plan-drive'
 import { Route as GuidesPickupReturnRouteImport } from './routes/guides/pickup-return'
 import { Route as GuidesPickCarRouteImport } from './routes/guides/pick-car'
@@ -87,13 +88,13 @@ import { Route as AdminCustomersIndexRouteImport } from './routes/admin/customer
 import { Route as AdminCarsIndexRouteImport } from './routes/admin/cars/index'
 import { Route as AdminCarModelsIndexRouteImport } from './routes/admin/car-models/index'
 import { Route as AdminAvailabilityIndexRouteImport } from './routes/admin/availability/index'
+import { Route as AdminAccountsIndexRouteImport } from './routes/admin/accounts/index'
 import { Route as AccountBookingsIndexRouteImport } from './routes/account/bookings/index'
 import { Route as LocaleBlogIndexRouteImport } from './routes/$locale/blog/index'
 import { Route as WellKnownMcpServerCardDotjsonRouteImport } from './routes/well-known/mcp/server-card[.]json'
 import { Route as WellKnownAgentSkillsIndexDotjsonRouteImport } from './routes/well-known/agent-skills/index[.]json'
 import { Route as InternalJobsJobIdRouteImport } from './routes/internal/jobs/$jobId'
 import { Route as InternalJobJobIdRouteImport } from './routes/internal/job/$jobId'
-import { Route as InternalInviteTokenRouteImport } from './routes/internal/invite/$token'
 import { Route as CheckoutConfirmedRentalIdRouteImport } from './routes/checkout/confirmed/$rentalId'
 import { Route as BookingConfirmedRentalIdRouteImport } from './routes/booking/confirmed/$rentalId'
 import { Route as AppRentalsRentalIdRouteImport } from './routes/app/rentals/$rentalId'
@@ -297,6 +298,11 @@ const InternalLoginRoute = InternalLoginRouteImport.update({
 const InternalJobRoute = InternalJobRouteImport.update({
   id: '/job',
   path: '/job',
+  getParentRoute: () => InternalRoute,
+} as any)
+const InternalDashboardRoute = InternalDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => InternalRoute,
 } as any)
 const GuidesPlanDriveRoute = GuidesPlanDriveRouteImport.update({
@@ -519,6 +525,11 @@ const AdminAvailabilityIndexRoute = AdminAvailabilityIndexRouteImport.update({
   path: '/availability/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAccountsIndexRoute = AdminAccountsIndexRouteImport.update({
+  id: '/accounts/',
+  path: '/accounts/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AccountBookingsIndexRoute = AccountBookingsIndexRouteImport.update({
   id: '/bookings/',
   path: '/bookings/',
@@ -550,11 +561,6 @@ const InternalJobJobIdRoute = InternalJobJobIdRouteImport.update({
   id: '/$jobId',
   path: '/$jobId',
   getParentRoute: () => InternalJobRoute,
-} as any)
-const InternalInviteTokenRoute = InternalInviteTokenRouteImport.update({
-  id: '/invite/$token',
-  path: '/invite/$token',
-  getParentRoute: () => InternalRoute,
 } as any)
 const CheckoutConfirmedRentalIdRoute =
   CheckoutConfirmedRentalIdRouteImport.update({
@@ -765,6 +771,7 @@ export interface FileRoutesByFullPath {
   '/guides/pick-car': typeof GuidesPickCarRoute
   '/guides/pickup-return': typeof GuidesPickupReturnRoute
   '/guides/plan-drive': typeof GuidesPlanDriveRoute
+  '/internal/dashboard': typeof InternalDashboardRoute
   '/internal/job': typeof InternalJobRouteWithChildren
   '/internal/login': typeof InternalLoginRoute
   '/pay/$rentalId': typeof PayRentalIdRoute
@@ -809,13 +816,13 @@ export interface FileRoutesByFullPath {
   '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
   '/booking/confirmed/$rentalId': typeof BookingConfirmedRentalIdRoute
   '/checkout/confirmed/$rentalId': typeof CheckoutConfirmedRentalIdRoute
-  '/internal/invite/$token': typeof InternalInviteTokenRoute
   '/internal/job/$jobId': typeof InternalJobJobIdRoute
   '/internal/jobs/$jobId': typeof InternalJobsJobIdRoute
   '/well-known/agent-skills/index.json': typeof WellKnownAgentSkillsIndexDotjsonRoute
   '/well-known/mcp/server-card.json': typeof WellKnownMcpServerCardDotjsonRoute
   '/$locale/blog/': typeof LocaleBlogIndexRoute
   '/account/bookings/': typeof AccountBookingsIndexRoute
+  '/admin/accounts/': typeof AdminAccountsIndexRoute
   '/admin/availability/': typeof AdminAvailabilityIndexRoute
   '/admin/car-models/': typeof AdminCarModelsIndexRoute
   '/admin/cars/': typeof AdminCarsIndexRoute
@@ -878,6 +885,7 @@ export interface FileRoutesByTo {
   '/guides/pick-car': typeof GuidesPickCarRoute
   '/guides/pickup-return': typeof GuidesPickupReturnRoute
   '/guides/plan-drive': typeof GuidesPlanDriveRoute
+  '/internal/dashboard': typeof InternalDashboardRoute
   '/internal/job': typeof InternalJobRouteWithChildren
   '/internal/login': typeof InternalLoginRoute
   '/pay/$rentalId': typeof PayRentalIdRoute
@@ -922,13 +930,13 @@ export interface FileRoutesByTo {
   '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
   '/booking/confirmed/$rentalId': typeof BookingConfirmedRentalIdRoute
   '/checkout/confirmed/$rentalId': typeof CheckoutConfirmedRentalIdRoute
-  '/internal/invite/$token': typeof InternalInviteTokenRoute
   '/internal/job/$jobId': typeof InternalJobJobIdRoute
   '/internal/jobs/$jobId': typeof InternalJobsJobIdRoute
   '/well-known/agent-skills/index.json': typeof WellKnownAgentSkillsIndexDotjsonRoute
   '/well-known/mcp/server-card.json': typeof WellKnownMcpServerCardDotjsonRoute
   '/$locale/blog': typeof LocaleBlogIndexRoute
   '/account/bookings': typeof AccountBookingsIndexRoute
+  '/admin/accounts': typeof AdminAccountsIndexRoute
   '/admin/availability': typeof AdminAvailabilityIndexRoute
   '/admin/car-models': typeof AdminCarModelsIndexRoute
   '/admin/cars': typeof AdminCarsIndexRoute
@@ -997,6 +1005,7 @@ export interface FileRoutesById {
   '/guides/pick-car': typeof GuidesPickCarRoute
   '/guides/pickup-return': typeof GuidesPickupReturnRoute
   '/guides/plan-drive': typeof GuidesPlanDriveRoute
+  '/internal/dashboard': typeof InternalDashboardRoute
   '/internal/job': typeof InternalJobRouteWithChildren
   '/internal/login': typeof InternalLoginRoute
   '/pay/$rentalId': typeof PayRentalIdRoute
@@ -1041,13 +1050,13 @@ export interface FileRoutesById {
   '/app/rentals/$rentalId': typeof AppRentalsRentalIdRoute
   '/booking/confirmed/$rentalId': typeof BookingConfirmedRentalIdRoute
   '/checkout/confirmed/$rentalId': typeof CheckoutConfirmedRentalIdRoute
-  '/internal/invite/$token': typeof InternalInviteTokenRoute
   '/internal/job/$jobId': typeof InternalJobJobIdRoute
   '/internal/jobs/$jobId': typeof InternalJobsJobIdRoute
   '/well-known/agent-skills/index.json': typeof WellKnownAgentSkillsIndexDotjsonRoute
   '/well-known/mcp/server-card.json': typeof WellKnownMcpServerCardDotjsonRoute
   '/$locale/blog/': typeof LocaleBlogIndexRoute
   '/account/bookings/': typeof AccountBookingsIndexRoute
+  '/admin/accounts/': typeof AdminAccountsIndexRoute
   '/admin/availability/': typeof AdminAvailabilityIndexRoute
   '/admin/car-models/': typeof AdminCarModelsIndexRoute
   '/admin/cars/': typeof AdminCarsIndexRoute
@@ -1117,6 +1126,7 @@ export interface FileRouteTypes {
     | '/guides/pick-car'
     | '/guides/pickup-return'
     | '/guides/plan-drive'
+    | '/internal/dashboard'
     | '/internal/job'
     | '/internal/login'
     | '/pay/$rentalId'
@@ -1161,13 +1171,13 @@ export interface FileRouteTypes {
     | '/app/rentals/$rentalId'
     | '/booking/confirmed/$rentalId'
     | '/checkout/confirmed/$rentalId'
-    | '/internal/invite/$token'
     | '/internal/job/$jobId'
     | '/internal/jobs/$jobId'
     | '/well-known/agent-skills/index.json'
     | '/well-known/mcp/server-card.json'
     | '/$locale/blog/'
     | '/account/bookings/'
+    | '/admin/accounts/'
     | '/admin/availability/'
     | '/admin/car-models/'
     | '/admin/cars/'
@@ -1230,6 +1240,7 @@ export interface FileRouteTypes {
     | '/guides/pick-car'
     | '/guides/pickup-return'
     | '/guides/plan-drive'
+    | '/internal/dashboard'
     | '/internal/job'
     | '/internal/login'
     | '/pay/$rentalId'
@@ -1274,13 +1285,13 @@ export interface FileRouteTypes {
     | '/app/rentals/$rentalId'
     | '/booking/confirmed/$rentalId'
     | '/checkout/confirmed/$rentalId'
-    | '/internal/invite/$token'
     | '/internal/job/$jobId'
     | '/internal/jobs/$jobId'
     | '/well-known/agent-skills/index.json'
     | '/well-known/mcp/server-card.json'
     | '/$locale/blog'
     | '/account/bookings'
+    | '/admin/accounts'
     | '/admin/availability'
     | '/admin/car-models'
     | '/admin/cars'
@@ -1348,6 +1359,7 @@ export interface FileRouteTypes {
     | '/guides/pick-car'
     | '/guides/pickup-return'
     | '/guides/plan-drive'
+    | '/internal/dashboard'
     | '/internal/job'
     | '/internal/login'
     | '/pay/$rentalId'
@@ -1392,13 +1404,13 @@ export interface FileRouteTypes {
     | '/app/rentals/$rentalId'
     | '/booking/confirmed/$rentalId'
     | '/checkout/confirmed/$rentalId'
-    | '/internal/invite/$token'
     | '/internal/job/$jobId'
     | '/internal/jobs/$jobId'
     | '/well-known/agent-skills/index.json'
     | '/well-known/mcp/server-card.json'
     | '/$locale/blog/'
     | '/account/bookings/'
+    | '/admin/accounts/'
     | '/admin/availability/'
     | '/admin/car-models/'
     | '/admin/cars/'
@@ -1718,6 +1730,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InternalJobRouteImport
       parentRoute: typeof InternalRoute
     }
+    '/internal/dashboard': {
+      id: '/internal/dashboard'
+      path: '/dashboard'
+      fullPath: '/internal/dashboard'
+      preLoaderRoute: typeof InternalDashboardRouteImport
+      parentRoute: typeof InternalRoute
+    }
     '/guides/plan-drive': {
       id: '/guides/plan-drive'
       path: '/guides/plan-drive'
@@ -2026,6 +2045,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAvailabilityIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/accounts/': {
+      id: '/admin/accounts/'
+      path: '/accounts'
+      fullPath: '/admin/accounts/'
+      preLoaderRoute: typeof AdminAccountsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/account/bookings/': {
       id: '/account/bookings/'
       path: '/bookings'
@@ -2067,13 +2093,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/internal/job/$jobId'
       preLoaderRoute: typeof InternalJobJobIdRouteImport
       parentRoute: typeof InternalJobRoute
-    }
-    '/internal/invite/$token': {
-      id: '/internal/invite/$token'
-      path: '/invite/$token'
-      fullPath: '/internal/invite/$token'
-      preLoaderRoute: typeof InternalInviteTokenRouteImport
-      parentRoute: typeof InternalRoute
     }
     '/checkout/confirmed/$rentalId': {
       id: '/checkout/confirmed/$rentalId'
@@ -2382,6 +2401,7 @@ interface AdminRouteChildren {
   AdminPartnersPartnerIdRoute: typeof AdminPartnersPartnerIdRoute
   AdminPromosPromoIdRoute: typeof AdminPromosPromoIdRoute
   AdminRentalsRentalIdRoute: typeof AdminRentalsRentalIdRoute
+  AdminAccountsIndexRoute: typeof AdminAccountsIndexRoute
   AdminAvailabilityIndexRoute: typeof AdminAvailabilityIndexRoute
   AdminCarModelsIndexRoute: typeof AdminCarModelsIndexRoute
   AdminCarsIndexRoute: typeof AdminCarsIndexRoute
@@ -2409,6 +2429,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPartnersPartnerIdRoute: AdminPartnersPartnerIdRoute,
   AdminPromosPromoIdRoute: AdminPromosPromoIdRoute,
   AdminRentalsRentalIdRoute: AdminRentalsRentalIdRoute,
+  AdminAccountsIndexRoute: AdminAccountsIndexRoute,
   AdminAvailabilityIndexRoute: AdminAvailabilityIndexRoute,
   AdminCarModelsIndexRoute: AdminCarModelsIndexRoute,
   AdminCarsIndexRoute: AdminCarsIndexRoute,
@@ -2461,19 +2482,19 @@ const InternalJobRouteWithChildren = InternalJobRoute._addFileChildren(
 )
 
 interface InternalRouteChildren {
+  InternalDashboardRoute: typeof InternalDashboardRoute
   InternalJobRoute: typeof InternalJobRouteWithChildren
   InternalLoginRoute: typeof InternalLoginRoute
   InternalIndexRoute: typeof InternalIndexRoute
-  InternalInviteTokenRoute: typeof InternalInviteTokenRoute
   InternalJobsJobIdRoute: typeof InternalJobsJobIdRoute
   InternalJobsIndexRoute: typeof InternalJobsIndexRoute
 }
 
 const InternalRouteChildren: InternalRouteChildren = {
+  InternalDashboardRoute: InternalDashboardRoute,
   InternalJobRoute: InternalJobRouteWithChildren,
   InternalLoginRoute: InternalLoginRoute,
   InternalIndexRoute: InternalIndexRoute,
-  InternalInviteTokenRoute: InternalInviteTokenRoute,
   InternalJobsJobIdRoute: InternalJobsJobIdRoute,
   InternalJobsIndexRoute: InternalJobsIndexRoute,
 }

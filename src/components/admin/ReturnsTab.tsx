@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { AdminListFilterBar } from '#/components/ui/AdminListFilterBar'
 import { type Column, DataTable } from '#/components/ui/DataTable'
 import { DateRangeFilter, DateRangeQuickPresets } from '#/components/ui/DateRangeFilter'
-import { StatusBadge } from '#/components/ui/StatusBadge'
 import { Button } from '#/components/ui/button'
 import {
   Sheet,
@@ -15,17 +14,20 @@ import {
 import {
   filterReturnRows,
   formatMYR,
-  isReturnOverdue,
-  OperationCustomerCell,
-  OperationDueCell,
+  OperationCustomerContactCell,
+  OperationDepositCell,
+  OperationDurationCell,
+  OperationHandledByCell,
+  OperationJobCarCell,
   OperationJobContext,
-  OperationMoneyCell,
-  OperationPaymentCell,
-  OperationScheduleCell,
+  OperationPickupCell,
+  OperationReturnCell,
+  OperationTotalCell,
   type OperationQueueFilters,
 } from '#/components/admin/operations-queue-utils'
 import { showAdminToast } from '#/components/ui/AdminToast'
 import { closeReturn, type RentalListRow } from '#/lib/rental-functions'
+import { RentalPhotos } from '#/components/admin/RentalPhotos'
 
 const SEARCH_DEBOUNCE_MS = 300
 
@@ -44,6 +46,7 @@ export function ReturnsTab({ rows, onMutated }: ReturnsTabProps) {
   const [paidAmountRM, setPaidAmountRM] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('cash')
   const [flagDamage, setFlagDamage] = useState(false)
+  const [fuelFeeRM, setFuelFeeRM] = useState('')
   const [returnError, setReturnError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -73,6 +76,7 @@ export function ReturnsTab({ rows, onMutated }: ReturnsTabProps) {
     setPaidAmountRM(((r.totalAmountSen - r.paidAmountSen) / 100).toFixed(2))
     setPaymentMethod('cash')
     setFlagDamage(false)
+    setFuelFeeRM('')
     setReturnError(null)
   }
 
@@ -90,6 +94,7 @@ export function ReturnsTab({ rows, onMutated }: ReturnsTabProps) {
           paidAmountSen: Math.round(Number(paidAmountRM) * 100),
           paymentMethod,
           flagDamage,
+          fuelFeeSen: Math.round(Number(fuelFeeRM || '0') * 100),
         },
       })
       setActiveRental(null)
@@ -105,62 +110,57 @@ export function ReturnsTab({ rows, onMutated }: ReturnsTabProps) {
   const columns = useMemo<Column<RentalListRow>[]>(
     () => [
       {
-        key: 'endDate',
-        header: 'Return',
-        cellClassName: 'admin-op-col-due whitespace-normal',
-        render: (r) => (
-          <OperationDueCell
-            date={r.endDate}
-            time={r.returnTime}
-            overdue={isReturnOverdue(r)}
-          />
-        ),
+        key: 'job',
+        header: 'Job / Car',
+        cellClassName: 'admin-op-col-car whitespace-normal',
+        render: (r) => <OperationJobCarCell rental={r} />,
       },
       {
-        key: 'status',
-        header: 'Status',
-        render: (r) => <StatusBadge status={r.status} />,
+        key: 'startDate',
+        header: 'Pickup',
+        headerClassName: 'op-hide-sm',
+        cellClassName: 'admin-op-col-due whitespace-normal op-hide-sm',
+        render: (r) => <OperationPickupCell rental={r} />,
       },
       {
         key: 'customer',
         header: 'Customer',
         cellClassName: 'admin-op-col-customer whitespace-normal',
-        render: (r) => <OperationCustomerCell rental={r} />,
+        render: (r) => <OperationCustomerContactCell rental={r} />,
       },
       {
-        key: 'car',
-        header: 'Car',
-        cellClassName: 'admin-op-col-car whitespace-normal',
+        key: 'duration',
+        header: 'Duration',
+        headerClassName: 'op-hide-sm',
+        cellClassName: 'whitespace-nowrap op-hide-sm',
+        render: (r) => <OperationDurationCell rental={r} />,
+      },
+      {
+        key: 'total',
+        header: 'Total',
+        cellClassName: 'admin-op-col-money',
+        render: (r) => <OperationTotalCell rental={r} />,
+      },
+      {
+        key: 'deposit',
+        header: 'Deposit',
+        headerClassName: 'op-hide-sm',
+        cellClassName: 'admin-op-col-money whitespace-normal op-hide-sm',
+        render: (r) => <OperationDepositCell rental={r} />,
+      },
+      {
+        key: 'endDate',
+        header: 'Return',
+        cellClassName: 'admin-op-col-due whitespace-normal',
+        render: (r) => <OperationReturnCell rental={r} />,
+      },
+      {
+        key: 'handledBy',
+        header: 'Pickup handled by',
+        headerClassName: 'op-hide-sm',
+        cellClassName: 'whitespace-normal op-hide-sm',
         render: (r) => (
-          <div>
-            <div className="admin-op-plate font-semibold">{r.carPlateNumber ?? '—'}</div>
-            <div className="text-[var(--admin-text-sm)] text-[var(--sea-ink-soft)]">
-              {r.carMake} {r.carModel}
-            </div>
-          </div>
-        ),
-      },
-      {
-        key: 'schedule',
-        header: 'Schedule',
-        cellClassName: 'admin-op-col-schedule whitespace-normal',
-        render: (r) => <OperationScheduleCell rental={r} />,
-      },
-      {
-        key: 'paymentStatus',
-        header: 'Payment',
-        render: (r) => <OperationPaymentCell rental={r} />,
-      },
-      {
-        key: 'balance',
-        header: 'Balance',
-        headerClassName: 'text-right',
-        cellClassName: 'admin-op-col-money text-right',
-        render: (r) => (
-          <OperationMoneyCell
-            amountSen={Math.max(0, r.totalAmountSen - r.paidAmountSen)}
-            emphasis
-          />
+          <OperationHandledByCell name={r.handoverByName} at={r.actualPickupAt} />
         ),
       },
     ],
@@ -178,7 +178,7 @@ export function ReturnsTab({ rows, onMutated }: ReturnsTabProps) {
       activeFilterCount={(filters.from ? 1 : 0) + (filters.to ? 1 : 0)}
       hasActiveFilters={hasActiveFilters}
       onClearFilters={clearFilters}
-      inlineControls={
+      actions={
         <div className="admin-filter-bar__quick-group">
           <span className="admin-filter-bar__quick-label">Quick range:</span>
           <DateRangeQuickPresets
@@ -304,6 +304,24 @@ export function ReturnsTab({ rows, onMutated }: ReturnsTabProps) {
                   <option value="other">Other</option>
                 </select>
               </div>
+              <div>
+                <label className="field-label" htmlFor="returns-fuel">
+                  Fuel top-up fee (RM){' '}
+                  <span className="font-normal text-[var(--sea-ink-soft)]">
+                    (if fuel returned lower)
+                  </span>
+                </label>
+                <input
+                  id="returns-fuel"
+                  type="number"
+                  className="field-input"
+                  value={fuelFeeRM}
+                  onChange={(e) => setFuelFeeRM(e.target.value)}
+                  min={0}
+                  step={0.01}
+                  placeholder="0.00"
+                />
+              </div>
               <div className="flex items-start gap-2">
                 <input
                   id="returns-damage"
@@ -318,6 +336,12 @@ export function ReturnsTab({ rows, onMutated }: ReturnsTabProps) {
               </div>
               {returnError ? <p className="form-error">{returnError}</p> : null}
             </form>
+            {activeRental ? (
+              <div className="mt-4 border-t border-[var(--line)] pt-4">
+                <p className="field-label mb-2">Return photos</p>
+                <RentalPhotos rentalId={activeRental.id} phase="return" />
+              </div>
+            ) : null}
           </div>
           <SheetFooter className="flex-row gap-2 border-t border-[var(--line)] px-5 py-4">
             <Button type="submit" form="returns-form" disabled={isSubmitting}>

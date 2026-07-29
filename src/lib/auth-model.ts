@@ -4,11 +4,11 @@ import { INTERNAL_JOBS_PATH } from '#/lib/internal-routes'
 export const appRoles = ['owner', 'staff', 'customer', 'super_admin'] as const
 export type AppRole = (typeof appRoles)[number]
 
-export const staffProfiles = ['customer_service', 'operations'] as const
+export const staffProfiles = ['customer_service', 'operations', 'account'] as const
 export type StaffProfile = (typeof staffProfiles)[number]
 
 /** UI persona that drives sidebar menus (CS desk vs ops floor vs full admin). */
-export type DashboardPersona = 'customer_service' | 'operations' | 'admin'
+export type DashboardPersona = 'customer_service' | 'operations' | 'account' | 'admin'
 
 /** Super admin header toggle — preview CS, Ops, or full Admin menus without changing DB role. */
 export type AdminViewMode = 'customer_service' | 'operations' | 'admin'
@@ -56,13 +56,16 @@ export function resolveDashboardPersona(opts: {
   }
 
   if (opts.role === 'staff') {
-    return opts.staffProfile === 'operations' ? 'operations' : 'customer_service'
+    if (opts.staffProfile === 'operations') return 'operations'
+    if (opts.staffProfile === 'account') return 'account'
+    return 'customer_service'
   }
 
   return 'customer_service'
 }
 
-export function getDefaultHomePathForPersona(_persona: DashboardPersona): string {
+export function getDefaultHomePathForPersona(persona: DashboardPersona): string {
+  if (persona === 'account') return '/admin/accounts'
   return INTERNAL_JOBS_PATH
 }
 
@@ -85,6 +88,8 @@ export function getStaffProfileLabel(profile: StaffProfile) {
       return 'Customer Service'
     case 'operations':
       return 'Operations'
+    case 'account':
+      return 'Accounts'
   }
 }
 
@@ -97,7 +102,11 @@ export function getHomePathForRole(
       return '/' as const
     case 'staff':
       return getDefaultHomePathForPersona(
-        staffProfile === 'operations' ? 'operations' : 'customer_service',
+        staffProfile === 'operations'
+          ? 'operations'
+          : staffProfile === 'account'
+            ? 'account'
+            : 'customer_service',
       )
     case 'owner':
     case 'super_admin':

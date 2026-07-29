@@ -1,5 +1,5 @@
 import { cn } from '#/lib/utils'
-import { formatJobType } from '#/lib/job-display'
+import { jobBookingRef } from '#/lib/job-display'
 import type { RentalListRow } from '#/lib/rental-functions'
 import { StatusBadge } from '#/components/ui/StatusBadge'
 
@@ -118,16 +118,12 @@ export function OperationDueCell({
 export function OperationCustomerCell({ rental }: { rental: RentalListRow }) {
   return (
     <div>
-      <div className="font-semibold text-[var(--sea-ink)]">{rental.customerFullName ?? '—'}</div>
+      <div className="admin-op-strong">{rental.customerFullName ?? '—'}</div>
       {rental.customerPhone ? (
-        <div className="text-[var(--admin-text-sm)] text-[var(--sea-ink-soft)]">
-          {rental.customerPhone}
-        </div>
+        <div className="admin-op-meta">{rental.customerPhone}</div>
       ) : null}
       {rental.customerIcOrPassport ? (
-        <div className="font-mono text-[var(--admin-text-sm)] text-[var(--sea-ink-soft)]">
-          {rental.customerIcOrPassport}
-        </div>
+        <div className="admin-op-meta font-mono">{rental.customerIcOrPassport}</div>
       ) : null}
     </div>
   )
@@ -140,12 +136,12 @@ export function OperationPaymentCell({ rental }: { rental: RentalListRow }) {
     <div>
       <StatusBadge status={rental.paymentStatus} size="sm" />
       {rental.depositAmountSen > 0 ? (
-        <div className="mt-1 text-[var(--admin-text-sm)] text-[var(--sea-ink-soft)]">
+        <div className="admin-op-meta mt-1">
           Dep. {formatMYR(rental.depositAmountSen)}
         </div>
       ) : null}
       {balanceSen > 0 ? (
-        <div className="mt-1 text-[var(--admin-text-sm)] font-medium text-amber-700">
+        <div className="admin-op-meta mt-1 font-medium text-amber-700">
           Bal. {formatMYR(balanceSen)}
         </div>
       ) : null}
@@ -154,34 +150,15 @@ export function OperationPaymentCell({ rental }: { rental: RentalListRow }) {
 }
 
 export function OperationJobContext({ rental }: { rental: RentalListRow }) {
-  const balanceSen = Math.max(0, rental.totalAmountSen - rental.paidAmountSen)
-
   return (
-    <div className="space-y-2 rounded-lg border border-[var(--line)] bg-[var(--surface-muted)] p-3 text-sm">
-      <div>
-        <div className="font-semibold text-[var(--sea-ink)]">{rental.customerFullName ?? '—'}</div>
-        <div className="text-[var(--sea-ink-soft)]">
-          {[rental.customerPhone, rental.customerIcOrPassport].filter(Boolean).join(' · ') || '—'}
-        </div>
-      </div>
-      <div className="text-[var(--sea-ink-soft)]">
-        <div>
-          Pickup: {formatOperationDateTime(rental.startDate, rental.pickUpTime)}
+    <div className="op-context">
+      <div className="op-context__body">
+        <div className="op-context__name">{rental.customerFullName ?? '—'}</div>
+        <div className="op-context__meta">
+          {formatOperationDateTime(rental.startDate, rental.pickUpTime)}
           {rental.pickUpLocation ? ` · ${rental.pickUpLocation}` : ''}
         </div>
-        <div>
-          Return: {formatOperationDateTime(rental.endDate, rental.returnTime)}
-          {rental.returnLocation ? ` · ${rental.returnLocation}` : ''}
-        </div>
       </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <StatusBadge status={rental.paymentStatus} size="sm" />
-        <span className="text-[var(--sea-ink-soft)]">
-          Total {formatMYR(rental.totalAmountSen)}
-          {balanceSen > 0 ? ` · Balance ${formatMYR(balanceSen)}` : ''}
-        </span>
-      </div>
-      <div className="text-[var(--sea-ink-soft)]">{formatJobType(rental.type)}</div>
     </div>
   )
 }
@@ -226,12 +203,150 @@ export function OperationMoneyCell({
   )
 }
 
+export function OperationJobCarCell({ rental }: { rental: RentalListRow }) {
+  const plate =
+    rental.carPlateNumber ?? rental.tempPlateLabel ?? rental.listingPlateNumber ?? null
+  return (
+    <div>
+      <div className="admin-op-ref">{jobBookingRef(rental.id)}</div>
+      <div className="admin-op-meta">
+        {plate ? <span className="font-mono">{plate}</span> : 'Plate TBC'}
+      </div>
+      {plate && rental.carMake ? (
+        <div className="admin-op-meta">
+          {`${rental.carMake} ${rental.carModel ?? ''}`.trim()}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+export function OperationPickupCell({ rental }: { rental: RentalListRow }) {
+  return (
+    <div className="admin-op-due">
+      <div className="admin-op-datetime">
+        {formatOperationDateTime(rental.startDate, rental.pickUpTime)}
+      </div>
+      {rental.pickUpLocation ? (
+        <div className="admin-op-meta">{rental.pickUpLocation}</div>
+      ) : null}
+      {isPickupOverdue(rental) && rental.status === 'confirmed' ? (
+        <DueBadge overdue className="mt-1" />
+      ) : null}
+      {rental.handoverByName ? (
+        <div className="admin-op-meta mt-0.5">Handled by {rental.handoverByName}</div>
+      ) : null}
+    </div>
+  )
+}
+
+export function OperationReturnCell({ rental }: { rental: RentalListRow }) {
+  return (
+    <div className="admin-op-due">
+      <div className="admin-op-datetime">
+        {formatOperationDateTime(rental.endDate, rental.returnTime)}
+      </div>
+      <div className="admin-op-meta">
+        {[rental.returnLocation, formatRentalDuration(rental)].filter(Boolean).join(' · ')}
+      </div>
+      {isReturnOverdue(rental) && rental.status === 'active' ? (
+        <DueBadge overdue className="mt-1" />
+      ) : null}
+      {rental.returnByName ? (
+        <div className="admin-op-meta mt-0.5">Handled by {rental.returnByName}</div>
+      ) : null}
+    </div>
+  )
+}
+
+export function OperationHandledByCell({
+  name,
+  at,
+}: {
+  name: string | null
+  at: Date | null
+}) {
+  if (!name) return <span className="admin-op-meta">—</span>
+  const atLabel = at
+    ? `${formatOperationDate(at)} · ${new Date(at).toLocaleTimeString('en-MY', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        timeZone: 'Asia/Kuala_Lumpur',
+      })}`
+    : null
+  return (
+    <div>
+      <div className="admin-op-strong">{name}</div>
+      {atLabel ? <div className="admin-op-meta">{atLabel}</div> : null}
+    </div>
+  )
+}
+
+export function OperationCustomerContactCell({ rental }: { rental: RentalListRow }) {
+  return (
+    <div>
+      <div className="admin-op-strong">{rental.customerFullName ?? '—'}</div>
+      {rental.customerPhone ? (
+        <div className="admin-op-meta">{rental.customerPhone}</div>
+      ) : null}
+      {rental.customerEmail ? (
+        <div className="admin-op-meta">{rental.customerEmail}</div>
+      ) : null}
+    </div>
+  )
+}
+
+export function OperationDepositCell({ rental }: { rental: RentalListRow }) {
+  if (rental.depositAmountSen <= 0) {
+    return <span className="text-[var(--sea-ink-soft)]">—</span>
+  }
+  const collected = rental.paidAmountSen >= rental.depositAmountSen
+  const collectedSen = Math.min(rental.paidAmountSen, rental.depositAmountSen)
+  return (
+    <div>
+      <div className="admin-op-money admin-op-money--emphasis">
+        {formatMYR(rental.depositAmountSen)}
+      </div>
+      <div
+        className={cn(
+          'admin-op-meta mt-0.5 font-medium',
+          collected ? 'text-emerald-700' : 'text-amber-700',
+        )}
+      >
+        {collected ? 'Collected' : 'Pending'}
+      </div>
+      <div className="admin-op-meta">
+        {collectedSen > 0
+          ? `${formatMYR(collectedSen)} by ${rental.createdByName ?? '—'}`
+          : 'Not collected'}
+      </div>
+    </div>
+  )
+}
+
+export function OperationTotalCell({ rental }: { rental: RentalListRow }) {
+  return (
+    <div>
+      <div className="admin-op-money">{formatMYR(rental.totalAmountSen)}</div>
+      <div className="admin-op-meta">Paid {formatMYR(rental.paidAmountSen)}</div>
+    </div>
+  )
+}
+
+export function OperationDurationCell({ rental }: { rental: RentalListRow }) {
+  return (
+    <span className="job-trip__duration tabular-nums">
+      {formatRentalDuration(rental)}
+    </span>
+  )
+}
+
 export type OperationQueueFilters = {
   search?: string
   from?: string
   to?: string
 }
-
 export function filterPickupRows(
   rows: RentalListRow[],
   filters: OperationQueueFilters,

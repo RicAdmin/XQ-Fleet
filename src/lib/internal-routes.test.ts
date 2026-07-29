@@ -12,9 +12,9 @@ describe('internal-routes', () => {
     expect(INTERNAL_JOBS_PATH).toBe('/internal/jobs')
   })
 
-  it('treats login and invite as public internal paths', () => {
+  it('treats only login as a public internal path', () => {
     expect(isPublicInternalPath('/internal/login')).toBe(true)
-    expect(isPublicInternalPath('/internal/invite/abc')).toBe(true)
+    expect(isPublicInternalPath('/internal/invite/abc')).toBe(false)
     expect(isPublicInternalPath('/internal/jobs')).toBe(false)
     expect(isPublicInternalPath('/internal/job')).toBe(false)
   })

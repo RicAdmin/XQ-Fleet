@@ -653,10 +653,10 @@ export function CarWebsitePanel({ car, canEdit, onSaved }: Props) {
 
           {canEdit ? (
             <div className="catalog-form__footer">
-              <div>{error ? <p className="form-error">{error}</p> : null}</div>
               <Button type="submit" disabled={saving}>
                 {saving ? 'Saving…' : 'Save website details'}
               </Button>
+              <div>{error ? <p className="form-error">{error}</p> : null}</div>
             </div>
           ) : error ? (
             <p className="form-error">{error}</p>

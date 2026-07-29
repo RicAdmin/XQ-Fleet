@@ -5,8 +5,5 @@ export const INTERNAL_LOGIN_PATH = '/internal/login' as const
 export const INTERNAL_JOBS_PATH = '/internal/jobs' as const
 
 export function isPublicInternalPath(pathname: string): boolean {
-  return (
-    pathname === INTERNAL_LOGIN_PATH ||
-    pathname.startsWith('/internal/invite')
-  )
+  return pathname === INTERNAL_LOGIN_PATH
 }

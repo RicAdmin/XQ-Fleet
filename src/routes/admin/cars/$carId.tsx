@@ -5,7 +5,6 @@ import { History, LayoutGrid, Pencil, Plus, Wrench } from 'lucide-react'
 
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
 import { isFullAdminRole, type AppRole } from '#/lib/auth-model'
-import { PageHeader } from '#/components/ui/PageHeader'
 import { StatusBadge } from '#/components/ui/StatusBadge'
 import { Button } from '#/components/ui/button'
 import {
@@ -24,8 +23,10 @@ import {
   SheetTitle,
 } from '#/components/ui/sheet'
 import type { CarCategory, CarColor, CarStatus, MaintenanceEventType } from '#/db/schema'
+import type { CarPhotoRow } from '#/lib/car-functions'
 import {
   getCarById,
+  getCarPhotos,
   updateCar,
 } from '#/lib/car-functions'
 import {
@@ -57,56 +58,6 @@ const DETAIL_TABS = [
   { value: 'maintenance', label: 'Maintenance', icon: Wrench },
   { value: 'history', label: 'History', icon: History },
 ] as const
-
-function ConfigValueField({
-  label,
-  value,
-  placeholder,
-  remark,
-  remarkPlaceholder,
-}: {
-  label: string
-  value: string | null
-  placeholder: string
-  remark?: string | null
-  remarkPlaceholder?: string
-}) {
-  if (!value) {
-    return (
-      <div className="maint-config-card">
-        <label className="maint-config-label">{label}</label>
-        <input
-          type="text"
-          className="field-input maint-sample-input"
-          disabled
-          readOnly
-          value=""
-          placeholder={placeholder}
-          aria-label={`${label} sample`}
-        />
-        {remarkPlaceholder ? (
-          <input
-            type="text"
-            className="field-input maint-sample-input mt-2"
-            disabled
-            readOnly
-            value=""
-            placeholder={remarkPlaceholder}
-            aria-label={`${label} remark sample`}
-          />
-        ) : null}
-      </div>
-    )
-  }
-
-  return (
-    <div className="maint-config-card">
-      <p className="maint-config-label">{label}</p>
-      <p className="maint-config-value">{value}</p>
-      {remark ? <p className="maint-config-ref">{remark}</p> : null}
-    </div>
-  )
-}
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -244,6 +195,37 @@ function formatDate(d: Date | null | undefined): string {
   return new Date(d).toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+function formatDateTime(d: Date | null | undefined): string {
+  if (!d) return '—'
+  return new Date(d).toLocaleString('en-MY', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  })
+}
+
+function DetailField({
+  label,
+  children,
+  mono,
+}: {
+  label: string
+  children: React.ReactNode
+  mono?: boolean
+}) {
+  return (
+    <div className="job-detail-field">
+      <dt className="job-detail-field__label">{label}</dt>
+      <dd className={mono ? 'job-detail-field__value font-mono' : 'job-detail-field__value'}>
+        {children}
+      </dd>
+    </div>
+  )
+}
+
 function maintenanceEventTypeBadge(type: MaintenanceEventType): string {
   const map: Record<MaintenanceEventType, string> = {
     scheduled: 'Scheduled',
@@ -284,6 +266,7 @@ function CarDetailPage() {
   const [config, setConfig] = useState<CarServiceConfigRow | null>(null)
   const [maintLoading, setMaintLoading] = useState(false)
   const [maintLoaded, setMaintLoaded] = useState(false)
+  const [coverPhoto, setCoverPhoto] = useState<CarPhotoRow | null>(null)
 
   const displayStatus = deriveCarDisplayStatus(
     car.status,
@@ -358,10 +341,16 @@ function CarDetailPage() {
     setEvents(null)
     setMaintLoading(false)
     setMaintLoaded(false)
+    setCoverPhoto(null)
     applyServiceConfig(null)
     void getOpenRentalsByCarId({ data: { carId: initialCar.id } })
       .then(setOpenRentals)
       .catch(() => setOpenRentals([]))
+    void getCarPhotos({ data: { carId: initialCar.id } })
+      .then((photos) => {
+        setCoverPhoto(photos.find((p) => p.isCover) ?? photos[0] ?? null)
+      })
+      .catch(() => setCoverPhoto(null))
   }, [initialCar.id])
 
   async function loadHistory() {
@@ -547,154 +536,142 @@ function CarDetailPage() {
 
   return (
     <AdminSidebarShell user={session.user} pageTitle="Vehicle profile">
-      <PageHeader
-        variant="detail"
-        backLink={{ to: '/admin/cars', label: 'Back' }}
-        title={`${car.make} ${car.model}`}
-        description={
-          <>
-            <span className="island-kicker">
-              {car.category.toUpperCase()} · {car.year}
-            </span>
-            <span className="ui-meta-sep" aria-hidden>
-              ·
-            </span>
-            <span className="font-mono text-xs font-semibold text-[var(--lagoon-deep)]">
+      <div className="job-detail">
+        <div className="job-detail-topbar">
+          <Link to="/admin/cars" className="job-detail-topbar__back">
+            ← Vehicles
+          </Link>
+          <div className="job-detail-topbar__meta">
+            <span className="font-mono tabular-nums job-detail-topbar__ref">
               {car.plateNumber}
             </span>
-          </>
-        }
-        actions={
-          <div className="flex items-center gap-3">
             <StatusBadge status={displayStatus} size="md" />
-            <Link
-              to="/admin/car-models/$carId"
-              params={{ carId: car.id }}
-              className="button-secondary inline-flex items-center gap-1.5 text-sm"
-            >
-              Car model
-            </Link>
-            {isOwner && car.status !== 'retired' ? (
-              <button
-                type="button"
-                className="button-secondary inline-flex items-center gap-1.5"
-                onClick={openEdit}
-              >
-                <Pencil size={13} />
-                Edit
-              </button>
+            <span className="ui-chip ui-chip--sm">{CATEGORY_LABEL[car.category]}</span>
+            <span className="ui-chip ui-chip--sm">{car.year}</span>
+            {car.ownedByFleet === false && car.vendorName ? (
+              <span className="ui-chip ui-chip--sm">Partner · {car.vendorName}</span>
             ) : null}
           </div>
-        }
-      />
+        </div>
 
-      {/* Detail tabs */}
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="gap-4">
-        <TabsList variant="pill">
-          {DETAIL_TABS.map((t) => {
-            const Icon = t.icon
-            return (
-              <TabsTrigger key={t.value} value={t.value}>
-                <Icon size={17} />
-                {t.label}
-              </TabsTrigger>
-            )
-          })}
-        </TabsList>
+        {/* Detail tabs */}
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="gap-4">
+          <TabsList variant="pill">
+            {DETAIL_TABS.map((t) => {
+              const Icon = t.icon
+              return (
+                <TabsTrigger key={t.value} value={t.value}>
+                  <Icon size={17} />
+                  {t.label}
+                </TabsTrigger>
+              )
+            })}
+          </TabsList>
 
-        <TabsContent value="overview" className="flex flex-col gap-3">
-          <div className="grid items-start gap-3 lg:grid-cols-2">
-            <Card size="sm">
-              <CardHeader className="pb-0">
-                <CardDescription className="island-kicker">Vehicle details</CardDescription>
-                <CardTitle className="sr-only">Vehicle details</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-3">
-                <dl className="flex flex-col gap-1.5">
-                  <div className="summary-row summary-row--compact">
-                    <dt className="text-sm text-[var(--sea-ink-soft)]">Plate number</dt>
-                    <dd className="font-mono text-sm font-semibold text-[var(--sea-ink)]">
-                      {car.plateNumber}
-                    </dd>
-                  </div>
-
-                  <div className="summary-row summary-row--compact summary-row--split">
-                    <div className="summary-field">
-                      <dt className="text-sm text-[var(--sea-ink-soft)]">Make</dt>
-                      <dd className="text-sm font-medium text-[var(--sea-ink)]">{car.make}</dd>
+          <TabsContent value="overview" className="mt-0">
+            <div className="job-detail-grid">
+              <div className="job-detail-main">
+                <Card className="job-detail-card">
+                  <CardHeader className="pb-2">
+                    <h2 className="job-detail-card__title">Vehicle</h2>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="job-detail-vehicle">
+                      {coverPhoto ? (
+                        <div className="job-detail-vehicle__photo">
+                          <img
+                            src={coverPhoto.url}
+                            alt={coverPhoto.altText ?? `${car.make} ${car.model}`}
+                          />
+                        </div>
+                      ) : null}
+                      <div className="job-detail-vehicle__head">
+                        <div>
+                          <p className="job-detail-vehicle__name">
+                            {car.make} {car.model}
+                          </p>
+                          <p className="job-detail-vehicle__meta">
+                            {car.year} · {COLOR_LABEL[car.color]}
+                            {car.transmission ? ` · ${car.transmission}` : ''}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="summary-field">
-                      <dt className="text-sm text-[var(--sea-ink-soft)]">Model</dt>
-                      <dd className="text-sm font-medium text-[var(--sea-ink)]">{car.model}</dd>
+                    <dl className="job-detail-fields">
+                      <DetailField label="Plate number" mono>
+                        {car.plateNumber}
+                      </DetailField>
+                      <DetailField label="Make / Model">
+                        {car.make} · {car.model}
+                      </DetailField>
+                      <DetailField label="Year">{car.year}</DetailField>
+                      <DetailField label="Ownership">
+                        {car.ownedByFleet === false
+                          ? car.vendorName
+                            ? `Partner — ${car.vendorName}`
+                            : 'Partner'
+                          : 'Self-owned'}
+                      </DetailField>
+                      <DetailField label="Category">
+                        {CATEGORY_LABEL[car.category]}
+                      </DetailField>
+                      <DetailField label="Mileage">
+                        {car.currentMileage != null
+                          ? `${car.currentMileage.toLocaleString()} km`
+                          : '—'}
+                      </DetailField>
+                      {car.notes ? <DetailField label="Notes">{car.notes}</DetailField> : null}
+                    </dl>
+                    <div className="job-detail-docs">
+                      <Link
+                        to="/admin/car-models/$carId"
+                        params={{ carId: car.id }}
+                        className="button-secondary inline-flex items-center gap-1.5"
+                      >
+                        Car model
+                      </Link>
+                      {isOwner && car.status !== 'retired' ? (
+                        <button
+                          type="button"
+                          className="button-secondary inline-flex items-center gap-1.5"
+                          onClick={openEdit}
+                        >
+                          <Pencil size={13} />
+                          Edit vehicle
+                        </button>
+                      ) : null}
                     </div>
-                  </div>
+                  </CardContent>
+                </Card>
+              </div>
 
-                  <div className="summary-row summary-row--compact summary-row--split">
-                    <div className="summary-field">
-                      <dt className="text-sm text-[var(--sea-ink-soft)]">Year</dt>
-                      <dd className="text-sm font-medium text-[var(--sea-ink)]">{car.year}</dd>
+              <div className="job-detail-rail">
+                <Card className="job-detail-card">
+                  <CardHeader className="pb-2">
+                    <CardDescription className="island-kicker">Status</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="car-detail-status">
+                      <StatusBadge status={displayStatus} size="md" />
+                      <p className="car-detail-status__meta">
+                        Last updated {formatDateTime(car.updatedAt)}
+                      </p>
                     </div>
-                    <div className="summary-field">
-                      <dt className="text-sm text-[var(--sea-ink-soft)]">Color</dt>
-                      <dd className="text-sm font-medium text-[var(--sea-ink)]">
-                        {COLOR_LABEL[car.color]}
-                      </dd>
+                    <div className="car-detail-stat">
+                      <span className="car-detail-stat__label">Current mileage</span>
+                      <span className="car-detail-stat__value">
+                        {car.currentMileage != null
+                          ? `${car.currentMileage.toLocaleString()} km`
+                          : '—'}
+                      </span>
                     </div>
-                  </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
 
-                  <div className="summary-row summary-row--compact summary-row--split">
-                    <div className="summary-field">
-                      <dt className="text-sm text-[var(--sea-ink-soft)]">Category</dt>
-                      <dd>
-                        <span className={`category-pill category-pill--${car.category}`}>
-                          {CATEGORY_LABEL[car.category]}
-                        </span>
-                      </dd>
-                    </div>
-                    <div className="summary-field">
-                      <dt className="text-sm text-[var(--sea-ink-soft)]">Daily rate</dt>
-                      <dd className="text-sm font-medium text-[var(--sea-ink)]">
-                        {formatMYR(car.dailyRateSen)}
-                      </dd>
-                    </div>
-                  </div>
-                </dl>
-                {car.notes && (
-                  <div className="mt-3 border-t border-[var(--line)] pt-3">
-                    <p className="mb-1 text-sm font-medium text-[var(--sea-ink-soft)]">
-                      Notes
-                    </p>
-                    <p className="text-sm text-[var(--sea-ink)]">{car.notes}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card size="sm">
-              <CardHeader className="pb-0">
-                <CardDescription className="island-kicker">Current status</CardDescription>
-                <CardTitle className="sr-only">Current status</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <StatusBadge status={displayStatus} size="md" />
-                  <span className="text-sm text-[var(--sea-ink-soft)]">
-                    Last updated {car.updatedAt.toLocaleDateString()}
-                  </span>
-                </div>
-                <hr className="my-3 border-[var(--line)]" />
-                <p className="island-kicker mb-1">Current mileage</p>
-                <p className="text-xl font-semibold text-[var(--sea-ink)]">
-                  {car.currentMileage != null
-                    ? `${car.currentMileage.toLocaleString()} km`
-                    : '—'}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="maintenance" className="flex flex-col gap-4">
+          <TabsContent value="maintenance" className="flex flex-col gap-4">
           {maintLoading || !maintLoaded ? (
             <Card>
               <CardContent className="py-8">
@@ -719,66 +696,42 @@ function CarDetailPage() {
                   </button>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    <ConfigValueField
-                      label="Service interval"
-                      value={
-                        config?.serviceIntervalKm || config?.serviceIntervalDays
-                          ? [
-                              config.serviceIntervalKm
-                                ? `${config.serviceIntervalKm.toLocaleString()} km`
-                                : null,
-                              config.serviceIntervalDays
-                                ? `${config.serviceIntervalDays} days`
-                                : null,
-                            ]
-                              .filter(Boolean)
-                              .join(' / ')
-                          : null
-                      }
-                      placeholder="e.g. 5,000 km / 180 days"
-                    />
-                    <ConfigValueField
-                      label="Alert before service"
-                      value={
-                        config
-                          ? `${config.alertBeforeKm} km / ${config.alertBeforeDays} days`
-                          : null
-                      }
-                      placeholder="e.g. 500 km / 7 days"
-                    />
-                    <ConfigValueField
-                      label="Current mileage"
-                      value={
-                        car.currentMileage != null
-                          ? `${car.currentMileage.toLocaleString()} km`
-                          : null
-                      }
-                      placeholder="e.g. 18,420 km"
-                    />
-                    <ConfigValueField
-                      label="Road tax"
-                      value={
-                        config?.roadTaxExpiryDate
-                          ? `Expires ${formatDate(config.roadTaxExpiryDate)}`
-                          : null
-                      }
-                      placeholder="e.g. Expires 2 Nov 2026"
-                      remark={config?.roadTaxPolicyRef}
-                      remarkPlaceholder="e.g. RT-88213"
-                    />
-                    <ConfigValueField
-                      label="Insurance"
-                      value={
-                        config?.insuranceExpiryDate
-                          ? `Expires ${formatDate(config.insuranceExpiryDate)}`
-                          : null
-                      }
-                      placeholder="e.g. Expires 15 Sep 2026"
-                      remark={config?.insurancePolicyRef}
-                      remarkPlaceholder="e.g. INS-XQ-4471"
-                    />
-                  </div>
+                  <dl className="job-detail-fields">
+                    <DetailField label="Service interval">
+                      {config?.serviceIntervalKm || config?.serviceIntervalDays
+                        ? [
+                            config.serviceIntervalKm
+                              ? `${config.serviceIntervalKm.toLocaleString()} km`
+                              : null,
+                            config.serviceIntervalDays
+                              ? `${config.serviceIntervalDays} days`
+                              : null,
+                          ]
+                            .filter(Boolean)
+                            .join(' / ')
+                        : '—'}
+                    </DetailField>
+                    <DetailField label="Alert before service">
+                      {config
+                        ? `${config.alertBeforeKm} km / ${config.alertBeforeDays} days`
+                        : '—'}
+                    </DetailField>
+                    <DetailField label="Current mileage">
+                      {car.currentMileage != null
+                        ? `${car.currentMileage.toLocaleString()} km`
+                        : '—'}
+                    </DetailField>
+                    <DetailField label="Road tax">
+                      {config?.roadTaxExpiryDate
+                        ? `Expires ${formatDate(config.roadTaxExpiryDate)}${config.roadTaxPolicyRef ? ` · ${config.roadTaxPolicyRef}` : ''}`
+                        : '—'}
+                    </DetailField>
+                    <DetailField label="Insurance">
+                      {config?.insuranceExpiryDate
+                        ? `Expires ${formatDate(config.insuranceExpiryDate)}${config.insurancePolicyRef ? ` · ${config.insurancePolicyRef}` : ''}`
+                        : '—'}
+                    </DetailField>
+                  </dl>
                 </CardContent>
               </Card>
 
@@ -904,6 +857,7 @@ function CarDetailPage() {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
 
       {/* ── Edit Sheet (matches fleet list) ── */}
       {isOwner && (

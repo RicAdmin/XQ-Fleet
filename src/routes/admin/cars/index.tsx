@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Plus, Pencil, CarFront, ImageOff } from 'lucide-react'
+import { Plus, Pencil, CarFront, ChartColumn, X, ImageOff } from 'lucide-react'
 
 import { DataTable, useSortState, type Column } from '#/components/ui/DataTable'
 import {
@@ -173,7 +173,7 @@ function carToForm(car: CarRow): CarFormData {
   }
 }
 
-type SortKey = 'plateNumber' | 'make' | 'year' | 'status' | 'category' | 'dailyRateSen' | 'createdAt'
+type SortKey = 'plateNumber' | 'make' | 'year' | 'status' | 'category' | 'dailyRateSen' | 'createdAt' | 'rentedDaysYtd'
 
 function CarsPage() {
   const navigate = useNavigate()
@@ -192,6 +192,8 @@ function CarsPage() {
   const [activeTab, setActiveTab] = useState<CarDisplayStatus | 'all'>('all')
   const [categoryFilter, setCategoryFilter] = useState<CarCategoryFilter>('all')
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [chartCategory, setChartCategory] = useState<CarCategory | null>(null)
+  const [chartExpanded, setChartExpanded] = useState(false)
   const [searchInput, setSearchInput] = useState('')
   const [search, setSearch] = useState('')
   const { sortKey, sortDir, handleSort } = useSortState<SortKey>('plateNumber')
@@ -388,6 +390,11 @@ function CarsPage() {
                 style={{ background: COLOR_SWATCH[car.color] }}
               />
               {COLOR_LABEL[car.color]} · {car.year}
+              <span
+                className={`fleet-ownership-chip${car.ownedByFleet ? '' : ' fleet-ownership-chip--partner'}`}
+              >
+                {car.ownedByFleet ? 'Self-owned' : 'Partner'}
+              </span>
             </p>
           </div>
         </div>
@@ -425,6 +432,19 @@ function CarsPage() {
       header: 'Status',
       sortable: true,
       render: (car) => <StatusBadge status={car.displayStatus} size="sm" />,
+    },
+    {
+      key: 'rentedDaysYtd',
+      header: `Rented days (${new Date().getFullYear()})`,
+      sortable: true,
+      headerClassName: 'text-right whitespace-nowrap',
+      cellClassName: 'text-right',
+      render: (car) => (
+        <span className="fleet-rented-days">
+          <span className="fleet-rented-days__value tabular-nums">{car.rentedDaysYtd}</span>
+          <span className="fleet-rented-days__unit">days</span>
+        </span>
+      ),
     },
     ...(isOwner
       ? [
@@ -489,6 +509,34 @@ function CarsPage() {
             ? `${result.total.toLocaleString()} plates in inventory`
             : 'Loading…'
         }
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            {result && result.rentedDaysChart.length > 0 ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="gap-1.5"
+                aria-expanded={chartExpanded}
+                onClick={() => setChartExpanded((prev) => !prev)}
+              >
+                <ChartColumn size={15} />
+                Utilisation
+              </Button>
+            ) : null}
+            {isOwner ? (
+              <Button
+                type="button"
+                size="sm"
+                className="gap-1.5"
+                onClick={openAdd}
+              >
+                <Plus size={15} />
+                Add vehicle
+              </Button>
+            ) : null}
+          </div>
+        }
       />
 
       {loadError ? (
@@ -499,6 +547,123 @@ function CarsPage() {
 
       {result ? (
         <div className="space-y-3">
+          {chartExpanded && result.rentedDaysChart.length > 0 ? (
+            <article className="workspace-panel island-shell p-4">
+              <div className="fleet-usage-chart__head">
+                <div>
+                  <p className="island-kicker">Utilisation</p>
+                  <h3 className="text-base font-semibold text-[var(--sea-ink)]">
+                    Rented days {new Date().getFullYear()} — self-owned fleet
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-[var(--sea-ink-soft)]">
+                    Highest to lowest
+                  </span>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="gap-1"
+                    aria-label="Close chart"
+                    onClick={() => setChartExpanded(false)}
+                  >
+                    <X size={14} />
+                    Close
+                  </Button>
+                </div>
+              </div>
+              <div className="fleet-usage-chart__categories" role="group" aria-label="Chart category">
+                {(Object.keys(CATEGORY_LABEL) as CarCategory[])
+                  .filter((category) =>
+                    result.rentedDaysChart.some((e) => e.category === category),
+                  )
+                  .map((category) => (
+                    <button
+                      key={category}
+                      type="button"
+                      aria-pressed={chartCategory === category}
+                      data-active={chartCategory === category ? 'true' : 'false'}
+                      className="admin-filter-preset h-[1.875rem] min-h-[1.875rem] max-h-[1.875rem] active:translate-y-0 inline-flex items-center rounded-md border border-[var(--line)] px-2.5 text-[0.8125rem] font-medium transition-colors hover:bg-[var(--surface-muted)] data-[active=true]:border-[var(--ui-ink)] data-[active=true]:bg-[var(--ui-ink)] data-[active=true]:text-white"
+                      onClick={() =>
+                        setChartCategory((prev) => (prev === category ? null : category))
+                      }
+                    >
+                      {CATEGORY_LABEL[category]}
+                    </button>
+                  ))}
+              </div>
+              {chartCategory === null ? (
+                <p className="mt-3 text-sm text-[var(--sea-ink-soft)]">
+                  Select a category to view utilisation.
+                </p>
+              ) : (
+                <div className="fleet-usage-chart mt-3">
+                  {(() => {
+                    const entries = result.rentedDaysChart.filter(
+                      (e) => e.category === chartCategory,
+                    )
+                    return entries.map((entry) => (
+                      <div key={entry.plateNumber} className="fleet-usage-chart__row">
+                        <span className="fleet-usage-chart__car">
+                          {entry.coverPhotoUrl ? (
+                            <img
+                              src={entry.coverPhotoUrl}
+                              alt=""
+                              className="fleet-usage-chart__thumb"
+                            />
+                          ) : (
+                            <span className="fleet-usage-chart__thumb fleet-usage-chart__thumb--empty" />
+                          )}
+                          <span className="fleet-usage-chart__label">
+                            <span className="fleet-usage-chart__model">
+                              {entry.make} {entry.model}
+                            </span>
+                            <span className="fleet-usage-chart__plate font-mono">
+                              {entry.plateNumber}
+                            </span>
+                          </span>
+                        </span>
+                        <span className="fleet-usage-chart__track" role="img"
+                          aria-label={`Monthly rented days for ${entry.plateNumber}`}
+                        >
+                          {entry.monthlyDays.map((monthDays, monthIdx) => {
+                            const monthLength = new Date(
+                              new Date().getFullYear(),
+                              monthIdx + 1,
+                              0,
+                            ).getDate()
+                            const fill = Math.min(1, monthDays / monthLength)
+                            const monthName = new Date(
+                              new Date().getFullYear(),
+                              monthIdx,
+                              1,
+                            ).toLocaleDateString('en-MY', { month: 'short' })
+                            return (
+                              <span
+                                key={monthIdx}
+                                className="fleet-usage-chart__month"
+                                title={`${monthName} ${new Date().getFullYear()} — ${monthDays} rented day${monthDays === 1 ? '' : 's'} (total ${entry.days}d)`}
+                              >
+                                <span
+                                  className="fleet-usage-chart__month-fill"
+                                  style={{ height: `${fill * 100}%` }}
+                                />
+                              </span>
+                            )
+                          })}
+                        </span>
+                        <span className="fleet-usage-chart__days tabular-nums">
+                          {entry.days}d
+                        </span>
+                      </div>
+                    ))
+                  })()}
+                </div>
+              )}
+            </article>
+          ) : null}
+
           <article className="workspace-panel island-shell overflow-x-auto p-0">
             <AdminListFilterBar
               searchValue={searchInput}
@@ -517,19 +682,6 @@ function CarsPage() {
                 setSearchInput('')
                 setSearch('')
               }}
-              actions={
-                isOwner ? (
-                  <Button
-                    type="button"
-                    size="sm"
-                    className="gap-1.5"
-                    onClick={openAdd}
-                  >
-                    <Plus size={15} />
-                    Add vehicle
-                  </Button>
-                ) : null
-              }
               quickFilters={
                 <AdminQuickFilterChips
                   label="Status"

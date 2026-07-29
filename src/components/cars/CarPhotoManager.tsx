@@ -65,9 +65,9 @@ function SortablePhoto({
     <div
       ref={setNodeRef}
       style={style}
-      className="group relative aspect-square overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--foam)]"
+      className="group relative overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--foam)]"
     >
-      <img src={photo.url} alt="Car photo" className="h-full w-full object-cover" />
+      <img src={photo.url} alt="Car photo" className="block h-auto w-full object-contain" />
 
       {/* Cover badge */}
       {photo.isCover && (

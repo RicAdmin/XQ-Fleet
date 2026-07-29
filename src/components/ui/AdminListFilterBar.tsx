@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
-import { Search, SlidersHorizontal, X } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
+import { ChevronDown, ChevronUp, Search, SlidersHorizontal, X } from 'lucide-react'
 
 import { Button } from '#/components/ui/button'
 import {
@@ -23,7 +23,7 @@ type AdminQuickFilterChipsProps = {
   className?: string
 }
 
-/** Pill chips for always-visible quick filters under the search row. */
+/** Pill chips for always-visible quick filters in the search row. */
 export function AdminQuickFilterChips({
   label,
   value,
@@ -31,11 +31,26 @@ export function AdminQuickFilterChips({
   onValueChange,
   className,
 }: AdminQuickFilterChipsProps) {
+  const [expanded, setExpanded] = useState(false)
+  const firstTwo = options.slice(0, 2)
+  const visible = expanded
+    ? options
+    : firstTwo.some((o) => o.value === value)
+      ? firstTwo
+      : [options[0], ...options.filter((o) => o.value === value)].filter(Boolean)
+  const hiddenCount = options.length - visible.length
+
   return (
     <div className={cn('admin-filter-bar__quick-group', className)}>
       {label ? <span className="admin-filter-bar__quick-label">{label}</span> : null}
-      <div className="admin-filter-bar__chips" role="group" aria-label={label ?? 'Quick filters'}>
-        {options.map((option) => {
+      <div
+        className="admin-filter-bar__chips"
+        role="group"
+        aria-label={label ?? 'Quick filters'}
+        onMouseEnter={() => setExpanded(true)}
+        onMouseLeave={() => setExpanded(false)}
+      >
+        {visible.map((option) => {
           const isActive = value === option.value
           return (
             <Button
@@ -52,6 +67,20 @@ export function AdminQuickFilterChips({
             </Button>
           )
         })}
+        {hiddenCount > 0 ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="admin-filter-preset h-[1.875rem] min-h-[1.875rem] max-h-[1.875rem] px-2 active:translate-y-0"
+            aria-label={expanded ? 'Collapse quick filters' : `Show ${hiddenCount} more quick filters`}
+            aria-expanded={expanded}
+            onClick={() => setExpanded(!expanded)}
+          >
+            {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            {!expanded ? hiddenCount : null}
+          </Button>
+        ) : null}
       </div>
     </div>
   )
@@ -98,7 +127,7 @@ export function AdminListFilterBar({
   className,
 }: AdminListFilterBarProps) {
   const showFilterPanel = filtersOpen && children
-  const showQuickRow = Boolean(quickFilters || inlineControls)
+  const showQuickRow = Boolean(inlineControls)
 
   return (
     <div className={cn('admin-filter-bar', className)}>
@@ -133,6 +162,8 @@ export function AdminListFilterBar({
             </InputGroupAddon>
           ) : null}
         </InputGroup>
+
+        {quickFilters}
 
         <div className="admin-filter-bar__actions">
           {children ? (
@@ -175,7 +206,6 @@ export function AdminListFilterBar({
 
       {showQuickRow ? (
         <div className="admin-filter-bar__quick">
-          {quickFilters}
           {inlineControls}
         </div>
       ) : null}

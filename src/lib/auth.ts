@@ -33,6 +33,18 @@ const trustedOrigins = Array.from(
   ]),
 )
 
+const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim()
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim()
+const googleSocialProvider =
+  googleClientId && googleClientSecret
+    ? {
+        google: {
+          clientId: googleClientId,
+          clientSecret: googleClientSecret,
+        },
+      }
+    : undefined
+
 export const auth = betterAuth({
   baseURL: defaultBaseUrl,
   secret: defaultSecret,
@@ -67,12 +79,7 @@ export const auth = betterAuth({
       })
     },
   },
-  socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID ?? '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
-    },
-  },
+  ...(googleSocialProvider ? { socialProviders: googleSocialProvider } : {}),
   user: {
     additionalFields: {
       role: {

@@ -15,9 +15,16 @@ export const auditActionEnum = pgEnum('audit_action', [
   'update',
   'deactivate',
   'bulk_generate',
+  'booking.create',
+  'booking.update',
+  'booking.handover',
+  'booking.close',
+  'booking.extend',
+  'booking.plate_change',
   'booking.cancel',
   'booking.refund_request',
   'booking.note',
+  'payment.refund',
   'affiliate.payout',
 ])
 

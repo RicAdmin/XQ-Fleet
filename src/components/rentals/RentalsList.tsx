@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
-import { useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { Check, Copy, KeyRound, Plus, Trash2, X } from 'lucide-react'
 
 import { DataTable, useSortState, type Column } from '#/components/ui/DataTable'
@@ -13,14 +13,6 @@ import { StatusFilterSelect } from '#/components/ui/StatusFilterSelect'
 import { TableSkeleton } from '#/components/ui/TableSkeleton'
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
 import { CsJobArrangementCell } from '#/components/rentals/CsJobScheduleCell'
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from '#/components/ui/combobox'
 import { showAdminToast } from '#/components/ui/AdminToast'
 import { Button } from '#/components/ui/button'
 import {
@@ -36,18 +28,14 @@ import {
   SheetTitle,
 } from '#/components/ui/sheet'
 import { DueBadge } from '#/components/admin/operations-queue-utils'
-import { createWalkInCustomer, searchCustomers } from '#/lib/customer-functions'
-import { formatJobDurationLabel, formatJobSource, formatJobType, isJobOverdue, jobBookingRef, toTimeHms } from '#/lib/job-display'
-import { listActivePickupLocations, type PickupLocationRow } from '#/lib/location-functions'
+import { formatJobDurationLabel, formatJobSource, formatFulfillmentLabel, isJobOverdue, jobBookingRef, type JobSource } from '#/lib/job-display'
 import { INTERNAL_JOBS_PATH } from '#/lib/internal-routes'
 import { cn } from '#/lib/utils'
-import type { AvailableCarOption, RentalListResult, RentalListRow } from '#/lib/rental-functions'
+import type { RentalListResult, RentalListRow } from '#/lib/rental-functions'
 import {
   cancelRental,
   confirmHandover,
-  createRental,
   deleteRental,
-  getAvailableCars,
   getRentalStatusCounts,
   listRentals,
 } from '#/lib/rental-functions'
@@ -55,7 +43,7 @@ import {
   CAR_CATEGORY_FILTER_OPTIONS,
   type CarCategoryFilter,
 } from '#/lib/car-category-options'
-import type { RentalStatus, RentalType } from '#/db/schema'
+import type { PaymentStatus, RentalStatus } from '#/db/schema'
 
 const PAGE_SIZE = 25
 const SEARCH_DEBOUNCE_MS = 300
@@ -71,15 +59,6 @@ function toDateInput(d: Date): string {
   const m = String(d.getMonth() + 1).padStart(2, '0')
   const day = String(d.getDate()).padStart(2, '0')
   return `${y}-${m}-${day}`
-}
-
-function calcTotalSen(dailyRateSen: number, start: string, end: string): number {
-  if (!start || !end) return 0
-  const startMs = new Date(start).getTime()
-  const endMs = new Date(end).getTime()
-  if (isNaN(startMs) || isNaN(endMs) || endMs <= startMs) return 0
-  const days = Math.max(1, Math.ceil((endMs - startMs) / (1000 * 60 * 60 * 24)))
-  return dailyRateSen * days
 }
 
 function today(): string {
@@ -116,10 +95,29 @@ function detectDayFilterPreset(from?: string, to?: string): DayFilterPreset {
 
 const RENTAL_STATUS_OPTIONS: { value: RentalStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },
-  { value: 'pending', label: 'Pending' },
+  { value: 'pending', label: 'Booked' },
+  { value: 'confirmed', label: 'Confirmed' },
   { value: 'active', label: 'Active' },
+  { value: 'expired', label: 'Expired' },
   { value: 'closed', label: 'Closed' },
   { value: 'cancelled', label: 'Cancelled' },
+]
+
+type PaymentFilter = PaymentStatus | 'all'
+type SourceFilter = JobSource | 'all'
+
+const PAYMENT_FILTER_OPTIONS: { value: PaymentFilter; label: string }[] = [
+  { value: 'all', label: 'All payments' },
+  { value: 'unpaid', label: 'Unpaid' },
+  { value: 'partial', label: 'Partial' },
+  { value: 'paid', label: 'Paid' },
+]
+
+const SOURCE_FILTER_OPTIONS: { value: SourceFilter; label: string }[] = [
+  { value: 'all', label: 'All sources' },
+  { value: 'in-house', label: 'In-House' },
+  { value: 'web', label: 'Web' },
+  { value: 'sales-agent', label: 'Sales Agent' },
 ]
 
 // ─── Sort ─────────────────────────────────────────────────────────────────────
@@ -133,186 +131,9 @@ type SortKey =
   | 'customerFullName'
   | 'createdAt'
 
-// ─── Sort ─────────────────────────────────────────────────────────────────────
-
-type RentalFormData = {
-  carId: string
-  customerId: string
-  type: RentalType
-  startDate: string
-  endDate: string
-  pickUpTime: string
-  returnTime: string
-  pickUpLocationKind: string
-  pickUpLocationDetail: string
-  pickUpLocationFeeRM: string
-  returnLocationKind: string
-  returnLocationDetail: string
-  returnLocationFeeRM: string
-  dailyRateRM: string
-  totalAmountRM: string
-  depositRM: string
-}
-
-function nonOfficeLocations(rows: PickupLocationRow[]): PickupLocationRow[] {
-  return rows.filter((row) => row.kind !== 'office')
-}
-
-function locationChipLabel(location: PickupLocationRow): string {
-  if (location.kind === 'hotel') return 'Others'
-  return location.label
-}
-
-function formatJobLocationLabel(location: PickupLocationRow, detail: string): string {
-  const name = detail.trim()
-  const label = locationChipLabel(location)
-  if (!name) return label
-  return `${label} · ${name}`
-}
-
-function locationDetailLabel(kind: PickupLocationRow['kind']): string {
-  if (kind === 'hotel') return 'Location name'
-  if (kind === 'airport') return 'Airport / terminal'
-  if (kind === 'jetty') return 'Jetty / pier'
-  return 'Location name'
-}
-
-function locationDetailPlaceholder(kind: PickupLocationRow['kind']): string {
-  if (kind === 'hotel') return 'e.g. Hotel, homestay, or address'
-  if (kind === 'airport') return 'e.g. LGK · Door 3'
-  if (kind === 'jetty') return 'e.g. Kuah Jetty'
-  return 'Enter location name'
-}
-
-type JobLocationLegProps = {
-  idPrefix: string
-  label: string
-  locations: PickupLocationRow[]
-  kind: string
-  detail: string
-  feeRM: string
-  onKindChange: (code: string) => void
-  onDetailChange: (detail: string) => void
-  onFeeChange: (fee: string) => void
-}
-
-function locationChargesFee(kind: PickupLocationRow['kind']): boolean {
-  return kind === 'hotel'
-}
-
-function JobLocationLeg({
-  idPrefix,
-  label,
-  locations,
-  kind,
-  detail,
-  feeRM,
-  onKindChange,
-  onDetailChange,
-  onFeeChange,
-}: JobLocationLegProps) {
-  const selected = locations.find((row) => row.code === kind)
-  const showFee = selected ? locationChargesFee(selected.kind as PickupLocationRow['kind']) : false
-
-  return (
-    <div className="job-location-leg">
-      <p className="ui-label">{label}</p>
-      <div
-        className="admin-filter-bar__chips job-create-form__chips"
-        role="radiogroup"
-        aria-label={label}
-      >
-        {locations.map((loc) => {
-          const active = kind === loc.code
-          return (
-            <Button
-              key={loc.code}
-              type="button"
-              variant="outline"
-              size="sm"
-              role="radio"
-              aria-checked={active}
-              data-active={active ? 'true' : 'false'}
-              className="admin-filter-preset h-[1.875rem] min-h-[1.875rem] max-h-[1.875rem] active:translate-y-0"
-              onClick={() => onKindChange(loc.code)}
-            >
-              {locationChipLabel(loc)}
-            </Button>
-          )
-        })}
-      </div>
-      {selected ? (
-        <div
-          className={cn(
-            'job-location-leg__fields',
-            showFee && 'job-location-leg__fields--with-fee',
-          )}
-        >
-          <div className="job-location-leg__detail">
-            <label className="ui-label" htmlFor={`${idPrefix}-detail`}>
-              {locationDetailLabel(selected.kind as PickupLocationRow['kind'])}
-            </label>
-            <input
-              id={`${idPrefix}-detail`}
-              type="text"
-              className="field-input w-full"
-              value={detail}
-              onChange={(e) => onDetailChange(e.target.value)}
-              placeholder={locationDetailPlaceholder(selected.kind as PickupLocationRow['kind'])}
-              required
-            />
-          </div>
-          {showFee ? (
-            <div className="job-location-leg__fee">
-              <label className="ui-label" htmlFor={`${idPrefix}-fee`}>
-                Additional fee <span className="job-create-optional">(optional)</span>
-              </label>
-              <div className="job-create-amount">
-                <span className="job-create-amount__prefix">RM</span>
-                <input
-                  id={`${idPrefix}-fee`}
-                  type="number"
-                  className="field-input job-create-amount__input"
-                  value={feeRM}
-                  onChange={(e) => onFeeChange(e.target.value)}
-                  min={0}
-                  step={0.01}
-                  placeholder="0.00"
-                />
-              </div>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-    </div>
-  )
-}
-
-function emptyForm(): RentalFormData {
-  return {
-    carId: '',
-    customerId: '',
-    type: 'walk-in',
-    startDate: today(),
-    endDate: '',
-    pickUpTime: '09:00',
-    returnTime: '09:00',
-    pickUpLocationKind: '',
-    pickUpLocationDetail: '',
-    pickUpLocationFeeRM: '',
-    returnLocationKind: '',
-    returnLocationDetail: '',
-    returnLocationFeeRM: '',
-    dailyRateRM: '',
-    totalAmountRM: '',
-    depositRM: '0',
-  }
-}
-
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 type RentalsListProps = {
-  availableCars?: AvailableCarOption[]
   session: { user: { name: string; email: string; role: string } }
   basePath: string
   canDelete?: boolean
@@ -325,7 +146,6 @@ type RentalsListProps = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function RentalsList({
-  availableCars: availableCarsProp,
   session,
   basePath,
   canDelete = false,
@@ -336,7 +156,6 @@ export default function RentalsList({
   const isManageMode = jobMode === 'manage'
   const navigate = useNavigate()
   const skipInitialLoad = useRef(Boolean(initialResult))
-  const [availableCars, setAvailableCars] = useState<AvailableCarOption[]>(availableCarsProp ?? [])
   const [result, setResult] = useState<RentalListResult | null>(initialResult ?? null)
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>(
     initialStatusCounts ?? initialResult?.statusCounts ?? { all: 0 },
@@ -346,6 +165,9 @@ export default function RentalsList({
   const [page, setPage] = useState(1)
   const [activeTab, setActiveTab] = useState<RentalStatus | 'all'>('all')
   const [categoryFilter, setCategoryFilter] = useState<CarCategoryFilter>('all')
+  const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>('all')
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all')
+  const [overdueOnly, setOverdueOnly] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [searchInput, setSearchInput] = useState('')
   const [search, setSearch] = useState('')
@@ -353,13 +175,7 @@ export default function RentalsList({
   const [dateTo, setDateTo] = useState<string | undefined>()
   const [customFrom, setCustomFrom] = useState('')
   const [customTo, setCustomTo] = useState('')
-  const { sortKey, sortDir, handleSort } = useSortState<SortKey>('startDate', 'desc')
-
-  // Form
-  const [formOpen, setFormOpen] = useState(false)
-  const [formData, setFormData] = useState<RentalFormData>(emptyForm())
-  const [formError, setFormError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { sortKey, sortDir, handleSort } = useSortState<SortKey>('createdAt', 'desc')
 
   // Confirm cancel
   const [confirmingCancel, setConfirmingCancel] = useState<RentalListRow | null>(null)
@@ -378,15 +194,6 @@ export default function RentalsList({
   const [handoverError, setHandoverError] = useState<string | null>(null)
   const [isSubmittingHandover, setIsSubmittingHandover] = useState(false)
 
-  const [customerSearchInput, setCustomerSearchInput] = useState('')
-  const [xqIdNo, setXqIdNo] = useState('')
-  const [customerOptions, setCustomerOptions] = useState<SelectOption[]>([])
-  const [customerSearchLoading, setCustomerSearchLoading] = useState(false)
-  const [customerMode, setCustomerMode] = useState<'existing' | 'new'>('existing')
-  const [newCustomer, setNewCustomer] = useState({ fullName: '', phone: '', email: '' })
-  const [locationRows, setLocationRows] = useState<PickupLocationRow[]>([])
-  const [totalAmountManual, setTotalAmountManual] = useState(false)
-  const locationOptions = useMemo(() => nonOfficeLocations(locationRows), [locationRows])
   const [copiedJobId, setCopiedJobId] = useState<string | null>(null)
 
   async function refreshStatusCounts() {
@@ -395,27 +202,6 @@ export default function RentalsList({
       setStatusCounts(counts)
     } catch {
       // Tab counts are non-blocking; list data is still usable.
-    }
-  }
-
-  async function loadCustomers(query?: string) {
-    setCustomerSearchLoading(true)
-    try {
-      const rows = await searchCustomers({
-        data: { q: query?.trim() || undefined, limit: 30 },
-      })
-      setCustomerOptions(
-        rows.map((c) => ({
-          value: c.id,
-          label: c.icOrPassport
-            ? `${c.fullName ?? '—'} · ${c.icOrPassport}`
-            : (c.fullName ?? '—'),
-        })),
-      )
-    } catch {
-      setCustomerOptions([])
-    } finally {
-      setCustomerSearchLoading(false)
     }
   }
 
@@ -428,6 +214,9 @@ export default function RentalsList({
           page: p,
           pageSize: PAGE_SIZE,
           status: activeTab === 'all' ? undefined : activeTab,
+          paymentStatus: paymentFilter === 'all' ? undefined : paymentFilter,
+          source: sourceFilter === 'all' ? undefined : sourceFilter,
+          overdue: overdueOnly || undefined,
           category: categoryFilter === 'all' ? undefined : categoryFilter,
           search: search || undefined,
           from: dateFrom,
@@ -452,41 +241,13 @@ export default function RentalsList({
     setPage(1)
     void load(1)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, categoryFilter, search, dateFrom, dateTo, sortKey, sortDir])
+  }, [activeTab, categoryFilter, paymentFilter, sourceFilter, overdueOnly, search, dateFrom, dateTo, sortKey, sortDir])
 
   useEffect(() => {
     if (initialStatusCounts || initialResult?.statusCounts) return
     void refreshStatusCounts()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  useEffect(() => {
-    if (!formOpen) return
-    void loadCustomers()
-    if (availableCars.length === 0) {
-      void getAvailableCars()
-        .then(setAvailableCars)
-        .catch(() => {
-          // Form still usable; car combobox will show empty.
-        })
-    }
-    void listActivePickupLocations()
-      .then((rows) => {
-        setLocationRows(rows)
-      })
-      .catch(() => {
-        // Form still usable; location chips will be empty until reload.
-      })
-  }, [formOpen, availableCars.length])
-
-  useEffect(() => {
-    if (!formOpen) return
-    const timer = setTimeout(() => {
-      const q = xqIdNo.trim() || customerSearchInput.trim() || undefined
-      void loadCustomers(q)
-    }, SEARCH_DEBOUNCE_MS)
-    return () => clearTimeout(timer)
-  }, [xqIdNo, customerSearchInput, formOpen])
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -499,9 +260,14 @@ export default function RentalsList({
   const totalPages = result ? Math.max(1, Math.ceil(result.total / result.pageSize)) : 1
   const tabCounts = statusCounts
   const dayPreset = detectDayFilterPreset(dateFrom, dateTo)
+  const activeFilterCount =
+    (categoryFilter !== 'all' ? 1 : 0) +
+    (paymentFilter !== 'all' ? 1 : 0) +
+    (sourceFilter !== 'all' ? 1 : 0) +
+    (overdueOnly ? 1 : 0)
   const hasActiveFilters =
     activeTab !== 'all' ||
-    categoryFilter !== 'all' ||
+    activeFilterCount > 0 ||
     searchInput.trim().length > 0 ||
     search.length > 0 ||
     Boolean(dateFrom || dateTo)
@@ -529,217 +295,6 @@ export default function RentalsList({
     }
     setDateFrom(customFrom)
     setDateTo(customTo)
-  }
-
-  type SelectOption = { value: string; label: string }
-
-  const carItems = useMemo<SelectOption[]>(
-    () =>
-      availableCars.map((c) => ({
-        value: c.id,
-        label: `${c.plateNumber} · ${c.make} ${c.model}`,
-      })),
-    [availableCars],
-  )
-
-  const selectedCarItem = carItems.find((i) => i.value === formData.carId) ?? null
-  const selectedCustomerItem =
-    customerOptions.find((i) => i.value === formData.customerId) ?? null
-
-  const customerItems = useMemo<SelectOption[]>(() => {
-    if (!selectedCustomerItem) return customerOptions
-    if (customerOptions.some((item) => item.value === selectedCustomerItem.value)) {
-      return customerOptions
-    }
-    return [selectedCustomerItem, ...customerOptions]
-  }, [customerOptions, selectedCustomerItem])
-
-  const suggestedTotalRM = useMemo(() => {
-    if (!formData.startDate || !formData.endDate || !formData.dailyRateRM) return null
-    const dailyRateSen = Math.round(Number(formData.dailyRateRM) * 100) || 0
-    const totalSen = calcTotalSen(dailyRateSen, formData.startDate, formData.endDate)
-    return totalSen > 0 ? (totalSen / 100).toFixed(2) : null
-  }, [formData.startDate, formData.endDate, formData.dailyRateRM])
-
-  // ── Auto-calc total ───────────────────────────────────────────────────────
-
-  function setField<K extends keyof RentalFormData>(key: K, value: RentalFormData[K]) {
-    if (key === 'totalAmountRM') {
-      setTotalAmountManual(true)
-      setFormData((prev) => ({ ...prev, totalAmountRM: value as string }))
-      return
-    }
-
-    setFormData((prev) => {
-      const next = { ...prev, [key]: value }
-      const shouldAutoTotal = !totalAmountManual
-      // Recalculate total when dates or daily rate change (unless CS set it manually)
-      if (shouldAutoTotal && (key === 'startDate' || key === 'endDate' || key === 'dailyRateRM')) {
-        const dailyRateSen = Math.round(Number(next.dailyRateRM) * 100) || 0
-        const totalSen = calcTotalSen(dailyRateSen, next.startDate, next.endDate)
-        next.totalAmountRM = totalSen > 0 ? (totalSen / 100).toFixed(2) : next.totalAmountRM
-      }
-      // Auto-fill daily rate when car is selected
-      if (key === 'carId') {
-        const car = availableCars.find((c) => c.id === value)
-        if (car) {
-          const dailyRateSen = car.dailyRateSen
-          next.dailyRateRM = (dailyRateSen / 100).toFixed(2)
-          if (shouldAutoTotal) {
-            const totalSen = calcTotalSen(dailyRateSen, next.startDate, next.endDate)
-            next.totalAmountRM = totalSen > 0 ? (totalSen / 100).toFixed(2) : ''
-          }
-        }
-      }
-      return next
-    })
-  }
-
-  function applySuggestedTotal() {
-    if (!suggestedTotalRM) return
-    setTotalAmountManual(false)
-    setFormData((prev) => ({ ...prev, totalAmountRM: suggestedTotalRM }))
-  }
-
-  // ── Form handlers ─────────────────────────────────────────────────────────
-
-  function openAdd() {
-    setFormData(emptyForm())
-    setFormError(null)
-    setCustomerSearchInput('')
-    setXqIdNo('')
-    setCustomerMode('existing')
-    setNewCustomer({ fullName: '', phone: '', email: '' })
-    setTotalAmountManual(false)
-    setFormOpen(true)
-    requestAnimationFrame(() => {
-      document.getElementById('job-create-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    })
-  }
-
-  function closeForm() {
-    setFormOpen(false)
-    setFormError(null)
-    setCustomerMode('existing')
-    setNewCustomer({ fullName: '', phone: '', email: '' })
-    setXqIdNo('')
-  }
-
-  function setCustomerEntryMode(mode: 'existing' | 'new') {
-    setCustomerMode(mode)
-    if (mode === 'new') {
-      setField('customerId', '')
-      setCustomerSearchInput('')
-      setXqIdNo('')
-      return
-    }
-    setNewCustomer({ fullName: '', phone: '', email: '' })
-  }
-
-  function setNewCustomerField(key: 'fullName' | 'phone' | 'email', value: string) {
-    setNewCustomer((prev) => ({ ...prev, [key]: value }))
-  }
-
-  function setLocationKind(leg: 'pickUp' | 'return', code: string) {
-    if (leg === 'pickUp') {
-      setFormData((prev) => ({
-        ...prev,
-        pickUpLocationKind: code,
-        pickUpLocationDetail: '',
-        pickUpLocationFeeRM: '0',
-      }))
-      return
-    }
-    setFormData((prev) => ({
-      ...prev,
-      returnLocationKind: code,
-      returnLocationDetail: '',
-      returnLocationFeeRM: '0',
-    }))
-  }
-
-  async function handleFormSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!formData.carId) { setFormError('Please select a car.'); return }
-
-    let customerId = formData.customerId
-    if (customerMode === 'new') {
-      if (!newCustomer.fullName.trim()) {
-        setFormError('Enter the customer name.')
-        return
-      }
-      if (!newCustomer.phone.trim()) {
-        setFormError('Enter the customer mobile number.')
-        return
-      }
-    } else if (!customerId) {
-      setFormError('Please select a customer.')
-      return
-    }
-
-    const pickUpPreset = locationOptions.find((row) => row.code === formData.pickUpLocationKind)
-    const returnPreset = locationOptions.find((row) => row.code === formData.returnLocationKind)
-    if (!pickUpPreset) { setFormError('Select a pickup location type.'); return }
-    if (!returnPreset) { setFormError('Select a return location type.'); return }
-    if (!formData.pickUpLocationDetail.trim()) { setFormError('Enter the pickup location name.'); return }
-    if (!formData.returnLocationDetail.trim()) { setFormError('Enter the return location name.'); return }
-    if (!formData.totalAmountRM.trim() || Number(formData.totalAmountRM) <= 0) {
-      setFormError('Enter the total amount.')
-      return
-    }
-
-    setFormError(null)
-    setIsSubmitting(true)
-    try {
-      if (customerMode === 'new') {
-        const created = await createWalkInCustomer({
-          data: {
-            fullName: newCustomer.fullName,
-            phone: newCustomer.phone,
-            email: newCustomer.email || undefined,
-            xqIdNo: xqIdNo.trim() || undefined,
-          },
-        })
-        customerId = created.id
-      }
-
-      const selectedCar = availableCars.find((c) => c.id === formData.carId)
-      const dailyRateSen =
-        Math.round(Number(formData.dailyRateRM) * 100) ||
-        selectedCar?.dailyRateSen ||
-        0
-      const totalAmountSen = Math.round(Number(formData.totalAmountRM) * 100)
-      const depositAmountSen = Math.round(Number(formData.depositRM || '0') * 100)
-      const deliveryFeeSen =
-        Math.round(Number(formData.pickUpLocationFeeRM || '0') * 100) +
-        Math.round(Number(formData.returnLocationFeeRM || '0') * 100)
-
-      await createRental({
-        data: {
-          carId: formData.carId,
-          customerId,
-          type: formData.type,
-          startDate: formData.startDate,
-          endDate: formData.endDate,
-          pickUpTime: toTimeHms(formData.pickUpTime),
-          returnTime: toTimeHms(formData.returnTime),
-          pickUpLocation: formatJobLocationLabel(pickUpPreset, formData.pickUpLocationDetail),
-          returnLocation: formatJobLocationLabel(returnPreset, formData.returnLocationDetail),
-          dailyRateSen,
-          totalAmountSen,
-          depositAmountSen,
-          deliveryFeeSen,
-        },
-      })
-      closeForm()
-      setPage(1)
-      showAdminToast('Job created.')
-      await Promise.all([load(1), refreshStatusCounts()])
-    } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Something went wrong.')
-    } finally {
-      setIsSubmitting(false)
-    }
   }
 
   // ── Cancel handler ────────────────────────────────────────────────────────
@@ -856,11 +411,35 @@ export default function RentalsList({
               </Button>
             </div>
             <div className="mt-0.5 text-xs text-[var(--sea-ink-soft)]">
-              {formatJobSource(r.type, r.createdByName)}
+              {formatJobSource(r)}
             </div>
           </div>
         )
       },
+    },
+    {
+      key: 'createdAt',
+      header: 'Created',
+      sortable: true,
+      cellClassName: 'whitespace-nowrap',
+      render: (r) => (
+        <div className="text-sm leading-snug text-[var(--sea-ink)]">
+          <div className="tabular-nums">
+            {r.createdAt.toLocaleDateString('en-MY', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+            })}
+          </div>
+          <div className="mt-0.5 text-xs tabular-nums text-[var(--sea-ink-soft)]">
+            {r.createdAt.toLocaleTimeString('en-MY', {
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true,
+            })}
+          </div>
+        </div>
+      ),
     },
     {
       key: 'carPlateNumber',
@@ -874,6 +453,11 @@ export default function RentalsList({
           <div className="mt-0.5 font-mono text-xs text-[var(--sea-ink-soft)]">
             {r.carPlateNumber ?? '—'}
           </div>
+          {r.fulfillmentSource && r.fulfillmentSource !== 'owned' ? (
+            <div className="mt-0.5 text-[0.6875rem] font-medium text-amber-700">
+              {formatFulfillmentLabel(r.fulfillmentSource)}
+            </div>
+          ) : null}
         </div>
       ),
     },
@@ -906,16 +490,26 @@ export default function RentalsList({
       header: 'Payment',
       sortable: true,
       cellClassName: 'whitespace-nowrap',
-      render: (r) => (
-        <div>
-          <div className="font-mono text-sm font-semibold tabular-nums text-[var(--sea-ink)]">
-            {formatMYR(r.totalAmountSen)}
+      render: (r) => {
+        const balanceSen = r.totalAmountSen - r.paidAmountSen
+        return (
+          <div>
+            <div className="font-mono text-sm font-semibold tabular-nums text-[var(--sea-ink)]">
+              {formatMYR(r.totalAmountSen)}
+            </div>
+            {r.paymentStatus === 'paid' ? (
+              <div className="mt-0.5 text-xs font-medium text-emerald-700">Fully paid</div>
+            ) : balanceSen > 0 ? (
+              <div className="mt-0.5 text-xs font-semibold tabular-nums text-red-600">
+                Balance {formatMYR(balanceSen)}
+              </div>
+            ) : null}
+            <div className="mt-0.5 text-xs font-medium tabular-nums text-[var(--sea-ink-soft)]">
+              {formatJobDurationLabel(r.startDate, r.endDate, r.extraHoursDecimal)}
+            </div>
           </div>
-          <div className="mt-0.5 text-xs font-medium tabular-nums text-[var(--sea-ink-soft)]">
-            {formatJobDurationLabel(r.startDate, r.endDate, r.extraHoursDecimal)}
-          </div>
-        </div>
-      ),
+        )
+      },
     },
     {
       key: 'status',
@@ -935,8 +529,9 @@ export default function RentalsList({
       headerClassName: 'text-right',
       cellClassName: 'text-right whitespace-nowrap',
       render: (r) => {
-        const canHandover = r.status === 'pending'
-        const canCancel = isManageMode && r.status === 'pending'
+        const canHandover = r.status === 'confirmed'
+        const canCancel =
+          isManageMode && (r.status === 'pending' || r.status === 'confirmed')
         const showDelete =
           isManageMode && canDelete && (r.status === 'closed' || r.status === 'cancelled')
 
@@ -1019,51 +614,52 @@ export default function RentalsList({
         }
         actions={
           <div className="flex flex-wrap items-center gap-1">
-            {(
-              [
-                { key: 'today' as const, label: 'Today' },
-                { key: 'in3d' as const, label: 'In 3D' },
-                { key: 'week' as const, label: '1 Week' },
-              ] as const
-            ).map((preset) => {
-              const isActive = dayPreset === preset.key
-              return (
-                <button
-                  key={preset.key}
-                  type="button"
-                  className={cn(
-                    'rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors',
-                    isActive
-                      ? 'bg-[var(--ui-ink)] text-white'
-                      : 'text-[var(--sea-ink-soft)] hover:bg-[var(--surface-muted)] hover:text-[var(--sea-ink)]',
-                  )}
-                  aria-pressed={isActive}
-                  onClick={() => {
-                    if (isActive) clearDayFilter()
-                    else applyDayPreset(preset.key)
-                  }}
-                >
-                  {preset.label}
-                </button>
-              )
-            })}
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
+            <div className="jobs-day-group">
+              {(
+                [
+                  { key: 'today' as const, label: 'Today' },
+                  { key: 'in3d' as const, label: 'In 3D' },
+                  { key: 'week' as const, label: '1 Week' },
+                ] as const
+              ).map((preset) => {
+                const isActive = dayPreset === preset.key
+                return (
                   <button
+                    key={preset.key}
                     type="button"
                     className={cn(
                       'rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors',
-                      dayPreset === 'custom'
+                      isActive
                         ? 'bg-[var(--ui-ink)] text-white'
                         : 'text-[var(--sea-ink-soft)] hover:bg-[var(--surface-muted)] hover:text-[var(--sea-ink)]',
                     )}
-                    aria-pressed={dayPreset === 'custom'}
-                  />
-                }
-              >
-                Custom date
-              </DropdownMenuTrigger>
+                    aria-pressed={isActive}
+                    onClick={() => {
+                      if (isActive) clearDayFilter()
+                      else applyDayPreset(preset.key)
+                    }}
+                  >
+                    {preset.label}
+                  </button>
+                )
+              })}
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <button
+                      type="button"
+                      className={cn(
+                        'rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors',
+                        dayPreset === 'custom'
+                          ? 'bg-[var(--ui-ink)] text-white'
+                          : 'text-[var(--sea-ink-soft)] hover:bg-[var(--surface-muted)] hover:text-[var(--sea-ink)]',
+                      )}
+                      aria-pressed={dayPreset === 'custom'}
+                    />
+                  }
+                >
+                  Custom date
+                </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 p-3">
                 <div className="space-y-3">
                   <div>
@@ -1106,16 +702,16 @@ export default function RentalsList({
                   </div>
                 </div>
               </DropdownMenuContent>
-            </DropdownMenu>
+              </DropdownMenu>
+            </div>
             {isManageMode ? (
-              <button
-                type="button"
-                className="button-primary ml-1 flex items-center gap-2"
-                onClick={openAdd}
+              <Link
+                to="/admin/availability"
+                className="button-primary jobs-create-btn"
               >
-                <Plus size={15} />
-                New job
-              </button>
+                <Plus className="size-4" />
+                Create job
+              </Link>
             ) : null}
           </div>
         }
@@ -1128,361 +724,6 @@ export default function RentalsList({
       {loading && !result && <TableSkeleton rows={8} columns={8} />}
 
       <div className="admin-stack">
-      {formOpen && isManageMode ? (
-        <article id="job-create-panel" className="workspace-panel island-shell job-create-panel overflow-hidden p-0">
-          <div className="job-create-panel__header flex items-start justify-between gap-3 border-b border-[var(--ui-border)] px-5 py-4">
-            <div>
-              <p className="island-kicker mb-1">New job</p>
-              <h2 className="ui-page-title text-[length:var(--admin-title-sm)]">Create job</h2>
-              <p className="ui-page-desc">
-                In house or booking — fill in the trip, then confirm payment.
-              </p>
-            </div>
-            <button type="button" className="button-secondary shrink-0" onClick={closeForm}>
-              Close
-            </button>
-          </div>
-
-          <div className="job-create-panel__body">
-            <form id="rental-form" className="admin-form-sheet job-create-form job-create-form--inline" onSubmit={handleFormSubmit}>
-              <div className="job-create-form__section job-create-form__source">
-                <span className="ui-label">Source</span>
-                <div className="job-create-form__chips" role="radiogroup" aria-label="Source">
-                  {(['booking', 'walk-in'] as RentalType[]).map((t) => {
-                    const active = formData.type === t
-                    return (
-                      <Button
-                        key={t}
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        role="radio"
-                        aria-checked={active}
-                        data-active={active ? 'true' : 'false'}
-                        className="admin-filter-preset h-[1.875rem] min-h-[1.875rem] max-h-[1.875rem] active:translate-y-0"
-                        onClick={() => setField('type', t)}
-                      >
-                        {formatJobType(t)}
-                      </Button>
-                    )
-                  })}
-                </div>
-              </div>
-
-              <div className="job-create-form__section job-create-form__customer">
-                <span className="ui-label">Customer</span>
-                <div
-                  className="job-create-form__chips"
-                  role="radiogroup"
-                  aria-label="Customer entry mode"
-                >
-                  {(
-                    [
-                      { value: 'existing' as const, label: 'Existing' },
-                      { value: 'new' as const, label: 'New customer' },
-                    ] as const
-                  ).map((option) => {
-                    const active = customerMode === option.value
-                    return (
-                      <Button
-                        key={option.value}
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        role="radio"
-                        aria-checked={active}
-                        data-active={active ? 'true' : 'false'}
-                        className="admin-filter-preset h-[1.875rem] min-h-[1.875rem] max-h-[1.875rem] active:translate-y-0"
-                        onClick={() => setCustomerEntryMode(option.value)}
-                      >
-                        {option.label}
-                      </Button>
-                    )
-                  })}
-                </div>
-
-                <div className="job-create-form__field job-create-form__xq-id">
-                  <label className="ui-label" htmlFor="rf-xq-id">XQ_ID No.</label>
-                  <input
-                    id="rf-xq-id"
-                    type="text"
-                    className="field-input w-full"
-                    value={xqIdNo}
-                    onChange={(e) => {
-                      setXqIdNo(e.target.value)
-                      if (customerMode === 'existing') {
-                        setField('customerId', '')
-                      }
-                    }}
-                    placeholder="IC or passport number"
-                    autoComplete="off"
-                  />
-                </div>
-
-                {customerMode === 'existing' ? (
-                  <div className="job-create-form__control">
-                    <Combobox
-                      items={customerItems}
-                      value={selectedCustomerItem}
-                      onValueChange={(item) => {
-                        setField('customerId', item?.value ?? '')
-                        if (!item) {
-                          return
-                        }
-                        const icSuffix = item.label.includes(' · ')
-                          ? item.label.split(' · ').pop()
-                          : ''
-                        if (icSuffix) setXqIdNo(icSuffix)
-                      }}
-                      itemToStringLabel={(item) => item.label}
-                      filter={null}
-                    >
-                      <ComboboxInput
-                        id="rf-customer"
-                        placeholder="Search name or IC…"
-                        className="field-input w-full"
-                        showClear={!!selectedCustomerItem}
-                        onChange={(e) => setCustomerSearchInput(e.target.value)}
-                      />
-                      <ComboboxContent>
-                        <ComboboxEmpty>
-                          {customerSearchLoading ? 'Searching…' : 'No customers found.'}
-                        </ComboboxEmpty>
-                        <ComboboxList>
-                          {(item) => (
-                            <ComboboxItem key={item.value} value={item}>
-                              {item.label}
-                            </ComboboxItem>
-                          )}
-                        </ComboboxList>
-                      </ComboboxContent>
-                    </Combobox>
-                  </div>
-                ) : (
-                  <div className="job-create-form__section-body job-create-form__grid job-create-form__grid--3">
-                    <div className="job-create-form__field">
-                      <label className="ui-label" htmlFor="nc-name">Name</label>
-                      <input
-                        id="nc-name"
-                        type="text"
-                        className="field-input w-full"
-                        value={newCustomer.fullName}
-                        onChange={(e) => setNewCustomerField('fullName', e.target.value)}
-                        placeholder="Full name"
-                        required
-                      />
-                    </div>
-                    <div className="job-create-form__field">
-                      <label className="ui-label" htmlFor="nc-phone">Mobile</label>
-                      <input
-                        id="nc-phone"
-                        type="tel"
-                        className="field-input w-full"
-                        value={newCustomer.phone}
-                        onChange={(e) => setNewCustomerField('phone', e.target.value)}
-                        placeholder="e.g. 012-345 6789"
-                        required
-                      />
-                    </div>
-                    <div className="job-create-form__field">
-                      <label className="ui-label" htmlFor="nc-email">
-                        Email <span className="job-create-optional">(optional)</span>
-                      </label>
-                      <input
-                        id="nc-email"
-                        type="email"
-                        className="field-input w-full"
-                        value={newCustomer.email}
-                        onChange={(e) => setNewCustomerField('email', e.target.value)}
-                        placeholder="name@email.com"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="job-create-form__section job-create-form__schedule">
-                <span className="ui-label">Schedule</span>
-                <div className="job-create-form__section-body job-create-form__grid job-create-form__grid--4">
-                  <div className="job-create-form__field">
-                    <label className="ui-label" htmlFor="rf-start">Pickup date</label>
-                    <input
-                      id="rf-start"
-                      type="date"
-                      className="field-input w-full"
-                      value={formData.startDate}
-                      min={today()}
-                      onChange={(e) => setField('startDate', e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="job-create-form__field">
-                    <label className="ui-label" htmlFor="rf-pickup-time">Pickup time</label>
-                    <input
-                      id="rf-pickup-time"
-                      type="time"
-                      className="field-input w-full"
-                      value={formData.pickUpTime}
-                      onChange={(e) => setField('pickUpTime', e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="job-create-form__field">
-                    <label className="ui-label" htmlFor="rf-end">Return date</label>
-                    <input
-                      id="rf-end"
-                      type="date"
-                      className="field-input w-full"
-                      value={formData.endDate}
-                      min={formData.startDate || today()}
-                      onChange={(e) => setField('endDate', e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="job-create-form__field">
-                    <label className="ui-label" htmlFor="rf-return-time">Return time</label>
-                    <input
-                      id="rf-return-time"
-                      type="time"
-                      className="field-input w-full"
-                      value={formData.returnTime}
-                      onChange={(e) => setField('returnTime', e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="job-create-form__section job-create-form__car">
-                <label className="ui-label" htmlFor="rf-car">Car</label>
-                <div className="job-create-form__control">
-                <Combobox
-                  items={carItems}
-                  value={selectedCarItem}
-                  onValueChange={(item) => setField('carId', item?.value ?? '')}
-                  itemToStringLabel={(item) => item.label}
-                >
-                  <ComboboxInput
-                    id="rf-car"
-                    placeholder="Search plate or model…"
-                    className="field-input w-full"
-                    showClear={!!selectedCarItem}
-                  />
-                  <ComboboxContent>
-                    <ComboboxEmpty>No available cars found.</ComboboxEmpty>
-                    <ComboboxList>
-                      {(item) => (
-                        <ComboboxItem key={item.value} value={item}>
-                          {item.label}
-                        </ComboboxItem>
-                      )}
-                    </ComboboxList>
-                  </ComboboxContent>
-                </Combobox>
-                </div>
-              </div>
-
-              <div className="job-create-form__section job-create-form__locations">
-                <span className="ui-label">Locations</span>
-                <div className="job-create-form__section-body job-create-form__grid job-create-form__grid--2">
-                  <JobLocationLeg
-                    idPrefix="pickup"
-                    label="Pickup"
-                    locations={locationOptions}
-                    kind={formData.pickUpLocationKind}
-                    detail={formData.pickUpLocationDetail}
-                    feeRM={formData.pickUpLocationFeeRM}
-                    onKindChange={(code) => setLocationKind('pickUp', code)}
-                    onDetailChange={(detail) => setField('pickUpLocationDetail', detail)}
-                    onFeeChange={(fee) => setField('pickUpLocationFeeRM', fee)}
-                  />
-                  <JobLocationLeg
-                    idPrefix="return"
-                    label="Return"
-                    locations={locationOptions}
-                    kind={formData.returnLocationKind}
-                    detail={formData.returnLocationDetail}
-                    feeRM={formData.returnLocationFeeRM}
-                    onKindChange={(code) => setLocationKind('return', code)}
-                    onDetailChange={(detail) => setField('returnLocationDetail', detail)}
-                    onFeeChange={(fee) => setField('returnLocationFeeRM', fee)}
-                  />
-                </div>
-              </div>
-
-              <div className="job-create-form__section job-create-form__payment">
-                <span className="ui-label">Payment</span>
-                <div className="job-create-form__section-body">
-                  <div className="job-create-form__field job-create-form__payment-total">
-                    <label className="ui-label" htmlFor="rf-total">Total amount</label>
-                    <div className="job-create-amount">
-                      <span className="job-create-amount__prefix">RM</span>
-                      <input
-                        id="rf-total"
-                        type="number"
-                        className="field-input job-create-amount__input"
-                        value={formData.totalAmountRM}
-                        onChange={(e) => setField('totalAmountRM', e.target.value)}
-                        min={0}
-                        step={0.01}
-                        placeholder="0.00"
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-                {suggestedTotalRM ? (
-                  <p className="job-create-payment__hint">
-                    {formData.startDate && formData.endDate && formData.dailyRateRM ? (
-                      <>
-                        Suggested:{' '}
-                        {Math.max(
-                          1,
-                          Math.ceil(
-                            (new Date(formData.endDate).getTime() -
-                              new Date(formData.startDate).getTime()) /
-                              86400000,
-                          ),
-                        )}{' '}
-                        day(s) × RM {Number(formData.dailyRateRM).toFixed(2)} ={' '}
-                        <strong>RM {suggestedTotalRM}</strong>
-                      </>
-                    ) : null}
-                    {totalAmountManual && formData.totalAmountRM !== suggestedTotalRM ? (
-                      <>
-                        {' '}
-                        <button
-                          type="button"
-                          className="job-create-payment__apply"
-                          onClick={applySuggestedTotal}
-                        >
-                          Use suggested
-                        </button>
-                      </>
-                    ) : null}
-                  </p>
-                ) : null}
-              </div>
-
-              {formError ? <p className="form-error">{formError}</p> : null}
-            </form>
-          </div>
-
-          <div className="job-create-panel__footer flex flex-wrap items-center justify-end gap-2 border-t border-[var(--ui-border)] px-5 py-4">
-            <button type="button" className="button-secondary" onClick={closeForm}>
-              Cancel
-            </button>
-            <button
-              type="submit"
-              form="rental-form"
-              disabled={isSubmitting}
-              className="button-primary"
-            >
-              {isSubmitting ? 'Creating…' : 'Create job'}
-            </button>
-          </div>
-        </article>
-      ) : null}
       {result && (
       <>
       <article className="workspace-panel island-shell overflow-x-auto p-0">
@@ -1499,11 +740,14 @@ export default function RentalsList({
           }
           filtersOpen={filtersOpen}
           onFiltersOpenChange={setFiltersOpen}
-          activeFilterCount={categoryFilter !== 'all' ? 1 : 0}
+          activeFilterCount={activeFilterCount}
           hasActiveFilters={hasActiveFilters}
           onClearFilters={() => {
             setActiveTab('all')
             setCategoryFilter('all')
+            setPaymentFilter('all')
+            setSourceFilter('all')
+            setOverdueOnly(false)
             setSearchInput('')
             setSearch('')
             clearDayFilter()
@@ -1531,6 +775,32 @@ export default function RentalsList({
             options={CAR_CATEGORY_FILTER_OPTIONS}
             onValueChange={setCategoryFilter}
           />
+          <StatusFilterSelect
+            aria-label="Filter jobs by payment status"
+            value={paymentFilter}
+            options={PAYMENT_FILTER_OPTIONS}
+            onValueChange={setPaymentFilter}
+          />
+          <StatusFilterSelect
+            aria-label="Filter jobs by source"
+            value={sourceFilter}
+            options={SOURCE_FILTER_OPTIONS}
+            onValueChange={setSourceFilter}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            data-active={overdueOnly ? 'true' : 'false'}
+            aria-pressed={overdueOnly}
+            className={cn(
+              'admin-filter-preset h-8 min-h-8',
+              overdueOnly && 'border-red-600 text-red-700',
+            )}
+            onClick={() => setOverdueOnly((prev) => !prev)}
+          >
+            Overdue returns
+          </Button>
         </AdminListFilterBar>
 
         <DataTable

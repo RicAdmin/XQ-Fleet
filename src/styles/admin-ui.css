@@ -175,6 +175,7 @@
   align-items: center;
   gap: var(--admin-space-2);
   min-width: 0;
+  margin-left: auto;
 }
 
 .cxq-dashboard-root .admin-filter-bar__quick-label {
@@ -212,10 +213,10 @@
 
 .cxq-dashboard-root .admin-filter-search {
   height: 2.25rem;
-  flex: 0 1 36rem;
-  width: 36rem;
+  flex: 0 1 20rem;
+  width: 20rem;
   max-width: 100%;
-  min-width: 14rem;
+  min-width: 12rem;
   background: var(--ui-white);
   border-radius: var(--ui-radius-sm);
 }
@@ -319,6 +320,28 @@
 .cxq-dashboard-root .ui-select {
   width: auto;
   min-width: 9rem;
+  cursor: pointer;
+}
+
+.cxq-dashboard-root .field-input--native-picker,
+.cxq-dashboard-root input.field-input[type='date'],
+.cxq-dashboard-root input.field-input[type='time'],
+.cxq-dashboard-root input.field-input[type='datetime-local'] {
+  position: relative;
+  cursor: pointer;
+}
+
+.cxq-dashboard-root .field-input--native-picker::-webkit-calendar-picker-indicator,
+.cxq-dashboard-root input.field-input[type='date']::-webkit-calendar-picker-indicator,
+.cxq-dashboard-root input.field-input[type='time']::-webkit-calendar-picker-indicator,
+.cxq-dashboard-root input.field-input[type='datetime-local']::-webkit-calendar-picker-indicator {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
   cursor: pointer;
 }
 
@@ -602,12 +625,12 @@
 }
 
 .cxq-dashboard-root .cars-table--fleet .cars-table__col-vehicle {
-  width: 14.5rem;
-  max-width: 14.5rem;
+  width: 17rem;
+  max-width: 17rem;
 }
 
 .cxq-dashboard-root .cars-table--fleet .cars-table__col-type {
-  width: 5.75rem;
+  width: 6.75rem;
 }
 
 .cxq-dashboard-root .cars-table--fleet .cars-table__col-owned {
@@ -655,8 +678,10 @@
 .cxq-dashboard-root .fleet-vehicle-cell__body {
   display: flex;
   min-width: 0;
+  flex: 1;
   flex-direction: column;
   align-items: flex-start;
+  overflow: hidden;
 }
 
 .cxq-dashboard-root .fleet-vehicle-cell__plate {
@@ -695,9 +720,12 @@
 
 .cxq-dashboard-root .fleet-vehicle-cell__meta {
   margin: 0.15rem 0 0;
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 100%;
   align-items: center;
-  gap: 0.35rem;
+  column-gap: 0.35rem;
+  row-gap: 0.15rem;
   font-size: 0.75rem;
   color: var(--sea-ink-soft);
   line-height: 1.2;
@@ -1045,6 +1073,89 @@
   color: var(--ui-ink);
 }
 
+.cxq-dashboard-root .admin-sidebar-footer {
+  margin-top: auto;
+}
+
+.cxq-dashboard-root .admin-sidebar-version {
+  margin: 0;
+  font-size: var(--admin-text-xs);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--sea-ink-soft);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ── Mobile sidebar drawer ──────────────────────────────────── */
+
+.cxq-dashboard-root [data-slot='sidebar'][data-mobile='true'] {
+  --sidebar-width: min(19rem, 88vw);
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.18);
+}
+
+.cxq-dashboard-root [data-slot='sidebar'][data-mobile='true'] [data-sidebar='header'] {
+  padding: 1.1rem 1.25rem;
+  min-height: 4.25rem;
+  justify-content: center;
+}
+
+.cxq-dashboard-root [data-slot='sidebar'][data-mobile='true'] .admin-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.cxq-dashboard-root [data-slot='sidebar'][data-mobile='true'] .admin-sidebar-brand svg {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.cxq-dashboard-root [data-slot='sidebar'][data-mobile='true'] .admin-sidebar-brand-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.cxq-dashboard-root [data-slot='sidebar'][data-mobile='true'] [data-sidebar='content'] {
+  padding: 0.5rem 0.85rem 1.5rem;
+  gap: 0.35rem;
+}
+
+.cxq-dashboard-root [data-slot='sidebar'][data-mobile='true'] [data-sidebar='group'] {
+  padding: 0;
+}
+
+.cxq-dashboard-root [data-slot='sidebar'][data-mobile='true'] .admin-sidebar-section-label {
+  padding: 0.85rem 0.6rem 0.4rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+}
+
+.cxq-dashboard-root [data-slot='sidebar'][data-mobile='true'] [data-sidebar='menu-item'] {
+  margin-bottom: 2px;
+}
+
+.cxq-dashboard-root [data-slot='sidebar'][data-mobile='true'] [data-sidebar='menu-button'] {
+  min-height: 2.75rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+  gap: 0.75rem;
+}
+
+.cxq-dashboard-root [data-slot='sidebar'][data-mobile='true'] [data-sidebar='menu-button'] svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.cxq-dashboard-root [data-slot='sidebar'][data-mobile='true'] .admin-nav-link.is-active {
+  border-radius: 0.75rem;
+}
+
+.cxq-dashboard-root [data-slot='sidebar'][data-mobile='true'] .admin-nav-soon {
+  margin-left: auto;
+}
+
 .cxq-dashboard-root .admin-main-canvas {
   --background: #ffffff;
   background: #ffffff;
@@ -1080,10 +1191,88 @@
   color: var(--ui-muted);
 }
 
-.cxq-dashboard-root .admin-topbar-signout {
+.cxq-dashboard-root .admin-view-mode-toggle {
+  align-items: center;
+  gap: 0.5rem;
   height: 2.125rem;
-  padding-inline: 0.85rem;
-  font-size: var(--admin-text-md);
+  padding-inline: 0.625rem 0.25rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: transparent;
+}
+
+.cxq-dashboard-root .admin-view-mode-toggle__label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .admin-view-mode-toggle__segments {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  border-radius: 0.375rem;
+  background: rgba(15, 23, 42, 0.05);
+  padding: 0.125rem;
+}
+
+.cxq-dashboard-root .admin-view-mode-toggle__segment {
+  border: none;
+  border-radius: 0.3rem;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--ui-muted);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.cxq-dashboard-root .admin-view-mode-toggle__segment:hover {
+  color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .admin-view-mode-toggle__segment--active {
+  background: var(--ui-accent);
+  color: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.18);
+}
+
+.cxq-dashboard-root .admin-view-mode-toggle__segment--active:hover {
+  color: #fff;
+}
+
+.cxq-dashboard-root .admin-topbar-datechip {
+  align-items: center;
+  gap: 0.4rem;
+  height: 2.125rem;
+  margin: 0;
+  padding-inline: 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: transparent;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-muted);
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .admin-topbar-datechip svg {
+  color: var(--ui-accent);
+  flex: none;
+}
+
+.cxq-dashboard-root .admin-topbar-signout {
+  height: 1.875rem;
+  padding-inline: 0.7rem;
+  font-size: 0.75rem;
 }
 
 .cxq-dashboard-root .summary-row--compact {
@@ -1123,6 +1312,10 @@
 
 .cxq-dashboard-root [data-slot='tabs-list'][data-variant='pill'] [data-slot='tabs-trigger'][data-active] svg {
   color: #fff;
+}
+
+.cxq-dashboard-root [data-sidebar='menu-button'].admin-nav-link {
+  font-size: var(--admin-text-sm);
 }
 
 .cxq-dashboard-root [data-sidebar='menu-button'].admin-nav-link svg {
@@ -1348,6 +1541,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  gap: 0.65rem;
   width: min(100%, 22rem);
 }
 
@@ -2010,6 +2204,11 @@
   top: 0;
   z-index: 2;
   box-shadow: 0 1px 0 var(--ui-border);
+  font-size: var(--admin-text-xs);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--sea-ink-soft);
 }
 
 .cxq-dashboard-root .admin-ops-table tbody tr {
@@ -2020,6 +2219,27 @@
   vertical-align: top;
   padding-top: 0.7rem;
   padding-bottom: 0.7rem;
+  font-size: var(--admin-text);
+  line-height: 1.45;
+}
+
+.cxq-dashboard-root .admin-op-meta {
+  font-size: var(--admin-text-xs);
+  line-height: 1.35;
+  color: var(--sea-ink-soft);
+}
+
+.cxq-dashboard-root .admin-op-strong {
+  font-size: var(--admin-text);
+  font-weight: 600;
+  color: var(--sea-ink);
+}
+
+.cxq-dashboard-root .admin-op-ref {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: var(--admin-text-sm);
+  font-weight: 600;
+  color: var(--sea-ink);
 }
 
 .cxq-dashboard-root .admin-op-col-due {
@@ -2046,6 +2266,116 @@
   min-width: 0;
 }
 
+/* Compact tab switcher when placed in the page header */
+.cxq-dashboard-root .admin-operations-tabs .ui-page-head__actions [data-slot='tabs-list'] {
+  height: 2.125rem;
+  padding: 0.1875rem;
+}
+
+.cxq-dashboard-root .admin-operations-tabs .ui-page-head__actions [data-slot='tabs-trigger'] {
+  height: 1.75rem;
+  padding-inline: 0.625rem;
+  font-size: 0.75rem;
+  gap: 0.3rem;
+}
+
+.cxq-dashboard-root .admin-operations-tabs .ui-page-head__actions [data-slot='tabs-trigger'] svg {
+  width: 0.8125rem;
+  height: 0.8125rem;
+}
+
+/* ── Operations floor — mobile ──────────────────────────────── */
+@media (max-width: 640px) {
+  .cxq-dashboard-root .admin-operations-tabs .ui-page-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cxq-dashboard-root .admin-operations-tabs .ui-page-head__actions,
+  .cxq-dashboard-root .admin-operations-tabs .ui-page-head__actions [data-slot='tabs-list'] {
+    width: 100%;
+  }
+
+  .cxq-dashboard-root .admin-operations-tabs .ui-page-head__actions [data-slot='tabs-list'] {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    height: auto;
+    padding: 0.25rem;
+    gap: 0.25rem;
+  }
+
+  .cxq-dashboard-root .admin-operations-tabs .ui-page-head__actions [data-slot='tabs-trigger'] {
+    height: 2.25rem;
+    justify-content: center;
+    font-size: 0.8rem;
+  }
+
+  .cxq-dashboard-root .admin-operations-tabs   .op-hide-sm {
+    display: none;
+  }
+
+  /* Sheets (handover / return / filters) go full width on phones */
+  [data-slot='sheet-content'][data-side='right'],
+  [data-slot='sheet-content'][data-side='left'] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Filter bar: collapse the Filters button to an icon, hide quick presets */
+  .cxq-dashboard-root .admin-filter-bar__actions .admin-filter-control:has(svg) {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    padding: 0;
+    justify-content: center;
+    gap: 0;
+    font-size: 0;
+  }
+
+  .cxq-dashboard-root .admin-filter-bar__actions .admin-filter-control:has(svg) svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .cxq-dashboard-root .admin-filter-bar__actions .admin-filter-control:has(svg) span {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    font-size: 10px;
+  }
+
+  .cxq-dashboard-root .admin-filter-bar__quick,
+  .cxq-dashboard-root .admin-filter-bar__quick-group {
+    display: none;
+  }
+
+  .cxq-dashboard-root .admin-operations-tabs .admin-ops-panel table {
+    font-size: 0.8125rem;
+  }
+
+  .cxq-dashboard-root .admin-operations-tabs .admin-ops-panel .admin-op-datetime,
+  .cxq-dashboard-root .admin-operations-tabs .admin-ops-panel .admin-op-strong,
+  .cxq-dashboard-root .admin-operations-tabs .admin-ops-panel .admin-op-money {
+    font-size: 0.8125rem;
+  }
+
+  .cxq-dashboard-root .admin-operations-tabs .admin-ops-panel .admin-op-meta,
+  .cxq-dashboard-root .admin-operations-tabs .admin-ops-panel .admin-op-ref {
+    font-size: 0.75rem;
+  }
+
+  .cxq-dashboard-root .admin-operations-tabs .admin-ops-panel th,
+  .cxq-dashboard-root .admin-operations-tabs .admin-ops-panel td {
+    padding: 0.5rem 0.55rem;
+  }
+
+  .cxq-dashboard-root .admin-operations-tabs .admin-filter-bar__quick-group {
+    flex-wrap: wrap;
+    row-gap: 0.35rem;
+  }
+}
+
 .cxq-dashboard-root .admin-op-col-schedule {
   min-width: 14rem;
 }
@@ -2061,7 +2391,8 @@
 
 .cxq-dashboard-root .admin-op-datetime {
   white-space: nowrap;
-  font-size: var(--admin-text-sm);
+  font-size: var(--admin-text);
+  font-weight: 500;
   color: var(--ui-ink);
 }
 
@@ -2185,6 +2516,49 @@
   margin: 0;
 }
 
+.cxq-dashboard-root .job-detail-plate {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+  background: color-mix(in srgb, var(--ui-canvas) 55%, white);
+}
+
+.cxq-dashboard-root .job-detail-plate__label {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .job-detail-plate__value {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  color: var(--lagoon-deep);
+}
+
+.cxq-dashboard-root .job-detail-plate__meta {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  font-size: var(--admin-text-sm);
+  color: var(--sea-ink-soft);
+}
+
+.cxq-dashboard-root .job-detail-vehicle__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .cxq-dashboard-root .job-detail-legs {
   display: grid;
   grid-template-columns: 1fr;
@@ -2304,6 +2678,359 @@
   border-top: 1px solid var(--ui-border);
 }
 
+/* ── Car detail: hero vehicle card (matches job detail layout) ─────────────── */
+
+.cxq-dashboard-root .job-detail-vehicle {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cxq-dashboard-root .job-detail-vehicle__photo {
+  width: 14rem;
+  max-width: 40%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--ui-radius-sm);
+  border: 1px solid var(--ui-border);
+  background: var(--surface-muted);
+  flex-shrink: 0;
+}
+
+.cxq-dashboard-root .job-detail-vehicle__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cxq-dashboard-root .job-detail-vehicle__photo--wide {
+  width: 100%;
+  max-width: none;
+  aspect-ratio: auto;
+}
+
+.cxq-dashboard-root .job-detail-vehicle__photo--wide img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: unset;
+}
+
+/* Capacity rows — stronger separation from the surrounding card */
+.cxq-dashboard-root .capacity-row {
+  border: 1px solid var(--ui-border);
+  background: var(--surface-muted);
+  box-shadow: 0 1px 2px rgba(20, 24, 26, 0.04);
+}
+
+/* Fleet list — ownership chip, rented days cell, utilisation chart */
+.cxq-dashboard-root .fleet-ownership-chip {
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--ui-border);
+  background: var(--surface-muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--ui-ink);
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .fleet-ownership-chip--partner {
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .fleet-rented-days {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.cxq-dashboard-root .fleet-rented-days__value {
+  font-weight: 600;
+  color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .fleet-rented-days__unit {
+  font-size: 0.75rem;
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .fleet-usage-chart__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.875rem;
+}
+
+.cxq-dashboard-root .fleet-usage-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.cxq-dashboard-root .fleet-usage-chart__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.cxq-dashboard-root .fleet-usage-chart__category {
+  margin: 0 0 0.125rem;
+}
+
+.cxq-dashboard-root .fleet-usage-chart__row {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr) 2.75rem;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cxq-dashboard-root .fleet-usage-chart__car {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .fleet-usage-chart__categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.cxq-dashboard-root .fleet-usage-chart__label {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.cxq-dashboard-root .fleet-usage-chart__model {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ui-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .fleet-usage-chart__thumb {
+  width: 2.5rem;
+  height: 1.75rem;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid var(--ui-border);
+  background: var(--surface-muted);
+  flex-shrink: 0;
+}
+
+.cxq-dashboard-root .fleet-usage-chart__plate {
+  font-size: 0.6875rem;
+  color: var(--ui-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .fleet-usage-chart__track {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 2px;
+  height: 1.375rem;
+  padding: 2px;
+  border-radius: 6px;
+  background: var(--surface-muted);
+  overflow: hidden;
+}
+
+.cxq-dashboard-root .fleet-usage-chart__month {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  border-radius: 3px;
+  background: rgba(20, 24, 26, 0.05);
+  overflow: hidden;
+}
+
+.cxq-dashboard-root .fleet-usage-chart__month:hover {
+  outline: 1px solid var(--ui-ink);
+  outline-offset: -1px;
+}
+
+.cxq-dashboard-root .fleet-usage-chart__month-fill {
+  display: block;
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  background: var(--ember, #ff6600);
+}
+
+.cxq-dashboard-root .fleet-usage-chart__days {
+  font-size: 0.75rem;
+  color: var(--ui-muted);
+  text-align: right;
+}
+
+/* Luggage illustration — compact admin version of the public site's trunk bags */
+.cxq-dashboard-root .luggage-illustration {
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.05)),
+    var(--surface-muted);
+  padding: 1rem 1rem 0.75rem;
+  overflow: hidden;
+}
+
+.cxq-dashboard-root .luggage-illustration__bags {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+  min-height: 74px;
+  border-bottom: 2px solid rgba(20, 24, 26, 0.14);
+  padding-bottom: 6px;
+}
+
+.cxq-dashboard-root .luggage-bag {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.18);
+}
+
+.cxq-dashboard-root .luggage-bag--lg {
+  height: 62px;
+  background: linear-gradient(180deg, #ff7a1a 0%, #d8552b 100%);
+}
+
+.cxq-dashboard-root .luggage-bag--sm {
+  height: 42px;
+  width: 38px;
+  background: linear-gradient(180deg, #6b7378 0%, #3f4549 100%);
+}
+
+.cxq-dashboard-root .luggage-bag__handle {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 9px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+}
+
+.cxq-dashboard-root .luggage-bag__stripe {
+  position: absolute;
+  top: 16px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.18);
+  border-top: 1px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.cxq-dashboard-root .luggage-bag em {
+  position: absolute;
+  bottom: 3px;
+  font-style: normal;
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.05em;
+}
+
+.cxq-dashboard-root .job-detail-vehicle__head {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.cxq-dashboard-root .job-detail-vehicle__name {
+  margin: 0;
+  font-size: var(--admin-text-lg, 1rem);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .job-detail-vehicle__meta {
+  margin: 0.15rem 0 0;
+  font-size: var(--admin-text-sm);
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .job-detail-vehicle__rate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+  flex: none;
+}
+
+.cxq-dashboard-root .job-detail-vehicle__rate-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .job-detail-vehicle__rate-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--lagoon-deep, #0e7490);
+  font-variant-numeric: tabular-nums;
+}
+
+.cxq-dashboard-root .car-detail-status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.cxq-dashboard-root .car-detail-status__meta {
+  margin: 0;
+  font-size: var(--admin-text-sm);
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .car-detail-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+  background: color-mix(in srgb, var(--ui-canvas) 55%, white);
+}
+
+.cxq-dashboard-root .car-detail-stat__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .car-detail-stat__value {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--ui-ink);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ── Website catalog form (car detail) ── */
 
 .cxq-dashboard-root .catalog-form {
@@ -2312,17 +3039,22 @@
 }
 
 .cxq-dashboard-root .catalog-form__section {
-  padding: var(--admin-space-5) 0;
-  border-bottom: 1px solid var(--ui-border);
+  padding: var(--admin-space-4);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+  background: var(--surface-muted);
+}
+
+.cxq-dashboard-root .catalog-form__section + .catalog-form__section {
+  margin-top: var(--admin-space-4);
 }
 
 .cxq-dashboard-root .catalog-form__section:first-child {
-  padding-top: 0;
+  padding-top: var(--admin-space-4);
 }
 
 .cxq-dashboard-root .catalog-form__section:last-of-type {
-  border-bottom: none;
-  padding-bottom: 0;
+  padding-bottom: var(--admin-space-4);
 }
 
 .cxq-dashboard-root .catalog-form__section-head {
@@ -2487,9 +3219,2394 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: var(--admin-space-3);
   padding-top: var(--admin-space-5);
   margin-top: var(--admin-space-2);
   border-top: 1px solid var(--ui-border);
+}
+
+/* ── Availability page ─────────────────────────────────────────────────── */
+
+.cxq-dashboard-root .avail-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.cxq-dashboard-root .avail-toolbar__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.cxq-dashboard-root .avail-toolbar__category {
+  margin-left: auto;
+}
+
+.cxq-dashboard-root .avail-toolbar__middle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.cxq-dashboard-root .avail-toolbar__status {
+  margin-left: auto;
+}
+
+@media (max-width: 48rem) {
+  .cxq-dashboard-root .avail-toolbar__top,
+  .cxq-dashboard-root .avail-toolbar__middle {
+    justify-content: flex-start;
+  }
+
+  .cxq-dashboard-root .avail-toolbar__category,
+  .cxq-dashboard-root .avail-toolbar__status {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .cxq-dashboard-root .avail-toolbar__search {
+    flex: 1 1 100%;
+  }
+}
+
+.cxq-dashboard-root .avail-toolbar__dates {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cxq-dashboard-root .avail-toolbar__dates-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--sea-ink);
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .avail-toolbar__dates > div {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.cxq-dashboard-root .avail-toolbar__dates .field-label {
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .avail-toolbar__dates-clear {
+  flex-shrink: 0;
+}
+
+.cxq-dashboard-root .avail-toolbar__search {
+  display: flex;
+  flex: 1 1 16rem;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .avail-selection-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.625rem;
+  padding-top: 0.125rem;
+}
+
+.cxq-dashboard-root .avail-selection-bar__count {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--sea-ink);
+}
+
+.cxq-dashboard-root .avail-selection-bar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cxq-dashboard-root .avail-table__col-select {
+  width: 2.5rem;
+  padding-right: 0.25rem;
+}
+
+.cxq-dashboard-root .avail-table__checkbox {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  accent-color: var(--lagoon-deep);
+}
+
+.cxq-dashboard-root .field-input[aria-invalid='true'] {
+  border-color: #dc2626;
+}
+
+.cxq-dashboard-root .field-error {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: #b91c1c;
+}
+
+.cxq-dashboard-root .avail-create-sheet__header {
+  gap: 0;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--ui-border, var(--line));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--lagoon-deep, #0d7377) 5%, var(--ui-white, #fff)) 0%,
+    var(--ui-white, #fff) 72%
+  );
+}
+
+.cxq-dashboard-root .avail-create-sheet__header-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.cxq-dashboard-root .avail-create-sheet__header-copy {
+  min-width: 0;
+}
+
+.cxq-dashboard-root .avail-create-sheet__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4375rem;
+  margin: 0 0 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--lagoon-deep, #0d7377);
+  line-height: 1.2;
+}
+
+.cxq-dashboard-root .avail-create-sheet__eyebrow::before {
+  content: '';
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.9;
+}
+
+.cxq-dashboard-root .avail-create-sheet__title {
+  margin: 0;
+  font-size: var(--admin-title, 1.375rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  color: var(--ui-ink, var(--sea-ink));
+}
+
+.cxq-dashboard-root .avail-create-sheet__subtitle {
+  margin: 0.4375rem 0 0;
+  max-width: 28rem;
+  font-size: var(--admin-text-sm, 0.8125rem);
+  line-height: 1.45;
+  color: var(--ui-muted, var(--sea-ink-soft));
+}
+
+.cxq-dashboard-root .avail-create-sheet__capacity-card {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 0.6875rem 0.875rem;
+  border: 1px solid var(--ui-border, var(--line));
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--ui-white, #fff) 88%, var(--ui-canvas, #f4f5f7));
+  box-shadow:
+    0 1px 2px rgba(20, 24, 26, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  text-align: right;
+}
+
+.cxq-dashboard-root .avail-create-sheet__capacity-label {
+  margin: 0;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ui-muted, var(--sea-ink-soft));
+}
+
+.cxq-dashboard-root .avail-create-sheet__capacity-value {
+  margin: 0.1875rem 0 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--ui-ink, var(--sea-ink));
+}
+
+.cxq-dashboard-root .avail-create-sheet__capacity-sep {
+  margin: 0 0.125rem;
+  font-weight: 500;
+  color: var(--ui-muted, var(--sea-ink-soft));
+  opacity: 0.45;
+}
+
+.cxq-dashboard-root .avail-create-sheet__capacity-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+}
+
+.cxq-dashboard-root .avail-create-sheet__capacity-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  line-height: 1.3;
+  color: var(--ui-muted, var(--sea-ink-soft));
+  background: var(--ui-canvas, #f4f5f7);
+}
+
+.cxq-dashboard-root .avail-create-sheet__capacity-chip strong {
+  font-weight: 700;
+  color: var(--ui-ink, var(--sea-ink));
+}
+
+@media (max-width: 40rem) {
+  .cxq-dashboard-root .avail-create-sheet__header-main {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cxq-dashboard-root .avail-create-sheet__capacity-card {
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .cxq-dashboard-root .avail-create-sheet__capacity-chips {
+    justify-content: flex-start;
+  }
+}
+
+.cxq-dashboard-root .avail-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.cxq-dashboard-root .avail-create-form__body {
+  display: grid;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (min-width: 64rem) {
+  .cxq-dashboard-root .avail-create-form__body {
+    grid-template-columns: minmax(0, 1fr) minmax(17.5rem, 22rem);
+  }
+
+  .cxq-dashboard-root .avail-create-form__aside {
+    position: sticky;
+    top: 0;
+  }
+}
+
+.cxq-dashboard-root .avail-create-form__main,
+.cxq-dashboard-root .avail-create-form__aside {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .avail-create-panel {
+  border: 1px solid var(--ui-border, var(--line));
+  border-radius: 0.75rem;
+  background: var(--ui-white, #fff);
+  overflow: hidden;
+}
+
+.cxq-dashboard-root .avail-create-panel__head {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--ui-border, var(--line));
+  background: var(--ui-white, #fff);
+}
+
+.cxq-dashboard-root .avail-create-panel__title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ui-ink, var(--sea-ink));
+}
+
+.cxq-dashboard-root .avail-create-panel__meta {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  color: var(--ui-muted, var(--sea-ink-soft));
+  line-height: 1.35;
+}
+
+.cxq-dashboard-root .avail-create-panel__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 1rem;
+}
+
+.cxq-dashboard-root .avail-create-panel__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.cxq-dashboard-root .avail-create-panel__group + .avail-create-panel__group {
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--ui-border, var(--line));
+}
+
+.cxq-dashboard-root .avail-create-panel__group-label {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ui-muted, var(--sea-ink-soft));
+}
+
+.cxq-dashboard-root .avail-create-field-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 1fr;
+}
+
+.cxq-dashboard-root .avail-create-field-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cxq-dashboard-root .avail-create-field-grid__full {
+  grid-column: 1 / -1;
+}
+
+.cxq-dashboard-root .avail-create-form .field-input,
+.cxq-dashboard-root .avail-create-form [data-slot='input-group'] {
+  min-height: 2rem;
+  font-size: var(--admin-text);
+  font-weight: 400;
+  color: var(--ui-ink);
+  background: var(--ui-white);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-sm);
+  box-shadow: none;
+}
+
+.cxq-dashboard-root .avail-create-form [data-slot='input-group'] {
+  width: 100%;
+  height: 2rem;
+  padding-inline: 0;
+}
+
+.cxq-dashboard-root .avail-create-form [data-slot='input-group-control'] {
+  height: 100%;
+  padding: 0.35rem 0.65rem;
+  font: inherit;
+  font-size: var(--admin-text);
+  color: var(--ui-ink);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.cxq-dashboard-root .avail-create-form [data-slot='input-group']:focus-within {
+  border-color: var(--ui-ink);
+  box-shadow: 0 0 0 3px rgba(20, 24, 26, 0.06);
+}
+
+.cxq-dashboard-root .avail-create-form [data-slot='input-group-control']::placeholder {
+  color: color-mix(in srgb, var(--ui-muted) 80%, transparent);
+  font-weight: 400;
+}
+
+@media (max-width: 40rem) {
+  .cxq-dashboard-root .avail-create-field-grid--2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cxq-dashboard-root .avail-create-panel--fleet .avail-create-panel__body {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.cxq-dashboard-root .avail-create-vehicles {
+  display: flex;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+}
+
+.cxq-dashboard-root .avail-create-vehicle-card {
+  position: relative;
+  cursor: default;
+}
+
+.cxq-dashboard-root .avail-create-vehicle-card__remove {
+  position: absolute;
+  top: 0.375rem;
+  right: 0.375rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid var(--ui-border, var(--line));
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--ui-muted, var(--sea-ink-soft));
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.cxq-dashboard-root .avail-create-vehicle-card__remove:hover {
+  color: var(--ui-ink, var(--sea-ink));
+  border-color: var(--ui-ink, var(--sea-ink));
+  background: #fff;
+}
+
+.cxq-dashboard-root .avail-create-vehicle-card__remove:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.cxq-dashboard-root .avail-create-vehicle-card__remove:disabled:hover {
+  color: var(--ui-muted, var(--sea-ink-soft));
+  border-color: var(--ui-border, var(--line));
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.cxq-dashboard-root .avail-create-vehicle-card:hover {
+  border-color: var(--ui-border, var(--line));
+  box-shadow: none;
+  transform: none;
+}
+
+.cxq-dashboard-root .avail-create-customer__modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cxq-dashboard-root .avail-create-addons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cxq-dashboard-root .avail-create-addon {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--ui-border, var(--line));
+  border-radius: 0.5rem;
+  background: var(--ui-white, #fff);
+  cursor: pointer;
+}
+
+.cxq-dashboard-root .avail-create-addon:has(.avail-create-addon__checkbox:checked) {
+  border-color: color-mix(in srgb, var(--ui-accent, #ff6600) 45%, var(--ui-border, #e4e6ea));
+  background: color-mix(in srgb, var(--ui-accent, #ff6600) 6%, white);
+}
+
+.cxq-dashboard-root .avail-create-addon__checkbox {
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+}
+
+.cxq-dashboard-root .avail-create-addon__label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ui-ink, var(--sea-ink));
+}
+
+.cxq-dashboard-root .avail-create-addon__price {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ui-muted, var(--sea-ink-soft));
+}
+
+.cxq-dashboard-root .avail-pricing-summary {
+  border: 1px solid var(--ui-border, var(--line));
+  border-radius: 0.75rem;
+  background: var(--ui-white, #fff);
+  overflow: hidden;
+}
+
+.cxq-dashboard-root .avail-pricing-summary__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.875rem 1.125rem;
+  border-bottom: 1px solid var(--ui-border, var(--line));
+  background: var(--ui-white, #fff);
+}
+
+.cxq-dashboard-root .avail-pricing-summary__title {
+  margin-bottom: 0.15rem;
+}
+
+.cxq-dashboard-root .avail-pricing-summary__subtitle {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--ui-muted, var(--sea-ink-soft));
+}
+
+.cxq-dashboard-root .avail-pricing-summary__seasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.cxq-dashboard-root .avail-pricing-summary__season {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.375rem;
+  background: var(--ui-white, #fff);
+  border: 1px solid var(--ui-border, var(--line));
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ui-ink, var(--sea-ink));
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .avail-pricing-summary__season--low {
+  border-color: color-mix(in srgb, #16a34a 35%, var(--ui-border, #e4e6ea));
+  color: #166534;
+}
+
+.cxq-dashboard-root .avail-pricing-summary__season--peak {
+  border-color: color-mix(in srgb, #d97706 35%, var(--ui-border, #e4e6ea));
+  color: #92400e;
+}
+
+.cxq-dashboard-root .avail-pricing-summary__season--super {
+  border-color: color-mix(in srgb, #dc2626 35%, var(--ui-border, #e4e6ea));
+  color: #991b1b;
+}
+
+.cxq-dashboard-root .avail-pricing-summary__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cxq-dashboard-root .avail-pricing-summary__table th,
+.cxq-dashboard-root .avail-pricing-summary__table td {
+  padding: 0.625rem 1.125rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  vertical-align: top;
+}
+
+.cxq-dashboard-root .avail-pricing-summary__table tbody th {
+  width: 70%;
+  font-weight: 500;
+  text-align: left;
+  color: var(--ui-ink, var(--sea-ink));
+}
+
+.cxq-dashboard-root .avail-pricing-summary__table tbody td {
+  width: 30%;
+  font-weight: 500;
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-ink, var(--sea-ink));
+}
+
+.cxq-dashboard-root .avail-pricing-summary__detail {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--ui-muted, var(--sea-ink-soft));
+}
+
+.cxq-dashboard-root .avail-pricing-summary__table tbody tr + tr th,
+.cxq-dashboard-root .avail-pricing-summary__table tbody tr + tr td {
+  border-top: 1px solid var(--ui-border, var(--line));
+}
+
+.cxq-dashboard-root .avail-pricing-summary__table tfoot th,
+.cxq-dashboard-root .avail-pricing-summary__table tfoot td {
+  border-top: 1px solid var(--ui-border, var(--line));
+  padding-top: 0.75rem;
+  padding-bottom: 0.875rem;
+  font-size: 1rem;
+  font-weight: 650;
+  color: var(--ui-ink, var(--sea-ink));
+}
+
+.cxq-dashboard-root .avail-pricing-summary__table tfoot th {
+  text-align: left;
+}
+
+.cxq-dashboard-root .avail-pricing-summary__table tfoot td {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.cxq-dashboard-root .avail-pricing-summary__empty,
+.cxq-dashboard-root .avail-pricing-summary__note {
+  margin: 0;
+  padding: 0.875rem 1.125rem;
+  font-size: 0.8125rem;
+  color: var(--ui-muted, var(--sea-ink-soft));
+  line-height: 1.45;
+}
+
+.cxq-dashboard-root .avail-pricing-summary__note {
+  border-top: 1px solid var(--ui-border, var(--line));
+  background: var(--ui-canvas, #f4f5f7);
+}
+
+.cxq-dashboard-root .avail-create-form__aside .avail-pricing-summary {
+  margin: 0;
+}
+
+.cxq-dashboard-root .avail-create-form__aside .form-error {
+  margin: 0;
+}
+
+.cxq-dashboard-root .avail-car-picker {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0.125rem 0.125rem 0.5rem;
+  scroll-snap-type: x proximity;
+}
+
+.cxq-dashboard-root .avail-car-picker__empty {
+  padding: 0.5rem 0;
+}
+
+.cxq-dashboard-root .avail-car-card {
+  display: flex;
+  flex-direction: column;
+  width: 8.5rem;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  border: 1px solid var(--ui-border, var(--line));
+  border-radius: 0.75rem;
+  background: var(--surface, #fff);
+  padding: 0.5rem;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.cxq-dashboard-root .avail-car-card:hover,
+.cxq-dashboard-root .avail-car-card:focus-within {
+  border-color: color-mix(in srgb, var(--lagoon-deep) 35%, var(--ui-border));
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+}
+
+.cxq-dashboard-root .avail-car-card--selected {
+  border-color: var(--lagoon-deep);
+  box-shadow: 0 0 0 1px var(--lagoon-deep);
+}
+
+.cxq-dashboard-root .avail-car-card__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 1px solid var(--ui-border, var(--line));
+  background: var(--surface-muted, #f4f5f7);
+}
+
+.cxq-dashboard-root .avail-car-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cxq-dashboard-root .avail-car-card__placeholder {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  color: var(--sea-ink-soft);
+}
+
+.cxq-dashboard-root .avail-car-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.375rem 0.125rem 0.125rem;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .avail-car-card__name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--sea-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .avail-car-card__plate {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.6875rem;
+  color: var(--sea-ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .avail-car-card__ribbon {
+  position: absolute;
+  top: 0.35rem;
+  left: 0;
+  z-index: 1;
+  max-width: calc(100% - 0.5rem);
+  margin: 0;
+  padding: 0.18rem 0.45rem 0.18rem 0.4rem;
+  border-radius: 0 0.25rem 0.25rem 0;
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.16);
+  pointer-events: none;
+}
+
+.cxq-dashboard-root .avail-car-card__ribbon {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.18);
+}
+
+.cxq-dashboard-root .avail-car-card__ribbon.status-badge--available {
+  background: rgba(255, 255, 255, 0.82);
+  color: #15803d;
+}
+
+.cxq-dashboard-root .avail-car-card__ribbon.status-badge--reserved {
+  background: rgba(255, 255, 255, 0.82);
+  color: #b45309;
+}
+
+.cxq-dashboard-root .avail-car-card__ribbon.status-badge--rented {
+  background: rgba(255, 255, 255, 0.82);
+  color: #b91c1c;
+}
+
+.cxq-dashboard-root .avail-car-card__ribbon.status-badge--maintenance {
+  background: rgba(255, 255, 255, 0.82);
+  color: #475569;
+}
+
+.cxq-dashboard-root .avail-car-card__actions {
+  display: none;
+  margin-top: 0.375rem;
+  width: 100%;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.cxq-dashboard-root .avail-car-card__create {
+  flex: 1;
+  min-width: 0;
+  min-height: 1.75rem;
+  height: 1.75rem;
+  padding-inline: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.cxq-dashboard-root .avail-car-card__calendar-btn {
+  flex: none;
+  min-height: 1.75rem;
+  height: 1.75rem;
+  width: 1.75rem;
+  padding: 0;
+}
+
+.cxq-dashboard-root .avail-car-card:hover .avail-car-card__actions,
+.cxq-dashboard-root .avail-car-card:focus-within .avail-car-card__actions {
+  display: flex;
+}
+
+.cxq-dashboard-root .avail-cal {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.cxq-dashboard-root .avail-cal-month__name {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--sea-ink);
+}
+
+.cxq-dashboard-root .avail-cal-month__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+}
+
+.cxq-dashboard-root .avail-cal-month__weekday {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sea-ink-soft);
+  text-align: center;
+  padding-block: 0.125rem;
+}
+
+.cxq-dashboard-root .avail-cal-month__day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--sea-ink);
+  background: var(--sea-surface-soft, rgba(15, 23, 42, 0.03));
+}
+
+.cxq-dashboard-root .avail-cal-month__day--outside {
+  color: var(--sea-ink-soft);
+  opacity: 0.35;
+  background: transparent;
+}
+
+.cxq-dashboard-root .avail-cal-month__day--today {
+  outline: 2px solid var(--sea-accent, #0ea5e9);
+  outline-offset: -2px;
+  font-weight: 700;
+}
+
+.cxq-dashboard-root .avail-cal-month__day--rented {
+  background: #dc2626;
+  color: #fff;
+  font-weight: 700;
+}
+
+.cxq-dashboard-root button.avail-cal-month__day {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+}
+
+.cxq-dashboard-root button.avail-cal-month__day:not(:disabled):hover {
+  background: var(--sea-accent-soft, rgba(14, 165, 233, 0.18));
+}
+
+.cxq-dashboard-root button.avail-cal-month__day:disabled {
+  cursor: not-allowed;
+}
+
+.cxq-dashboard-root .avail-cal-month__day--in-range {
+  background: var(--sea-accent-soft, rgba(14, 165, 233, 0.18));
+  color: var(--sea-ink);
+  border-radius: 0;
+}
+
+.cxq-dashboard-root .avail-cal-month__day--selected {
+  background: var(--sea-accent, #0ea5e9);
+  color: #fff;
+  font-weight: 700;
+}
+
+.cxq-dashboard-root .avail-cal-month__day--selected.avail-cal-month__day--today {
+  outline-color: #fff;
+}
+
+.cxq-dashboard-root .avail-cal-month__day--reserved {
+  background: #f59e0b;
+  color: #fff;
+  font-weight: 700;
+}
+
+.cxq-dashboard-root .avail-cal__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.cxq-dashboard-root .avail-cal__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--sea-ink-soft);
+}
+
+.cxq-dashboard-root .avail-cal__legend-swatch {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 0.25rem;
+}
+
+.cxq-dashboard-root .avail-cal__legend-swatch--rented {
+  background: #dc2626;
+}
+
+.cxq-dashboard-root .avail-cal__legend-swatch--reserved {
+  background: #f59e0b;
+}
+
+.cxq-dashboard-root .avail-cal__legend-swatch--today {
+  background: transparent;
+  outline: 2px solid var(--sea-accent, #0ea5e9);
+  outline-offset: -2px;
+}
+
+.cxq-dashboard-root .avail-cal__months {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.cxq-dashboard-root .avail-cal__car-head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .avail-cal__car-media {
+  flex: none;
+  height: 4.75rem;
+  border-radius: 0.625rem;
+  overflow: hidden;
+  background: var(--sea-surface-soft, rgba(15, 23, 42, 0.05));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sea-ink-soft);
+}
+
+.cxq-dashboard-root .avail-cal__car-img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.cxq-dashboard-root .avail-cal__nav {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.375rem;
+  flex: none;
+  margin-right: 2.5rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--sea-line, rgba(15, 23, 42, 0.1));
+  border-radius: 0.625rem;
+  background: var(--sea-surface-soft, rgba(15, 23, 42, 0.03));
+}
+
+.cxq-dashboard-root .avail-cal__nav-title {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sea-ink-soft);
+  text-align: center;
+}
+
+.cxq-dashboard-root .avail-cal__nav-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+}
+
+@media (max-width: 900px) {
+  .cxq-dashboard-root .avail-cal__months {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.cxq-dashboard-root .avail-cal__selection {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1.25rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--sea-line, rgba(15, 23, 42, 0.1));
+  border-radius: 0.625rem;
+  background: var(--sea-surface-soft, rgba(15, 23, 42, 0.03));
+}
+
+.cxq-dashboard-root .avail-cal__selection-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cxq-dashboard-root .avail-cal__selection-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sea-ink-soft);
+}
+
+.cxq-dashboard-root .avail-cal__selection-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cxq-dashboard-root .avail-cal__selection-date {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--sea-ink);
+  font-variant-numeric: tabular-nums;
+  min-width: 6.5rem;
+}
+
+.cxq-dashboard-root .avail-cal__time-input {
+  height: 2rem;
+  padding-inline: 0.5rem;
+  border: 1px solid var(--sea-line, rgba(15, 23, 42, 0.12));
+  border-radius: 0.375rem;
+  background: var(--sea-surface, #fff);
+  color: var(--sea-ink);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.cxq-dashboard-root .avail-cal__selection-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ─── CS dashboard ─────────────────────────────────────────────────────────── */
+
+.cxq-dashboard-root .cs-dash {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cxq-dashboard-root .cs-dash-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+}
+
+.cxq-dashboard-root .cs-dash-head__kicker {
+  margin: 0 0 0.2rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .cs-dash-head__title {
+  margin: 0;
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .cs-dash-head__sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .cs-dash-head__dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--ui-muted);
+  opacity: 0.6;
+}
+
+.cxq-dashboard-root .cs-dash-head__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cxq-dashboard-root .cs-dash-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--ui-white);
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+@media (max-width: 960px) {
+  .cxq-dashboard-root .cs-dash-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .cxq-dashboard-root .cs-dash-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cxq-dashboard-root .cs-dash-metric {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  transition: background 0.15s ease;
+}
+
+.cxq-dashboard-root .cs-dash-metric:nth-child(4n) {
+  border-right: none;
+}
+
+@media (max-width: 960px) {
+  .cxq-dashboard-root .cs-dash-metric:nth-child(4n) {
+    border-right: 1px solid var(--line);
+  }
+
+  .cxq-dashboard-root .cs-dash-metric:nth-child(2n) {
+    border-right: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .cxq-dashboard-root .cs-dash-metric {
+    border-right: none;
+  }
+}
+
+.cxq-dashboard-root .cs-dash-metric--active {
+  background: rgba(14, 116, 144, 0.04);
+}
+
+.cxq-dashboard-root .cs-dash-metric__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  flex: none;
+}
+
+.cxq-dashboard-root .cs-dash-metric__icon--payments {
+  background: #ea580c;
+  color: #ffffff;
+}
+
+.cxq-dashboard-root .cs-dash-metric__icon--holds {
+  background: rgba(15, 15, 15, 0.08);
+  color: #111111;
+}
+
+.cxq-dashboard-root .cs-dash-metric__icon--pickups {
+  background: #ea580c;
+  color: #ffffff;
+}
+
+.cxq-dashboard-root .cs-dash-metric__icon--returns {
+  background: #111111;
+  color: #ffffff;
+}
+
+.cxq-dashboard-root .cs-dash-metric__body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .cs-dash-metric__value {
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ui-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.cxq-dashboard-root .cs-dash-metric__label {
+  margin-top: 0.1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .cs-dash-metric__sub {
+  margin-top: 0.1rem;
+  font-size: 0.6875rem;
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .cs-dash-metric__sub--danger {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.cxq-dashboard-root .cs-dash-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .cxq-dashboard-root .cs-dash-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cxq-dashboard-root .op-context {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.op-context__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.op-context__name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #171717;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.op-context__meta {
+  font-size: 13px;
+  color: var(--sea-ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.op-context__meta::before {
+  content: 'Pickup · ';
+  font-weight: 600;
+  color: #f97316;
+}
+
+/* Ops panel stretches to fill the viewport so the infinite-scroll status
+   row ("1 pickup · end of list") sits at the bottom of the page. */
+.admin-main-content > .admin-operations-tabs {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-operations-tabs [data-slot='tabs-content'] {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-operations-tabs [data-slot='tabs-content'] > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-operations-tabs .admin-ops-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-operations-tabs .admin-ops-panel .admin-infinite-status {
+  margin-top: auto;
+}
+
+.cs-dash-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+  min-width: 0;
+}
+
+.cs-dash-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cxq-dashboard-root .cs-dash-panel {
+  padding: 0;
+  overflow: hidden;
+}
+
+.cxq-dashboard-root .cs-dash-panel--queue {
+  min-height: 12rem;
+}
+
+.cxq-dashboard-root .cs-dash-side > .cs-dash-panel:first-child {
+  min-height: 12rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.cxq-dashboard-root .cs-dash-side > .cs-dash-panel:first-child > :last-child {
+  flex: 1;
+}
+
+.cxq-dashboard-root .cs-dash-panel__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1rem 0.75rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.cxq-dashboard-root .cs-dash-panel__title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .cs-dash-panel__desc {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .cs-dash-panel__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ui-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.cxq-dashboard-root .cs-dash-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .cs-dash-empty p {
+  margin: 0;
+  font-size: 0.8125rem;
+}
+
+.cxq-dashboard-root .cs-dash-empty--panel {
+  padding: 2rem 1rem;
+}
+
+.cxq-dashboard-root .cs-dash-queue {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.cxq-dashboard-root .cs-dash-queue__row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  background: var(--ui-white);
+  overflow: hidden;
+  border-left-width: 3px;
+  border-left-color: var(--line);
+}
+
+.cxq-dashboard-root .cs-dash-queue__row--urgent {
+  border-left-color: #d97706;
+}
+
+.cxq-dashboard-root .cs-dash-queue__row--expired {
+  border-left-color: #dc2626;
+  background: rgba(220, 38, 38, 0.03);
+}
+
+.cxq-dashboard-root .cs-dash-queue__row--ok {
+  border-left-color: #0ea5e9;
+}
+
+.cxq-dashboard-root .cs-dash-queue__main {
+  flex: 1;
+  min-width: 0;
+  padding: 0.625rem 0 0.625rem 0.75rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.cxq-dashboard-root .cs-dash-queue__main:hover .cs-dash-queue__customer {
+  color: var(--lagoon-deep, #0e7490);
+}
+
+.cxq-dashboard-root .cs-dash-queue__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+}
+
+.cxq-dashboard-root .cs-dash-queue__ref {
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--lagoon-deep, #0e7490);
+}
+
+.cxq-dashboard-root .cs-dash-queue__age {
+  font-size: 0.6875rem;
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .cs-dash-queue__customer {
+  margin: 0.15rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ui-ink);
+  transition: color 0.15s ease;
+}
+
+.cxq-dashboard-root .cs-dash-queue__meta {
+  margin: 0.1rem 0 0;
+  font-size: 0.75rem;
+  color: var(--ui-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .cs-dash-queue__tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+
+.cxq-dashboard-root .cs-dash-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.cxq-dashboard-root .cs-dash-chip--muted {
+  background: var(--surface-muted);
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .cs-dash-chip--warn {
+  background: rgba(217, 119, 6, 0.12);
+  color: #b45309;
+}
+
+.cxq-dashboard-root .cs-dash-chip--danger {
+  background: rgba(220, 38, 38, 0.1);
+  color: #b91c1c;
+}
+
+.cxq-dashboard-root .cs-dash-chip--ok {
+  background: rgba(14, 116, 144, 0.1);
+  color: #0e7490;
+}
+
+.cxq-dashboard-root .cs-dash-queue__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.625rem 0.75rem 0.625rem 0;
+  flex: none;
+}
+
+.cxq-dashboard-root .cs-dash-queue__amount {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--ui-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.cxq-dashboard-root .cs-dash-queue__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.cxq-dashboard-root .cs-dash-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.45rem;
+  border: 1px solid var(--line);
+  background: var(--ui-white);
+  color: var(--ui-muted);
+  text-decoration: none;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.cxq-dashboard-root .cs-dash-icon-btn:hover {
+  background: var(--surface-muted);
+  color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .cs-dash-icon-btn--primary {
+  border-color: var(--lagoon-deep, #0e7490);
+  background: rgba(14, 116, 144, 0.08);
+  color: var(--lagoon-deep, #0e7490);
+}
+
+.cxq-dashboard-root .cs-dash-icon-btn--primary:hover {
+  background: var(--lagoon-deep, #0e7490);
+  color: #fff;
+}
+
+.cxq-dashboard-root .cs-dash-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.cxq-dashboard-root .cs-dash-timeline__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid transparent;
+  border-radius: 0.55rem;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.cxq-dashboard-root .cs-dash-timeline__item:hover {
+  background: rgba(14, 116, 144, 0.05);
+  border-color: var(--line);
+}
+
+.cxq-dashboard-root .cs-dash-timeline__item--overdue {
+  background: rgba(220, 38, 38, 0.04);
+  border-color: rgba(220, 38, 38, 0.2);
+}
+
+.cxq-dashboard-root .cs-dash-timeline__time {
+  flex: none;
+  min-width: 4.25rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.cxq-dashboard-root .cs-dash-timeline__time--pickup {
+  background: rgba(14, 116, 144, 0.1);
+  color: #0e7490;
+}
+
+.cxq-dashboard-root .cs-dash-timeline__time--return {
+  background: rgba(79, 70, 229, 0.1);
+  color: #4f46e5;
+}
+
+.cxq-dashboard-root .cs-dash-timeline__body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 0.1rem;
+}
+
+.cxq-dashboard-root .cs-dash-timeline__name {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .cs-dash-timeline__badge {
+  padding: 0.05rem 0.35rem;
+  border-radius: 999px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background: rgba(220, 38, 38, 0.12);
+  color: #b91c1c;
+}
+
+.cxq-dashboard-root .cs-dash-timeline__meta {
+  font-size: 0.75rem;
+  color: var(--ui-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .cs-dash-timeline__loc {
+  font-size: 0.6875rem;
+  color: var(--ui-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .cs-dash-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.25rem;
+}
+
+.cxq-dashboard-root .cs-dash-foot__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--lagoon-deep, #0e7490);
+  text-decoration: none;
+}
+
+.cxq-dashboard-root .cs-dash-foot__link:hover {
+  text-decoration: underline;
+}
+
+/* ─── Staff admin ──────────────────────────────────────────────────────────── */
+
+.cxq-dashboard-root .staff-role-chip {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .staff-status {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.cxq-dashboard-root .staff-status--active {
+  background: rgba(22, 163, 74, 0.12);
+  color: #15803d;
+}
+
+.cxq-dashboard-root .staff-status--off {
+  background: rgba(220, 38, 38, 0.1);
+  color: #b91c1c;
+}
+
+.cxq-dashboard-root .staff-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.cxq-dashboard-root .staff-row-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.cxq-dashboard-root .staff-invite-result {
+  border: 1px dashed var(--line);
+  border-radius: 0.55rem;
+  padding: 0.625rem 0.75rem;
+  background: var(--surface-muted);
+}
+
+.cxq-dashboard-root .staff-invite-result__text {
+  margin: 0 0 0.4rem;
+  font-size: 0.8125rem;
+  color: var(--ui-muted);
+}
+
+.cxq-dashboard-root .staff-invite-result__row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.cxq-dashboard-root .staff-invite-result__url {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ui-ink);
+  word-break: break-all;
+}
+
+.cxq-dashboard-root .staff-temp-pass {
+  border-color: rgba(217, 119, 6, 0.5);
+  background: rgba(217, 119, 6, 0.07);
+}
+
+.cxq-dashboard-root .staff-temp-pass__title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .staff-invite-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.cxq-dashboard-root .staff-invite-row__meta {
+  color: var(--ui-ink);
+}
+
+/* ── Job detail: header badges, contacts, vehicle photo ───────────────────── */
+
+.cxq-dashboard-root .job-detail-head-meta__badges {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+}
+
+.cxq-dashboard-root .job-detail-contact {
+  color: var(--ui-accent);
+  text-decoration: none;
+}
+
+.cxq-dashboard-root .job-detail-contact:hover {
+  text-decoration: underline;
+}
+
+.cxq-dashboard-root .job-detail-contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.875rem;
+}
+
+.cxq-dashboard-root .job-detail-contact-actions--header {
+  margin-top: 0;
+  justify-content: flex-end;
+}
+
+.cxq-dashboard-root .job-detail-vehicle__photo {
+  border-radius: var(--ui-radius-md, 8px);
+  border: 1px solid var(--ui-line);
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.cxq-dashboard-root .job-detail-vehicle__photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 200px;
+  object-fit: cover;
+}
+
+.cxq-dashboard-root .job-detail-vehicle__photo--wide {
+  aspect-ratio: auto;
+}
+
+.cxq-dashboard-root .job-detail-vehicle__photo--wide img {
+  height: auto;
+  max-height: none;
+  object-fit: contain;
+}
+
+/* Job detail rail: vertical vehicle card — full-width photo */
+.cxq-dashboard-root .job-detail-vehicle-rail .job-detail-vehicle__photo {
+  width: 100%;
+  max-width: none;
+  aspect-ratio: 16 / 9;
+}
+
+.cxq-dashboard-root .job-detail-vehicle-rail .job-detail-vehicle__photo img {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+}
+
+/* ── Job detail: payment breakdown ────────────────────────────────────────── */
+
+.cxq-dashboard-root .job-pay {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.cxq-dashboard-root .job-pay__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.cxq-dashboard-root .job-pay__line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--ui-ink-dim);
+}
+
+.cxq-dashboard-root .job-pay__line--balance {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.cxq-dashboard-root .job-pay__total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-top: 1px dashed var(--ui-line);
+  border-bottom: 1px dashed var(--ui-line);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .job-pay__progress {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.cxq-dashboard-root .job-pay__progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #059669;
+  transition: width 200ms ease;
+}
+
+.cxq-dashboard-root .job-pay__status {
+  display: flex;
+}
+
+.cxq-dashboard-root .job-pay__deposit {
+  margin: 0;
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--ui-radius-md, 8px);
+  background: rgba(217, 119, 6, 0.07);
+  border: 1px solid rgba(217, 119, 6, 0.3);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: #92400e;
+}
+
+/* ── Job detail: activity timeline ────────────────────────────────────────── */
+
+.cxq-dashboard-root .job-audit {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cxq-dashboard-root .job-audit__item {
+  position: relative;
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.625rem 0;
+}
+
+.cxq-dashboard-root .job-audit__item:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 22px;
+  bottom: -4px;
+  width: 1px;
+  background: var(--ui-line);
+}
+
+.cxq-dashboard-root .job-audit__dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  margin-top: 5px;
+  border-radius: 999px;
+  background: var(--ui-accent);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+}
+
+.cxq-dashboard-root .job-audit__body {
+  min-width: 0;
+}
+
+.cxq-dashboard-root .job-audit__title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .job-audit__meta {
+  margin: 0.125rem 0 0;
+  font-size: 0.75rem;
+  color: var(--ui-ink-dim);
+}
+
+.cxq-dashboard-root .job-audit__lines {
+  list-style: none;
+  margin: 0.375rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  font-size: 0.75rem;
+  color: var(--ui-ink-dim);
+}
+
+.cxq-dashboard-root .job-audit-empty {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--ui-ink-dim);
+}
+
+/* ── Job detail: actions sheet list ───────────────────────────────────────── */
+
+.cxq-dashboard-root .job-actions-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cxq-dashboard-root .job-actions-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: var(--ui-radius-md, 8px);
+  border: 1px solid var(--ui-line);
+  background: var(--ui-panel, #fff);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+.cxq-dashboard-root .job-actions-item:hover {
+  border-color: var(--ui-accent);
+  background: rgba(15, 23, 42, 0.02);
+}
+
+.cxq-dashboard-root .job-actions-item--danger:hover {
+  border-color: #dc2626;
+  background: rgba(220, 38, 38, 0.04);
+}
+
+.cxq-dashboard-root .job-actions-item__icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.05);
+  color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .job-actions-item--danger .job-actions-item__icon {
+  background: rgba(220, 38, 38, 0.08);
+  color: #b91c1c;
+}
+
+.cxq-dashboard-root .job-actions-item__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .job-actions-item__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .job-actions-item--danger .job-actions-item__label {
+  color: #b91c1c;
+}
+
+.cxq-dashboard-root .job-actions-item__desc {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ui-ink-dim);
+}
+
+/* ── Job detail: trip strip in page header ────────────────────────────────── */
+
+.cxq-dashboard-root .job-trip {
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-md, 10px);
+  background: var(--ui-panel, #fff);
+  min-width: 320px;
+}
+
+.cxq-dashboard-root .job-trip__leg {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.cxq-dashboard-root .job-trip__leg--end {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.cxq-dashboard-root .job-trip__label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ui-ink-dim);
+}
+
+.cxq-dashboard-root .job-trip__when {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ui-ink);
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .job-trip__where {
+  font-size: 0.75rem;
+  color: var(--ui-ink-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.cxq-dashboard-root .job-trip__sep {
+  flex: none;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--ui-ink-dim);
+  padding: 0 0.25rem;
+}
+
+.cxq-dashboard-root .job-trip__duration {
+  font-size: var(--admin-text-xs);
+  font-weight: 700;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  background: #ffedd5;
+  color: #c2410c;
+  white-space: nowrap;
+}
+
+.cxq-dashboard-root .job-detail-head-meta__sep {
+  flex: none;
+  width: 1px;
+  height: 14px;
+  background: var(--ui-line);
+  margin: 0 0.125rem;
+}
+
+@media (max-width: 720px) {
+  .cxq-dashboard-root .job-trip {
+    min-width: 0;
+    width: 100%;
+    gap: 0.5rem;
+    padding: 0.625rem 0.75rem;
+  }
+
+  .cxq-dashboard-root .job-trip__where {
+    max-width: 110px;
+  }
+}
+
+.cxq-dashboard-root .job-trip--card {
+  width: 100%;
+  min-width: 0;
+  justify-content: space-between;
+  background: var(--ui-panel, #fff);
+  border: 1px solid rgba(15, 23, 42, 0.22);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  padding: 0.875rem 1.125rem;
+}
+
+.cxq-dashboard-root .job-trip--card .job-trip__where {
+  max-width: none;
+}
+
+/* ── Job detail: slim topbar (replaces page header band) ──────────────────── */
+
+.cxq-dashboard-root .job-detail-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.875rem;
+}
+
+.cxq-dashboard-root .job-detail-topbar__back {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ui-ink-dim);
+  text-decoration: none;
+}
+
+.cxq-dashboard-root .job-detail-topbar__back:hover {
+  color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .job-detail-topbar__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cxq-dashboard-root .job-detail-topbar__meta .ui-chip {
+  font-size: 0.8125rem;
+  padding: 0.3rem 0.625rem;
+}
+
+.cxq-dashboard-root .job-detail-topbar__meta .job-detail-topbar__ref {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .job-detail-topbar__meta > span:not(.ui-chip):not(.job-detail-topbar__ref) {
+  font-size: 0.8125rem;
+  padding: 0.3rem 0.625rem;
+}
+
+/* ── Change job sheet: segmented control, sections, live summary ──────────── */
+
+.cxq-dashboard-root .job-segment {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--ui-line);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.cxq-dashboard-root .job-segment__btn {
+  padding: 0.375rem 0.875rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ui-ink-dim);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.cxq-dashboard-root .job-segment__btn:hover {
+  color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .job-segment__btn.is-active {
+  background: var(--ui-panel, #fff);
+  color: var(--ui-ink);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+}
+
+.cxq-dashboard-root .job-edit-section {
+  margin: 0;
+  padding: 0.875rem 1rem 1rem;
+  border: 1px solid var(--ui-line);
+  border-radius: 12px;
+}
+
+.cxq-dashboard-root .job-edit-section__legend {
+  padding: 0 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ui-ink-dim);
+}
+
+.cxq-dashboard-root .job-edit-summary {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px dashed var(--ui-line);
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.cxq-dashboard-root .job-edit-summary__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--ui-ink-dim);
+  padding: 0.125rem 0;
+}
+
+.cxq-dashboard-root .job-edit-summary__row strong {
+  font-size: 0.875rem;
+  color: var(--ui-ink);
+}
+
+.cxq-dashboard-root .job-edit-summary__note {
+  margin: 0.375rem 0 0;
+  font-size: 0.75rem;
+  color: var(--ui-ink-dim);
+}
+
+/* ── Jobs list: bordered day-preset group ─────────────────────────────────── */
+
+.cxq-dashboard-root .jobs-create-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: 0.5rem;
+  height: 40px;
+  padding: 0 0.9rem;
+  border-radius: 10px;
+  font-size: var(--admin-text-sm);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.cxq-dashboard-root .jobs-day-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid rgba(15, 23, 42, 0.18);
+  border-radius: 10px;
+  background: var(--ui-panel, #fff);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
 }

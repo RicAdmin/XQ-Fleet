@@ -12,6 +12,8 @@ import { RowActionsMenu } from '#/components/ui/RowActionsMenu'
 import { StatusFilterSelect } from '#/components/ui/StatusFilterSelect'
 import { TableSkeleton } from '#/components/ui/TableSkeleton'
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
+import { jobBookingRef } from '#/lib/job-display'
+import { INTERNAL_JOBS_PATH } from '#/lib/internal-routes'
 import { Button } from '#/components/ui/button'
 import {
   Sheet,
@@ -24,8 +26,10 @@ import {
   createCustomer,
   deleteCustomer,
   getCustomerAccountCounts,
+  listCustomerAuditLog,
   listCustomers,
   updateCustomer,
+  type CustomerAuditEntry,
   type CustomerListResult,
 } from '#/lib/customer-functions'
 
@@ -44,6 +48,8 @@ export type CustomerRow = {
   address: string | null
   createdAt: Date
   updatedAt: Date
+  latestJobId: string | null
+  latestJobType: string | null
 }
 
 type CustomerFormData = {
@@ -127,6 +133,10 @@ export default function CustomersList({
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
+  // Audit log (edit sheet)
+  const [auditEntries, setAuditEntries] = useState<CustomerAuditEntry[]>([])
+  const [auditLoading, setAuditLoading] = useState(false)
+
   async function load(p = page) {
     setLoading(true)
     setLoadError(null)
@@ -196,6 +206,18 @@ export default function CustomersList({
     setFormError(null)
     setFormOpen(true)
   }
+
+  useEffect(() => {
+    if (!formOpen || !editingCustomer) {
+      setAuditEntries([])
+      return
+    }
+    setAuditLoading(true)
+    void listCustomerAuditLog({ data: { customerId: editingCustomer.id } })
+      .then(setAuditEntries)
+      .catch(() => setAuditEntries([]))
+      .finally(() => setAuditLoading(false))
+  }, [formOpen, editingCustomer])
 
   function closeForm() {
     setFormOpen(false)
@@ -278,37 +300,68 @@ export default function CustomersList({
       header: 'Name',
       sortable: true,
       render: (c) => (
-        <Link to={`${basePath}/$customerId` as never} params={{ customerId: c.id } as never} className="plate-link">
-          {c.fullName ?? '—'}
-        </Link>
+        <div className="min-w-0">
+          <Link
+            to={`${basePath}/$customerId` as never}
+            params={{ customerId: c.id } as never}
+            className="plate-link font-medium"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {c.fullName ?? '—'}
+          </Link>
+          {c.icOrPassport ? (
+            <p className="m-0 mt-0.5 font-mono text-xs text-[var(--sea-ink-soft)]">
+              {c.icOrPassport}
+            </p>
+          ) : null}
+        </div>
       ),
     },
     {
-      key: 'icOrPassport',
-      header: 'IC / Passport',
-      sortable: true,
-      cellClassName: 'font-mono text-xs text-[var(--sea-ink-soft)]',
-      render: (c) => c.icOrPassport ?? '—',
+      key: 'contact',
+      header: 'Contact',
+      cellClassName: 'min-w-[12rem]',
+      render: (c) => (
+        <div className="min-w-0">
+          <p className="m-0 text-sm text-[var(--sea-ink)]">{c.phone ?? '—'}</p>
+          <p className="m-0 mt-0.5 truncate text-xs text-[var(--sea-ink-soft)]">
+            {c.email ?? <span className="opacity-40">No email</span>}
+          </p>
+        </div>
+      ),
     },
     {
-      key: 'phone',
-      header: 'Phone',
-      sortable: true,
-      cellClassName: 'text-[var(--sea-ink-soft)]',
-      render: (c) => c.phone ?? '—',
+      key: 'source',
+      header: 'Source',
+      render: (c) => (
+        <span className="ui-chip ui-chip--sm">
+          {c.authUserId ? 'Web' : 'In-House'}
+        </span>
+      ),
     },
     {
-      key: 'email',
-      header: 'Email',
-      sortable: true,
-      cellClassName: 'text-[var(--sea-ink-soft)]',
-      render: (c) => c.email ?? <span className="opacity-40">—</span>,
+      key: 'latestJob',
+      header: 'Job ID',
+      cellClassName: 'whitespace-nowrap',
+      render: (c) =>
+        c.latestJobId ? (
+          <Link
+            to={`${INTERNAL_JOBS_PATH}/$jobId` as never}
+            params={{ jobId: c.latestJobId } as never}
+            className="plate-link font-mono text-xs tabular-nums"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {jobBookingRef(c.latestJobId)}
+          </Link>
+        ) : (
+          <span className="text-[var(--sea-ink-soft)] opacity-60">—</span>
+        ),
     },
     {
       key: 'createdAt',
-      header: 'Joined',
+      header: 'Created Date',
       sortable: true,
-      cellClassName: 'text-[var(--sea-ink-soft)]',
+      cellClassName: 'text-[var(--sea-ink-soft)] whitespace-nowrap',
       render: (c) => formatDate(c.createdAt),
     },
     {
@@ -317,25 +370,31 @@ export default function CustomersList({
       headerClassName: 'text-right',
       cellClassName: 'text-right whitespace-nowrap',
       render: (c) => (
-        <RowActionsMenu
-          label={`Actions for ${c.fullName ?? 'customer'}`}
-          actions={[
-            { label: 'Edit', icon: <Pencil />, onSelect: () => openEdit(c) },
-            ...(canDelete
-              ? [
-                  {
-                    label: 'Delete',
-                    variant: 'destructive' as const,
-                    separatorBefore: true,
-                    onSelect: () => {
-                      setConfirmingDelete(c)
-                      setDeleteError(null)
+        <div
+          className="inline-flex"
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
+          <RowActionsMenu
+            label={`Actions for ${c.fullName ?? 'customer'}`}
+            actions={[
+              { label: 'Edit', icon: <Pencil />, onSelect: () => openEdit(c) },
+              ...(canDelete
+                ? [
+                    {
+                      label: 'Delete',
+                      variant: 'destructive' as const,
+                      separatorBefore: true,
+                      onSelect: () => {
+                        setConfirmingDelete(c)
+                        setDeleteError(null)
+                      },
                     },
-                  },
-                ]
-              : []),
-          ]}
-        />
+                  ]
+                : []),
+            ]}
+          />
+        </div>
       ),
     },
   ]
@@ -404,6 +463,7 @@ export default function CustomersList({
           sortKey={sortKey}
           sortDir={sortDir}
           onSort={handleSort as (key: string) => void}
+          onRowClick={(c) => openEdit(c)}
           emptyState={
             <div className="hub-empty-state m-6">
               <Users size={28} className="text-[var(--sea-ink-soft)]" />
@@ -519,8 +579,8 @@ export default function CustomersList({
                 </label>
                 <textarea
                   id="cuf-address"
-                  className="field-input"
-                  rows={3}
+                  className="field-input min-h-[9.5rem]"
+                  rows={6}
                   value={formData.address}
                   onChange={(e) => setField('address', e.target.value)}
                   placeholder="Street, city, postcode…"
@@ -529,6 +589,81 @@ export default function CustomersList({
 
               {formError && <p className="form-error">{formError}</p>}
             </form>
+
+            {editingCustomer ? (
+              <section className="mt-5 border-t border-[var(--line)] pt-4">
+                <p className="island-kicker mb-2">Audit log</p>
+                {auditLoading ? (
+                  <p className="text-sm text-[var(--sea-ink-soft)]">Loading history…</p>
+                ) : auditEntries.length === 0 ? (
+                  <p className="text-sm text-[var(--sea-ink-soft)]">No edits recorded yet.</p>
+                ) : (
+                  <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
+                    {auditEntries.map((entry) => (
+                      <li
+                        key={entry.id}
+                        className="rounded-md border border-[var(--line)] bg-[var(--ui-canvas)] px-3 py-2"
+                      >
+                        <p className="m-0 text-sm font-medium text-[var(--sea-ink)]">
+                          {entry.action === 'update' ? 'Details updated' : entry.action}
+                          <span className="ml-2 font-normal text-[var(--sea-ink-soft)]">
+                            {entry.actorName ?? 'System'}
+                            {entry.actorRole ? ` · ${entry.actorRole}` : ''}
+                          </span>
+                        </p>
+                        <p className="m-0 mt-0.5 text-xs text-[var(--sea-ink-soft)]">
+                          {new Date(entry.createdAt).toLocaleString('en-MY', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                        {entry.before && entry.after ? (
+                          <ul className="m-0 mt-1.5 flex list-none flex-col gap-0.5 p-0">
+                            {(['fullName', 'icOrPassport', 'phone', 'email', 'address'] as const)
+                              .filter(
+                                (field) =>
+                                  String(
+                                    (entry.before as Record<string, unknown>)[field] ?? '',
+                                  ) !==
+                                  String(
+                                    (entry.after as Record<string, unknown>)[field] ?? '',
+                                  ),
+                              )
+                              .map((field) => (
+                                <li
+                                  key={field}
+                                  className="text-xs text-[var(--sea-ink-soft)]"
+                                >
+                                  <span className="font-medium text-[var(--sea-ink)]">
+                                    {field === 'icOrPassport'
+                                      ? 'IC / Passport'
+                                      : field === 'fullName'
+                                        ? 'Name'
+                                        : field.charAt(0).toUpperCase() + field.slice(1)}
+                                    :
+                                  </span>{' '}
+                                  <span className="line-through opacity-70">
+                                    {String(
+                                      (entry.before as Record<string, unknown>)[field] ?? '—',
+                                    ) || '—'}
+                                  </span>{' '}
+                                  →{' '}
+                                  {String(
+                                    (entry.after as Record<string, unknown>)[field] ?? '—',
+                                  ) || '—'}
+                                </li>
+                              ))}
+                          </ul>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            ) : null}
           </div>
 
           <SheetFooter className="flex-row gap-2 border-t border-[var(--line)] px-5 py-4">

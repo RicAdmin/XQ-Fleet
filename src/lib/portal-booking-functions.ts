@@ -11,6 +11,7 @@ import {
   usesSingleUnitCarStatus,
   type FleetCapacity,
 } from '#/lib/fleet-capacity'
+import { resolveFulfillmentForListingCar } from '#/lib/rental-fulfillment'
 import { HOLD_MINUTES } from '#/lib/payment-functions'
 import {
   computeFinalTotal,
@@ -540,12 +541,26 @@ export const createPortalBooking = createServerFn({ method: 'POST' })
         paymentConfig.paymentMode === 'deposit' ? paymentConfig.depositAmountSen : 0
 
       const holdExpiry = new Date(Date.now() + HOLD_MINUTES * 60 * 1000)
+      const rentalId = crypto.randomUUID()
+      const fulfillment = await resolveFulfillmentForListingCar(tx, {
+        listingCarId: data.carId,
+        tripStart: startDate,
+        tripEnd: endDate,
+        rentalIdForTempLabel: rentalId,
+      })
 
-      // Create rental with full pricing breakdown
+      // Create rental with full pricing breakdown + auto plate/temp fulfillment
       const [rental] = await tx
         .insert(rentals)
         .values({
+          id: rentalId,
           carId: data.carId,
+          assignedCarId: fulfillment.assignedCarId,
+          fulfillmentSource: fulfillment.fulfillmentSource,
+          partnerId: fulfillment.partnerId,
+          partnerCarModelId: fulfillment.partnerCarModelId,
+          tempPlateLabel: fulfillment.tempPlateLabel,
+          plateConfirmedAt: fulfillment.plateConfirmedAt,
           customerId,
           type: 'booking',
           status: 'pending',

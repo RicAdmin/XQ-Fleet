@@ -67,6 +67,7 @@ type OwnedUnitDraft = {
 type Props = {
   carId: string
   canEdit: boolean
+  section?: 'all' | 'owned' | 'partner'
   onCapacitySynced?: (board: CarCapacityBoard) => void
 }
 
@@ -114,7 +115,7 @@ function boardToOwnedDraft(board: CarCapacityBoard): OwnedUnitDraft[] {
   return rows
 }
 
-export function CarCapacityPanel({ carId, canEdit, onCapacitySynced }: Props) {
+export function CarCapacityPanel({ carId, canEdit, section = 'all', onCapacitySynced }: Props) {
   const [board, setBoard] = useState<CarCapacityBoard | null>(null)
   const [partners, setPartners] = useState<PartnerOption[]>([])
   const [draftRows, setDraftRows] = useState<DraftRow[]>([])
@@ -276,12 +277,25 @@ export function CarCapacityPanel({ carId, canEdit, onCapacitySynced }: Props) {
     }
   }
 
+  const headerKicker =
+    section === 'partner'
+      ? 'Partner supply'
+      : section === 'owned'
+        ? 'Self-owned capacity'
+        : 'Fleet capacity'
+  const headerTitle =
+    section === 'partner'
+      ? 'Overbook capacity for this model'
+      : section === 'owned'
+        ? 'Fleet plates for this model'
+        : 'Booking slots for this model'
+
   if (loading && !board) {
     return (
       <Card>
         <CardHeader>
-          <CardDescription className="island-kicker">Fleet capacity</CardDescription>
-          <CardTitle className="text-base">Booking slots for this model</CardTitle>
+          <CardDescription className="island-kicker">{headerKicker}</CardDescription>
+          <CardTitle className="text-base">{headerTitle}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-[var(--sea-ink-soft)]">Loading capacity…</p>
@@ -294,8 +308,8 @@ export function CarCapacityPanel({ carId, canEdit, onCapacitySynced }: Props) {
     return (
       <Card>
         <CardHeader>
-          <CardDescription className="island-kicker">Fleet capacity</CardDescription>
-          <CardTitle className="text-base">Booking slots for this model</CardTitle>
+          <CardDescription className="island-kicker">{headerKicker}</CardDescription>
+          <CardTitle className="text-base">{headerTitle}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="form-error">{loadError ?? 'Unable to load capacity.'}</p>
@@ -328,6 +342,7 @@ export function CarCapacityPanel({ carId, canEdit, onCapacitySynced }: Props) {
 
   const capacityForm = canEdit ? (
     <form className="space-y-6" onSubmit={handleSave}>
+      {section !== 'partner' ? (
       <section>
         <div className="mb-2 flex items-center justify-between gap-2">
           <h3 className="text-sm font-semibold text-[var(--sea-ink)]">Self-owned</h3>
@@ -342,7 +357,7 @@ export function CarCapacityPanel({ carId, canEdit, onCapacitySynced }: Props) {
 
         <ul className="space-y-2">
           {ownedDraftRows.map((unit) => (
-            <li key={unit.key} className="space-y-2 rounded-lg border border-[var(--line)] p-3">
+            <li key={unit.key} className="capacity-row space-y-2 rounded-lg border border-[var(--line)] p-3">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-medium text-[var(--sea-ink-soft)]">
                   Owned unit
@@ -359,14 +374,14 @@ export function CarCapacityPanel({ carId, canEdit, onCapacitySynced }: Props) {
                   </Link>
                 ) : null}
               </div>
-              <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_7.5rem_5.5rem_auto_auto] sm:items-end">
-                <div>
+              <div className="grid gap-3 sm:grid-cols-[minmax(10rem,1.4fr)_9rem_6rem_auto_auto] sm:items-end">
+                <div className="min-w-0">
                   <label className="field-label" htmlFor={`plate-${unit.key}`}>
                     Plate number
                   </label>
                   <input
                     id={`plate-${unit.key}`}
-                    className="field-input h-10 min-h-10 min-w-0 font-mono uppercase"
+                    className="field-input h-10 min-h-10 w-full min-w-0 font-mono uppercase"
                     value={unit.plateNumber}
                     onChange={(e) =>
                       updateOwnedUnit(unit.key, { plateNumber: e.target.value.toUpperCase() })
@@ -375,7 +390,7 @@ export function CarCapacityPanel({ carId, canEdit, onCapacitySynced }: Props) {
                     required
                   />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <label className="field-label" htmlFor={`color-${unit.key}`}>
                     Color
                   </label>
@@ -395,7 +410,7 @@ export function CarCapacityPanel({ carId, canEdit, onCapacitySynced }: Props) {
                     ))}
                   </select>
                 </div>
-                <div>
+                <div className="min-w-0">
                   <label className="field-label" htmlFor={`year-${unit.key}`}>
                     Year
                   </label>
@@ -410,7 +425,7 @@ export function CarCapacityPanel({ carId, canEdit, onCapacitySynced }: Props) {
                     required
                   />
                 </div>
-                <div className="flex h-10 items-center">
+                <div className="flex h-10 items-center justify-end">
                   {unit.status ? <StatusBadge status={unit.status} size="sm" /> : null}
                 </div>
                 <div className="flex h-10 items-center">
@@ -442,7 +457,9 @@ export function CarCapacityPanel({ carId, canEdit, onCapacitySynced }: Props) {
           </Button>
         </div>
       </section>
+      ) : null}
 
+      {section !== 'owned' ? (
       <section>
         <div className="mb-2 flex items-center justify-between gap-2">
           <h3 className="text-sm font-semibold text-[var(--sea-ink)]">Partner overbook</h3>
@@ -461,15 +478,15 @@ export function CarCapacityPanel({ carId, canEdit, onCapacitySynced }: Props) {
               {draftRows.map((row) => (
                 <li
                   key={row.key}
-                  className="grid gap-2 rounded-lg border border-[var(--line)] p-3 sm:grid-cols-[1fr_6rem_auto]"
+                  className="capacity-row grid gap-3 rounded-lg border border-[var(--line)] p-3 sm:grid-cols-[minmax(0,1fr)_7rem_auto] sm:items-end"
                 >
-                  <div>
+                  <div className="min-w-0">
                     <label className="field-label" htmlFor={`partner-${row.key}`}>
                       Partner
                     </label>
                     <select
                       id={`partner-${row.key}`}
-                      className="field-input"
+                      className="field-input h-10 min-h-10 w-full"
                       value={row.partnerId}
                       onChange={(e) => updateRow(row.key, { partnerId: e.target.value })}
                       required
@@ -482,7 +499,7 @@ export function CarCapacityPanel({ carId, canEdit, onCapacitySynced }: Props) {
                       ))}
                     </select>
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <label className="field-label" htmlFor={`units-${row.key}`}>
                       Units
                     </label>
@@ -490,7 +507,7 @@ export function CarCapacityPanel({ carId, canEdit, onCapacitySynced }: Props) {
                       id={`units-${row.key}`}
                       type="number"
                       min={1}
-                      className="field-input"
+                      className="field-input h-10 min-h-10 w-full"
                       value={row.maxUnits}
                       onChange={(e) => updateRow(row.key, { maxUnits: e.target.value })}
                       required
@@ -519,8 +536,12 @@ export function CarCapacityPanel({ carId, canEdit, onCapacitySynced }: Props) {
           </div>
         </div>
       </section>
+      ) : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--line)] pt-4">
+      <div className="flex flex-wrap items-center justify-start gap-3 border-t border-[var(--line)] pt-4">
+        <button type="submit" className="button-primary" disabled={saving}>
+          {saving ? 'Saving…' : 'Save capacity'}
+        </button>
         <p className="text-sm text-[var(--sea-ink-soft)]">
           Max concurrent bookings:{' '}
           <span className="font-medium text-[var(--sea-ink)]">{previewMax}</span>
@@ -529,14 +550,12 @@ export function CarCapacityPanel({ carId, canEdit, onCapacitySynced }: Props) {
             ({ownedForCapacity} owned + {draftPartnerTotal} partner)
           </span>
         </p>
-        <button type="submit" className="button-primary" disabled={saving}>
-          {saving ? 'Saving…' : 'Save capacity'}
-        </button>
       </div>
       {saveError ? <p className="form-error">{saveError}</p> : null}
     </form>
   ) : (
     <>
+      {section !== 'partner' ? (
       <section>
         <div className="mb-2 flex items-center justify-between gap-2">
           <h3 className="text-sm font-semibold text-[var(--sea-ink)]">Self-owned</h3>
@@ -579,7 +598,9 @@ export function CarCapacityPanel({ carId, canEdit, onCapacitySynced }: Props) {
           </ul>
         )}
       </section>
+      ) : null}
 
+      {section !== 'owned' ? (
       <section>
         <div className="mb-2 flex items-center justify-between gap-2">
           <h3 className="text-sm font-semibold text-[var(--sea-ink)]">Partner overbook</h3>
@@ -615,6 +636,7 @@ export function CarCapacityPanel({ carId, canEdit, onCapacitySynced }: Props) {
           <span className="font-medium text-[var(--sea-ink)]">{board.maxConcurrent}</span>
         </p>
       </section>
+      ) : null}
     </>
   )
 
@@ -622,8 +644,8 @@ export function CarCapacityPanel({ carId, canEdit, onCapacitySynced }: Props) {
     <>
       <Card>
         <CardHeader>
-          <CardDescription className="island-kicker">Fleet capacity</CardDescription>
-          <CardTitle className="text-base">Booking slots for this model</CardTitle>
+          <CardDescription className="island-kicker">{headerKicker}</CardDescription>
+          <CardTitle className="text-base">{headerTitle}</CardTitle>
         </CardHeader>
         <CardContent>{capacityForm}</CardContent>
       </Card>

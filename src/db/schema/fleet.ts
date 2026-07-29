@@ -53,19 +53,30 @@ export type CarColor = (typeof carColorEnum.enumValues)[number]
 export const rentalTypeEnum = pgEnum('rental_type', ['booking', 'walk-in'])
 export const rentalStatusEnum = pgEnum('rental_status', [
   'pending',
+  'confirmed',
+  'expired',
   'active',
   'closed',
   'cancelled',
 ])
+export const tripTypeEnum = pgEnum('trip_type', ['round', 'oneway'])
 export const paymentStatusEnum = pgEnum('payment_status', [
   'unpaid',
   'partial',
   'paid',
 ])
+export const rentalFulfillmentSourceEnum = pgEnum('rental_fulfillment_source', [
+  'owned',
+  'partner',
+  'unassigned',
+])
 
 export type RentalType = (typeof rentalTypeEnum.enumValues)[number]
 export type RentalStatus = (typeof rentalStatusEnum.enumValues)[number]
+export type TripType = (typeof tripTypeEnum.enumValues)[number]
 export type PaymentStatus = (typeof paymentStatusEnum.enumValues)[number]
+export type RentalFulfillmentSource =
+  (typeof rentalFulfillmentSourceEnum.enumValues)[number]
 export const paymentProviderEnum = pgEnum('payment_provider', ['manual', 'ipay88'])
 export const paymentAttemptStatusEnum = pgEnum('payment_attempt_status', [
   'pending',
@@ -250,6 +261,20 @@ export const rentals = pgTable(
     carId: uuid('car_id')
       .notNull()
       .references(() => cars.id, { onDelete: 'restrict' }),
+    /** Concrete owned plate when known; listing capacity still uses carId. */
+    assignedCarId: uuid('assigned_car_id').references(() => cars.id, {
+      onDelete: 'set null',
+    }),
+    fulfillmentSource: rentalFulfillmentSourceEnum('fulfillment_source')
+      .notNull()
+      .default('unassigned'),
+    partnerId: uuid('partner_id'),
+    partnerCarModelId: uuid('partner_car_model_id'),
+    tempPlateLabel: text('temp_plate_label'),
+    plateConfirmedAt: timestamp('plate_confirmed_at', {
+      mode: 'date',
+      withTimezone: true,
+    }),
     customerId: uuid('customer_id')
       .notNull()
       .references(() => customers.id, { onDelete: 'restrict' }),
@@ -292,6 +317,34 @@ export const rentals = pgTable(
     endMileage: integer('end_mileage'),
     startConditionNote: text('start_condition_note'),
     endConditionNote: text('end_condition_note'),
+    /** Round trip or one-way (return at a different meet point). */
+    tripType: tripTypeEnum('trip_type').notNull().default('round'),
+    /** CS-created jobs must be confirmed within 72h of creation. */
+    bookingExpiresAt: timestamp('booking_expires_at', {
+      mode: 'date',
+      withTimezone: true,
+    }),
+    confirmedAt: timestamp('confirmed_at', { mode: 'date', withTimezone: true }),
+    confirmedByUserId: text('confirmed_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    /** Actual pickup timestamp recorded at handover. */
+    actualPickupAt: timestamp('actual_pickup_at', {
+      mode: 'date',
+      withTimezone: true,
+    }),
+    /** Ops user who performed the pickup handover. */
+    handoverByUserId: text('handover_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    /** Ops user who closed the return. */
+    returnByUserId: text('return_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    /** Deposit cash collected at pickup (refundable at return). */
+    depositPaidSen: integer('deposit_paid_sen').notNull().default(0),
+    /** Extra charge when fuel level at return is lower than at pickup. */
+    fuelFeeSen: integer('fuel_fee_sen').notNull().default(0),
     paymentHoldExpiresAt: timestamp('payment_hold_expires_at', {
       mode: 'date',
       withTimezone: true,
@@ -321,6 +374,7 @@ export const rentals = pgTable(
   },
   (table) => [
     index('rentals_car_id_idx').on(table.carId),
+    index('rentals_assigned_car_id_idx').on(table.assignedCarId),
     index('rentals_customer_id_idx').on(table.customerId),
     index('rentals_status_idx').on(table.status),
     index('rentals_status_start_date_idx').on(table.status, table.startDate),
@@ -414,6 +468,35 @@ export const rentalNotes = pgTable(
       .defaultNow(),
   },
   (table) => [index('rental_notes_rental_idx').on(table.rentalId)],
+)
+
+export const rentalPhotoPhaseEnum = pgEnum('rental_photo_phase', ['pickup', 'return'])
+
+export const rentalPhotos = pgTable(
+  'rental_photos',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    rentalId: uuid('rental_id')
+      .notNull()
+      .references(() => rentals.id, { onDelete: 'cascade' }),
+    phase: rentalPhotoPhaseEnum('phase').notNull(),
+    /** e.g. ic_passport, dashboard, exterior, fuel, damage, other */
+    category: text('category').notNull().default('other'),
+    url: text('url').notNull(),
+    caption: text('caption'),
+    uploadedByUserId: text('uploaded_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    createdAt: timestamp('created_at', {
+      mode: 'date',
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index('rental_photos_rental_idx').on(table.rentalId, table.phase),
+  ],
 )
 
 export const carServiceConfig = pgTable('car_service_config', {

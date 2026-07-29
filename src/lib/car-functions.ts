@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { and, asc, desc, eq, ilike, inArray, ne, notInArray, or, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, gte, ilike, inArray, lte, ne, notInArray, or, sql } from 'drizzle-orm'
 import { z } from 'zod'
 
 import { carPhotos, cars, rentals } from '#/db/schema'
@@ -21,6 +21,7 @@ import {
   type CarDisplayStatus,
   type OverdueCarBuckets,
 } from '#/lib/car-display-status'
+import { loadCoverPhotoUrlByMakeModel } from '#/lib/car-model-functions'
 import {
   adminInputValidator,
   carCategoryFilterSchema,
@@ -202,8 +203,21 @@ export type CarListRow = {
   ownedCapacityCount: number
   ownedUnits: OwnedCapacityUnit[]
   partnerCapacities: CarListPartnerCapacity[]
+  /** Days this car was on rent in the current calendar year (active + closed rentals). */
+  rentedDaysYtd: number
   createdAt: Date
   updatedAt: Date
+}
+
+export type CarRentedDaysChartEntry = {
+  plateNumber: string
+  make: string
+  model: string
+  days: number
+  /** Rented days per month (index 0 = January) for the current year. */
+  monthlyDays: number[]
+  category: CarCategory
+  coverPhotoUrl: string | null
 }
 
 export type CarListResult = {
@@ -212,6 +226,8 @@ export type CarListResult = {
   page: number
   pageSize: number
   statusCounts: Record<string, number>
+  /** Rented-days-YTD for every self-owned car, sorted high to low (for charts). */
+  rentedDaysChart: CarRentedDaysChartEntry[]
 }
 
 const carStatusFilterValues = [...carStatusValues, 'overdue'] as const
@@ -221,10 +237,47 @@ const listCarsSchema = paginationSchema.extend({
   category: carCategoryFilterSchema,
   search: z.string().trim().max(120).optional(),
   sortKey: z
-    .enum(['plateNumber', 'make', 'year', 'status', 'category', 'dailyRateSen', 'createdAt'])
+    .enum(['plateNumber', 'make', 'year', 'status', 'category', 'dailyRateSen', 'createdAt', 'rentedDaysYtd'])
     .default('plateNumber'),
   sortDir: sortDirSchema,
 })
+
+type RentalSpan = { carId: string; startDate: Date; endDate: Date }
+
+function sumRentedDaysYtd(spans: RentalSpan[], yearStart: Date, now: Date) {
+  const totals = new Map<string, number>()
+  for (const span of spans) {
+    const start = span.startDate > yearStart ? span.startDate : yearStart
+    const end = span.endDate < now ? span.endDate : now
+    const days = Math.max(0, Math.ceil((end.getTime() - start.getTime()) / 86_400_000))
+    totals.set(span.carId, (totals.get(span.carId) ?? 0) + days)
+  }
+  return totals
+}
+
+/** Per-month rented-day breakdown (index 0 = January) for the current year. */
+function monthlyRentedDaysYtd(spans: RentalSpan[], yearStart: Date, now: Date) {
+  const result = new Map<string, number[]>()
+  for (const span of spans) {
+    const start = span.startDate > yearStart ? span.startDate : yearStart
+    const end = span.endDate < now ? span.endDate : now
+    if (end <= start) continue
+    const months = result.get(span.carId) ?? Array.from({ length: 12 }, () => 0)
+    let cursor = new Date(start)
+    while (cursor < end) {
+      const monthEnd = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1)
+      const sliceEnd = monthEnd < end ? monthEnd : end
+      const days = Math.max(
+        0,
+        Math.ceil((sliceEnd.getTime() - cursor.getTime()) / 86_400_000),
+      )
+      months[cursor.getMonth()] += days
+      cursor = monthEnd
+    }
+    result.set(span.carId, months)
+  }
+  return result
+}
 
 async function getCarStatusCounts(overdue: OverdueCarBuckets) {
   const { db } = await import('#/db')
@@ -268,6 +321,7 @@ export const listCars = createServerFn({ method: 'GET' })
           page: data.page,
           pageSize: data.pageSize,
           statusCounts: await getCarStatusCounts(overdue),
+          rentedDaysChart: [],
         }
       }
       filters.push(inArray(cars.id, overdue.ids))
@@ -291,6 +345,8 @@ export const listCars = createServerFn({ method: 'GET' })
     }
     const whereClause = filters.length ? and(...filters) : undefined
 
+    const sortByRentedDays = data.sortKey === 'rentedDaysYtd'
+
     const sortColumn = {
       plateNumber: cars.plateNumber,
       make: cars.make,
@@ -299,15 +355,19 @@ export const listCars = createServerFn({ method: 'GET' })
       category: cars.category,
       dailyRateSen: cars.dailyRateSen,
       createdAt: cars.createdAt,
+      // rentedDaysYtd is computed in JS — fall back to plate for the DB ordering.
+      rentedDaysYtd: cars.plateNumber,
     }[data.sortKey]
 
     const orderBy = data.sortDir === 'asc' ? asc(sortColumn) : desc(sortColumn)
     const offset = (data.page - 1) * data.pageSize
 
     const baseQuery = db.select().from(cars)
-    const rowsPromise = whereClause
-      ? baseQuery.where(whereClause).orderBy(orderBy).limit(data.pageSize).offset(offset)
-      : baseQuery.orderBy(orderBy).limit(data.pageSize).offset(offset)
+    const filteredQuery = whereClause ? baseQuery.where(whereClause) : baseQuery
+    // Sorting by rented days needs the full filtered set before slicing.
+    const rowsPromise = sortByRentedDays
+      ? filteredQuery.orderBy(asc(cars.plateNumber))
+      : filteredQuery.orderBy(orderBy).limit(data.pageSize).offset(offset)
 
     const countBase = db.select({ count: sql<number>`count(*)::int` }).from(cars)
     const countPromise = whereClause ? countBase.where(whereClause) : countBase
@@ -349,6 +409,10 @@ export const listCars = createServerFn({ method: 'GET' })
             .where(and(inArray(carPhotos.carId, carIds), eq(carPhotos.isCover, true)))
 
     const coverByCarId = new Map(coverPhotos.map((photo) => [photo.carId, photo.url]))
+    const coverByMakeModel = await loadCoverPhotoUrlByMakeModel(
+      db,
+      rows.map((row) => ({ make: row.make, model: row.model })),
+    )
 
     const openByCarId = new Map<
       string,
@@ -363,8 +427,91 @@ export const listCars = createServerFn({ method: 'GET' })
     }
 
     const now = new Date()
+    const yearStart = new Date(now.getFullYear(), 0, 1)
+
+    const rentedSpans =
+      carIds.length === 0
+        ? []
+        : await db
+            .select({
+              carId: rentals.carId,
+              startDate: rentals.startDate,
+              endDate: rentals.endDate,
+            })
+            .from(rentals)
+            .where(
+              and(
+                inArray(rentals.carId, carIds),
+                inArray(rentals.status, ['active', 'closed']),
+                lte(rentals.startDate, now),
+                gte(rentals.endDate, yearStart),
+              ),
+            )
+    const rentedDaysByCarId = sumRentedDaysYtd(rentedSpans, yearStart, now)
+
+    // Chart dataset: rented days YTD across all self-owned cars (page-independent).
+    const ownedFleetCars = await db
+      .select({
+        id: cars.id,
+        plateNumber: cars.plateNumber,
+        make: cars.make,
+        model: cars.model,
+        category: cars.category,
+      })
+      .from(cars)
+      .where(eq(cars.ownedByFleet, true))
+    const ownedIds = ownedFleetCars.map((row) => row.id)
+    const ownedSpans =
+      ownedIds.length === 0
+        ? []
+        : await db
+            .select({
+              carId: rentals.carId,
+              startDate: rentals.startDate,
+              endDate: rentals.endDate,
+            })
+            .from(rentals)
+            .where(
+              and(
+                inArray(rentals.carId, ownedIds),
+                inArray(rentals.status, ['active', 'closed']),
+                lte(rentals.startDate, now),
+                gte(rentals.endDate, yearStart),
+              ),
+            )
+    const ownedDaysByCarId = sumRentedDaysYtd(ownedSpans, yearStart, now)
+    const ownedMonthlyByCarId = monthlyRentedDaysYtd(ownedSpans, yearStart, now)
+    const ownedCovers =
+      ownedIds.length === 0
+        ? []
+        : await db
+            .select({ carId: carPhotos.carId, url: carPhotos.url })
+            .from(carPhotos)
+            .where(and(inArray(carPhotos.carId, ownedIds), eq(carPhotos.isCover, true)))
+    const ownedCoverByCarId = new Map(ownedCovers.map((photo) => [photo.carId, photo.url]))
+    const ownedCoverByMakeModel = await loadCoverPhotoUrlByMakeModel(
+      db,
+      ownedFleetCars.map((row) => ({ make: row.make, model: row.model })),
+    )
+    const rentedDaysChart: CarRentedDaysChartEntry[] = ownedFleetCars
+      .map((row) => {
+        const capacityKey = `${row.make.toLowerCase()}\0${row.model.toLowerCase()}`
+        return {
+          plateNumber: row.plateNumber,
+          make: row.make,
+          model: row.model,
+          days: ownedDaysByCarId.get(row.id) ?? 0,
+          monthlyDays:
+            ownedMonthlyByCarId.get(row.id) ?? Array.from({ length: 12 }, () => 0),
+          category: row.category,
+          coverPhotoUrl:
+            ownedCoverByCarId.get(row.id) ?? ownedCoverByMakeModel.get(capacityKey) ?? null,
+        }
+      })
+      .sort((a, b) => b.days - a.days)
+
     const capacityByMakeModel = await listCapacitySummariesByMakeModel(db, rows)
-    const enrichedRows: CarListRow[] = rows.map((row) => {
+    let enrichedRows: CarListRow[] = rows.map((row) => {
       const capacityKey = `${row.make.toLowerCase()}\0${row.model.toLowerCase()}`
       const capacity = capacityByMakeModel.get(capacityKey) ?? {
         ownedCount: ownedUnitCountFromSiblings(0),
@@ -374,13 +521,24 @@ export const listCars = createServerFn({ method: 'GET' })
 
       return {
         ...row,
-        coverPhotoUrl: coverByCarId.get(row.id) ?? null,
+        coverPhotoUrl:
+          coverByCarId.get(row.id) ?? coverByMakeModel.get(capacityKey) ?? null,
         displayStatus: deriveCarDisplayStatus(row.status, openByCarId.get(row.id), now),
         ownedCapacityCount: capacity.ownedCount,
         ownedUnits: capacity.ownedUnits,
         partnerCapacities: capacity.partners,
+        rentedDaysYtd: rentedDaysByCarId.get(row.id) ?? 0,
       }
     })
+
+    if (sortByRentedDays) {
+      enrichedRows.sort((a, b) =>
+        data.sortDir === 'asc'
+          ? a.rentedDaysYtd - b.rentedDaysYtd
+          : b.rentedDaysYtd - a.rentedDaysYtd,
+      )
+      enrichedRows = enrichedRows.slice(offset, offset + data.pageSize)
+    }
 
     return {
       rows: enrichedRows,
@@ -388,6 +546,7 @@ export const listCars = createServerFn({ method: 'GET' })
       page: data.page,
       pageSize: data.pageSize,
       statusCounts,
+      rentedDaysChart,
     }
   })
 

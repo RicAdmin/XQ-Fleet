@@ -16,6 +16,7 @@ import { cn } from '#/lib/utils'
 export interface Column<T> {
   key: string
   header: string
+  headerContent?: React.ReactNode
   sortable?: boolean
   headerClassName?: string
   cellClassName?: string | ((row: T) => string)
@@ -114,6 +115,8 @@ export function DataTable<T>({
                     {col.header}
                     <SortIcon active={sortKey === col.key} dir={sortDir} />
                   </span>
+                ) : col.headerContent ? (
+                  col.headerContent
                 ) : (
                   col.header
                 )}

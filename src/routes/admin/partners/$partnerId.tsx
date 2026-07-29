@@ -1,12 +1,11 @@
 import { useState } from 'react'
 
-import { createFileRoute, notFound } from '@tanstack/react-router'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { createFileRoute, Link, notFound } from '@tanstack/react-router'
+import { Pencil, Trash2 } from 'lucide-react'
 
 import AdminSidebarShell from '#/components/shells/AdminSidebarShell'
 import { ConfirmActionDialog } from '#/components/ui/ConfirmActionDialog'
 import { DataTable, type Column } from '#/components/ui/DataTable'
-import { PageHeader } from '#/components/ui/PageHeader'
 import { RowActionsMenu } from '#/components/ui/RowActionsMenu'
 import { StatusBadge } from '#/components/ui/StatusBadge'
 import { Button } from '#/components/ui/button'
@@ -15,7 +14,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from '#/components/ui/card'
 import {
   Sheet,
@@ -103,6 +101,25 @@ function modelToForm(row: PartnerModelRow): ModelForm {
   }
 }
 
+function DetailField({
+  label,
+  children,
+  mono,
+}: {
+  label: string
+  children: React.ReactNode
+  mono?: boolean
+}) {
+  return (
+    <div className="job-detail-field">
+      <dt className="job-detail-field__label">{label}</dt>
+      <dd className={mono ? 'job-detail-field__value font-mono' : 'job-detail-field__value'}>
+        {children}
+      </dd>
+    </div>
+  )
+}
+
 function PartnerDetailPage() {
   const { session, detail: initialDetail } = Route.useRouteContext() as unknown as {
     session: { user: { name: string; email: string; role: string } }
@@ -177,14 +194,6 @@ function PartnerDetailPage() {
     } finally {
       setPartnerSaving(false)
     }
-  }
-
-  function openAddModel() {
-    setEditingModel(null)
-    setModelForm(emptyModelForm())
-    setModelError(null)
-    setModelOpen(true)
-    void ensureCarsLoaded()
   }
 
   function openEditModel(row: PartnerModelRow) {
@@ -324,105 +333,101 @@ function PartnerDetailPage() {
 
   return (
     <AdminSidebarShell user={session.user} pageTitle="Partner">
-      <PageHeader
-        variant="detail"
-        backLink={{ to: '/admin/partners', label: 'Back' }}
-        title={partner.name}
-        description={
-          <>
-            <span className="font-mono text-xs">{formatPartnerCode(partner.code)}</span>
-            <span className="ui-meta-sep" aria-hidden>
-              ·
+      <div className="job-detail">
+        <div className="job-detail-topbar">
+          <Link to="/admin/partners" className="job-detail-topbar__back">
+            ← Partners
+          </Link>
+          <div className="job-detail-topbar__meta">
+            <span className="font-mono tabular-nums job-detail-topbar__ref">
+              {partner.name}
             </span>
-            <StatusBadge status={partner.status} size="sm" />
-          </>
-        }
-        actions={
-          <button
-            type="button"
-            className="button-primary flex items-center gap-2"
-            onClick={openAddModel}
-          >
-            <Plus size={15} />
-            Add car model
-          </button>
-        }
-      />
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardDescription className="island-kicker">Partner</CardDescription>
-            <CardTitle className="text-base">Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <dl className="mb-4 flex flex-col gap-2 text-sm">
-              <div className="summary-row">
-                <dt className="text-[var(--sea-ink-soft)]">Contact</dt>
-                <dd>{partner.contactPerson || '—'}</dd>
-              </div>
-              <div className="summary-row">
-                <dt className="text-[var(--sea-ink-soft)]">Phone</dt>
-                <dd>{partner.phone || '—'}</dd>
-              </div>
-              <div className="summary-row">
-                <dt className="text-[var(--sea-ink-soft)]">Email</dt>
-                <dd>{partner.email || '—'}</dd>
-              </div>
-            </dl>
-            <form className="space-y-3" onSubmit={savePartnerMeta}>
-              <div>
-                <label className="field-label" htmlFor="pd-status">Status</label>
-                <select
-                  id="pd-status"
-                  className="field-input"
-                  value={partnerStatus}
-                  onChange={(e) =>
-                    setPartnerStatus(e.target.value as typeof partnerStatus)
-                  }
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-              </div>
-              <div>
-                <label className="field-label" htmlFor="pd-notes">Notes</label>
-                <textarea
-                  id="pd-notes"
-                  className="field-input"
-                  rows={3}
-                  value={partnerNotes}
-                  onChange={(e) => setPartnerNotes(e.target.value)}
-                />
-              </div>
-              {partnerError ? <p className="form-error">{partnerError}</p> : null}
-              <Button type="submit" disabled={partnerSaving}>
-                {partnerSaving ? 'Saving…' : 'Save partner'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        <article className="workspace-panel island-shell overflow-x-auto p-0 lg:col-span-2">
-          <div className="border-b border-[var(--line)] px-4 py-3">
-            <p className="island-kicker">Supply</p>
-            <h3 className="text-base font-semibold text-[var(--sea-ink)]">
-              Car models ({detail.models.length})
-            </h3>
+            <StatusBadge status={partner.status} size="md" />
+            <span className="ui-chip ui-chip--sm font-mono">
+              {formatPartnerCode(partner.code)}
+            </span>
+            <span className="ui-chip ui-chip--sm">
+              {detail.models.length} model{detail.models.length !== 1 ? 's' : ''}
+            </span>
           </div>
-          <DataTable
-            columns={columns}
-            data={detail.models}
-            getKey={(row) => row.id}
-            emptyState={
-              <div className="hub-empty-state m-6">
-                <p className="text-sm text-[var(--sea-ink-soft)]">
-                  No models yet. Add the car types this partner can supply.
-                </p>
-              </div>
-            }
-          />
-        </article>
+        </div>
+
+        <div className="job-detail-grid">
+          <div className="job-detail-main">
+            <Card className="job-detail-card">
+              <CardHeader className="pb-2">
+                <div>
+                  <CardDescription className="island-kicker">Supply</CardDescription>
+                  <h2 className="job-detail-card__title">
+                    Car models ({detail.models.length})
+                  </h2>
+                </div>
+              </CardHeader>
+              <CardContent className="px-0 pb-0">
+                <DataTable
+                  columns={columns}
+                  data={detail.models}
+                  getKey={(row) => row.id}
+                  emptyState={
+                    <div className="hub-empty-state m-6">
+                      <p className="text-sm text-[var(--sea-ink-soft)]">
+                        No models yet. Add the car types this partner can supply.
+                      </p>
+                    </div>
+                  }
+                />
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="job-detail-rail">
+            <Card className="job-detail-card">
+              <CardHeader className="pb-2">
+                <CardDescription className="island-kicker">Partner</CardDescription>
+                <h2 className="job-detail-card__title">Details</h2>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <dl className="job-detail-fields">
+                  <DetailField label="Contact">
+                    {partner.contactPerson || '—'}
+                  </DetailField>
+                  <DetailField label="Phone">{partner.phone || '—'}</DetailField>
+                  <DetailField label="Email">{partner.email || '—'}</DetailField>
+                </dl>
+                <form className="space-y-3" onSubmit={savePartnerMeta}>
+                  <div>
+                    <label className="field-label" htmlFor="pd-status">Status</label>
+                    <select
+                      id="pd-status"
+                      className="field-input"
+                      value={partnerStatus}
+                      onChange={(e) =>
+                        setPartnerStatus(e.target.value as typeof partnerStatus)
+                      }
+                    >
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="field-label" htmlFor="pd-notes">Notes</label>
+                    <textarea
+                      id="pd-notes"
+                      className="field-input"
+                      rows={3}
+                      value={partnerNotes}
+                      onChange={(e) => setPartnerNotes(e.target.value)}
+                    />
+                  </div>
+                  {partnerError ? <p className="form-error">{partnerError}</p> : null}
+                  <Button type="submit" disabled={partnerSaving}>
+                    {partnerSaving ? 'Saving…' : 'Save partner'}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
 
       <Sheet open={modelOpen} onOpenChange={(open) => { if (!open) setModelOpen(false) }}>

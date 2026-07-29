@@ -162,8 +162,6 @@ export function calculateBaseRental(days: DayEntry[], car: CarPricing): number {
 
 // ─── Step 3: Extra hours (Option 1 — full timestamp comparison) ───────────────
 
-const FULL_DAY_CAP_THRESHOLD = 6
-
 export function calculateExtraHours(
   pickUpDate: Date,
   pickUpTime: string,
@@ -198,22 +196,21 @@ export function calculateExtraHours(
   const hourlyRate = hourlyRateSen / 100
   const dayRate = dayRateSen / 100
 
-  // Rule A: full-day cap at >= 6 extra hours
-  if (extraHours >= FULL_DAY_CAP_THRESHOLD) {
-    const extraDays = Math.ceil(extraHours / 24)
-    return {
-      hours: extraHours,
-      charge: extraDays * dayRate,
-      appliedRule: 'full-day-cap',
-      capDayRate: dayRate,
-    }
-  }
+  // Each full 24h block is charged as one extra day at the seasonal day rate.
+  // The remaining hours are billed at the configured hourly rate, but the
+  // hourly charge must never exceed the daily rate of the same season.
+  const fullDays = Math.floor(extraHours / 24)
+  const remainingHours = extraHours - fullDays * 24
+  const uncappedRemaining = remainingHours * hourlyRate
+  const remainingCharge = Math.min(uncappedRemaining, dayRate)
+  const capped = fullDays > 0 || uncappedRemaining > dayRate
 
   return {
     hours: extraHours,
-    charge: extraHours * hourlyRate,
-    appliedRule: 'hourly',
+    charge: fullDays * dayRate + remainingCharge,
+    appliedRule: capped ? 'full-day-cap' : 'hourly',
     hourlyRate,
+    capDayRate: dayRate,
   }
 }
 

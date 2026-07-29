@@ -162,7 +162,7 @@ export function PaymentsTab({
       {
         key: 'createdAt',
         header: 'Created',
-        cellClassName: 'text-xs',
+        cellClassName: 'whitespace-nowrap',
         render: (r) => formatDateTime(r.createdAt),
       },
       {
@@ -173,13 +173,12 @@ export function PaymentsTab({
       {
         key: 'method',
         header: 'Method',
-        cellClassName: 'text-sm',
         render: (r) => r.paymentMethod ?? r.provider,
       },
       {
         key: 'reference',
         header: 'Reference',
-        cellClassName: 'max-w-[14rem] truncate font-mono text-xs',
+        cellClassName: 'max-w-[14rem] truncate font-mono text-[13px]',
         render: (r) => r.externalRef ?? '—',
       },
       {
@@ -188,7 +187,7 @@ export function PaymentsTab({
         cellClassName: 'whitespace-normal',
         render: (r) => (
           <div>
-            <div className="font-mono">{r.rentalCarPlateNumber ?? '—'}</div>
+            <div className="font-mono text-[13px]">{r.rentalCarPlateNumber ?? '—'}</div>
             <div className="text-xs text-[var(--sea-ink-soft)]">
               {r.rentalCustomerFullName ?? '—'}
             </div>

@@ -2,9 +2,9 @@ import { createServerFn } from '@tanstack/react-start'
 import { and, asc, desc, eq, ilike, isNotNull, isNull, ne, or, sql } from 'drizzle-orm'
 import { z } from 'zod'
 
-import { customers } from '#/db/schema'
+import { customers, rentals } from '#/db/schema'
 import { requireRole } from '#/lib/auth-functions'
-import { fleetOpsRoles, fullAdminRoles } from '#/lib/auth-model'
+import { fleetOpsRoles, fullAdminRoles, type AppRole } from '#/lib/auth-model'
 import {
   adminInputValidator,
   paginationSchema,
@@ -130,6 +130,8 @@ export type CustomerListRow = {
   address: string | null
   createdAt: Date
   updatedAt: Date
+  latestJobId: string | null
+  latestJobType: string | null
 }
 
 export type CustomerListResult = {
@@ -207,7 +209,31 @@ export const listCustomers = createServerFn({ method: 'GET' })
     const orderBy = data.sortDir === 'asc' ? asc(sortColumn) : desc(sortColumn)
     const offset = (data.page - 1) * data.pageSize
 
-    const baseQuery = db.select().from(customers)
+    const baseQuery = db
+      .select({
+        id: customers.id,
+        authUserId: customers.authUserId,
+        fullName: customers.fullName,
+        email: customers.email,
+        icOrPassport: customers.icOrPassport,
+        phone: customers.phone,
+        address: customers.address,
+        createdAt: customers.createdAt,
+        updatedAt: customers.updatedAt,
+        latestJobId: sql<string | null>`(
+          select r.id from ${rentals} r
+          where r.customer_id = ${customers.id}
+          order by r.created_at desc
+          limit 1
+        )`,
+        latestJobType: sql<string | null>`(
+          select r.type from ${rentals} r
+          where r.customer_id = ${customers.id}
+          order by r.created_at desc
+          limit 1
+        )`,
+      })
+      .from(customers)
     const rowsPromise = whereClause
       ? baseQuery.where(whereClause).orderBy(orderBy).limit(data.pageSize).offset(offset)
       : baseQuery.orderBy(orderBy).limit(data.pageSize).offset(offset)
@@ -355,6 +381,13 @@ export const updateCustomer = createServerFn({ method: 'POST' })
     const validated = validateCustomerFields(data)
 
     const { db } = await import('#/db')
+    const [before] = await db
+      .select()
+      .from(customers)
+      .where(eq(customers.id, data.customerId))
+      .limit(1)
+    if (!before) throw new Error('Customer not found.')
+
     const existing = await db
       .select({ id: customers.id })
       .from(customers)
@@ -385,11 +418,75 @@ export const updateCustomer = createServerFn({ method: 'POST' })
       .returning()
 
     if (!result[0]) throw new Error('Customer not found.')
+
+    const { auth } = await import('#/lib/auth')
+    const { getRequestHeaders } = await import('@tanstack/react-start/server')
+    const session = await auth.api.getSession({ headers: getRequestHeaders() })
+    const { recordAuditLog } = await import('#/lib/audit-log')
+    await recordAuditLog({
+      actorUserId: session?.user?.id ?? null,
+      actorRole: (session?.user as { role?: AppRole } | undefined)?.role ?? null,
+      action: 'update',
+      entityType: 'customer',
+      entityId: data.customerId,
+      before: {
+        fullName: before.fullName,
+        icOrPassport: before.icOrPassport,
+        phone: before.phone,
+        email: before.email,
+        address: before.address,
+      },
+      after: {
+        fullName: result[0].fullName,
+        icOrPassport: result[0].icOrPassport,
+        phone: result[0].phone,
+        email: result[0].email,
+        address: result[0].address,
+      },
+    })
+
     return result[0]
   })
 
-export const deleteCustomer = createServerFn({ method: 'POST' })
-  .inputValidator((input: DeleteCustomerInput) => input)
+export type CustomerAuditEntry = {
+  id: string
+  action: string
+  actorName: string | null
+  actorRole: string | null
+  before: object | null
+  after: object | null
+  createdAt: Date
+}
+
+/** Audit timeline for one customer — who edited what, when. */
+export const listCustomerAuditLog = createServerFn({ method: 'GET' })
+  .inputValidator((input: { customerId: string }) => input)
+  .handler(async ({ data }): Promise<CustomerAuditEntry[]> => {
+    await requireRole(fleetOpsRoles)
+    const { db } = await import('#/db')
+    const { auditLog } = await import('#/db/schema/audit')
+    const { users } = await import('#/db/schema')
+
+    const rows = await db
+      .select({
+        id: auditLog.id,
+        action: auditLog.action,
+        actorName: users.name,
+        actorRole: auditLog.actorRole,
+        before: auditLog.before,
+        after: auditLog.after,
+        createdAt: auditLog.createdAt,
+      })
+      .from(auditLog)
+      .leftJoin(users, eq(auditLog.actorUserId, users.id))
+      .where(and(eq(auditLog.entityType, 'customer'), eq(auditLog.entityId, data.customerId)))
+      .orderBy(desc(auditLog.createdAt))
+      .limit(20)
+
+    return rows as CustomerAuditEntry[]
+  })
+
+export const deleteCustomer = createServerFn({ method: 'POST' }).inputValidator((input: DeleteCustomerInput) => input)
   .handler(async ({ data }) => {
     await requireRole(fullAdminRoles)
     const { db } = await import('#/db')

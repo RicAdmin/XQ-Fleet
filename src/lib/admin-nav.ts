@@ -13,6 +13,7 @@ export type AdminNavLinkTo =
   | '/admin/customers'
   | '/admin/rentals'
   | '/internal/jobs'
+  | '/internal/dashboard'
   | '/admin/settings'
   | '/admin/promos'
   | '/admin/affiliates'
@@ -24,6 +25,7 @@ export type AdminNavLinkTo =
   | '/admin/staff'
   | '/admin/partners'
   | '/admin/maintenance'
+  | '/admin/accounts'
   | '/app/customers'
   | '/app/rentals'
 

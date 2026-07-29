@@ -179,6 +179,8 @@ export type AdminBookingsResult = {
 
 const rentalStatusValues = [
   'pending',
+  'confirmed',
+  'expired',
   'active',
   'closed',
   'cancelled',

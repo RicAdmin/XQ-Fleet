@@ -1634,6 +1634,8 @@ html.dark .cxq-light-surface {
 .status-badge--retired        { background: var(--status-retired-bg);         color: var(--status-retired-text); }
 
 .status-badge--pending   { background: var(--status-maintenance-bg); color: var(--status-maintenance-text); }
+.status-badge--confirmed { background: #f97316; color: #fff; }
+.status-badge--expired   { background: #171717; color: #fff; }
 .status-badge--active    { background: var(--status-available-bg);   color: var(--status-available-text); }
 .status-badge--closed    { background: var(--status-retired-bg);     color: var(--status-retired-text); }
 .status-badge--cancelled { background: var(--status-damaged-bg);     color: var(--status-damaged-text); }

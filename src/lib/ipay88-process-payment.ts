@@ -248,14 +248,27 @@ export async function processIpay88Payment(
       .limit(1)
 
     if (rentalData) {
+      const nowPaid = new Date()
       await db
         .update(rentals)
         .set({
           paidAmountSen: payment.amountSen,
           paymentStatus: 'paid',
-          updatedAt: new Date(),
+          updatedAt: nowPaid,
         })
         .where(eq(rentals.id, rentalData.id))
+
+      // Paid web bookings go straight to confirmed so ops can pick them up.
+      await db
+        .update(rentals)
+        .set({
+          status: 'confirmed',
+          confirmedAt: nowPaid,
+          bookingExpiresAt: null,
+          paymentHoldExpiresAt: null,
+          updatedAt: nowPaid,
+        })
+        .where(and(eq(rentals.id, rentalData.id), eq(rentals.status, 'pending')))
 
       const fleetCapacity = await getCarFleetCapacity(db, rentalData.carId)
       if (fleetCapacity && usesSingleUnitCarStatus(fleetCapacity)) {

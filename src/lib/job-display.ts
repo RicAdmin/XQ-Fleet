@@ -1,4 +1,4 @@
-import type { RentalType } from '#/db/schema'
+import type { RentalType, RentalFulfillmentSource } from '#/db/schema'
 import type { RentalListRow } from '#/lib/rental-functions'
 import {
   isPickupOverdue,
@@ -6,20 +6,55 @@ import {
 } from '#/components/admin/operations-queue-utils'
 import { makeBookingRef, rentalDays } from '#/emails/email-helpers'
 
-export function formatJobType(type: RentalType): string {
-  return type === 'walk-in' ? 'In House' : 'Online booking'
+export const JOB_SOURCES = ['in-house', 'web', 'sales-agent'] as const
+export type JobSource = (typeof JOB_SOURCES)[number]
+
+export const JOB_SOURCE_LABELS: Record<JobSource, string> = {
+  'in-house': 'In-House',
+  web: 'Web',
+  'sales-agent': 'Sales Agent',
 }
 
-/** In-house CS jobs show as "CS · {staff name}"; portal bookings as "Online". */
-export function formatJobSource(
-  type: RentalType,
-  createdByName?: string | null,
+export type JobSourceInput = Pick<
+  RentalListRow,
+  | 'type'
+  | 'affiliateRefCode'
+  | 'affiliateAttributionId'
+  | 'refferqRefCode'
+>
+
+export function hasSalesAgentAttribution(row: {
+  affiliateRefCode?: string | null
+  affiliateAttributionId?: string | null
+  refferqRefCode?: string | null
+}): boolean {
+  if (row.affiliateAttributionId) return true
+  if (row.affiliateRefCode?.trim()) return true
+  if (row.refferqRefCode?.trim()) return true
+  return false
+}
+
+export function resolveJobSource(row: JobSourceInput): JobSource {
+  if (row.type === 'walk-in') return 'in-house'
+  if (hasSalesAgentAttribution(row)) return 'sales-agent'
+  return 'web'
+}
+
+/** Staff-created job types shown in create/edit forms (Sales Agent is derived from affiliate data). */
+export function formatJobType(type: RentalType): string {
+  return type === 'walk-in' ? JOB_SOURCE_LABELS['in-house'] : JOB_SOURCE_LABELS.web
+}
+
+export function formatJobSource(row: JobSourceInput): string {
+  return JOB_SOURCE_LABELS[resolveJobSource(row)]
+}
+
+export function formatFulfillmentLabel(
+  source: RentalFulfillmentSource | null | undefined,
 ): string {
-  if (type === 'walk-in') {
-    const name = createdByName?.trim()
-    return name ? `CS · ${name}` : 'CS'
-  }
-  return 'Online'
+  if (source === 'owned') return 'Owned plate'
+  if (source === 'partner') return 'Partner'
+  return 'Plate TBC'
 }
 
 export function jobBookingRef(rentalId: string): string {
@@ -66,7 +101,8 @@ export function toTimeInputValue(time: string | null | undefined): string {
 }
 
 export function isJobOverdue(rental: RentalListRow): boolean {
-  if (rental.status === 'pending') return isPickupOverdue(rental)
+  if (rental.status === 'pending' || rental.status === 'confirmed')
+    return isPickupOverdue(rental)
   if (rental.status === 'active') return isReturnOverdue(rental)
   return false
 }

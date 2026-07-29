@@ -28,31 +28,32 @@ export default function AdminOperations({ session, initialQueue }: AdminOperatio
 
   return (
     <AdminSidebarShell user={session.user} pageTitle="Operation">
-      <PageHeader
-        kicker="Operations floor"
-        title="Operation"
-        description="Pickup, return, and open jobs — phone, IC, and payment at a glance."
-      />
-
       <Tabs
         value={tab}
         onValueChange={(value) => setTab(value as OperationTab)}
         className="gap-2.5 admin-operations-tabs"
       >
-        <TabsList variant="pill" className="w-full max-w-xl">
-          <TabsTrigger value="pickups">
-            <KeyRound size={14} />
-            Pickup ({queue.pickups.length})
-          </TabsTrigger>
-          <TabsTrigger value="returns">
-            <Undo2 size={14} />
-            Return ({queue.returns.length})
-          </TabsTrigger>
-          <TabsTrigger value="all">
-            <List size={14} />
-            All ({queue.all.length})
-          </TabsTrigger>
-        </TabsList>
+        <PageHeader
+          kicker="Operations floor"
+          title="Operation"
+          description="Pickup, return, and open jobs — phone, IC, and payment at a glance."
+          actions={
+            <TabsList variant="pill">
+              <TabsTrigger value="pickups">
+                <KeyRound size={14} />
+                Pickup ({queue.pickups.length})
+              </TabsTrigger>
+              <TabsTrigger value="returns">
+                <Undo2 size={14} />
+                Return ({queue.returns.length})
+              </TabsTrigger>
+              <TabsTrigger value="all">
+                <List size={14} />
+                All ({queue.all.length})
+              </TabsTrigger>
+            </TabsList>
+          }
+        />
 
         <TabsContent value="pickups" className="mt-0">
           <PickupsTab rows={queue.pickups} onMutated={refreshQueue} />
@@ -63,7 +64,11 @@ export default function AdminOperations({ session, initialQueue }: AdminOperatio
         </TabsContent>
 
         <TabsContent value="all" className="mt-0">
-          <AllJobsTab rows={queue.all} />
+          <AllJobsTab
+            rows={queue.all}
+            canEdit={session.user.role === 'admin'}
+            onMutated={refreshQueue}
+          />
         </TabsContent>
       </Tabs>
     </AdminSidebarShell>

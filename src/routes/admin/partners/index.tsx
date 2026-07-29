@@ -245,9 +245,24 @@ function PartnersPage() {
       key: 'contact',
       header: 'Contact',
       render: (row) => (
-        <span className="text-sm text-[var(--sea-ink-soft)]">
-          {row.contactPerson || row.phone || row.email || '—'}
+        <span className="text-sm text-[var(--sea-ink)]">
+          {row.contactPerson || '—'}
         </span>
+      ),
+    },
+    {
+      key: 'phone',
+      header: 'Mobile',
+      render: (row) => (
+        <span className="text-sm text-[var(--sea-ink-soft)]">{row.phone || '—'}</span>
+      ),
+    },
+    {
+      key: 'email',
+      header: 'Email',
+      cellClassName: 'whitespace-normal',
+      render: (row) => (
+        <span className="text-sm text-[var(--sea-ink-soft)]">{row.email || '—'}</span>
       ),
     },
     {
@@ -425,82 +440,109 @@ function PartnersPage() {
             </SheetTitle>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto px-5 py-4">
-            <form id="partner-form" className="space-y-3" onSubmit={handleSubmit}>
-              <div>
-                <label className="field-label" htmlFor="pf-name">Name</label>
-                <input
-                  id="pf-name"
-                  className="field-input"
-                  required
-                  value={form.name}
-                  onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-                />
-              </div>
-              <div>
-                <label className="field-label" htmlFor="pf-code">Code</label>
-                <input
-                  id="pf-code"
-                  className="field-input font-mono"
-                  required
-                  value={form.code}
-                  onChange={(e) => setForm((prev) => ({ ...prev, code: e.target.value }))}
-                  placeholder="e.g. island-motors"
-                />
-              </div>
-              <div>
-                <label className="field-label" htmlFor="pf-contact">Contact person</label>
-                <input
-                  id="pf-contact"
-                  className="field-input"
-                  value={form.contactPerson}
-                  onChange={(e) => setForm((prev) => ({ ...prev, contactPerson: e.target.value }))}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="field-label" htmlFor="pf-phone">Phone</label>
-                  <input
-                    id="pf-phone"
-                    className="field-input"
-                    value={form.phone}
-                    onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
-                  />
+            <form
+              id="partner-form"
+              className="admin-form-sheet fleet-car-form space-y-5"
+              onSubmit={handleSubmit}
+            >
+              <section className="fleet-car-form__section">
+                <span className="ui-label">Identity</span>
+                <div className="mt-2 grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="field-label" htmlFor="pf-name">Name</label>
+                    <input
+                      id="pf-name"
+                      className="field-input"
+                      required
+                      value={form.name}
+                      onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                      placeholder="e.g. Island Motors"
+                    />
+                  </div>
+                  <div>
+                    <label className="field-label" htmlFor="pf-code">Code</label>
+                    <input
+                      id="pf-code"
+                      className="field-input font-mono"
+                      required
+                      value={form.code}
+                      onChange={(e) => setForm((prev) => ({ ...prev, code: e.target.value }))}
+                      placeholder="e.g. island-motors"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="field-label" htmlFor="pf-email">Email</label>
-                  <input
-                    id="pf-email"
-                    type="email"
-                    className="field-input"
-                    value={form.email}
-                    onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-                  />
+              </section>
+
+              <section className="fleet-car-form__section">
+                <span className="ui-label">Contact</span>
+                <div className="mt-2 space-y-3">
+                  <div>
+                    <label className="field-label" htmlFor="pf-contact">Contact person</label>
+                    <input
+                      id="pf-contact"
+                      className="field-input"
+                      value={form.contactPerson}
+                      onChange={(e) => setForm((prev) => ({ ...prev, contactPerson: e.target.value }))}
+                      placeholder="e.g. Ahmad Razif"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="field-label" htmlFor="pf-phone">Phone</label>
+                      <input
+                        id="pf-phone"
+                        className="field-input"
+                        value={form.phone}
+                        onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
+                        placeholder="e.g. 016-770 7097"
+                      />
+                    </div>
+                    <div>
+                      <label className="field-label" htmlFor="pf-email">Email</label>
+                      <input
+                        id="pf-email"
+                        type="email"
+                        className="field-input"
+                        value={form.email}
+                        onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+                        placeholder="e.g. ops@island.com"
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <label className="field-label" htmlFor="pf-status">Status</label>
-                <select
-                  id="pf-status"
-                  className="field-input"
-                  value={form.status}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, status: e.target.value as PartnerStatus }))
-                  }
-                >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-              </div>
-              <div>
-                <label className="field-label" htmlFor="pf-notes">Notes</label>
-                <textarea
-                  id="pf-notes"
-                  className="field-input"
-                  rows={3}
-                  value={form.notes}
-                  onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))}
-                />
-              </div>
+              </section>
+
+              <section className="fleet-car-form__section">
+                <span className="ui-label">Account</span>
+                <div className="mt-2 space-y-3">
+                  <div>
+                    <label className="field-label" htmlFor="pf-status">Status</label>
+                    <select
+                      id="pf-status"
+                      className="field-input"
+                      value={form.status}
+                      onChange={(e) =>
+                        setForm((prev) => ({ ...prev, status: e.target.value as PartnerStatus }))
+                      }
+                    >
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="field-label" htmlFor="pf-notes">Notes</label>
+                    <textarea
+                      id="pf-notes"
+                      className="field-input"
+                      rows={3}
+                      value={form.notes}
+                      onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))}
+                      placeholder="Internal notes about this partner…"
+                    />
+                  </div>
+                </div>
+              </section>
+
               {formError ? <p className="form-error">{formError}</p> : null}
             </form>
           </div>

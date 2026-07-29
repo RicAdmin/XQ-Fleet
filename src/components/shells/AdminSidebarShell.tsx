@@ -5,16 +5,19 @@ import { Link, useMatchRoute } from '@tanstack/react-router'
 import {
   ArrowLeftRight,
   BarChart3,
+  CalendarDays,
   CalendarRange,
   CalendarCheck,
   Car,
   CreditCard,
   Handshake,
   Layers,
+  LayoutDashboard,
   LogOut,
   MapPin,
   Tag,
   Users,
+  Wallet,
   Wrench,
 } from 'lucide-react'
 
@@ -24,6 +27,7 @@ import { Button } from '#/components/ui/button'
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -54,12 +58,21 @@ import {
   type AdminNavSection,
 } from '#/lib/admin-nav'
 import { INTERNAL_JOBS_PATH } from '#/lib/internal-routes'
+import { CAROS_RELEASE_LABEL } from '#/lib/caros-version'
 import { cn } from '#/lib/utils'
 
 const NAV_SECTIONS: AdminNavSection<ReactNode>[] = [
   {
     label: 'Manage',
     items: [
+      {
+        type: 'link',
+        label: 'Dashboard',
+        to: '/internal/dashboard',
+        icon: <LayoutDashboard />,
+        exact: true,
+        audiences: ['customer_service', 'admin'],
+      },
       {
         type: 'link',
         label: 'Operation',
@@ -96,6 +109,26 @@ const NAV_SECTIONS: AdminNavSection<ReactNode>[] = [
         icon: <Users />,
         exact: false,
         audiences: ['customer_service', 'admin'],
+      },
+    ],
+  },
+  {
+    label: 'Accounts',
+    audiences: ['account', 'admin'],
+    items: [
+      {
+        type: 'link',
+        label: 'Jobs for accounts',
+        to: '/admin/accounts',
+        icon: <Wallet />,
+        exact: false,
+      },
+      {
+        type: 'link',
+        label: 'Payment',
+        to: '/admin/payments',
+        icon: <CreditCard />,
+        exact: false,
       },
     ],
   },
@@ -362,25 +395,27 @@ function ViewModeToggle({
 }) {
   return (
     <div
-      className="admin-view-mode-toggle hidden items-center rounded-md border border-[var(--line)] bg-[var(--surface-muted)] p-0.5 sm:flex"
+      className="admin-view-mode-toggle hidden sm:flex"
       role="group"
       aria-label="Switch dashboard view"
     >
-      {VIEW_MODE_OPTIONS.map(({ mode, label }) => (
-        <button
-          key={mode}
-          type="button"
-          onClick={() => onChange(mode)}
-          className={cn(
-            'rounded px-2 py-1 text-xs font-semibold transition-colors',
-            value === mode
-              ? 'bg-white text-[var(--sea-ink)] shadow-sm'
-              : 'text-[var(--sea-ink-soft)] hover:text-[var(--sea-ink)]',
-          )}
-        >
-          {label}
-        </button>
-      ))}
+      <span className="admin-view-mode-toggle__label">View</span>
+      <div className="admin-view-mode-toggle__segments">
+        {VIEW_MODE_OPTIONS.map(({ mode, label }) => (
+          <button
+            key={mode}
+            type="button"
+            onClick={() => onChange(mode)}
+            aria-pressed={value === mode}
+            className={cn(
+              'admin-view-mode-toggle__segment',
+              value === mode && 'admin-view-mode-toggle__segment--active',
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }
@@ -454,6 +489,10 @@ export default function AdminSidebarShell({
             <AdminNavMenu sections={navSections} />
           </SidebarContent>
 
+          <SidebarFooter className="admin-sidebar-footer border-t border-[var(--line)] bg-[var(--surface-strong)] p-3 group-data-[collapsible=icon]:hidden">
+            <p className="admin-sidebar-version">{CAROS_RELEASE_LABEL}</p>
+          </SidebarFooter>
+
           <SidebarRail />
         </AdminHoverSidebar>
 
@@ -471,14 +510,15 @@ export default function AdminSidebarShell({
                 </span>
               </p>
             </div>
-            <div className="admin-topbar-actions flex shrink-0 items-center gap-2">
+            <div className="admin-topbar-actions flex shrink-0 items-center gap-2.5">
               {isSuperAdmin ? (
                 <ViewModeToggle
                   value={viewMode}
                   onChange={(mode) => setViewMode(mode)}
                 />
               ) : null}
-              <p className="admin-topbar-context hidden truncate leading-tight sm:block">
+              <p className="admin-topbar-datechip hidden sm:flex" title="Today's date">
+                <CalendarDays className="size-3.5" aria-hidden />
                 <time dateTime={todayIso}>{today}</time>
               </p>
               <Button

@@ -8,7 +8,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core'
 
-import { users } from './auth'
+import { staffProfileEnum, users } from './auth'
 
 export const invitationRoleEnum = pgEnum('invitation_role', ['staff'])
 
@@ -18,6 +18,7 @@ export const staffInvitations = pgTable(
     id: uuid('id').defaultRandom().primaryKey(),
     email: text('email').notNull(),
     role: invitationRoleEnum('role').notNull().default('staff'),
+    staffProfile: staffProfileEnum('staff_profile'),
     tokenHash: text('token_hash').notNull(),
     invitedByUserId: text('invited_by_user_id')
       .notNull()

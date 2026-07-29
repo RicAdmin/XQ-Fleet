@@ -198,11 +198,11 @@ describe('extra hours', () => {
     expect(r.charge).toBeCloseTo(150)
   })
 
-  // Test 10: 6 hours extra, last day Peak → full-day cap RM 240 (NOT 6 × 30 = 180)
-  it('10. 6 hours extra, last day Peak → full-day cap RM 240', () => {
+  // Test 10: 6 hours extra, last day Peak → hourly 6 × RM 30 = RM 180 (under RM 240 day rate)
+  it('10. 6 hours extra, last day Peak → hourly RM 180', () => {
     const r = calculateExtraHours(pu, '08:00:00', ret, '14:00:00', days4, innova)
-    expect(r.appliedRule).toBe('full-day-cap')
-    expect(r.charge).toBe(240)
+    expect(r.appliedRule).toBe('hourly')
+    expect(r.charge).toBe(180)
   })
 
   // Test 11: 14 hours extra, last day Peak → full-day cap RM 240
@@ -213,13 +213,13 @@ describe('extra hours', () => {
     expect(r.charge).toBe(240)
   })
 
-  // Test 12: 25 hours extra, last day Peak → 2 full days RM 480
-  it('12. 25 hours extra, last day Peak → 2 full days RM 480', () => {
+  // Test 12: 25 hours extra, last day Peak → 1 day RM 240 + 1h RM 30 = RM 270
+  it('12. 25 hours extra, last day Peak → 1 day + 1 hour RM 270', () => {
     const retNextDay = new Date('2026-05-24')
     const r = calculateExtraHours(pu, '08:00:00', retNextDay, '09:00:00', days4, innova)
     expect(r.appliedRule).toBe('full-day-cap')
     expect(r.hours).toBeCloseTo(25)
-    expect(r.charge).toBe(480)
+    expect(r.charge).toBe(270)
   })
 
   // Test 13: 14 hours extra, last day Super Peak → RM 280
